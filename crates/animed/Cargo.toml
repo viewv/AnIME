@@ -1,0 +1,15 @@
+[package]
+name = "animed"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anime-protocol = { path = "../protocol" }
+anime-lexicon = { path = "../lexicon" }
+anime-lm-ngram = { path = "../lm-ngram" }
+anime-lm-neural = { path = "../lm-neural" }
+anime-engine = { path = "../engine" }
+
+[lints]
+workspace = true

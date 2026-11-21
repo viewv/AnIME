@@ -1,0 +1,163 @@
+# AnIME 仓库逻辑路由图（冷启动 3 秒定位模块边界、契约与构建/测试入口）
+version: 1
+
+modules:
+  protocol:
+    paths:
+      - "crates/protocol/**"
+    owner: "agent-pool-careful"
+    depends_on: []
+    contracts:
+      - ".agents/contracts/core-api.md"
+      - ".agents/contracts/ipc-protocol.md"
+    build: "cargo check -p anime-protocol"
+    test: "cargo test -p anime-protocol"
+    summary: "平台无关领域类型、配置结构与 NDJSON IPC 线协议模型（零外部平台依赖）。"
+
+  lexicon:
+    paths:
+      - "crates/lexicon/**"
+    owner: "agent-pool"
+    depends_on:
+      - "protocol"
+    contracts:
+      - ".agents/contracts/core-api.md"
+      - ".agents/contracts/data-format.md"
+    build: "cargo check -p anime-lexicon"
+    test: "cargo test -p anime-lexicon"
+    summary: "L1 词级层：紧凑 Trie、QWERTY 物理键距矩阵、加权模糊束搜索、Double Metaphone 读音倒排与缩写大小写恢复。"
+
+  lm-ngram:
+    paths:
+      - "crates/lm-ngram/**"
+    owner: "agent-pool"
+    depends_on:
+      - "protocol"
+    contracts:
+      - ".agents/contracts/core-api.md"
+      - ".agents/contracts/data-format.md"
+    build: "cargo check -p anime-lm-ngram"
+    test: "cargo test -p anime-lm-ngram"
+    summary: "L2 统计层：词格 Viterbi 整句解码、2/3-gram 评分表与 SQLite 本机个人词频学习。"
+
+  lm-neural:
+    paths:
+      - "crates/lm-neural/**"
+    owner: "agent-pool"
+    depends_on:
+      - "protocol"
+    contracts:
+      - ".agents/contracts/core-api.md"
+      - ".agents/contracts/data-format.md"
+    build: "cargo check -p anime-lm-neural"
+    test: "cargo test -p anime-lm-neural"
+    summary: "L3 神经层：端侧小 Transformer 异步候选重排与多词/短语续写预测接口及推理后端。"
+
+  engine:
+    paths:
+      - "crates/engine/**"
+    owner: "agent-pool"
+    depends_on:
+      - "protocol"
+      - "lexicon"
+      - "lm-ngram"
+      - "lm-neural"
+    contracts:
+      - ".agents/contracts/core-api.md"
+    build: "cargo check -p anime-engine"
+    test: "cargo test -p anime-engine"
+    summary: "平台无关会话状态机：拼音式带空格预编辑、数字选词与部分选词、智能空格/标点回删、多路融合排序与隐私保护。"
+
+  animed:
+    paths:
+      - "crates/animed/**"
+    owner: "agent-pool"
+    depends_on:
+      - "protocol"
+      - "lexicon"
+      - "lm-ngram"
+      - "lm-neural"
+      - "engine"
+    contracts:
+      - ".agents/contracts/ipc-protocol.md"
+      - ".agents/contracts/core-api.md"
+      - ".agents/contracts/data-format.md"
+    build: "cargo build --release -p animed"
+    test: "cargo test -p animed"
+    summary: "独立英文输入法守护进程：提供 Unix Domain Socket（NDJSON）与 --stdio 调试接口，调度异步 L3 推理并刷新候选。"
+
+  eval:
+    paths:
+      - "crates/eval/**"
+      - "eval/**"
+    owner: "agent-pool"
+    depends_on:
+      - "protocol"
+      - "lexicon"
+      - "lm-ngram"
+      - "lm-neural"
+      - "engine"
+    contracts:
+      - ".agents/contracts/eval-schema.md"
+      - ".agents/contracts/core-api.md"
+    build: "cargo check -p anime-eval"
+    test: "cargo run -p anime-eval -- eval/fixtures/smoke.tsv"
+    summary: "7 类英文输入场景离线评测器、基准测试集（eval/fixtures/）与 Top-K / 延迟门禁报告。"
+
+  data-pipeline:
+    paths:
+      - "scripts/data_pipeline/**"
+      - "data/MANIFEST.yaml"
+    owner: "agent-pool"
+    depends_on: []
+    contracts:
+      - ".agents/contracts/data-format.md"
+    build: "true"
+    test: "python3 -c 'import yaml; yaml.safe_load(open(\"data/MANIFEST.yaml\"))'"
+    summary: "100% 开源洁净词库、错拼数据集、语料词频构建脚本与数据溯源清单（data/MANIFEST.yaml）。"
+
+  fcitx5-frontend:
+    paths:
+      - "frontends/fcitx5/**"
+    owner: "agent-pool"
+    depends_on:
+      - "animed"
+    contracts:
+      - ".agents/contracts/ipc-protocol.md"
+      - ".agents/contracts/core-api.md"
+    build: "make addon"
+    test: "make addon"
+    summary: "Linux Wayland + Fcitx5 C++20 薄前端插件：异步 Unix socket 客户端、预编辑、数字选词、Shift 直通、surrounding text 与隐私框识别。"
+
+  macos-frontend:
+    paths:
+      - "frontends/macos/**"
+    owner: "human-or-phase3"
+    depends_on:
+      - "engine"
+    contracts:
+      - ".agents/contracts/ipc-protocol.md"
+      - ".agents/contracts/core-api.md"
+    build: "true"
+    test: "true"
+    summary: "未来 macOS IMKit 前端占位（IMKInputController 通过 C-ABI FFI 或本地 Unix socket 接入 Rust 核心引擎）。"
+
+  agent-infra:
+    paths:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - ".agents/**"
+      - "scripts/verify-boundaries.sh"
+      - "scripts/agent-wt.sh"
+      - "Makefile"
+      - "Cargo.toml"
+      - "README.md"
+      - "ROADMAP.md"
+      - "LICENSE"
+      - ".gitignore"
+    owner: "coordinator-only"
+    depends_on: []
+    contracts: []
+    build: "make verify-infra"
+    test: "make verify-infra"
+    summary: "Agent 冷启动入口、模块路由图、锁定契约、任务单体系、Worktree 脚本与边界守卫。"

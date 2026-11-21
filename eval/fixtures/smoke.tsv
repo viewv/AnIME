@@ -1,0 +1,16 @@
+# AnIME Phase 0 Smoke Eval Fixture (7 categories per .agents/contracts/eval-schema.md)
+# Format: category<TAB>context<TAB>input<TAB>expected<TAB>notes
+exact		apple	apple	Known exact word must not be over-corrected
+exact		beautiful	beautiful	Known exact word with prefix ambiguity
+prefix		algor	algorithm	Prefix completion
+prefix		definit	definitely	Prefix completion
+typo_simple		appie	apple	Adjacent-key substitution l->i
+typo_simple		teh	the	Adjacent character transposition
+typo_prefix		beutif	beautiful	Early deletion + incomplete prefix
+typo_prefix		enviorn	environment	Early transposition + incomplete prefix
+typo_phonetic		numonia	pneumonia	Silent prefix p + phonetic mismatch
+typo_phonetic		definately	definitely	Common human phonetic misspelling
+context_realword	go 	form here	from here	Real-word typo resolved by preceding verb
+context_realword	Thank you for 	yur	your	Context-aided short typo recovery
+sentence		i wnt to eat an appie	I want to eat an apple	Preedit spaces + casing + omission + typo
+sentence		hw r u	how are you	Multi-word vowel omission recovery

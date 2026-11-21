@@ -1,0 +1,28 @@
+# Rust
+/target/
+**/target/
+Cargo.lock
+
+# CMake / C++ build artifacts
+frontends/fcitx5/build/
+build/
+*.so
+*.dylib
+*.a
+*.o
+
+# Data pipeline raw downloads & compiled binaries (rebuilt locally from data/MANIFEST.yaml)
+data/raw/
+data/compiled/
+*.bin
+*.fst
+*.gguf
+*.db
+*.db-journal
+*.db-wal
+
+# Agent worktrees & local temp files
+.worktrees/
+.DS_Store
+__pycache__/
+*.pyc

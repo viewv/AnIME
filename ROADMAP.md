@@ -1,0 +1,26 @@
+# AnIME 开发路线图
+
+## Phase 0：工程基建与可编译骨架（当前已完成）
+
+- 按 Agent 工程化体系建仓：`AGENTS.md`、`.agents/map.yaml`、4 份锁定契约（`core-api` / `ipc-protocol` / `data-format` / `eval-schema`）、任务单模板与 Phase 1 任务单、`scripts/verify-boundaries.sh`、`scripts/agent-wt.sh`。
+- 搭建平台无关 Rust Workspace 7 个 crate 的接口骨架与零外部依赖烟雾实现，`cargo check` / `cargo test` 离线通过。
+- 搭建 Fcitx5 C++20 薄前端可编译骨架（`libanime.so`）与 `eval/fixtures/smoke.tsv` 7 类评测基准框。
+
+## Phase 1：开源数据管线 + L1/L2 核心引擎 + Wayland Fcitx5 MVP（可并行派单）
+
+对应 `.agents/tasks/task-01` ~ `task-04`，支持在独立 `git worktree` 中按契约并行实现：
+1. **Task 01（数据与评测）**：编写可复现开源词表/错拼/词频构建脚本（SCOWL + `wordfreq` + Wikipedia 常见错拼），扩充 7 类场景评测集（覆盖重度读音错拼、截断前缀纠错、真词歧义与整句）及指标回归门禁。
+2. **Task 02（L1 词法纠错引擎）**：实现紧凑词典 Trie、QWERTY 物理键距矩阵、加权模糊 Trie 束搜索（`appie → apple`、`beutif → beautiful`）、Double Metaphone 读音倒排（`numonia → pneumonia`）、大小写与缩写恢复（`im → I'm`）。
+3. **Task 03（IPC / L2 整句与引擎核心 / `animed`）**：实现完整 NDJSON 编解码、词格 Viterbi + 2/3-gram + SQLite 个人学习、部分选词与智能标点回删、Unix Socket 常驻守护进程。
+4. **Task 04（Fcitx5 Wayland 前端）**：基于异步 Unix Socket 客户端与 `seq`/`revision` 防过期机制，接入预编辑、数字键选词、`Enter` 原串直出、`Shift` 直通、surrounding text 与隐私框保护。
+
+## Phase 2：L3 本地神经整句精排与续写预测
+
+- 为 `crates/lm-neural` 接入真实端侧小模型推理（优先验证开源 `SmolLM2-135M` Q4 或同级轻量模型，支持 CPU 与可选 GPU 加速）。
+- 基于光标前文（surrounding text）实现异步候选重排（解决 `from/form`、`their/there/they're` 等真词误拼与语境歧义）与下一词/短语续写预测（`✦` 标记），严格遵守 `seq`/`revision` 不抢键约定。
+
+## Phase 3：专用模型微调、macOS IMKit 移植与公开发布
+
+- 使用公开语料与合成物理键盘打错噪声，微调/训练专用于英文输入法的 ~30M 参数轻量模型，降低内存与端侧延迟。
+- 在不改动 Rust 核心的前提下实现 `frontends/macos/`（macOS IMKit `IMKInputController`）。
+- 完善设置界面、跨发行版打包与发布文档，正式公开仓库。

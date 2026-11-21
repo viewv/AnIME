@@ -1,0 +1,43 @@
+# AnIME 100% 开源洁净数据源登记表（遵循 .agents/contracts/data-format.md）
+version: 1
+
+sources:
+  - id: scowl
+    status: planned
+    description: "Spell Checker Oriented Word Lists — 规范英文词形基础表（含美/英拼写分级与屈折变化）"
+    source_url: "https://wordlist.aspell.net/"
+    version: "2020.12.07"
+    license: "MIT / BSD-like (SCOWL permissive custom)"
+    sha256: "TBD"
+    build_script: "scripts/data_pipeline/build_lexicon.py"
+    notes: "过滤生僻词等级，作为合法英文词汇白名单基准，防止误词进入候选"
+
+  - id: wordfreq-en
+    status: planned
+    description: "wordfreq English multi-source Zipf word frequencies（覆盖 Wikipedia / Reddit / Twitter / OpenSubtitles 等现代语料）"
+    source_url: "https://github.com/rspeer/wordfreq"
+    version: "3.1.1"
+    license: "Apache-2.0 (code) / CC-BY-SA-4.0 (compiled frequency lists)"
+    sha256: "TBD"
+    build_script: "scripts/data_pipeline/build_lexicon.py"
+    notes: "提供现代词频并覆盖 kubernetes、chatgpt 等新词；与 SCOWL 取交集与补丁"
+
+  - id: wikipedia-common-misspellings
+    status: planned
+    description: "公开常见英文人类拼写错误映射表（Wikipedia / Birkbeck / Aspell 汇总，如 definately -> definitely）"
+    source_url: "https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings"
+    version: "TBD"
+    license: "CC-BY-SA-4.0 / Public Domain (Birkbeck/Aspell)"
+    sha256: "TBD"
+    build_script: "scripts/data_pipeline/build_misspellings.py"
+    notes: "用于增强 L1 高频非邻键人类惯性拼错直达映射与离线评测集构建"
+
+  - id: ngram-corpus
+    status: planned
+    description: "开源英文对话/文档语料统计 2-gram 与 3-gram 概率表（ANIMENGR）"
+    source_url: "https://huggingface.co/datasets"
+    version: "TBD"
+    license: "Apache-2.0 / CC-BY-4.0 / MIT"
+    sha256: "TBD"
+    build_script: "scripts/data_pipeline/build_ngram.py"
+    notes: "Task 01 选定具体洁净语料源后填入实际 URL、版本与 SHA256"
