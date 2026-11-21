@@ -1,0 +1,412 @@
+# AnIME Core Offline Benchmark v1 (7 categories per .agents/contracts/eval-schema.md)
+# Format: category<TAB>context<TAB>input<TAB>expected<TAB>notes
+#
+# 1. exact (>= 45): Known valid words, technical terms, contractions, proper nouns — zero over-correction
+exact		the	the	Most frequent English determiner
+exact		and	and	High-frequency conjunction
+exact		apple	apple	Common concrete noun
+exact		algorithm	algorithm	Core CS vocabulary
+exact		kubernetes	kubernetes	Modern cloud-native term
+exact		typescript	typescript	Modern programming language name
+exact		wayland	wayland	Linux display protocol name
+exact		beautiful	beautiful	Frequent adjective with long prefix
+exact		definitely	definitely	Frequently confused spelling entered correctly
+exact		receive	receive	Correct ie-after-c spelling
+exact		separate	separate	Correct a-vs-e spelling
+exact		accommodation	accommodation	Double-c double-m word entered accurately
+exact		necessary	necessary	Single-c double-s word entered accurately
+exact		environment	environment	Correct silent-n cluster
+exact		restaurant	restaurant	Correct au cluster
+exact		pneumonia	pneumonia	Silent initial p entered accurately
+exact		psychology	psychology	Silent initial p entered accurately
+exact		knowledge	knowledge	Silent k and dg entered accurately
+exact		through	through	Silent gh cluster
+exact		though	though	Distinguished from through and thought
+exact		thought	thought	Distinguished from though
+exact		their	their	Possessive determiner without context
+exact		there	there	Adverb without context
+exact		from	from	Short preposition must not drift to form
+exact		form	form	Valid short word must not drift to from
+exact		quiet	quiet	Valid word near quite
+exact		quite	quite	Valid word near quiet
+exact		affect	affect	Valid verb near effect
+exact		effect	effect	Valid noun near affect
+exact		loose	loose	Valid adjective near lose
+exact		lose	lose	Valid verb near loose
+exact		weather	weather	Valid noun near whether
+exact		whether	whether	Valid conjunction near weather
+exact		desert	desert	Valid word near dessert
+exact		dessert	dessert	Valid word near desert
+exact		don't	don't	Exact apostrophe contraction
+exact		can't	can't	Exact apostrophe contraction
+exact		won't	won't	Exact apostrophe contraction
+exact		I'm	I'm	Exact capitalized contraction
+exact		I've	I've	Exact capitalized contraction
+exact		I	I	Capitalized first-person pronoun
+exact		Monday	Monday	Weekday proper noun
+exact		Wednesday	Wednesday	Weekday proper noun with silent d
+exact		English	English	Language proper noun
+exact		Linux	Linux	OS proper noun
+exact		database	database	Compound technical noun
+exact		authentication	authentication	Long security term
+exact		configuration	configuration	Long system term
+exact		concurrency	concurrency	Systems programming noun
+exact		architecture	architecture	Design and engineering noun
+
+# 2. prefix (>= 45): Unambiguous prefix completion
+prefix		algor	algorithm	Algorithm prefix
+prefix		beautif	beautiful	Beautiful prefix
+prefix		kubern	kubernetes	Kubernetes modern term prefix
+prefix		typescr	typescript	TypeScript prefix
+prefix		authentica	authentication	Authentication long prefix
+prefix		configur	configuration	Configuration prefix
+prefix		environm	environment	Environment prefix
+prefix		definitel	definitely	Definitely long prefix
+prefix		definitio	definition	Definition prefix
+prefix		implemen	implement	Implement prefix
+prefix		communica	communication	Communication prefix
+prefix		applicat	application	Application prefix
+prefix		performan	performance	Performance prefix
+prefix		architectu	architecture	Architecture prefix
+prefix		concurren	concurrency	Concurrency prefix
+prefix		asynchron	asynchronous	Asynchronous prefix
+prefix		bibliogra	bibliography	Bibliography prefix
+prefix		calculat	calculate	Calculate prefix
+prefix		celebrat	celebrate	Celebrate prefix
+prefix		comprehens	comprehensive	Comprehensive prefix
+prefix		considera	consideration	Consideration prefix
+prefix		convenien	convenient	Convenient prefix
+prefix		descripti	description	Description prefix
+prefix		developm	development	Development prefix
+prefix		differen	different	Different prefix
+prefix		documen	document	Document prefix
+prefix		educatio	education	Education prefix
+prefix		effectiv	effective	Effective prefix
+prefix		electron	electronic	Electronic prefix
+prefix		experien	experience	Experience prefix
+prefix		experime	experiment	Experiment prefix
+prefix		extraord	extraordinary	Extraordinary prefix
+prefix		governm	government	Government prefix
+prefix		immediat	immediately	Immediately prefix
+prefix		importan	important	Important prefix
+prefix		independ	independent	Independent prefix
+prefix		informat	information	Information prefix
+prefix		intellig	intelligence	Intelligence prefix
+prefix		interest	interesting	Interesting prefix
+prefix		internat	international	International prefix
+prefix		knowledg	knowledge	Knowledge prefix
+prefix		langua	language	Language strict prefix
+prefix		necessar	necessary	Necessary prefix
+prefix		opportun	opportunity	Opportunity prefix
+prefix		organiza	organization	Organization prefix
+prefix		particul	particular	Particular prefix
+prefix		philosop	philosophy	Philosophy prefix
+prefix		programm	programming	Programming prefix
+prefix		recommen	recommend	Recommend prefix
+prefix		restaura	restaurant	Restaurant prefix
+prefix		technolo	technology	Technology prefix
+prefix		understa	understand	Understand prefix
+prefix		vocabula	vocabulary	Vocabulary prefix
+
+# 3. typo_simple (>= 50): Single-edit QWERTY adjacent key / deletion / insertion / transposition
+typo_simple		teh	the	Adjacent transposition e-h
+typo_simple		adn	and	Adjacent transposition d-n
+typo_simple		taht	that	Transposition a-h
+typo_simple		wiht	with	Transposition h-t
+typo_simple		hte	the	Early transposition h-t
+typo_simple		appie	apple	Adjacent-key substitution l->i
+typo_simple		aple	apple	Single omission of double p
+typo_simple		appple	apple	Accidental triple p insertion
+typo_simple		recieve	receive	Classic ie/ei transposition
+typo_simple		langauge	language	Adjacent vowel transposition a-u
+typo_simple		becuase	because	Adjacent transposition u-a
+typo_simple		freind	friend	Adjacent transposition e-i
+typo_simple		beleive	believe	Adjacent transposition i-e
+typo_simple		seperate	separate	Single vowel substitution a->e
+typo_simple		occured	occurred	Omitted double r
+typo_simple		untill	until	Extra trailing l insertion
+typo_simple		tommorow	tomorrow	Wrong double m instead of r
+typo_simple		tomorow	tomorrow	Single omission of double r
+typo_simple		goverment	government	Silent n omission
+typo_simple		enviroment	environment	Silent n omission
+typo_simple		neccessary	necessary	Extra c insertion
+typo_simple		necesary	necessary	Single s omission
+typo_simple		succesful	successful	Single s omission
+typo_simple		accomodate	accommodate	Single m omission
+typo_simple		commited	committed	Single t omission
+typo_simple		begining	beginning	Single n omission
+typo_simple		adress	address	Single d omission
+typo_simple		buisness	business	Transposition s-i
+typo_simple		calender	calendar	Suffix vowel substitution a->e
+typo_simple		catagory	category	Medial vowel substitution e->a
+typo_simple		changable	changeable	Silent e omission
+typo_simple		collegue	colleague	Silent a omission
+typo_simple		concious	conscious	Silent s omission
+typo_simple		curiousity	curiosity	Extra u insertion
+typo_simple		disapoint	disappoint	Single p omission
+typo_simple		embarass	embarrass	Single r omission
+typo_simple		existance	existence	Suffix vowel substitution e->a
+typo_simple		foriegn	foreign	Transposition e-i
+typo_simple		fourty	forty	Extra u insertion
+typo_simple		grammer	grammar	Suffix vowel substitution a->e
+typo_simple		happend	happened	Omitted e in past suffix
+typo_simple		immediatly	immediately	Silent e omission
+typo_simple		independant	independent	Suffix vowel substitution e->a
+typo_simple		knowlege	knowledge	Omitted d before ge
+typo_simple		libary	library	Omitted first r
+typo_simple		mispell	misspell	Omitted double s
+typo_simple		noticable	noticeable	Omitted e before able
+typo_simple		ocassion	occasion	Wrong double s instead of c
+typo_simple		posession	possession	Omitted first double s
+typo_simple		preffered	preferred	Wrong double f instead of r
+typo_simple		publically	publicly	Extra al syllable insertion
+typo_simple		refered	referred	Omitted double r
+typo_simple		religous	religious	Omitted i before ous
+typo_simple		similiar	similar	Extra i insertion
+typo_simple		truely	truly	Extra e insertion
+typo_simple		wether	whether	Omitted silent h
+typo_simple		writting	writing	Extra t insertion
+typo_simple		helo	hello	Single l omission
+typo_simple		wrld	world	Single o omission
+typo_simple		compuetr	computer	Transposition t-e
+
+# 4. typo_prefix (>= 45): Early typo + truncated incomplete prefix
+typo_prefix		beutif	beautiful	Early a omission + truncated prefix
+typo_prefix		enviorn	environment	Early r-o transposition + truncated prefix
+typo_prefix		reciev	receive	Early ei transposition + truncated prefix
+typo_prefix		definat	definitely	Early i->a substitution + truncated prefix
+typo_prefix		conifg	configuration	Early f-i transposition + truncated prefix
+typo_prefix		algoritm	algorithm	Omitted h + short prefix
+typo_prefix		asynchorn	asynchronous	Early r-o transposition + truncated prefix
+typo_prefix		kubrenet	kubernetes	Early r-e transposition + truncated prefix
+typo_prefix		authntic	authentication	Omitted e + truncated prefix
+typo_prefix		comunnic	communication	Wrong double n / single m + truncated
+typo_prefix		aproxim	approximately	Single p omission + truncated prefix
+typo_prefix		architc	architecture	Omitted e + truncated prefix
+typo_prefix		beleiv	believe	Transposition i-e + truncated
+typo_prefix		bginni	beginning	Omitted e + truncated prefix
+typo_prefix		bussin	business	Double s + truncated
+typo_prefix		caland	calendar	Wrong second a + truncated
+typo_prefix		catago	category	Wrong vowel + truncated
+typo_prefix		changab	changeable	Omitted e + truncated
+typo_prefix		commite	committed	Single t + truncated
+typo_prefix		consciu	conscious	Transposed o-u + truncated
+typo_prefix		convein	convenient	Transposed i-e + truncated prefix
+typo_prefix		cuoris	curiosity	Transposition u-r + truncated
+typo_prefix		devlopm	development	Omitted e + truncated
+typo_prefix		diferen	different	Single f + truncated
+typo_prefix		disapoi	disappoint	Single p + truncated
+typo_prefix		documnt	document	Omitted e + truncated
+typo_prefix		edcuat	education	Transposed u-c + truncated prefix
+typo_prefix		embaras	embarrass	Single r + truncated
+typo_prefix		exisanc	existence	Omitted t + a substitution + truncated
+typo_prefix		expeirm	experiment	Transposed r-i + truncated prefix
+typo_prefix		extrord	extraordinary	Omitted a + truncated
+typo_prefix		forieg	foreign	Transposition e-i + truncated
+typo_prefix		goverm	government	Omitted rn + truncated
+typo_prefix		imediat	immediately	Single m + truncated
+typo_prefix		indepnd	independent	Omitted e + truncated prefix
+typo_prefix		infroma	information	Transposed o-r + truncated prefix
+typo_prefix		intelig	intelligence	Single l + truncated
+typo_prefix		interst	interesting	Omitted e + truncated
+typo_prefix		intrena	international	Transposed e-r + truncated
+typo_prefix		knwoled	knowledge	Transposed o-w + truncated prefix
+typo_prefix		langaug	language	Transposed a-u + truncated
+typo_prefix		neccess	necessary	Double c + truncated
+typo_prefix		oportun	opportunity	Single p + truncated
+typo_prefix		orgniza	organization	Omitted a + truncated
+typo_prefix		particlu	particular	Transposed l-u + truncated
+typo_prefix		perfomr	performance	Omitted r + transposed m-r + truncated
+typo_prefix		philsop	philosophy	Omitted o + truncated prefix
+typo_prefix		progrmm	programming	Omitted a + truncated
+typo_prefix		recomnd	recommend	Omitted me + truncated prefix
+typo_prefix		restran	restaurant	Omitted au + truncated
+typo_prefix		techonl	technology	Transposed o-n + truncated prefix
+typo_prefix		typscri	typescript	Omitted e + truncated
+
+# 5. typo_phonetic (>= 55): Severe phonetic similarity / silent letters / multi-edit errors
+typo_phonetic		numonia	pneumonia	Silent initial p + phonetic eu->u
+typo_phonetic		sikology	psychology	Silent initial p + ch->k
+typo_phonetic		sycology	psychology	Silent initial p + ch->c
+typo_phonetic		nolege	knowledge	Silent k + dge->ge
+typo_phonetic		nolidge	knowledge	Silent k + phonetic vowel shift
+typo_phonetic		rythm	rhythm	Silent first h omitted
+typo_phonetic		rithm	rhythm	Phonetic y->i + silent h omitted
+typo_phonetic		wendsday	Wednesday	Phonetic spoken form of Wednesday
+typo_phonetic		wensday	Wednesday	Spoken drop of d + nes
+typo_phonetic		colnel	colonel	Silent o omitted in colonel
+typo_phonetic		kurnel	colonel	Phonetic r sound for colonel
+typo_phonetic		sutle	subtle	Silent b omitted
+typo_phonetic		reseet	receipt	Silent p + ei->ee phonetic
+typo_phonetic		resiet	receipt	Silent p + ei->ie
+typo_phonetic		fisics	physics	ph->f and y->i
+typo_phonetic		fiziks	physics	ph->f + s->z + cs->ks
+typo_phonetic		filosofy	philosophy	ph->f twice
+typo_phonetic		farmacy	pharmacy	ph->f initial
+typo_phonetic		fantom	phantom	ph->f initial
+typo_phonetic		enuf	enough	Phonetic ough->uf
+typo_phonetic		laff	laugh	Phonetic augh->aff
+typo_phonetic		tuff	tough	Phonetic ough->uff
+typo_phonetic		thru	through	Phonetic ough->u
+typo_phonetic		tho	though	Phonetic ough->o
+typo_phonetic		definately	definitely	Very common phonetic i->a
+typo_phonetic		definatly	definitely	Phonetic i->a + silent e drop
+typo_phonetic		restrant	restaurant	Multi-edit silent au drop
+typo_phonetic		restarant	restaurant	Omitted u + vowel shift
+typo_phonetic		burocracy	bureaucracy	Phonetic eau->o
+typo_phonetic		bureucracy	bureaucracy	Omitted a in eau
+typo_phonetic		questionaire	questionnaire	Single n phonetic spelling
+typo_phonetic		entreprenur	entrepreneur	Phonetic eur->ur
+typo_phonetic		entrepeneur	entrepreneur	Omitted second r
+typo_phonetic		conshus	conscious	Phonetic sci->sh
+typo_phonetic		conshusness	consciousness	Phonetic sci->sh
+typo_phonetic		lutenant	lieutenant	Phonetic ieu->u
+typo_phonetic		skedule	schedule	Phonetic sch->sk
+typo_phonetic		shedule	schedule	British phonetic sch->sh
+typo_phonetic		cemetary	cemetery	Phonetic suffix e->a
+typo_phonetic		camoflage	camouflage	Phonetic ou->o
+typo_phonetic		catastrofy	catastrophe	Phonetic phe->fy
+typo_phonetic		katastrofe	catastrophe	c->k + ph->f
+typo_phonetic		kronology	chronology	chr->kr phonetic
+typo_phonetic		akademia	academia	c->k phonetic
+typo_phonetic		akward	awkward	Silent w drop
+typo_phonetic		awsum	awesome	Phonetic e->u + silent e drop
+typo_phonetic		bizzar	bizarre	Phonetic double z + drop e
+typo_phonetic		calander	calendar	Phonetic ar->er
+typo_phonetic		dilema	dilemma	Single m phonetic
+typo_phonetic		farenheit	Fahrenheit	Silent h drop
+typo_phonetic		florescent	fluorescent	Silent u drop
+typo_phonetic		garantee	guarantee	Silent u drop
+typo_phonetic		gaurd	guard	Phonetic ua->au
+typo_phonetic		hygene	hygiene	Phonetic ie->e
+typo_phonetic		jealus	jealous	Omitted o in ou
+typo_phonetic		mischevious	mischievous	Phonetic ie/io shift
+typo_phonetic		nawty	naughty	Phonetic augh->aw
+typo_phonetic		okasion	occasion	cc->k phonetic
+typo_phonetic		perswade	persuade	su->sw phonetic
+typo_phonetic		priviledge	privilege	Phonetic d insertion before g
+typo_phonetic		quew	queue	Phonetic ueue->ew
+typo_phonetic		rehersal	rehearsal	Omitted a in ea
+typo_phonetic		scisors	scissors	Silent c/s drop
+typo_phonetic		sieze	seize	ei/ie phonetic swap
+typo_phonetic		soverign	sovereign	Omitted e in ei
+typo_phonetic		stomack	stomach	ch->ck phonetic
+typo_phonetic		vacum	vacuum	Single u phonetic
+
+# 6. context_realword (>= 50): Context-dependent real-word disambiguation & sentence-start casing
+context_realword	go 	form here	from here	Verb 'go' strongly prefers 'from here' over 'form here'
+context_realword	come 	form London	from London	Verb 'come' prefers 'from'
+context_realword	a letter 	form my friend	from my friend	Noun phrase expects preposition 'from'
+context_realword	fill out the 	from	form	Phrase 'fill out the' expects 'form'
+context_realword	in 	their	their	Keep possessive 'their' before implied noun phrase
+context_realword	over 	their	there	Locative 'over' strongly prefers 'there'
+context_realword	put it over 	their	there	Locative 'put it over' prefers 'there'
+context_realword	they lost 	there keys	their keys	Possessive context prefers 'their keys'
+context_realword	I think 	there coming	they're coming	Clause expects contraction 'they're'
+context_realword	Thank you for 	yur	your	Preposition + possessive pronoun 'your'
+context_realword	I hope 	your happy	you're happy	Adjective predicate prefers 'you're happy'
+context_realword	please check 	youre email	your email	Noun 'email' expects possessive 'your'
+context_realword	the cat licked 	it's paw	its paw	Possessive determiner 'its paw'
+context_realword	I think 	its raining	it's raining	Participle expects contraction 'it's raining'
+context_realword	I want 	too go	to go	Infinitive marker prefers 'to go'
+context_realword	me 	to	too	Short reply 'me too' prefers 'too'
+context_realword	more expensive 	then before	than before	Comparative expects 'than before'
+context_realword	and 	than we left	then we left	Temporal sequence expects 'then we left'
+context_realword	it will 	effect the plan	affect the plan	Modal 'will' + object expects verb 'affect'
+context_realword	a positive 	affect	effect	Article + adjective expects noun 'effect'
+context_realword	I gladly 	except the offer	accept the offer	Subject + verb expects 'accept'
+context_realword	everyone 	accept him	except him	Exclusion preposition expects 'except'
+context_realword	do not 	loose focus	lose focus	Verb phrase expects 'lose focus'
+context_realword	a very 	lose screw	loose screw	Adjective before noun expects 'loose'
+context_realword	depends on 	weather it rains	whether it rains	Clause expects conjunction 'whether'
+context_realword	check the 	whether forecast	weather forecast	Noun phrase expects 'weather forecast'
+context_realword	the school 	principle	principal	Phrase 'the school' expects 'principal'
+context_realword	a core 	principal	principle	Phrase 'a core' expects 'principle'
+context_realword	please keep 	quite	quiet	Verb 'keep' expects adjective 'quiet'
+context_realword	it is 	quiet good	quite good	Adverb modifying adjective expects 'quite'
+context_realword	dry Sahara 	dessert	desert	Geographic context expects 'desert'
+context_realword	sweet chocolate 	desert	dessert	Food context expects 'dessert'
+context_realword	can you 	here me	hear me	Verb + object expects 'hear me'
+context_realword	wait right 	hear	here	Adverbial expects 'here'
+context_realword	do you 	no him	know him	Auxiliary + subject expects verb 'know'
+context_realword	there is 	know way	no way	Existential negation expects 'no way'
+context_realword	you are 	write about it	right about it	Copula expects adjective 'right'
+context_realword	please 	right a note	write a note	Imperative + object expects verb 'write'
+context_realword	they 	where happy	were happy	Past plural expects verb 'were'
+context_realword	do you know 	were it is	where it is	Relative adverb expects 'where'
+context_realword	I like to 	where coats	wear coats	Infinitive + clothing expects 'wear'
+context_realword	turn 	of the light	off the light	Phrasal verb 'turn off' expects 'off'
+context_realword	a cup 	off coffee	of coffee	Partitive expects 'of coffee'
+context_realword	apples 	an oranges	and oranges	Conjunction expects 'and'
+context_realword	eat 	and apple	an apple	Singular vowel-initial noun expects 'an'
+context_realword	at the 	end off the day	end of the day	Idiom expects 'of'
+context_realword	Hello. 	this is great	This is great	Sentence-start capitalization after period + space
+context_realword	Why? 	because it works	Because it works	Sentence-start capitalization after question mark + space
+context_realword	Great! 	let us start	Let us start	Sentence-start capitalization after exclamation + space
+context_realword	Done. 	the build passed	The build passed	Sentence-start capitalization after period + space
+context_realword	see you 	tomorow morning	tomorrow morning	Context collocates 'tomorrow morning'
+
+# 7. sentence (>= 60): Multi-word preedit spaces, contractions, compound typos & dev/daily sentences
+sentence		i wnt to eat an appie	I want to eat an apple	Multiple typos + pronoun casing
+sentence		hw r u	how are you	Texting vowel-omission shorthand
+sentence		im going home now	I'm going home now	Contraction im -> I'm
+sentence		ive finished teh work	I've finished the work	Contraction ive + transposition teh
+sentence		ill send it tomorow	I'll send it tomorrow	Contraction ill + typo tomorow
+sentence		id like to help	I'd like to help	Contraction id -> I'd
+sentence		dont worry about it	don't worry about it	Contraction dont -> don't
+sentence		i cant beleive this	I can't believe this	Pronoun + cant + beleive
+sentence		they wont come today	they won't come today	Contraction wont -> won't
+sentence		it isnt ready yet	it isn't ready yet	Contraction isnt -> isn't
+sentence		we didnt see teh bug	we didn't see the bug	Contraction didnt + teh
+sentence		she doesnt know yet	she doesn't know yet	Contraction doesnt -> doesn't
+sentence		theyre comming soon	they're coming soon	Contraction theyre + double m typo
+sentence		youre definately right	you're definitely right	Contraction youre + phonetic definately
+sentence		thats a greta idea	that's a great idea	Contraction thats + transposition greta
+sentence		theres no need to rush	there's no need to rush	Contraction theres -> there's
+sentence		whats teh status today	what's the status today	Contraction whats + teh
+sentence		thank yu for yur help	thank you for your help	Missing vowel typos in common phrase
+sentence		please let me knw	please let me know	Missing vowel omission knw
+sentence		could yu send teh file	could you send the file	Multiple short typos
+sentence		i need some advcie	I need some advice	Transposition c-i
+sentence		lets meet at teh restrant	let's meet at the restaurant	Contraction + teh + phonetic restrant
+sentence		he went to teh libary	he went to the library	teh + dropped r
+sentence		we need a good enviornment	we need a good environment	Transposition + exact context
+sentence		check teh configuraton file	check the configuration file	Missing i in configuration
+sentence		run teh unit tests now	run the unit tests now	teh transposition in dev phrase
+sentence		deploy to kubernets cluster	deploy to kubernetes cluster	Missing e in kubernetes
+sentence		wayland input method works	wayland input method works	Clean multi-word exact phrase
+sentence		build teh rust workspace	build the rust workspace	Developer command sentence
+sentence		fix teh memory leak	fix the memory leak	Short engineering sentence
+sentence		i am writting tests	I am writing tests	Pronoun + double t typo
+sentence		please reveiw my code	please review my code	ie/ei swap in review
+sentence		this algorthm is fast	this algorithm is fast	Omitted i in algorithm
+sentence		update teh documntation	update the documentation	teh + omitted e
+sentence		verify teh sha checksum	verify the sha checksum	Simple typo in security phrase
+sentence		i have a questoin	I have a question	Transposition i-o
+sentence		can we discss this	can we discuss this	Omitted u
+sentence		it happend yestrday	it happened yesterday	Omitted e in both words
+sentence		see yu on wendsday	see you on Wednesday	yu + phonetic weekday casing
+sentence		i am free on mondy	I am free on Monday	Weekday casing + omitted a
+sentence		call me when youre fre	call me when you're free	Contraction + truncated double e
+sentence		sorry for teh delsy	sorry for the delay	Adjacent-key substitution a->s
+sentence		i will check it soon	I will check it soon	Pronoun I recovery
+sentence		keep up teh good wrk	keep up the good work	teh + omitted o
+sentence		we recived your mesage	we received your message	Two single-omission typos
+sentence		teh server is runing	the server is running	teh + single n omission
+sentence		my compuetr froze again	my computer froze again	Transposition t-e
+sentence		open teh termnal window	open the terminal window	Omitted i in terminal
+sentence		save teh file before exit	save the file before exit	teh transposition
+sentence		are yu avalable tomorrow	are you available tomorrow	yu + omitted i
+sentence		i really apreciate it	I really appreciate it	Single p phonetic typo in appreciate
+sentence		it takes a lot of effrt	it takes a lot of effort	Omitted o in effort
+sentence		the weather is beautifl	the weather is beautiful	Missing u in beautiful
+sentence		she studies sikology	she studies psychology	Phonetic silent p in sentence
+sentence		he has numonia today	he has pneumonia today	Phonetic silent p in sentence
+sentence		fisics is very intresting	physics is very interesting	Phonetic ph->f + omitted e
+sentence		do not forget teh pasword	do not forget the password	teh + single s omission
+sentence		we should refactor teh code	we should refactor the code	Developer sentence
+sentence		git commit failed agian	git commit failed again	Transposition i-a
+sentence		test suite passed cleanly	test suite passed cleanly	Exact clean sentence
+sentence		i think its a good plan	I think it's a good plan	Pronoun + contraction its->it's
+sentence		take a look at teh diff	take a look at the diff	Short dev review sentence
+sentence		waiting for yur response	waiting for your response	Short typo in email phrase

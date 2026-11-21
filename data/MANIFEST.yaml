@@ -3,41 +3,41 @@ version: 1
 
 sources:
   - id: scowl
-    status: planned
+    status: ready
     description: "Spell Checker Oriented Word Lists — 规范英文词形基础表（含美/英拼写分级与屈折变化）"
-    source_url: "https://wordlist.aspell.net/"
+    source_url: "https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz"
     version: "2020.12.07"
     license: "MIT / BSD-like (SCOWL permissive custom)"
-    sha256: "TBD"
+    sha256: "5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc"
     build_script: "scripts/data_pipeline/build_lexicon.py"
-    notes: "过滤生僻词等级，作为合法英文词汇白名单基准，防止误词进入候选"
+    notes: "过滤生僻词等级（默认 <= 70），作为合法英文词汇白名单基准，防止误词进入候选"
 
   - id: wordfreq-en
-    status: planned
+    status: ready
     description: "wordfreq English multi-source Zipf word frequencies（覆盖 Wikipedia / Reddit / Twitter / OpenSubtitles 等现代语料）"
-    source_url: "https://github.com/rspeer/wordfreq"
+    source_url: "https://files.pythonhosted.org/packages/py3/w/wordfreq/wordfreq-3.1.1-py3-none-any.whl"
     version: "3.1.1"
     license: "Apache-2.0 (code) / CC-BY-SA-4.0 (compiled frequency lists)"
-    sha256: "TBD"
+    sha256: "4b1c6ecffc6198be3396d5cf871c4423ca71c907c231348d352dd54d62b97473"
     build_script: "scripts/data_pipeline/build_lexicon.py"
-    notes: "提供现代词频并覆盖 kubernetes、chatgpt 等新词；与 SCOWL 取交集与补丁"
+    notes: "提供现代词频并覆盖 kubernetes、chatgpt 等新词；通过纯标准库解包 wheel 内置 cBpack 词频表与 SCOWL 取交集与补丁"
 
   - id: wikipedia-common-misspellings
     status: planned
-    description: "公开常见英文人类拼写错误映射表（Wikipedia / Birkbeck / Aspell 汇总，如 definately -> definitely）"
-    source_url: "https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings"
-    version: "TBD"
-    license: "CC-BY-SA-4.0 / Public Domain (Birkbeck/Aspell)"
+    description: "Wikipedia 公开常见英文人类拼写错误映射表（For_machines 清单，如 definately -> definitely）"
+    source_url: "https://en.wikipedia.org/w/index.php?title=Wikipedia:Lists_of_common_misspellings/For_machines&action=raw"
+    version: "snapshot-pending-pin"
+    license: "CC-BY-SA-4.0"
     sha256: "TBD"
     build_script: "scripts/data_pipeline/build_misspellings.py"
-    notes: "用于增强 L1 高频非邻键人类惯性拼错直达映射与离线评测集构建"
+    notes: "明确排除 Birkbeck（CC-BY-NC-SA-3.0 非商用，不符合协议白名单）；CC-BY-SA-4.0 仅用于独立可审查错拼词表并保留来源署名；待拉取固定 oldid 后锁定 sha256；构建脚本亦支持合入 crate-ci/typos（MIT OR Apache-2.0）CSV"
 
   - id: ngram-corpus
-    status: planned
-    description: "开源英文对话/文档语料统计 2-gram 与 3-gram 概率表（ANIMENGR）"
-    source_url: "https://huggingface.co/datasets"
-    version: "TBD"
-    license: "Apache-2.0 / CC-BY-4.0 / MIT"
-    sha256: "TBD"
+    status: ready
+    description: "OpenSLR 11 LibriSpeech 规范化英文语言模型语料（源自 Public Domain Project Gutenberg 书库），统计 2-gram 与 3-gram 概率表（ANIMENGR）"
+    source_url: "https://www.openslr.org/resources/11/librispeech-lm-norm.txt.gz"
+    version: "openslr-11"
+    license: "Public Domain"
+    sha256: "927d47656638c2ca93566640e56bcbeb2aa4ca237b8490fe1eff7d6e610a53c7"
     build_script: "scripts/data_pipeline/build_ngram.py"
-    notes: "Task 01 选定具体洁净语料源后填入实际 URL、版本与 SHA256"
+    notes: "支持流式读取 .txt.gz 语料或 .arpa.gz 语言模型并编译为 ANIMENGR v1 二进制表"
