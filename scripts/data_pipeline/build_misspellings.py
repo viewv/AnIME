@@ -11,6 +11,10 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from common import in_split  # noqa: E402
 
 TOKEN_RE = re.compile(r"^[A-Za-z][A-Za-z'\-]{0,38}[A-Za-z]$|^[A-Za-z]$")
 
@@ -120,6 +124,8 @@ def build_misspellings(
     tsv_paths: list[Path],
     lexicon_tsv: Path | None,
     out_tsv: Path,
+    split: str = "all",
+    eval_pct: int = 20,
 ) -> int:
     raw_entries: list[tuple[str, str, str, float]] = []
     for p in wiki_paths:
@@ -134,6 +140,8 @@ def build_misspellings(
     # 去重聚合：(typo, target) -> (sources_set, max_weight)
     merged: dict[tuple[str, str], tuple[set[str], float]] = {}
     for typo, target, src, weight in raw_entries:
+        if not in_split(typo, split, eval_pct):
+            continue
         if whitelist is not None and target.lower() not in whitelist:
             continue
         key = (typo, target)
@@ -191,6 +199,18 @@ def main(argv: list[str] | None = None) -> int:
         help="可选合法词库 TSV（仅保留合法目标词）",
     )
     parser.add_argument(
+        "--split",
+        choices=("all", "train", "eval"),
+        default="all",
+        help="防泄漏切分模式（train 用于入库，eval 留作评测，默认 all）",
+    )
+    parser.add_argument(
+        "--eval-pct",
+        type=int,
+        default=20,
+        help="eval 切分占比百分比（默认 20）",
+    )
+    parser.add_argument(
         "--out-tsv",
         type=Path,
         default=REPO_ROOT / "data" / "compiled" / "misspellings.tsv",
@@ -207,6 +227,8 @@ def main(argv: list[str] | None = None) -> int:
         tsv_paths=args.tsv,
         lexicon_tsv=args.lexicon_tsv,
         out_tsv=args.out_tsv,
+        split=args.split,
+        eval_pct=args.eval_pct,
     )
     print(f"misspellings build complete: {count} entries -> {args.out_tsv}")
     return 0

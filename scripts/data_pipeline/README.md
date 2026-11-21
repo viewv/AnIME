@@ -1,39 +1,62 @@
 # AnIME Open-Source Data Pipeline
 
-本目录存放用于校验、下载、清洗与编译 100% 开源洁净英文词库、错拼集及 2/3-gram 语料的**可复现构建脚本**（仅依赖 Python 3 标准库 + `pyyaml`）。
+本目录存放用于校验、下载、清洗与编译 100% 开源洁净英文词库、错拼集、2/3-gram 语料及大规模真实离线评测集的**可复现构建脚本**（仅依赖 Python 3 标准库 + `pyyaml`）。
 
 ## 约束与合规
 
-1. 所有外部数据源必须登记在 [data/MANIFEST.yaml](../../data/MANIFEST.yaml)（来源 URL、版本、开源协议、SHA256、构建脚本路径）。
+1. 所有开源外部数据源必须登记在 [data/MANIFEST.yaml](../../data/MANIFEST.yaml)（来源 URL、版本、开源协议、SHA256、构建脚本路径）。
 2. `common.py` 强制执行开源协议白名单（仅允许 `MIT`、`Apache-2.0`、`BSD-*`、`MPL-2.0`、`ISC`、`CC0-1.0`、`Public Domain`、`CC-BY-4.0`、`CC-BY-SA-4.0`，显式拒绝 `-NC` / `GPL` / `AGPL` / `Proprietary` 等）。
-3. 原始下载与编译生成的二进制产物默认输出至 `data/raw/` 与 `data/compiled/`（均在 `.gitignore` 中，禁止提交进 Git）。
+3. 原始下载与编译生成的产物默认输出至 `data/raw/` 与 `data/compiled/`（均在 `.gitignore` 中，禁止提交进 Git）。
+4. `build_eval_benchmark.py` 提供严格隔离的 `--local-birkbeck` 与 `--local-jfleg-src`/`--local-jfleg-ref` 适配器，仅允许用于本机离线评测并输出至 `data/compiled/`，**严禁**写入词库/n-gram 训练管线或提交进仓库。
 
-## 标准构建流程
+## 标准构建流程（含 Train / Eval 防泄漏 80/20 切分）
 
 ```bash
-# 1. 离线校验 data/MANIFEST.yaml 协议与字段合法性
+# 1. 离线校验 data/MANIFEST.yaml 协议、字段及已缓存文件的 SHA256
 python3 scripts/data_pipeline/fetch_sources.py --verify-only
 
-# 2. 在联网环境按 SHA256 拉取已锁定数据源到 data/raw/
+# 2. 在联网环境按 SHA256 拉取已锁定开源数据源到 data/raw/
 python3 scripts/data_pipeline/fetch_sources.py --all
-# 若需拉取 Wikipedia For_machines（sha256=TBD）并获取实际哈希进行版本锁定：
-# python3 scripts/data_pipeline/fetch_sources.py --source wikipedia-common-misspellings --allow-unpinned
 
 # 3. 先构建基础词表（SCOWL 白名单 + wordfreq wheel cBpack 纯标准库直读）
 python3 scripts/data_pipeline/build_lexicon.py \
   --scowl-tar data/raw/scowl/scowl-2020.12.07.tar.gz \
   --wordfreq-whl data/raw/wordfreq-en/wordfreq-3.1.1-py3-none-any.whl
 
-# 4. 清洗合并错拼表（可选过滤至合法词库白名单）并回写进 ANIMELEX
+# 4. 仅取 train 切分（80%）清洗错拼表并回写进 ANIMELEX，确保与 eval（20%）零重合
 python3 scripts/data_pipeline/build_misspellings.py \
   --wiki-raw data/raw/wikipedia-common-misspellings/wikipedia_for_machines.txt \
-  --lexicon-tsv data/compiled/lexicon.tsv
+  --typos-csv data/raw/crate-ci-typos/words.csv \
+  --lexicon-tsv data/compiled/lexicon.tsv \
+  --split train \
+  --out-tsv data/compiled/misspellings_train.tsv
 python3 scripts/data_pipeline/build_lexicon.py \
   --scowl-tar data/raw/scowl/scowl-2020.12.07.tar.gz \
   --wordfreq-whl data/raw/wordfreq-en/wordfreq-3.1.1-py3-none-any.whl \
-  --misspellings-tsv data/compiled/misspellings.tsv
+  --misspellings-tsv data/compiled/misspellings_train.tsv
 
-# 5. 流式编译 2/3-gram 语言模型（支持 .txt/.txt.gz 语料或 .arpa/.arpa.gz）
+# 5. 生成本机大规模开源真实评测集（data/compiled/eval_large_open.tsv，使用 --split eval 防泄漏）
+python3 scripts/data_pipeline/build_eval_benchmark.py \
+  --lexicon-tsv data/compiled/lexicon.tsv \
+  --typos-csv data/raw/crate-ci-typos/words.csv \
+  --wiki-raw data/raw/wikipedia-common-misspellings/wikipedia_for_machines.txt \
+  --multiwoz-json data/raw/multiwoz-2.2-test-001/dialogues_001.json \
+  --multiwoz-json data/raw/multiwoz-2.2-test-002/dialogues_002.json \
+  --merge-seed-tsv eval/benchmarks/core_v1.tsv \
+  --per-category 1500 \
+  --split eval \
+  --out-tsv data/compiled/eval_large_open.tsv
+
+# 6. 可选：转换用户本机下载的非商用学术数据集进行离线补充评测（绝不入库/不入模型）
+python3 scripts/data_pipeline/build_eval_benchmark.py \
+  --local-birkbeck /path/to/missp.dat \
+  --local-out data/compiled/eval_local_birkbeck.tsv
+python3 scripts/data_pipeline/build_eval_benchmark.py \
+  --local-jfleg-src /path/to/test.src \
+  --local-jfleg-ref /path/to/test.ref0 \
+  --local-out data/compiled/eval_local_jfleg.tsv
+
+# 7. 流式编译 2/3-gram 语言模型（支持 .txt/.txt.gz 语料或 .arpa/.arpa.gz）
 python3 scripts/data_pipeline/build_ngram.py \
   --corpus data/raw/ngram-corpus/librispeech-lm-norm.txt.gz \
   --max-lines 1000000

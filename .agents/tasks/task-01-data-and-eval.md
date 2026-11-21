@@ -42,6 +42,7 @@ acceptance_cmd: "cargo test -p anime-eval && cargo run -p anime-eval -- eval/fix
   - `scripts/data_pipeline/build_misspellings.py`
   - `scripts/data_pipeline/build_lexicon.py`
   - `scripts/data_pipeline/build_ngram.py`
+  - `scripts/data_pipeline/build_eval_benchmark.py`
   - `scripts/data_pipeline/test_pipeline.py`
   - `scripts/data_pipeline/README.md`
   - `eval/benchmarks/core_v1.tsv`
@@ -55,11 +56,12 @@ acceptance_cmd: "cargo test -p anime-eval && cargo run -p anime-eval -- eval/fix
   - `.agents/tasks/task-01-data-and-eval.md`
 - Verification Output:
   - `cargo check --workspace`: 0 errors, 0 warnings
-  - `cargo test -p anime-eval`: 7 passed, 0 failed (`smoke.tsv` + `core_v1.tsv` 396 条 7 类去重与语义纯度校验通过)
-  - `cargo test --workspace`: 19 passed across 7 workspace crates (`anime-eval` 7, `anime-engine` 6, `anime-protocol` 2, `anime-lexicon` 1, `anime-lm-ngram` 1, `anime-lm-neural` 1, `animed` 1)
-  - `cargo run -p anime-eval -- eval/fixtures/smoke.tsv --gate phase0`: TOTAL 14, Top1=28.6%, strict1=28.6%, p50=16us, p99=240us (release p50=6us, p99=81us), Gate `phase0` PASS
-  - `cargo run -p anime-eval -- eval/benchmarks/core_v1.tsv --json-out ... --md-out ...`: TOTAL 396 (`exact`=50, `prefix`=53, `typo_simple`=60, `typo_prefix`=52, `typo_phonetic`=67, `context_realword`=51, `sentence`=63), Top1=15.4%, strict1=14.4%, p50=20us, p99=246us, JSON validated via `python3 -m json.tool`; `--gate phase1 --show-failures 5` exited cleanly with code 2 on Phase 0 stub
-  - `python3 -m unittest discover -s scripts/data_pipeline -p 'test_*.py' -v`: 10 passed, 0 failed
-  - `python3 scripts/data_pipeline/fetch_sources.py --verify-only`: `MANIFEST OK: 4 个数据源全部通过开源协议与格式校验`
+  - `cargo test --workspace`: 19 passed across 7 workspace crates (incl. `anime-eval` 7 tests validating 1,400-case `core_v1.tsv` 7-category uniqueness & semantic purity)
+  - `cargo run --release -p anime-eval -- eval/fixtures/smoke.tsv --gate phase0`: TOTAL 14, Top1=28.6%, strict1=28.6%, p50=2us, p99=32us, Gate `phase0` PASS
+  - `cargo run --release -p anime-eval -- eval/benchmarks/core_v1.tsv`: TOTAL 1400 (200 per category), `exact` Top1=99.5%, overall Top1=15.0%, strict1=14.7%, p50=2us, p99=72us
+  - `cargo run --release -p anime-eval -- data/compiled/eval_large_open.tsv --json-out ...`: TOTAL 9888 (`exact`=1500, `prefix`=1500, `typo_simple`=1500, `typo_prefix`=1500, `typo_phonetic`=1500, `context_realword`=888, `sentence`=1500), `exact` Top1=99.6%, overall Top1=15.2%, p50=2us, p99=77us, JSON validated
+  - `build_lexicon.py` + `build_misspellings.py --split train` on fetched SCOWL + `wordfreq` + Wikipedia + `crate-ci/typos`: 120,000 words, 57,117 train-split misspellings (`ANIMELEX` v1 built cleanly in `.gitignore`d `data/compiled/`)
+  - `python3 -m unittest discover -s scripts/data_pipeline -p 'test_*.py' -v`: 12 passed, 0 failed
+  - `python3 scripts/data_pipeline/fetch_sources.py --verify-only`: `MANIFEST OK: 7 个数据源全部通过开源协议与格式校验`
   - `make verify-infra`: `INFRA OK`
-  - `./scripts/verify-boundaries.sh .agents/tasks/task-01-data-and-eval.md`: `BOUNDARY OK (task-01-data-and-eval): 已检查 16 个文件，零越界`
+  - `./scripts/verify-boundaries.sh .agents/tasks/task-01-data-and-eval.md`: `BOUNDARY OK (task-01-data-and-eval): 已检查 9 个文件，零越界`

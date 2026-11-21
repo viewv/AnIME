@@ -23,14 +23,44 @@ sources:
     notes: "提供现代词频并覆盖 kubernetes、chatgpt 等新词；通过纯标准库解包 wheel 内置 cBpack 词频表与 SCOWL 取交集与补丁"
 
   - id: wikipedia-common-misspellings
-    status: planned
-    description: "Wikipedia 公开常见英文人类拼写错误映射表（For_machines 清单，如 definately -> definitely）"
-    source_url: "https://en.wikipedia.org/w/index.php?title=Wikipedia:Lists_of_common_misspellings/For_machines&action=raw"
-    version: "snapshot-pending-pin"
+    status: ready
+    description: "Wikipedia 公开常见英文人类拼写错误映射表（For_machines 固定快照，如 definately -> definitely）"
+    source_url: "https://en.wikipedia.org/w/index.php?title=Wikipedia:Lists_of_common_misspellings/For_machines&oldid=1199637275&action=raw"
+    version: "oldid-1199637275"
     license: "CC-BY-SA-4.0"
-    sha256: "TBD"
+    sha256: "3b6a9290e5aaad968da7ec769a5174adb45247688ef7ae097fd2dd80237a3050"
     build_script: "scripts/data_pipeline/build_misspellings.py"
-    notes: "明确排除 Birkbeck（CC-BY-NC-SA-3.0 非商用，不符合协议白名单）；CC-BY-SA-4.0 仅用于独立可审查错拼词表并保留来源署名；待拉取固定 oldid 后锁定 sha256；构建脚本亦支持合入 crate-ci/typos（MIT OR Apache-2.0）CSV"
+    notes: "明确排除 Birkbeck（CC-BY-NC-SA-3.0 非商用）；CC-BY-SA-4.0 仅用于独立可审查错拼词表并按 80/20 切分（train 入库 / eval 评测防泄漏）"
+
+  - id: crate-ci-typos
+    status: ready
+    description: "crate-ci/typos 开源英文真实拼写错误词典 CSV（覆盖开发与通用场景常见错拼）"
+    source_url: "https://raw.githubusercontent.com/crate-ci/typos/v1.32.0/crates/typos-dict/assets/words.csv"
+    version: "v1.32.0"
+    license: "MIT OR Apache-2.0"
+    sha256: "3630b7c12bf3a860ec2b7bd9b7a5e2e992dbb09936359c292d3be2762f7bd30d"
+    build_script: "scripts/data_pipeline/build_misspellings.py"
+    notes: "采用确定性哈希按 80/20 切分：train 切分用于错拼库，eval 切分专用于离线真实错拼评测，零重合防泄漏"
+
+  - id: multiwoz-2.2-test-001
+    status: ready
+    description: "MultiWOZ 2.2 多领域英文对话测试集分片 001（真实自然英文人机对话语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/test/dialogues_001.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "d6f43876cf130fdb2dfa8f96bc056b0995354137f02122e004925d01264ed386"
+    build_script: "scripts/data_pipeline/build_eval_benchmark.py"
+    notes: "用于提取真实语境真词消歧（context_realword）与真实英文对话整句（sentence）离线评测样本"
+
+  - id: multiwoz-2.2-test-002
+    status: ready
+    description: "MultiWOZ 2.2 多领域英文对话测试集分片 002（真实自然英文人机对话语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/test/dialogues_002.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "89af95d8f596a448e733d59b31be78f1dd1632eddd99d5cb298a3fcb1ac9d185"
+    build_script: "scripts/data_pipeline/build_eval_benchmark.py"
+    notes: "与 multiwoz-2.2-test-001 共同构成完整 MultiWOZ 2.2 test 分片"
 
   - id: ngram-corpus
     status: ready

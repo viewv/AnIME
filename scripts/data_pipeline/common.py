@@ -185,6 +185,27 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def deterministic_split_bucket(key: str) -> int:
+    """将任意键稳定映射到 [0, 99]，用于训练集与 held-out 评测集的防泄漏切分。"""
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
+    return int(digest[:8], 16) % 100
+
+
+def in_split(key: str, split: str, eval_pct: int = 20) -> bool:
+    """按比例划入 all / train / eval 切分，确保 train 与 eval 零重叠。"""
+    if split == "all":
+        return True
+    if not (0 <= eval_pct <= 100):
+        raise ValueError(f"eval_pct must be in 0..=100, got {eval_pct}")
+    bucket = deterministic_split_bucket(key)
+    cutoff = 100 - eval_pct
+    if split == "train":
+        return bucket < cutoff
+    if split == "eval":
+        return bucket >= cutoff
+    raise ValueError(f"unknown split '{split}' (expected all, train, or eval)")
+
+
 def download_verified(
     url: str,
     dest: Path,

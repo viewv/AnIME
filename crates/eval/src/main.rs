@@ -178,8 +178,8 @@ context_realword\tgo \tform here\tfrom here\tcontext
         let core_rows =
             parse_tsv(include_str!("../../../eval/benchmarks/core_v1.tsv")).expect("core_v1.tsv valid");
         assert!(
-            core_rows.len() >= 300,
-            "core_v1.tsv should contain >= 300 cases, got {}",
+            core_rows.len() >= 1000,
+            "core_v1.tsv should contain >= 1000 cases, got {}",
             core_rows.len()
         );
 
@@ -221,14 +221,14 @@ context_realword\tgo \tform here\tfrom here\tcontext
 
         for cat in Category::ALL {
             assert!(
-                counts.get(&cat).copied().unwrap_or(0) >= 45,
+                counts.get(&cat).copied().unwrap_or(0) >= 150,
                 "category {} has too few cases: {:?}",
                 cat,
                 counts.get(&cat)
             );
         }
-        assert!(counts[&Category::TypoPhonetic] >= 55);
-        assert!(counts[&Category::Sentence] >= 60);
+        assert!(counts[&Category::TypoPhonetic] >= 150);
+        assert!(counts[&Category::Sentence] >= 150);
     }
 
     #[test]

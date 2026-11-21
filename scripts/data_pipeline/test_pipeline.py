@@ -19,6 +19,7 @@ REPO_ROOT = SCRIPT_DIR.parent.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+import build_eval_benchmark  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
 import build_ngram  # noqa: E402
@@ -29,6 +30,8 @@ from common import (  # noqa: E402
     MAGIC_LEX,
     MAGIC_NGR,
     MisspellingEntry,
+    deterministic_split_bucket,
+    in_split,
     load_and_validate_manifest,
     pack_header,
     read_animelex,
@@ -389,6 +392,202 @@ class TestEndToEndBuilders(unittest.TestCase):
             self.assertEqual(len(au), 5)  # <unk>, <bos>, <eos>, from, go
             self.assertEqual(len(ab), 2)
             self.assertEqual(len(at), 1)
+
+    def test_deterministic_split_zero_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            csv_path = root / "typos.csv"
+            lines = ["typo,correction"]
+            for idx in range(60):
+                a = chr(97 + idx // 26)
+                b = chr(97 + idx % 26)
+                lines.append(f"typow{a}{b}x,apple")
+            csv_path.write_text("\n".join(lines), encoding="utf-8")
+
+            train_tsv = root / "train.tsv"
+            eval_tsv = root / "eval.tsv"
+            build_misspellings.main(["--typos-csv", str(csv_path), "--split", "train", "--out-tsv", str(train_tsv)])
+            build_misspellings.main(["--typos-csv", str(csv_path), "--split", "eval", "--out-tsv", str(eval_tsv)])
+
+            train_typos = {
+                r.split("\t")[0]
+                for r in train_tsv.read_text(encoding="utf-8").splitlines()
+                if r.strip() and not r.startswith("#")
+            }
+            eval_typos = {
+                r.split("\t")[0]
+                for r in eval_tsv.read_text(encoding="utf-8").splitlines()
+                if r.strip() and not r.startswith("#")
+            }
+            self.assertGreater(len(train_typos), 30)
+            self.assertGreater(len(eval_typos), 5)
+            self.assertEqual(train_typos & eval_typos, set())
+            self.assertEqual(deterministic_split_bucket("apple"), deterministic_split_bucket("apple"))
+            self.assertTrue(in_split("apple", "train", 20) ^ in_split("apple", "eval", 20))
+
+    def test_eval_benchmark_open_and_local_adapters(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            lex_tsv = root / "lexicon.tsv"
+            lex_words = [
+                ("the", 7.7),
+                ("to", 7.4),
+                ("and", 7.3),
+                ("from", 6.8),
+                ("form", 5.8),
+                ("go", 6.2),
+                ("here", 6.1),
+                ("want", 5.9),
+                ("find", 5.8),
+                ("hotel", 5.5),
+                ("near", 5.4),
+                ("apple", 5.2),
+                ("algorithm", 4.9),
+                ("beautiful", 5.1),
+                ("environment", 5.0),
+                ("kubernetes", 4.4),
+                ("configuration", 4.7),
+                ("definitely", 5.3),
+                ("receive", 5.0),
+                ("pneumonia", 3.9),
+                ("psychology", 4.6),
+                ("document", 5.1),
+                ("check", 5.6),
+                ("this", 6.7),
+                ("please", 5.9),
+                ("I", 7.5),
+                ("I'm", 6.4),
+                ("don't", 6.6),
+            ]
+            lex_lines = ["# word\tzipf\tfreq_rank\tentry_flags\tsource"]
+            for i, (w, z) in enumerate(lex_words, 1):
+                lex_lines.append(f"{w}\t{z:.2f}\t{i}\t4\tscowl+wordfreq")
+            lex_tsv.write_text("\n".join(lex_lines), encoding="utf-8")
+
+            typos_csv = root / "typos.csv"
+            typos_csv.write_text(
+                "\n".join(
+                    [
+                        "typo,correction",
+                        "teh,the",
+                        "appie,apple",
+                        "definately,definitely",
+                        "numonia,pneumonia",
+                        "sikology,psychology",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            # 合成 GitHub Typo Corpus jsonl.gz
+            gh_gz = root / "gh.jsonl.gz"
+            gh_records = [
+                {
+                    "commit": "c1",
+                    "edits": [
+                        {
+                            "src": {"text": "check this dokument please", "lang": "eng"},
+                            "tgt": {"text": "check this document please", "lang": "eng"},
+                            "prob_typo": 0.95,
+                            "is_typo": True,
+                        },
+                        {
+                            "src": {"text": "go form here", "lang": "eng"},
+                            "tgt": {"text": "go from here", "lang": "eng"},
+                            "prob_typo": 0.92,
+                            "is_typo": True,
+                        },
+                    ],
+                }
+            ]
+            with gzip.open(gh_gz, "wt", encoding="utf-8") as fh:
+                for rec in gh_records:
+                    fh.write(json.dumps(rec) + "\n")
+
+            # 合成 MultiWOZ 2.2 dialogues_001.json
+            mw_dir = root / "mw"
+            mw_dir.mkdir()
+            (mw_dir / "dialogues_001.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "dialogue_id": "d1",
+                            "turns": [
+                                {"speaker": "USER", "utterance": "I want to find a hotel from here"},
+                                {"speaker": "SYSTEM", "utterance": "Sure"},
+                                {"speaker": "USER", "utterance": "I'm sure I don't want this document"},
+                            ],
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            out_open = root / "eval_open.tsv"
+            stats_json = root / "eval_stats.json"
+            rc = build_eval_benchmark.main(
+                [
+                    "--lexicon-tsv",
+                    str(lex_tsv),
+                    "--typos-csv",
+                    str(typos_csv),
+                    "--github-typo-jsonl",
+                    str(gh_gz),
+                    "--multiwoz-dir",
+                    str(mw_dir),
+                    "--per-category",
+                    "10",
+                    "--split",
+                    "all",
+                    "--out-tsv",
+                    str(out_open),
+                    "--stats-json",
+                    str(stats_json),
+                ]
+            )
+            self.assertEqual(rc, 0)
+            stats = json.loads(stats_json.read_text(encoding="utf-8"))
+            self.assertGreater(stats["total"], 10)
+            self.assertGreater(stats["categories"]["exact"], 0)
+            self.assertGreater(stats["categories"]["prefix"], 0)
+            self.assertGreater(stats["categories"]["context_realword"], 0)
+            self.assertGreater(stats["categories"]["sentence"], 0)
+
+            for raw in out_open.read_text(encoding="utf-8").splitlines():
+                if not raw.strip() or raw.startswith("#"):
+                    continue
+                parts = raw.split("\t")
+                self.assertEqual(len(parts), 5)
+                self.assertTrue(build_eval_benchmark.is_valid_sample(parts[0], parts[1], parts[2], parts[3]))
+
+            # 本机非商用适配器测试（Birkbeck + JFLEG）
+            birkbeck = root / "missp.dat"
+            birkbeck.write_text("$pneumonia\nnumonia\n$apple\nappie\n", encoding="utf-8")
+            jfleg_src = root / "test.src"
+            jfleg_ref = root / "test.ref0"
+            jfleg_src.write_text("i want go to teh school\n", encoding="utf-8")
+            jfleg_ref.write_text("I want to go to the school\n", encoding="utf-8")
+            local_out = root / "eval_local.tsv"
+            rc_loc = build_eval_benchmark.main(
+                [
+                    "--local-birkbeck",
+                    str(birkbeck),
+                    "--local-jfleg-src",
+                    str(jfleg_src),
+                    "--local-jfleg-ref",
+                    str(jfleg_ref),
+                    "--local-out",
+                    str(local_out),
+                ]
+            )
+            self.assertEqual(rc_loc, 0)
+            loc_rows = [
+                r.split("\t")
+                for r in local_out.read_text(encoding="utf-8").splitlines()
+                if r.strip() and not r.startswith("#")
+            ]
+            self.assertEqual(len(loc_rows), 3)
+            self.assertEqual({r[0] for r in loc_rows}, {"typo_phonetic", "typo_simple", "sentence"})
 
 
 if __name__ == "__main__":
