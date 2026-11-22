@@ -41,6 +41,7 @@ acceptance_cmd: "cargo test -p anime-lexicon && ./scripts/verify-boundaries.sh .
   - `crates/lexicon/src/contractions.rs`
   - `crates/lexicon/src/lexicon.rs`
   - `crates/lexicon/tests/real_lexicon_eval.rs`
+  - `crates/lexicon/README.md`
   - `.agents/tasks/task-02-lexicon-core.md`
 - Verification Output:
   - `cargo check --workspace`: 0 errors, 0 warnings
