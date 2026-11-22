@@ -220,6 +220,7 @@ fn main() {
     if !args.group_by_tag {
         report.by_tag.clear();
     }
+    report.show_interaction = args.interactive;
 
     if let Some(ref json_path) = args.json_out {
         let json_body = render_json(&report, gate_summary.as_ref(), args.show_failures);
@@ -487,6 +488,44 @@ context_realword\tgo \tform here\tfrom here\tcontext
     }
 
     #[test]
+    fn interaction_metrics_track_first_hit_dropouts_and_select_index() {
+        use crate::metrics::{InteractionTotals, SampleInteraction, wilson_ci95};
+
+        // 5 键输入：第 2 键进 Top-3、第 3 键进 Top-1、第 4 键被挤出、第 5 键回到 Top-1
+        let mut s = SampleInteraction::default();
+        let mut was = false;
+        for (k, r) in [(1, None), (2, Some(2)), (3, Some(0)), (4, Some(1)), (5, Some(0))] {
+            s.observe(k, r, &mut was);
+        }
+        s.keys = 5;
+        s.final_rank = Some(0);
+        assert_eq!((s.first_top1_key, s.first_top3_key, s.top1_dropouts), (Some(3), Some(2), 1));
+
+        let mut never = SampleInteraction { keys: 4, final_rank: None, ..Default::default() };
+        let mut w = false;
+        never.observe(1, None, &mut w);
+
+        let mut t = InteractionTotals::default();
+        t.add(&s);
+        t.add(&never);
+        assert!((t.keys_saved_top1_pct() - 20.0).abs() < 1e-9); // (2/5 + 0) / 2
+        assert!((t.keys_saved_top3_pct() - 30.0).abs() < 1e-9); // (3/5 + 0) / 2
+        assert!((t.dropouts_per_sample() - 0.5).abs() < 1e-9);
+        assert!((t.mean_select_index() - 5.5).abs() < 1e-9); // (1 + 10) / 2
+        assert_eq!(t.lost_after_top1_pct(), 0.0);
+
+        let (lo, hi) = wilson_ci95(90, 100);
+        assert!(lo > 82.0 && lo < 83.5 && hi > 94.0 && hi < 95.5);
+        assert_eq!(wilson_ci95(0, 0), (0.0, 0.0));
+
+        let rows = parse_tsv("exact\t\tapple\tapple\tx\n").expect("parse");
+        let mut report = run_eval("inter", &rows);
+        report.show_interaction = true;
+        assert!(render_text(&report, None, 0).contains("Interaction metrics:"));
+        assert!(render_json(&report, None, 0).contains("\"keys_saved_top1_pct\""));
+    }
+
+    #[test]
     fn gate_presets_custom_rules_and_missing_category() {
         let mut by_cat = BTreeMap::new();
         let mut exact = CategoryStats::default();
@@ -512,6 +551,7 @@ context_realword\tgo \tform here\tfrom here\tcontext
             failures: Vec::new(),
             l3_stats: None,
             by_tag: BTreeMap::new(),
+            show_interaction: false,
         };
 
         let p1_rules = parse_gate_spec("phase1", false).expect("phase1");

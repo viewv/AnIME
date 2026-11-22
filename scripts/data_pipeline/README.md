@@ -73,6 +73,15 @@ python3 scripts/data_pipeline/build_ngram.py \
 
 # 8. 由冻结的 core_v1 派生 core_v2，并从 MultiWOZ test 合成 noise_v1（含 negative:clean 反例）
 python3 scripts/data_pipeline/build_eval_v2.py
+
+# 9. 评测 v3：noise_v2（含 noise:multi）与 LibriSpeech 留出 ood_v1；反例按 eval/review/negative_review.tsv 复核
+#    新增或改动 eval/ 后必须重跑第 7 步重建 L2，使新评测句被去泄漏过滤
+python3 scripts/data_pipeline/build_eval_v3.py
+#    复核流程：导出候选 -> 用当前引擎评测 -> 只裁决被改动的句子 -> 写入裁决表 -> 重新生成，直到无未复核分歧
+python3 scripts/data_pipeline/build_eval_v3.py --emit-negative-candidates data/compiled/local/neg_candidates.tsv
+
+# 10. 本机回放自己的打字记录（context<TAB>typed<TAB>committed；只在本机，绝不入库/入训练，只输出聚合指标）
+python3 scripts/data_pipeline/replay_local_log.py ~/my_typing_log.tsv
 ```
 
 ## 离线单元测试

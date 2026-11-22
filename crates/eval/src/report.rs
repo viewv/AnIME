@@ -3,7 +3,7 @@
 use std::fmt::Write as _;
 
 use crate::gate::GateSummary;
-use crate::metrics::{CategoryStats, EvalReport};
+use crate::metrics::{CategoryStats, EvalReport, wilson_ci95};
 
 pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures: usize) -> String {
     let mut out = String::new();
@@ -36,6 +36,37 @@ pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures
         let _ = writeln!(out, "\nBy notes tag:");
         for (tag, stats) in &report.by_tag {
             write_text_row(&mut out, tag, stats);
+        }
+    }
+
+    if report.show_interaction {
+        let _ = writeln!(
+            out,
+            "\nInteraction metrics:\n{:<26} {:>5} {:>15} {:>9} {:>9} {:>9} {:>8} {:>8}",
+            "group", "n", "top1 ci95", "saved1%", "saved3%", "dropout", "lost1%", "selidx"
+        );
+        let rows = report
+            .by_cat
+            .iter()
+            .map(|(c, s)| (c.as_str().to_string(), s))
+            .chain(report.by_tag.iter().map(|(t, s)| (t.clone(), s)))
+            .chain(std::iter::once(("TOTAL".to_string(), &report.overall)));
+        for (label, s) in rows {
+            let (lo, hi) = wilson_ci95(s.top1, s.total);
+            let i = &s.interaction;
+            let _ = writeln!(
+                out,
+                "{:<26} {:>5} {:>6.1}-{:>5.1}% {:>8.1}% {:>8.1}% {:>9.3} {:>7.1}% {:>8.2}",
+                label,
+                s.total,
+                lo,
+                hi,
+                i.keys_saved_top1_pct(),
+                i.keys_saved_top3_pct(),
+                i.dropouts_per_sample(),
+                i.lost_after_top1_pct(),
+                i.mean_select_index()
+            );
         }
     }
 
@@ -441,7 +472,15 @@ fn write_json_stats(out: &mut String, stats: &CategoryStats, indent: usize) {
     let _ = writeln!(out, "{inner}\"key_latency_p99_us\": {},", stats.key_p99_us());
     let _ = writeln!(out, "{inner}\"key_latency_max_us\": {},", stats.key_max_us());
     let _ = writeln!(out, "{inner}\"sample_total_p50_us\": {},", stats.sample_p50_us());
-    let _ = writeln!(out, "{inner}\"sample_total_p99_us\": {}", stats.sample_p99_us());
+    let _ = writeln!(out, "{inner}\"sample_total_p99_us\": {},", stats.sample_p99_us());
+    let (lo, hi) = wilson_ci95(stats.top1, stats.total);
+    let i = &stats.interaction;
+    let _ = writeln!(out, "{inner}\"top1_ci95\": [{lo:.2}, {hi:.2}],");
+    let _ = writeln!(out, "{inner}\"keys_saved_top1_pct\": {:.2},", i.keys_saved_top1_pct());
+    let _ = writeln!(out, "{inner}\"keys_saved_top3_pct\": {:.2},", i.keys_saved_top3_pct());
+    let _ = writeln!(out, "{inner}\"top1_dropouts_per_sample\": {:.4},", i.dropouts_per_sample());
+    let _ = writeln!(out, "{inner}\"lost_after_top1_pct\": {:.2},", i.lost_after_top1_pct());
+    let _ = writeln!(out, "{inner}\"mean_select_index\": {:.3}", i.mean_select_index());
     let _ = write!(out, "{pad}}}");
 }
 

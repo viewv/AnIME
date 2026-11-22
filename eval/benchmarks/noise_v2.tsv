@@ -1,0 +1,1653 @@
+# AnIME noise_v2：MultiWOZ 2.2 test 子句，8 类单错误 + noise:multi 多错误 + 复核后的 negative:clean
+# seed=20261123；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核
+# category	context	input	expected	notes
+sentence		i'll also need a reference umber	I'll also need a reference number	noise:leading_drop
+sentence		do they have internet and what's the rice range	Do they have internet and what's the price range	noise:leading_drop
+sentence		what about one hat serves mediterranean	What about one that serves mediterranean	noise:leading_drop
+sentence		i'll just eed the departure time and price	I'll just need the departure time and price	noise:leading_drop
+sentence		as ong as it is expensive	as long as it is expensive	noise:leading_drop
+sentence		let's start with a moderately priced place o eat	Let's start with a moderately priced place to eat	noise:leading_drop
+sentence		he same as the hotel please	The same as the hotel please	noise:leading_drop
+sentence		i'll book it yself	I'll book it myself	noise:leading_drop
+sentence		what is the entrance ee	What is the entrance fee	noise:leading_drop
+sentence		and a restaurant on the outh side	and a restaurant on the south side	noise:leading_drop
+sentence		can you let me know he postcode	Can you let me know the postcode	noise:leading_drop
+sentence		lease provide a reference number	Please provide a reference number	noise:leading_drop
+sentence		that's ll for me	That's all for me	noise:leading_drop
+sentence		do you ave a recommendation	do you have a recommendation	noise:leading_drop
+sentence		ive me the arrival time and price please	Give me the arrival time and price please	noise:leading_drop
+sentence		ny of them would be fine	Any of them would be fine	noise:leading_drop
+sentence		we would like o try that club	We would like to try that club	noise:leading_drop
+sentence		the restaurant should be in the expensive rice range	The restaurant should be in the expensive price range	noise:leading_drop
+sentence		could you ind one for me please	Could you find one for me please	noise:leading_drop
+sentence		are there any colleges in that rea instead	Are there any colleges in that area instead	noise:leading_drop
+sentence		eh doesn't really matter	meh doesn't really matter	noise:leading_drop
+sentence		e need five rooms please	we need five rooms please	noise:leading_drop
+sentence		i'd like it o be in the east	I'd like it to be in the east	noise:leading_drop
+sentence		i'll be travelling n wednesday	I'll be travelling on wednesday	noise:leading_drop
+sentence		so i'd like an expensive ne	so I'd like an expensive one	noise:leading_drop
+sentence		thanks again for all your elp	Thanks again for all your help	noise:leading_drop
+sentence		i'm also looking for lace to go in town	I'm also looking for place to go in town	noise:leading_drop
+sentence		hat is there that fits that criteria	what is there that fits that criteria	noise:leading_drop
+sentence		i'm ot sure yet	I'm not sure yet	noise:leading_drop
+sentence		italian food will e fine	Italian food will be fine	noise:leading_drop
+sentence		lease book that train	please book that train	noise:leading_drop
+sentence		preferably in the centre f town	preferably in the centre of town	noise:leading_drop
+sentence		could you book a room or wednesday	Could you book a room for wednesday	noise:leading_drop
+sentence		are there any rains from cambridge to kings lynn	are there any trains from cambridge to kings lynn	noise:leading_drop
+sentence		i'd like something n the expensive price range	I'd like something in the expensive price range	noise:leading_drop
+sentence		no need to ook it	No need to book it	noise:leading_drop
+sentence		something you think is the est	Something you think is the best	noise:leading_drop
+sentence		re you aware of it	Are you aware of it	noise:leading_drop
+sentence		also include the reference umber	Also include the reference number	noise:leading_drop
+sentence		thanks for our help	Thanks for your help	noise:leading_drop
+sentence		how about one hat serves mediterranean food	how about one that serves mediterranean food	noise:leading_drop
+sentence		yes that sounds reat	Yes that sounds great	noise:leading_drop
+sentence		and only he address is necessary	and only the address is necessary	noise:leading_drop
+sentence		can you give me their phone umber please	Can you give me their phone number please	noise:leading_drop
+sentence		no that is ll	No that is all	noise:leading_drop
+sentence		the north part of town lease	The north part of town please	noise:leading_drop
+sentence		o any of them have free parking	Do any of them have free parking	noise:leading_drop
+sentence		what do ou have	What do you have	noise:leading_drop
+sentence		and arrival time or any train	and arrival time for any train	noise:leading_drop
+sentence		ow long is the ride	How long is the ride	noise:leading_drop
+sentence		before we ove on to the taxi	Before we move on to the taxi	noise:leading_drop
+sentence		can you help me pick ut a restaurant	Can you help me pick out a restaurant	noise:leading_drop
+sentence		can you book hat for just me	Can you book that for just me	noise:leading_drop
+sentence		what's the travel time or that train	What's the travel time for that train	noise:leading_drop
+sentence		could you also provide heir phone number and entrance fees	Could you also provide their phone number and entrance fees	noise:leading_drop
+sentence		just want o impress my boss	just want to impress my boss	noise:leading_drop
+sentence		nd provide the phone number for me please	And provide the phone number for me please	noise:leading_drop
+sentence		just the price nd arrival time	just the price and arrival time	noise:leading_drop
+sentence		also he postcode and address	also the postcode and address	noise:leading_drop
+sentence		i'll be going from the park o the restaurant	I'll be going from the park to the restaurant	noise:leading_drop
+sentence		i'd like to o to cambridge	I'd like to go to cambridge	noise:leading_drop
+sentence		are there any italian restaurants in the ity centre	Are there any italian restaurants in the city centre	noise:leading_drop
+sentence		ist all tuesday departures to cambridge	List all tuesday departures to cambridge	noise:leading_drop
+sentence		is here any train leaving sooner	Is there any train leaving sooner	noise:leading_drop
+sentence		can you help me find a train for onday	Can you help me find a train for monday	noise:leading_drop
+sentence		yes please try t	Yes please try it	noise:leading_drop
+sentence		what's the phone number for the one in the enter	What's the phone number for the one in the center	noise:leading_drop
+sentence		the reservation ill start on sunday	The reservation will start on sunday	noise:leading_drop
+sentence		just he postcode please	Just the postcode please	noise:leading_drop
+sentence		f that day fails	If that day fails	noise:leading_drop
+sentence		lease for my records	please for my records	noise:leading_drop
+sentence		can you reserve a table for he six of us	can you reserve a table for the six of us	noise:leading_drop
+sentence		hat is the price	What is the price	noise:leading_drop
+sentence		we will also eed lodging	We will also need lodging	noise:leading_drop
+sentence		what's the address for the one n the south	What's the address for the one in the south	noise:leading_drop
+sentence		preferably a museum n the centre of town	Preferably a museum in the centre of town	noise:leading_drop
+sentence		and entrance fee f any	and entrance fee if any	noise:leading_drop
+sentence		and what rea of town is that in	And what area of town is that in	noise:leading_drop
+sentence		can you also help me ith a hotel	Can you also help me with a hotel	noise:leading_drop
+sentence		you have een oh so wonderful	you have been oh so wonderful	noise:leading_drop
+sentence		and phone umber for the one you suggest	and phone number for the one you suggest	noise:leading_drop
+sentence		thank you or the assistance	Thank you for the assistance	noise:leading_drop
+sentence		it should leave from cambridge and go o leicester please	It should leave from cambridge and go to leicester please	noise:leading_drop
+sentence		what's the irst one on the list	what's the first one on the list	noise:leading_drop
+sentence		perhaps starting unday instead	Perhaps starting sunday instead	noise:leading_drop
+sentence		entrance fee nd postcode please	entrance fee and postcode please	noise:leading_drop
+sentence		for wo nights please	for two nights please	noise:leading_drop
+sentence		one in the east of own	one in the east of town	noise:leading_drop
+sentence		yes can you book hat please	Yes can you book that please	noise:leading_drop
+sentence		i'd ike some information on a restaurant	I'd like some information on a restaurant	noise:leading_drop
+sentence		tell me the postcode or the cheap restaurant	Tell me the postcode for the cheap restaurant	noise:leading_drop
+sentence		it needs to e in the centre and be expensive	It needs to be in the centre and be expensive	noise:leading_drop
+sentence		i'll ry that out	I'll try that out	noise:leading_drop
+sentence		thank you for all of your elp	Thank you for all of your help	noise:leading_drop
+sentence		the closest museum would e fine	the closest museum would be fine	noise:leading_drop
+sentence		lso the phone number please	also the phone number please	noise:leading_drop
+sentence		yes i'd ike one in the expensive range	Yes I'd like one in the expensive range	noise:leading_drop
+sentence		i'll e heading out to king's lynn on sunday	I'll be heading out to king's lynn on sunday	noise:leading_drop
+sentence		an you help please	Can you help please	noise:leading_drop
+sentence		but could you please get he address for me	but could you please get the address for me	noise:leading_drop
+sentence		otel or guest house	Hotel or guest house	noise:leading_drop
+sentence		i'll take a cheap one lease	I'll take a cheap one please	noise:leading_drop
+sentence		make he reservation please	make the reservation please	noise:leading_drop
+sentence		i'm looking for ome hungarian food restaurants near the centre	I'm looking for some hungarian food restaurants near the centre	noise:leading_drop
+sentence		arriving in ime for my reservation	arriving in time for my reservation	noise:leading_drop
+sentence		it depends on what theatre ou recommend	It depends on what theatre you recommend	noise:leading_drop
+sentence		can ou assist me with that	can you assist me with that	noise:leading_drop
+sentence		that ounds like a winner	That sounds like a winner	noise:leading_drop
+sentence		the college should be n the west	the college should be in the west	noise:leading_drop
+sentence		i'm willing to ry something new	I'm willing to try something new	noise:leading_drop
+sentence		can you book that nd give me a reference number	Can you book that and give me a reference number	noise:leading_drop
+sentence		thank you very much or all of your help	thank you very much for all of your help	noise:leading_drop
+sentence		let's go with he alexander bed and breakfast	Let's go with the alexander bed and breakfast	noise:leading_drop
+sentence		it's ur anniversary and my wife loves british food	It's our anniversary and my wife loves british food	noise:leading_drop
+sentence		i'd like a moderately priced uest house	I'd like a moderately priced guest house	noise:leading_drop
+sentence		we're all oming to cambridge together	we're all coming to cambridge together	noise:leading_drop
+sentence		have a ood day	Have a good day	noise:leading_drop
+sentence		i'm looking for a otel called acorn guest house	I'm looking for a hotel called acorn guest house	noise:leading_drop
+sentence		are here any expensive british restaurants	Are there any expensive british restaurants	noise:leading_drop
+sentence		and the same ay	and the same day	noise:leading_drop
+sentence		what are my three choices efore we make a reservation	what are my three choices before we make a reservation	noise:leading_drop
+sentence		can ou try anything that serves french food	can you try anything that serves french food	noise:leading_drop
+sentence		no that will be t	No that will be it	noise:leading_drop
+sentence		that number doesn't eem like it would be correct	that number doesn't seem like it would be correct	noise:leading_drop
+sentence		can you make ome recommendations	Can you make some recommendations	noise:leading_drop
+sentence		you have a fantastic day as ell	You have a fantastic day as well	noise:leading_drop
+sentence		y boyfriend got himself arrested	My boyfriend got himself arrested	noise:leading_drop
+sentence		lease help me make a taxi reservation	Please help me make a taxi reservation	noise:leading_drop
+sentence		that sounds like a ood one	That sounds like a good one	noise:leading_drop
+sentence		can you tell me the price of the icket please	Can you tell me the price of the ticket please	noise:leading_drop
+sentence		no that won't e necessary	No that won't be necessary	noise:leading_drop
+sentence		t should be expensive	It should be expensive	noise:leading_drop
+sentence		how many tars does this hotel have	How many stars does this hotel have	noise:leading_drop
+sentence		can you schedule e a taxi to take me there	Can you schedule me a taxi to take me there	noise:leading_drop
+sentence		thank ou so much for your help today	thank you so much for your help today	noise:leading_drop
+sentence		could ou provide the details	Could you provide the details	noise:leading_drop
+sentence		it oes need to be cheap though	It does need to be cheap though	noise:leading_drop
+sentence		is there one at all	is there none at all	noise:leading_drop
+sentence		and what area is hat in	And what area is that in	noise:leading_drop
+sentence		that will ork perfect	that will work perfect	noise:leading_drop
+sentence		is there an admission ee	Is there an admission fee	noise:leading_drop
+sentence		you do he same	You do the same	noise:leading_drop
+sentence		olden house sounds delicious	Golden house sounds delicious	noise:leading_drop
+sentence		i'd like ome info on a restaurant	I'd like some info on a restaurant	noise:leading_drop
+sentence		what attraction is good in the orth	What attraction is good in the north	noise:leading_drop
+sentence		re there any expensive restaurants in the city centre	are there any expensive restaurants in the city centre	noise:leading_drop
+sentence		can ou book a table for me there	Can you book a table for me there	noise:leading_drop
+sentence		need it or monday	need it for monday	noise:leading_drop
+sentence		i'm hoping to find a nightclub in own	I'm hoping to find a nightclub in town	noise:leading_drop
+sentence		an you also book a taxi for me	Can you also book a taxi for me	noise:leading_drop
+sentence		are there any in the cheap rice range	Are there any in the cheap price range	noise:boundary_gemination
+sentence		what is the star atings for them	What is the star ratings for them	noise:boundary_gemination
+sentence		the restaurant should be in the xpensive price range	The restaurant should be in the expensive price range	noise:boundary_gemination
+sentence		it needs to be in the centre and be xpensive	It needs to be in the centre and be expensive	noise:boundary_gemination
+sentence		something on the ast side of town	Something on the east side of town	noise:boundary_gemination
+sentence		that should o it	that should do it	noise:boundary_gemination
+sentence		i'm looking for an expensive restaurant hat serves thai food	I'm looking for an expensive restaurant that serves thai food	noise:boundary_gemination
+sentence		what kind of attraction is gallery at welve	What kind of attraction is gallery at twelve	noise:boundary_gemination
+sentence		that'll be it oday	That'll be it today	noise:boundary_gemination
+sentence		so please tell me verything that is available	so please tell me everything that is available	noise:boundary_gemination
+sentence		do they have internet here	Do they have internet there	noise:boundary_gemination
+sentence		how about one in the ast	How about one in the east	noise:boundary_gemination
+sentence		no at his time	No at this time	noise:boundary_gemination
+sentence		how long does it ake to get there	How long does it take to get there	noise:boundary_gemination
+sentence		do you happen to know hat attraction type it is	Do you happen to know what attraction type it is	noise:boundary_gemination
+sentence		just he entrance fee please	just the entrance fee please	noise:boundary_gemination
+sentence		what ype of accommodations are they	What type of accommodations are they	noise:boundary_gemination
+sentence		please try one in the ast	Please try one in the east	noise:boundary_gemination
+sentence		great thanks o much	Great thanks so much	noise:boundary_gemination
+sentence		what ype of hotel it is	what type of hotel it is	noise:boundary_gemination
+sentence		just heir phone number	just their phone number	noise:boundary_gemination
+sentence		thank you for making this o easy	Thank you for making this so easy	noise:boundary_gemination
+sentence		i've really got o go	I've really got to go	noise:boundary_gemination
+sentence		how many are xpensive	how many are expensive	noise:boundary_gemination
+sentence		what other estaurants in that area serve italian food	What other restaurants in that area serve italian food	noise:boundary_gemination
+sentence		for four people staying three nights tarting friday	for four people staying three nights starting friday	noise:boundary_gemination
+sentence		no n the phone number	No on the phone number	noise:boundary_gemination
+sentence		do you have anything in the xpensive price range	Do you have anything in the expensive price range	noise:boundary_gemination
+sentence		what time does the first rain depart	What time does the first train depart	noise:boundary_gemination
+sentence		what is the ntrance fee and the postcode	What is the entrance fee and the postcode	noise:boundary_gemination
+sentence		one in the ast of town	one in the east of town	noise:boundary_gemination
+sentence		how far are ach of them from my hotel	How far are each of them from my hotel	noise:boundary_gemination
+sentence		how about rying just for one night	How about trying just for one night	noise:boundary_gemination
+sentence		make sure you get he reference number	Make sure you get the reference number	noise:boundary_gemination
+sentence		good ay to you	Good day to you	noise:boundary_gemination
+sentence		tell me some restaurant ypes in the town centre	Tell me some restaurant types in the town centre	noise:boundary_gemination
+sentence		you made the trip lanning much easier for me	you made the trip planning much easier for me	noise:boundary_gemination
+sentence		i've got a particular estaurant we want to try	I've got a particular restaurant we want to try	noise:boundary_gemination
+sentence		it depends on what heatre you recommend	It depends on what theatre you recommend	noise:boundary_gemination
+sentence		and get he info	and get the info	noise:boundary_gemination
+sentence		i'm also looking for an architecture attraction ear the restaurant	I'm also looking for an architecture attraction near the restaurant	noise:boundary_gemination
+sentence		do you know hat area in the city they're located	do you know what area in the city they're located	noise:boundary_gemination
+sentence		there are two f us	There are two of us	noise:boundary_gemination
+sentence		thanks a lot have a good ay	Thanks a lot have a good day	noise:boundary_gemination
+sentence		what ime does the train arrive	What time does the train arrive	noise:boundary_gemination
+sentence		great hat will be everything thanks	Great that will be everything thanks	noise:boundary_gemination
+sentence		what is the xact address	What is the exact address	noise:boundary_gemination
+sentence		please book that rain for one person	Please book that train for one person	noise:boundary_gemination
+sentence		yes can you please get hat booked for me	Yes can you please get that booked for me	noise:boundary_gemination
+sentence		what ype of car is it	What type of car is it	noise:boundary_gemination
+sentence		the one in the ast please	the one in the east please	noise:boundary_gemination
+sentence		but could you give me the xact travel time please	but could you give me the exact travel time please	noise:boundary_gemination
+sentence		the xpensive price range please	the expensive price range please	noise:boundary_gemination
+sentence		good ay to you also bye	Good day to you also bye	noise:boundary_gemination
+sentence		what is the xact departure time	What is the exact departure time	noise:boundary_gemination
+sentence		something in the cheap rice range including free parking	Something in the cheap price range including free parking	noise:boundary_gemination
+sentence		please give me some info n your favorite place	Please give me some info on your favorite place	noise:boundary_gemination
+sentence		how long will that rip take	How long will that trip take	noise:boundary_gemination
+sentence		perhaps a museum in the same area s the hotel	Perhaps a museum in the same area as the hotel	noise:boundary_gemination
+sentence		i'm looking for a restaurant hat serves swedish food	I'm looking for a restaurant that serves swedish food	noise:boundary_gemination
+sentence		could you just ell me when that one departs	Could you just tell me when that one departs	noise:boundary_gemination
+sentence		also i'm looking for a chinese restaurant hat is expensive	Also I'm looking for a chinese restaurant that is expensive	noise:boundary_gemination
+sentence		great hank you for all your help	Great thank you for all your help	noise:boundary_gemination
+sentence		do you have any attractions in the ast	do you have any attractions in the east	noise:boundary_gemination
+sentence		in the ast area	in the east area	noise:boundary_gemination
+sentence		what about on the ast side	What about on the east side	noise:boundary_gemination
+sentence		the type of ood is not important	The type of food is not important	noise:boundary_gemination
+sentence		what is the ntrance fee for the attractions	What is the entrance fee for the attractions	noise:boundary_gemination
+sentence		you can end the conversation ow	You can end the conversation now	noise:boundary_gemination
+sentence		that rain sounds good	that train sounds good	noise:boundary_gemination
+sentence		can you make a recommendation and provide ntrance fee	Can you make a recommendation and provide entrance fee	noise:boundary_gemination
+sentence		what is the ntrance fee	What is the entrance fee	noise:boundary_gemination
+sentence		any of them would o	Any of them would do	noise:boundary_gemination
+sentence		can you find me another restaurant hat serves indian food	can you find me another restaurant that serves indian food	noise:boundary_gemination
+sentence		can you please just ell me the postcode and address	can you please just tell me the postcode and address	noise:boundary_gemination
+sentence		thanks o much for all the help	Thanks so much for all the help	noise:boundary_gemination
+sentence		once the taxi s booked	Once the taxi is booked	noise:boundary_gemination
+sentence		how about he same time for saturday	how about the same time for saturday	noise:boundary_gemination
+sentence		thanks o much for all of your help	Thanks so much for all of your help	noise:boundary_gemination
+sentence		nothing but he best	nothing but the best	noise:boundary_gemination
+sentence		can you please book a room at he acorn	Can you please book a room at the acorn	noise:boundary_gemination
+sentence		can you give me the star ating of the place	Can you give me the star rating of the place	noise:boundary_gemination
+sentence		i'd still ike free parking as well	I'd still like free parking as well	noise:boundary_gemination
+sentence		have a blessed ay	Have a blessed day	noise:boundary_gemination
+sentence		then find me one in the xpensive price range	Then find me one in the expensive price range	noise:boundary_gemination
+sentence		i'm looking for a jamaican restaurant in the ast	I'm looking for a jamaican restaurant in the east	noise:boundary_gemination
+sentence		as a matter of act yes	As a matter of fact yes	noise:boundary_gemination
+sentence		need restaurant in the ast	Need restaurant in the east	noise:boundary_gemination
+sentence		thank you and have a good ay	Thank you and have a good day	noise:boundary_gemination
+sentence		could you just give me the star ating	Could you just give me the star rating	noise:boundary_gemination
+sentence		could you tell me more about heir locations	Could you tell me more about their locations	noise:boundary_gemination
+sentence		perhaps tarting sunday instead	Perhaps starting sunday instead	noise:boundary_gemination
+sentence		price range and area s well please	price range and area as well please	noise:boundary_gemination
+sentence		the name of the restaurant is restaurant wo two	The name of the restaurant is restaurant two two	noise:boundary_gemination
+sentence		money is no bject so please find me something expensive	Money is no object so please find me something expensive	noise:boundary_gemination
+sentence		just he price and arrival time	just the price and arrival time	noise:boundary_gemination
+sentence		what can you tell me about he golden curry restaurant	What can you tell me about the golden curry restaurant	noise:boundary_gemination
+sentence		can you let me know if the reservation is uccessful	Can you let me know if the reservation is successful	noise:boundary_gemination
+sentence		how about an entertainment place in the ast	How about an entertainment place in the east	noise:boundary_gemination
+sentence		how about he holy trinity church	How about the holy trinity church	noise:boundary_gemination
+sentence		any ou choose is fine	Any you choose is fine	noise:boundary_gemination
+sentence		how about he moderate one	How about the moderate one	noise:boundary_gemination
+sentence		i'd really like to get some middle astern food	I'd really like to get some middle eastern food	noise:boundary_gemination
+sentence		what is the price for that rain	What is the price for that train	noise:boundary_gemination
+sentence		i'd like some information on a restaurant oday	I'd like some information on a restaurant today	noise:boundary_gemination
+sentence		do you have anything in the cheap rice range	Do you have anything in the cheap price range	noise:boundary_gemination
+sentence		let's try a restaurant hat serves international food	let's try a restaurant that serves international food	noise:boundary_gemination
+sentence		the ntertainment venue sounds like a lot of fun	The entertainment venue sounds like a lot of fun	noise:boundary_gemination
+sentence		but i'd like it o be moderately priced	but I'd like it to be moderately priced	noise:boundary_gemination
+sentence		what is the one with the shortest ravel time	What is the one with the shortest travel time	noise:boundary_gemination
+sentence		any interesting boats on the ast side of town	Any interesting boats on the east side of town	noise:boundary_gemination
+sentence		that rain would work well	That train would work well	noise:boundary_gemination
+sentence		what ime did the train depart	what time did the train depart	noise:boundary_gemination
+sentence		i'd like it to be xpensive	I'd like it to be expensive	noise:boundary_gemination
+sentence		what are the ntrance fees like	What are the entrance fees like	noise:boundary_gemination
+sentence		how about he center	How about the center	noise:boundary_gemination
+sentence		how much is that icket	how much is that ticket	noise:boundary_gemination
+sentence		i'd like to find some xpensive mexican cuisine	I'd like to find some expensive mexican cuisine	noise:boundary_gemination
+sentence		you said you have two ptions	You said you have two options	noise:boundary_gemination
+sentence		thanks o much for stepping in	Thanks so much for stepping in	noise:boundary_gemination
+sentence		have a good ay	Have a good day	noise:boundary_gemination
+sentence		thanks o much for your help	thanks so much for your help	noise:boundary_gemination
+sentence		what is the xact departure time please	What is the exact departure time please	noise:boundary_gemination
+sentence		thanks o much for the help	thanks so much for the help	noise:boundary_gemination
+sentence		cheap rice range in the centre	Cheap price range in the centre	noise:boundary_gemination
+sentence		what ype of attraction is it	What type of attraction is it	noise:boundary_gemination
+sentence		is this listing in the xpensive price range	Is this listing in the expensive price range	noise:boundary_gemination
+sentence		how about a park in the ast	how about a park in the east	noise:boundary_gemination
+sentence		does that rain leave on friday	Does that train leave on friday	noise:boundary_gemination
+sentence		if that ime doesn't work	if that time doesn't work	noise:boundary_gemination
+sentence		is it in the xpensive range	Is it in the expensive range	noise:boundary_gemination
+sentence		does it have a four star ating	Does it have a four star rating	noise:boundary_gemination
+sentence		could you just ell me the phone number	could you just tell me the phone number	noise:boundary_gemination
+sentence		can you tell me the ntrance fee and phone number	Can you tell me the entrance fee and phone number	noise:boundary_gemination
+sentence		i'd just need their star ating and phone number	I'd just need their star rating and phone number	noise:boundary_gemination
+sentence		is this restaurant located near places that serves wedish food	Is this restaurant located near places that serves swedish food	noise:boundary_gemination
+sentence		i'll need it for three nights tarting on sunday	I'll need it for three nights starting on sunday	noise:boundary_gemination
+sentence		no that would be it hanks	No that would be it thanks	noise:boundary_gemination
+sentence		i'd like something in the xpensive price range	I'd like something in the expensive price range	noise:boundary_gemination
+sentence		but maybe a little arlier would work	but maybe a little earlier would work	noise:boundary_gemination
+sentence		can you tell me what he area of town is	Can you tell me what the area of town is	noise:boundary_gemination
+sentence		can you give me the info n the cheap one	Can you give me the info on the cheap one	noise:boundary_gemination
+sentence		tell me about he ones to the north	tell me about the ones to the north	noise:boundary_gemination
+sentence		the ntrance fee and the phone number please	The entrance fee and the phone number please	noise:boundary_gemination
+sentence		and the ntrance fee i'd have to pay	and the entrance fee I'd have to pay	noise:boundary_gemination
+sentence		what about he type of a museum	what about the type of a museum	noise:boundary_gemination
+sentence		does that rain go there	Does that train go there	noise:boundary_gemination
+sentence		do you know here that is	do you know where that is	noise:boundary_gemination
+sentence		to get here in time for my reservation	to get there in time for my reservation	noise:boundary_gemination
+sentence		what ype of architecture is it	what type of architecture is it	noise:boundary_gemination
+sentence		price is not of anyc oncern	Price is not of any concern	noise:space_shift
+sentence		we are looking fo rindian food	We are looking for indian food	noise:space_shift
+sentence		could you send me thep hone number	Could you send me the phone number	noise:space_shift
+sentence		whicho ne do you recommend	Which one do you recommend	noise:space_shift
+sentence		thanks that would be al lfor tonight	Thanks that would be all for tonight	noise:space_shift
+sentence		cany ou recommend one and give me the phone number	Can you recommend one and give me the phone number	noise:space_shift
+sentence		can you help me wit hplaces to go	Can you help me with places to go	noise:space_shift
+sentence		perhaps a museum in the same area as theh otel	Perhaps a museum in the same area as the hotel	noise:space_shift
+sentence		the one in the eas tplease	the one in the east please	noise:space_shift
+sentence		thank you for all you rhelp today	thank you for all your help today	noise:space_shift
+sentence		is there an admissionf ee	Is there an admission fee	noise:space_shift
+sentence		cany ou recommend any	Can you recommend any	noise:space_shift
+sentence		that willw ork great	that will work great	noise:space_shift
+sentence		can you lookt hat up for me	can you look that up for me	noise:space_shift
+sentence		are there anyb ritish restaurants in the centre	Are there any british restaurants in the centre	noise:space_shift
+sentence		sure tha twould be great	Sure that would be great	noise:space_shift
+sentence		i'm alsol ooking for place to go in town	I'm also looking for place to go in town	noise:space_shift
+sentence		i'm looking for a moderately priced restaurantw ith british food	I'm looking for a moderately priced restaurant with british food	noise:space_shift
+sentence		justn eed to know what area it's in	Just need to know what area it's in	noise:space_shift
+sentence		i'll need the car typ eand contact number as well	I'll need the car type and contact number as well	noise:space_shift
+sentence		please give me a referenc enumber	Please give me a reference number	noise:space_shift
+sentence		i'll go with theo ne in the centre	I'll go with the one in the centre	noise:space_shift
+sentence		what is the entrance fee and addres sfor that location	what is the entrance fee and address for that location	noise:space_shift
+sentence		i'm als ogoing to need a train	I'm also going to need a train	noise:space_shift
+sentence		could yout ry a restaurant that serves british food instead	Could you try a restaurant that serves british food instead	noise:space_shift
+sentence		what is thea rea	What is the area	noise:space_shift
+sentence		i'll als oneed somewhere to go while i'm in town	I'll also need somewhere to go while I'm in town	noise:space_shift
+sentence		how about a boatinga ttraction	How about a boating attraction	noise:space_shift
+sentence		what kind of expensive korean restaurants do you havea vailable	What kind of expensive korean restaurants do you have available	noise:space_shift
+sentence		th evarsity is good	The varsity is good	noise:space_shift
+sentence		what do yo urecommend	What do you recommend	noise:space_shift
+sentence		to get there in timef or my reservation	to get there in time for my reservation	noise:space_shift
+sentence		what time woul dyou like to depart	What time would you like to depart	noise:space_shift
+sentence		wha tabout one that serves mediterranean	What about one that serves mediterranean	noise:space_shift
+sentence		could you recommendo ne with the food type	Could you recommend one with the food type	noise:space_shift
+sentence		what is the entrance fee for thea ttractions	What is the entrance fee for the attractions	noise:space_shift
+sentence		i'd also like a taxib etween the places if possible	I'd also like a taxi between the places if possible	noise:space_shift
+sentence		is there on eyou would recommend	Is there one you would recommend	noise:space_shift
+sentence		tha twill be all today	That will be all today	noise:space_shift
+sentence		if you could recommen done	If you could recommend one	noise:space_shift
+sentence		ca nyou provide me with the entrance fee and postcode	Can you provide me with the entrance fee and postcode	noise:space_shift
+sentence		pleas ebook a table	please book a table	noise:space_shift
+sentence		how long will the travelt ime be	How long will the travel time be	noise:space_shift
+sentence		and phone number for th eone you suggest	and phone number for the one you suggest	noise:space_shift
+sentence		butf irst can we work out the train details	but first can we work out the train details	noise:space_shift
+sentence		are ther eany nearby	Are there any nearby	noise:space_shift
+sentence		and fe einformation please	and fee information please	noise:space_shift
+sentence		no price rang erestrictions	No price range restrictions	noise:space_shift
+sentence		alsof ind me a theatre	also find me a theatre	noise:space_shift
+sentence		justp lease give me the travel time	just please give me the travel time	noise:space_shift
+sentence		great what is thee ntrance fee too	Great what is the entrance fee too	noise:space_shift
+sentence		can you give me the info on the chea pone	Can you give me the info on the cheap one	noise:space_shift
+sentence		i'm looking to find an expensive italianr estaurant	I'm looking to find an expensive italian restaurant	noise:space_shift
+sentence		let's go with the alexander beda nd breakfast	Let's go with the alexander bed and breakfast	noise:space_shift
+sentence		what would the pricer ange be for that	What would the price range be for that	noise:space_shift
+sentence		tha tsounds like a winner	That sounds like a winner	noise:space_shift
+sentence		i'm good fort oday	I'm good for today	noise:space_shift
+sentence		can youg ive the arrival time on that train please	Can you give the arrival time on that train please	noise:space_shift
+sentence		have a greato ne	Have a great one	noise:space_shift
+sentence		choose a restaurant yo urecommend	Choose a restaurant you recommend	noise:space_shift
+sentence		how about internationa lfood	How about international food	noise:space_shift
+sentence		thank yo uand have a good day	Thank you and have a good day	noise:space_shift
+sentence		i'd alsol ike their phone number	I'd also like their phone number	noise:space_shift
+sentence		list allt uesday departures to cambridge	List all tuesday departures to cambridge	noise:space_shift
+sentence		it's calledi ndia house	It's called india house	noise:space_shift
+sentence		anyt hat do that will be fine	Any that do that will be fine	noise:space_shift
+sentence		whata rea is that in	What area is that in	noise:space_shift
+sentence		butc ould you quote me a price on that	but could you quote me a price on that	noise:space_shift
+sentence		it needs to be in the centr eand be expensive	It needs to be in the centre and be expensive	noise:space_shift
+sentence		pleas eget me the you get phone number and address	please get me the you get phone number and address	noise:space_shift
+sentence		an yarea is fine	any area is fine	noise:space_shift
+sentence		tell me thep ostcode for the cheap restaurant	Tell me the postcode for the cheap restaurant	noise:space_shift
+sentence		in thee ast location	in the east location	noise:space_shift
+sentence		are therea ny on that route	are there any on that route	noise:space_shift
+sentence		can you suggest a greato ne	Can you suggest a great one	noise:space_shift
+sentence		what is the trave ltime on that	what is the travel time on that	noise:space_shift
+sentence		tha tcould be nice	that could be nice	noise:space_shift
+sentence		somet ype of boat	some type of boat	noise:space_shift
+sentence		can you search for a boat attraction instea dthen	Can you search for a boat attraction instead then	noise:space_shift
+sentence		that's al lfor now	That's all for now	noise:space_shift
+sentence		could you just tell me whent hat one departs	Could you just tell me when that one departs	noise:space_shift
+sentence		but it needs to be neart he centre of town	but it needs to be near the centre of town	noise:space_shift
+sentence		pleas eget me the travel time	please get me the travel time	noise:space_shift
+sentence		thanks for you rhelp with the hotel	Thanks for your help with the hotel	noise:space_shift
+sentence		something in the cheap pric erange including free parking	Something in the cheap price range including free parking	noise:space_shift
+sentence		for the samea mount of people	for the same amount of people	noise:space_shift
+sentence		thank you very much for all of you rhelp	thank you very much for all of your help	noise:space_shift
+sentence		i'd like a moderately priced gues thouse	I'd like a moderately priced guest house	noise:space_shift
+sentence		that sounds great can yo usend me all the info	that sounds great can you send me all the info	noise:space_shift
+sentence		it should be in th ecentre and serve chinese food	it should be in the centre and serve chinese food	noise:space_shift
+sentence		when are thea rrival times	When are the arrival times	noise:space_shift
+sentence		tha tshould be fine	That should be fine	noise:space_shift
+sentence		is there anothe rhotel that matches that criteria	Is there another hotel that matches that criteria	noise:space_shift
+sentence		how about just fort he one night	How about just for the one night	noise:space_shift
+sentence		thatw ould be fantastic	That would be fantastic	noise:space_shift
+sentence		is there anythingn ear the centre	Is there anything near the centre	noise:space_shift
+sentence		wha tprice range is that in	What price range is that in	noise:space_shift
+sentence		i'm also looking for an architectur eattraction near the restaurant	I'm also looking for an architecture attraction near the restaurant	noise:space_shift
+sentence		the moderate price rang ewould be best	The moderate price range would be best	noise:space_shift
+sentence		area anda ddress of what you pick	area and address of what you pick	noise:space_shift
+sentence		can yout ell me about it	Can you tell me about it	noise:space_shift
+sentence		how about chinesef ood	How about chinese food	noise:space_shift
+sentence		it depends on wha ttheatre you recommend	It depends on what theatre you recommend	noise:space_shift
+sentence		i'm lookingf or things to do in town	I'm looking for things to do in town	noise:space_shift
+sentence		just tell me the attractio ntype please	Just tell me the attraction type please	noise:space_shift
+sentence		it doesn't have to be a swimmin gpool	It doesn't have to be a swimming pool	noise:space_shift
+sentence		i'll be goin gfrom the park to the restaurant	I'll be going from the park to the restaurant	noise:space_shift
+sentence		couldy ou give me the price	Could you give me the price	noise:space_shift
+sentence		we wil lalso need lodging	We will also need lodging	noise:space_shift
+sentence		can yo utell me what the travel time is	Can you tell me what the travel time is	noise:space_shift
+sentence		it willj ust be for me on wednesday	It will just be for me on wednesday	noise:space_shift
+sentence		no particula rpart of town	No particular part of town	noise:space_shift
+sentence		i'll just need th epostcode	I'll just need the postcode	noise:space_shift
+sentence		and it must be in th enorth	And it must be in the north	noise:space_shift
+sentence		please book tha tfor me	please book that for me	noise:space_shift
+sentence		onl ythe best for my family	Only the best for my family	noise:space_shift
+sentence		i'll need the postcode an daddress	I'll need the postcode and address	noise:space_shift
+sentence		are there any thatc an accommodate that many	Are there any that can accommodate that many	noise:space_shift
+sentence		what's the departure time andp rice	what's the departure time and price	noise:space_shift
+sentence		i'd really like to get some middlee astern food	I'd really like to get some middle eastern food	noise:space_shift
+sentence		and give me ca rtype and contact info	And give me car type and contact info	noise:space_shift
+sentence		are there an ymuseums	Are there any museums	noise:space_shift
+sentence		thatw ould be fine	that would be fine	noise:space_shift
+sentence		that ones ounds great	That one sounds great	noise:space_shift
+sentence		i'm lookingf or european restaurant in the centre	I'm looking for european restaurant in the centre	noise:space_shift
+sentence		and on ethat has free parking	and one that has free parking	noise:space_shift
+sentence		th eeast is fine	The east is fine	noise:space_shift
+sentence		are there an yaround	Are there any around	noise:space_shift
+sentence		i'll needt he reference number	I'll need the reference number	noise:space_shift
+sentence		i'll be departingc ambridge	I'll be departing cambridge	noise:space_shift
+sentence		what is the pric erange of the acorn guest house	What is the price range of the acorn guest house	noise:space_shift
+sentence		any of themw ould be fine	Any of them would be fine	noise:space_shift
+sentence		i'm leaving fro mpeterborough and need to travel on tuesday	I'm leaving from peterborough and need to travel on tuesday	noise:space_shift
+sentence		what is th ephone number for that place	what is the phone number for that place	noise:space_shift
+sentence		the sam eday as the booking	The same day as the booking	noise:space_shift
+sentence		are there anyt urkish restaurants	Are there any turkish restaurants	noise:space_shift
+sentence		i'd like to knowt he entrance fee	I'd like to know the entrance fee	noise:space_shift
+sentence		meh doesn't reall ymatter	meh doesn't really matter	noise:space_shift
+sentence		we needf ive rooms please	we need five rooms please	noise:space_shift
+sentence		what is their phon enumber	What is their phone number	noise:space_shift
+sentence		are ther eany cinemas	Are there any cinemas	noise:space_shift
+sentence		howm uch will that cost	How much will that cost	noise:space_shift
+sentence		italian foodw ill be fine	Italian food will be fine	noise:space_shift
+sentence		thanks so much fo reverything today	thanks so much for everything today	noise:space_shift
+sentence		thats hould be all for today	that should be all for today	noise:space_shift
+sentence		i'm just getting som einformation together	I'm just getting some information together	noise:space_shift
+sentence		leaving cambridge for birmingha mnew street	Leaving cambridge for birmingham new street	noise:space_shift
+sentence		and it doesn't matter if it doesn't havei nternet	and it doesn't matter if it doesn't have internet	noise:space_shift
+sentence		it could be anyon ethen	it could be anyone then	noise:space_shift
+sentence		great to heart hat	Great to hear that	noise:space_shift
+sentence		a moderate pric ed one is fine	A moderate priced one is fine	noise:space_extra
+sentence		you have a gr eat day now	You have a great day now	noise:space_extra
+sentence		co uld you let me know the departure and arrival time	could you let me know the departure and arrival time	noise:space_extra
+sentence		thanks for your time to day	Thanks for your time today	noise:space_extra
+sentence		yes can you book that for me ple ase	Yes can you book that for me please	noise:space_extra
+sentence		and a moderate pri ce range	And a moderate price range	noise:space_extra
+sentence		are there any chu rches or museums on the east side	Are there any churches or museums on the east side	noise:space_extra
+sentence		can you help me find a tra in now	can you help me find a train now	noise:space_extra
+sentence		how about exp ensive turkish food in the centre of town	how about expensive turkish food in the centre of town	noise:space_extra
+sentence		let's go with kore an	Let's go with korean	noise:space_extra
+sentence		just the area and pos tcode please	Just the area and postcode please	noise:space_extra
+sentence		wh ere are they located	Where are they located	noise:space_extra
+sentence		i'd like a taxi to get th ere	I'd like a taxi to get there	noise:space_extra
+sentence		can you help me find a pl ace to eat	Can you help me find a place to eat	noise:space_extra
+sentence		yes please give me the phone num ber	Yes please give me the phone number	noise:space_extra
+sentence		what's your favorite co llege to visit in cambridge	What's your favorite college to visit in cambridge	noise:space_extra
+sentence		what attraction is good in the no rth	What attraction is good in the north	noise:space_extra
+sentence		are there any entertain ment attractions then	are there any entertainment attractions then	noise:space_extra
+sentence		can you try a hotel pl ease	can you try a hotel please	noise:space_extra
+sentence		alright tell me the star rat ing	Alright tell me the star rating	noise:space_extra
+sentence		how about a chine se restaurant	How about a chinese restaurant	noise:space_extra
+sentence		can you find me a mus eum to visit	Can you find me a museum to visit	noise:space_extra
+sentence		and how exp ensive is it	and how expensive is it	noise:space_extra
+sentence		book me for what availab le	book me for what available	noise:space_extra
+sentence		i'm good for to day	I'm good for today	noise:space_extra
+sentence		go ahe ad and book that	go ahead and book that	noise:space_extra
+sentence		could you also provi de the museum's postcode please	Could you also provide the museum's postcode please	noise:space_extra
+sentence		is there anywhere that serves mi ddle eastern food	Is there anywhere that serves middle eastern food	noise:space_extra
+sentence		could you tell me more about th eir locations	Could you tell me more about their locations	noise:space_extra
+sentence		do you have any swimming poo ls	Do you have any swimming pools	noise:space_extra
+sentence		you have a fanta stic day as well	You have a fantastic day as well	noise:space_extra
+sentence		just anything you would recomm end	Just anything you would recommend	noise:space_extra
+sentence		can you plea se find one for me	Can you please find one for me	noise:space_extra
+sentence		the hot el and the restaurant	The hotel and the restaurant	noise:space_extra
+sentence		this will be for wednes day	This will be for wednesday	noise:space_extra
+sentence		great what is the ent rance fee too	Great what is the entrance fee too	noise:space_extra
+sentence		thanks for being so helpful to day	Thanks for being so helpful today	noise:space_extra
+sentence		i'll be headi ng to peterborough from cambridge	I'll be heading to peterborough from cambridge	noise:space_extra
+sentence		as always you are amazi ng	As always you are amazing	noise:space_extra
+sentence		yes ple ase that be great	Yes please that be great	noise:space_extra
+sentence		should be moderately pr iced	Should be moderately priced	noise:space_extra
+sentence		do you have anything that serves mode rn european food	Do you have anything that serves modern european food	noise:space_extra
+sentence		is this restaurant located near places that se rves swedish food	Is this restaurant located near places that serves swedish food	noise:space_extra
+sentence		can you offer a recommendati on	Can you offer a recommendation	noise:space_extra
+sentence		moderately priced in the cent re	Moderately priced in the centre	noise:space_extra
+sentence		can you tell me the address to the police stati on	Can you tell me the address to the police station	noise:space_extra
+sentence		i'll go with the one in the ce ntre	I'll go with the one in the centre	noise:space_extra
+sentence		yes plea se book that	Yes please book that	noise:space_extra
+sentence		in the same area as the restau rant please	in the same area as the restaurant please	noise:space_extra
+sentence		i'm loo king for a restaurant in the city centre	I'm looking for a restaurant in the city centre	noise:space_extra
+sentence		i'm look ing for things to do in the west	I'm looking for things to do in the west	noise:space_extra
+sentence		how much is the cheapest pla ce	How much is the cheapest place	noise:space_extra
+sentence		that would all rig ht	that would all right	noise:space_extra
+sentence		no th ank you very much	No thank you very much	noise:space_extra
+sentence		what is the ad dress and contact information	What is the address and contact information	noise:space_extra
+sentence		that so unds like it would work	That sounds like it would work	noise:space_extra
+sentence		what time would you like to depa rt	What time would you like to depart	noise:space_extra
+sentence		the moderate price ra nge would be best	The moderate price range would be best	noise:space_extra
+sentence		tha nk you for the train and college information	Thank you for the train and college information	noise:space_extra
+sentence		okay are th ere any good colleges in that area	Okay are there any good colleges in that area	noise:space_extra
+sentence		do they cha rge an entrance fee	Do they charge an entrance fee	noise:space_extra
+sentence		th ank you for your time and help with this	Thank you for your time and help with this	noise:space_extra
+sentence		how about modern euro pean food	How about modern european food	noise:space_extra
+sentence		i'll also need somewhere to go wh ile i'm in town	I'll also need somewhere to go while I'm in town	noise:space_extra
+sentence		that would be it than ks a lot	That would be it thanks a lot	noise:space_extra
+sentence		do you know any rest aurants near me in the city	do you know any restaurants near me in the city	noise:space_extra
+sentence		i'm willing to try somethi ng new	I'm willing to try something new	noise:space_extra
+sentence		i'm coming in from the london liverpool st reet station	I'm coming in from the london liverpool street station	noise:space_extra
+sentence		cou ld you send me the phone number	Could you send me the phone number	noise:space_extra
+sentence		can you ple ase give me the address though	Can you please give me the address though	noise:space_extra
+sentence		can you tell me a little more about the pla ce	Can you tell me a little more about the place	noise:space_extra
+sentence		but please conf irm their address again and their postcode	but please confirm their address again and their postcode	noise:space_extra
+sentence		does that help na rrow it down	Does that help narrow it down	noise:space_extra
+sentence		am looking for a tra in	am looking for a train	noise:space_extra
+sentence		the closest museum wo uld be fine	the closest museum would be fine	noise:space_extra
+sentence		and ph one number of all saints church	and phone number of all saints church	noise:space_extra
+sentence		please don't rese rve a table just yet	Please don't reserve a table just yet	noise:space_extra
+sentence		and thanks ag ain for your help	And thanks again for your help	noise:space_extra
+sentence		can you give me the star rating of the pl ace	Can you give me the star rating of the place	noise:space_extra
+sentence		can you help me find a train for mond ay	Can you help me find a train for monday	noise:space_extra
+sentence		the resta urant should be in the moderate price range	The restaurant should be in the moderate price range	noise:space_extra
+sentence		but i'm having trouble finding in formation on one in particular	but I'm having trouble finding information on one in particular	noise:space_extra
+sentence		what's the fir st one on the list	what's the first one on the list	noise:space_extra
+sentence		ent rance fee and postcode please	entrance fee and postcode please	noise:space_extra
+sentence		can you recomme nd a good one	Can you recommend a good one	noise:space_extra
+sentence		find me a mediterranean restaurant in the cen tre of cambridge	Find me a mediterranean restaurant in the centre of cambridge	noise:space_extra
+sentence		th ank you have a nice day	Thank you have a nice day	noise:space_extra
+sentence		i'm also looking for a tr ain for saturday	I'm also looking for a train for saturday	noise:space_extra
+sentence		it doesn't need to in clude internet	It doesn't need to include internet	noise:space_extra
+sentence		a pl ace to stay	a place to stay	noise:space_extra
+sentence		yes i'd like one in the expensi ve range	Yes I'd like one in the expensive range	noise:space_extra
+sentence		what is the trav el time and price	What is the travel time and price	noise:space_extra
+sentence		monday departing from london liverpo ol st	Monday departing from london liverpool st	noise:space_extra
+sentence		gre at to hear that	Great to hear that	noise:space_extra
+sentence		the reservation will st art on sunday	The reservation will start on sunday	noise:space_extra
+sentence		can you try book ing for one night	Can you try booking for one night	noise:space_extra
+sentence		what is the price range of the acorn gu est house	What is the price range of the acorn guest house	noise:space_extra
+sentence		yes the che ap price range	Yes the cheap price range	noise:space_extra
+sentence		also it should include free pa rking	Also it should include free parking	noise:space_extra
+sentence		please give me the car type and contact num ber	Please give me the car type and contact number	noise:space_extra
+sentence		that's all i'll be need ing	That's all I'll be needing	noise:space_extra
+sentence		what would the price ran ge be for that	What would the price range be for that	noise:space_extra
+sentence		how about wed nesday instead	how about wednesday instead	noise:space_extra
+sentence		arr iving by my reservation time	arriving by my reservation time	noise:space_extra
+sentence		could you give me th eir phone number and address please	could you give me their phone number and address please	noise:space_extra
+sentence		arrival time doesn't matt er so much	Arrival time doesn't matter so much	noise:space_extra
+sentence		it ne eds to be cheap	It needs to be cheap	noise:space_extra
+sentence		but can you tell me the pri ce	but can you tell me the price	noise:space_extra
+sentence		is the re anything you can tell me about it	Is there anything you can tell me about it	noise:space_extra
+sentence		that soun ds great what is their postcode	That sounds great what is their postcode	noise:space_extra
+sentence		i'm loo king for some architecture in the west	I'm looking for some architecture in the west	noise:space_extra
+sentence		just pl ease give me the address for the hotel	just please give me the address for the hotel	noise:space_extra
+sentence		but could you quo te me a price on that	but could you quote me a price on that	noise:space_extra
+sentence		that wou ld be great	that would be great	noise:space_extra
+sentence		sure that sou nds nice	Sure that sounds nice	noise:space_extra
+sentence		please get me ti ckets for the same group of people	please get me tickets for the same group of people	noise:space_extra
+sentence		departing from cambridge and going to le icester on tuesday	Departing from cambridge and going to leicester on tuesday	noise:space_extra
+sentence		that wou ld be fine	that would be fine	noise:space_extra
+sentence		can you give me the address of cl are hall	Can you give me the address of clare hall	noise:space_extra
+sentence		and postcode for shanghai family resta urant	and postcode for shanghai family restaurant	noise:space_extra
+sentence		please reco mmend one and book it for six people	Please recommend one and book it for six people	noise:space_extra
+sentence		wo uld you mind sending me the reference number	would you mind sending me the reference number	noise:space_extra
+sentence		i'm looking for an italian restaurant in the no rth	I'm looking for an italian restaurant in the north	noise:space_extra
+sentence		do any of them have free pa rking	Do any of them have free parking	noise:space_extra
+sentence		preferably in the cent re of town	preferably in the centre of town	noise:space_extra
+sentence		i'm loo king for an attraction in the west	I'm looking for an attraction in the west	noise:space_extra
+sentence		and postcode for that loc ation	and postcode for that location	noise:space_extra
+sentence		just myself will be travell ing	Just myself will be travelling	noise:space_extra
+sentence		i'll need the postcode and addre ss	I'll need the postcode and address	noise:space_extra
+sentence		postcode and entr ance fee	postcode and entrance fee	noise:space_extra
+sentence		i'd like to find a pla ce to go	I'd like to find a place to go	noise:space_extra
+sentence		what is the name of the pl ace	what is the name of the place	noise:space_extra
+sentence		can you sugg est one for me	Can you suggest one for me	noise:space_extra
+sentence		that will be all for tod ay	That will be all for today	noise:space_extra
+sentence		i'm also looking for a particu lar attraction	I'm also looking for a particular attraction	noise:space_extra
+sentence		how about an entertainment pla ce in the east	How about an entertainment place in the east	noise:space_extra
+sentence		could you find one for me ple ase	Could you find one for me please	noise:space_extra
+sentence		how much is that tr ain	How much is that train	noise:space_extra
+sentence		but need some help finding a cer tain restaurant	but need some help finding a certain restaurant	noise:space_extra
+sentence		tha nk you so much	Thank you so much	noise:space_extra
+sentence		it will be a gro up of us	it will be a group of us	noise:space_extra
+sentence		look for a che ap restaurant	look for a cheap restaurant	noise:space_extra
+sentence		can you give me the ph one number and postcode please	Can you give me the phone number and postcode please	noise:space_extra
+sentence		what's th eir address and postcode	What's their address and postcode	noise:space_extra
+sentence		where is the hotel lo cated	Where is the hotel located	noise:space_extra
+sentence		no that wo uld be all	No that would be all	noise:space_extra
+sentence		can you let me know the post code	Can you let me know the postcode	noise:space_extra
+sentence		can you find information for thurs day please	Can you find information for thursday please	noise:space_extra
+sentence		does it have in ternet	Does it have internet	noise:space_extra
+sentence		how abo ut train stations near leicester	How about train stations near leicester	noise:space_extra
+sentence		well how about onethat serves indian food then	Well how about one that serves indian food then	noise:space_missing
+sentence		well how many starsdoes it have	Well how many stars does it have	noise:space_missing
+sentence		acheap option please	A cheap option please	noise:space_missing
+sentence		i'll bookthe table myself	I'll book the table myself	noise:space_missing
+sentence		could you also providethe museum's postcode please	Could you also provide the museum's postcode please	noise:space_missing
+sentence		please giveme a reference number	Please give me a reference number	noise:space_missing
+sentence		can you give me the referencenumber please	Can you give me the reference number please	noise:space_missing
+sentence		money is noobject	Money is no object	noise:space_missing
+sentence		howmuch would that cost	How much would that cost	noise:space_missing
+sentence		can you helpme with places to go	Can you help me with places to go	noise:space_missing
+sentence		thank youfor all your help today	thank you for all your help today	noise:space_missing
+sentence		are you aware ofit	Are you aware of it	noise:space_missing
+sentence		itis trinity college	It is trinity college	noise:space_missing
+sentence		canyou make a recommendation and provide entrance fee	Can you make a recommendation and provide entrance fee	noise:space_missing
+sentence		thank you very much for all yourhelp	Thank you very much for all your help	noise:space_missing
+sentence		ok great andwhat is the arrival time	OK great and what is the arrival time	noise:space_missing
+sentence		please booka reservation	please book a reservation	noise:space_missing
+sentence		i'll book itmyself	I'll book it myself	noise:space_missing
+sentence		howabout one in the east	How about one in the east	noise:space_missing
+sentence		is this listing in the expensiveprice range	Is this listing in the expensive price range	noise:space_missing
+sentence		what is the postcode andthe area please	What is the postcode and the area please	noise:space_missing
+sentence		are there any attractions in the west part oftown	Are there any attractions in the west part of town	noise:space_missing
+sentence		noit doesn't matter	No it doesn't matter	noise:space_missing
+sentence		phone numberand postcode please	phone number and postcode please	noise:space_missing
+sentence		give me the postcode aswell	Give me the postcode as well	noise:space_missing
+sentence		any will befine	any will be fine	noise:space_missing
+sentence		no that would beall	No that would be all	noise:space_missing
+sentence		what part of town is thaton	What part of town is that on	noise:space_missing
+sentence		are you surethat didn't work	Are you sure that didn't work	noise:space_missing
+sentence		no this will beall thank you	No this will be all thank you	noise:space_missing
+sentence		get me the referencenumbers	get me the reference numbers	noise:space_missing
+sentence		i'm currently planningmy trip to cambridge	I'm currently planning my trip to cambridge	noise:space_missing
+sentence		is therea lebanese option	Is there a lebanese option	noise:space_missing
+sentence		i'm leavingon tuesday	I'm leaving on tuesday	noise:space_missing
+sentence		what was the reference numberfor the booking	What was the reference number for the booking	noise:space_missing
+sentence		and i'm comingfrom birmingham new street	and I'm coming from birmingham new street	noise:space_missing
+sentence		what kindof attractions are there in the centre	what kind of attractions are there in the centre	noise:space_missing
+sentence		we are lookingfor a place to dine	We are looking for a place to dine	noise:space_missing
+sentence		i'm looking for some hungarianfood restaurants near the centre	I'm looking for some hungarian food restaurants near the centre	noise:space_missing
+sentence		thank yougood bye	Thank you good bye	noise:space_missing
+sentence		how about aplace that serves indian food	how about a place that serves indian food	noise:space_missing
+sentence		cheap and inthe south please	Cheap and in the south please	noise:space_missing
+sentence		what is the total duration ofthe train ride	What is the total duration of the train ride	noise:space_missing
+sentence		any pricerange please	any price range please	noise:space_missing
+sentence		i'm interested ina restaurant called rice house	I'm interested in a restaurant called rice house	noise:space_missing
+sentence		justan expensive indian place	Just an expensive indian place	noise:space_missing
+sentence		what are theentrance fees like	What are the entrance fees like	noise:space_missing
+sentence		andin the same area as the restaurant	and in the same area as the restaurant	noise:space_missing
+sentence		is there an entrancefee	Is there an entrance fee	noise:space_missing
+sentence		and phone numberof one	and phone number of one	noise:space_missing
+sentence		do you havemany trains from cambridge to peterborough	Do you have many trains from cambridge to peterborough	noise:space_missing
+sentence		could you tell me how many stars ithas	Could you tell me how many stars it has	noise:space_missing
+sentence		are there any good vegetarianrestaurants in the centre	Are there any good vegetarian restaurants in the centre	noise:space_missing
+sentence		anddo they have free parking	And do they have free parking	noise:space_missing
+sentence		depart from cambridge andshould leave on tuesday	depart from cambridge and should leave on tuesday	noise:space_missing
+sentence		couldyou help me book rooms	Could you help me book rooms	noise:space_missing
+sentence		looking for aparticular hotel	looking for a particular hotel	noise:space_missing
+sentence		okay can you bookthat please	Okay can you book that please	noise:space_missing
+sentence		choose arestaurant you recommend	Choose a restaurant you recommend	noise:space_missing
+sentence		that will be justfine	That will be just fine	noise:space_missing
+sentence		alsothe hotel address	Also the hotel address	noise:space_missing
+sentence		you arenot being very helpful	You are not being very helpful	noise:space_missing
+sentence		entrancefee and phone numbers for both	entrance fee and phone numbers for both	noise:space_missing
+sentence		thank youfor serving me	Thank you for serving me	noise:space_missing
+sentence		it needs tobe cheap	It needs to be cheap	noise:space_missing
+sentence		i'm looking for an attraction in the type oftheatre	I'm looking for an attraction in the type of theatre	noise:space_missing
+sentence		to theregency gallery	To the regency gallery	noise:space_missing
+sentence		could you give me theaddress and postcode	Could you give me the address and postcode	noise:space_missing
+sentence		i'm also looking toleave on tuesday by train	I'm also looking to leave on tuesday by train	noise:space_missing
+sentence		you havebeen extremely helpful	You have been extremely helpful	noise:space_missing
+sentence		i'd like their addressas well	I'd like their address as well	noise:space_missing
+sentence		pleasebook the hamilton lodge	Please book the hamilton lodge	noise:space_missing
+sentence		that wouldall right	that would all right	noise:space_missing
+sentence		but could you give me theexact travel time please	but could you give me the exact travel time please	noise:space_missing
+sentence		please provide thereference number	please provide the reference number	noise:space_missing
+sentence		do you have any goodrecommendations	Do you have any good recommendations	noise:space_missing
+sentence		do you have anythingin the cheap price range	Do you have anything in the cheap price range	noise:space_missing
+sentence		any youchoose is fine	Any you choose is fine	noise:space_missing
+sentence		yes pleasebook that	Yes please book that	noise:space_missing
+sentence		could you giveme the ticket price	Could you give me the ticket price	noise:space_missing
+sentence		thanks for yourhelp with the train and attraction	Thanks for your help with the train and attraction	noise:space_missing
+sentence		yes thatwould be great	Yes that would be great	noise:space_missing
+sentence		is there a museumof science	Is there a museum of science	noise:space_missing
+sentence		get me the foodtype and the post code	get me the food type and the post code	noise:space_missing
+sentence		that would be all fortoday	That would be all for today	noise:space_missing
+sentence		what is the addressfor this museum	what is the address for this museum	noise:space_missing
+sentence		i'm looking for anentertaining tourist attraction	I'm looking for an entertaining tourist attraction	noise:space_missing
+sentence		please help me find atrain	please help me find a train	noise:space_missing
+sentence		can you letme know if the reservation is successful	Can you let me know if the reservation is successful	noise:space_missing
+sentence		what's the arrival time forthat train	What's the arrival time for that train	noise:space_missing
+sentence		canyou suggest something	Can you suggest something	noise:space_missing
+sentence		thatwould work great	that would work great	noise:space_missing
+sentence		book that one forme	book that one for me	noise:space_missing
+sentence		can you find a train schedule forme	Can you find a train schedule for me	noise:space_missing
+sentence		it's calledtrinity college	It's called trinity college	noise:space_missing
+sentence		i'm going to cambridge fromleicester	I'm going to cambridge from leicester	noise:space_missing
+sentence		that one would befine	that one would be fine	noise:space_missing
+sentence		isthere anything near the centre	Is there anything near the centre	noise:space_missing
+sentence		whatever youthink is good	Whatever you think is good	noise:space_missing
+sentence		what is the one with theshortest travel time	What is the one with the shortest travel time	noise:space_missing
+sentence		are any of those in the moderateprice range	Are any of those in the moderate price range	noise:space_missing
+sentence		area andaddress of what you pick	area and address of what you pick	noise:space_missing
+sentence		can you just give me a price forthat	Can you just give me a price for that	noise:space_missing
+sentence		can youhelp please	Can you help please	noise:space_missing
+sentence		can you tell meabout trains leaving monday	Can you tell me about trains leaving monday	noise:space_missing
+sentence		can you suggesta place to go in town	Can you suggest a place to go in town	noise:space_missing
+sentence		i'm looking for a moderately priced restaurant inthe centre	I'm looking for a moderately priced restaurant in the centre	noise:space_missing
+sentence		you just gaveme the address	You just gave me the address	noise:space_missing
+sentence		does that train leaveon friday	Does that train leave on friday	noise:space_missing
+sentence		what's thetravel time for that route	what's the travel time for that route	noise:space_missing
+sentence		thank youso much	Thank you so much	noise:space_missing
+sentence		and postcode for the restaurantyou find	and postcode for the restaurant you find	noise:space_missing
+sentence		what do you have available fromthere	What do you have available from there	noise:space_missing
+sentence		nope that would beit	Nope that would be it	noise:space_missing
+sentence		let's go withkorean	Let's go with korean	noise:space_missing
+sentence		are there anyturkish restaurants	Are there any turkish restaurants	noise:space_missing
+sentence		as a matter offact yes	As a matter of fact yes	noise:space_missing
+sentence		what's theaddress of your favorite one	What's the address of your favorite one	noise:space_missing
+sentence		could you give me the address forthe cambridge punter	Could you give me the address for the cambridge punter	noise:space_missing
+sentence		let's try for fridayinstead	Let's try for friday instead	noise:space_missing
+sentence		andthe travel time	And the travel time	noise:space_missing
+sentence		whatever isavailable nearby will be fine	Whatever is available nearby will be fine	noise:space_missing
+sentence		can yourecommend a place	Can you recommend a place	noise:space_missing
+sentence		youhave been so helpful	You have been so helpful	noise:space_missing
+sentence		thefirst one is fine	The first one is fine	noise:space_missing
+sentence		any ofthem you recommend would be fine	Any of them you recommend would be fine	noise:space_missing
+sentence		same dayas the hotel booking	same day as the hotel booking	noise:space_missing
+sentence		but could you tellme the postcode	but could you tell me the postcode	noise:space_missing
+sentence		and visiting cambridge as part ofthat	and visiting cambridge as part of that	noise:space_missing
+sentence		i'm looking for a moderately priced restaurant with britishfood	I'm looking for a moderately priced restaurant with british food	noise:space_missing
+sentence		i'd like a moderately priced hotelin the south	I'd like a moderately priced hotel in the south	noise:space_missing
+sentence		can you give me the addressand phone number perhaps	Can you give me the address and phone number perhaps	noise:space_missing
+sentence		before wedo that	Before we do that	noise:space_missing
+sentence		i'd like to knowthe entrance fee	I'd like to know the entrance fee	noise:space_missing
+sentence		thanks and have a goodday	Thanks and have a good day	noise:space_missing
+sentence		money is no object soplease find me something expensive	Money is no object so please find me something expensive	noise:space_missing
+sentence		cheap price range in thecentre	Cheap price range in the centre	noise:space_missing
+sentence		please book it for twopeople	please book it for two people	noise:space_missing
+sentence		what is the address tothe ashley hotel	What is the address to the Ashley hotel	noise:space_missing
+sentence		thanks again forhelping	thanks again for helping	noise:space_missing
+sentence		how abouta college in the same area	How about a college in the same area	noise:space_missing
+sentence		you have quickly answeredall my questions	You have quickly answered all my questions	noise:space_missing
+sentence		the south oftown preferably	the south of town preferably	noise:space_missing
+sentence		please give metravel time	please give me travel time	noise:space_missing
+sentence		do you have one thatyou would recommend	do you have one that you would recommend	noise:space_missing
+sentence		could youkindly provide me with the phone number	Could you kindly provide me with the phone number	noise:space_missing
+sentence		thanks foryour help today	Thanks for your help today	noise:space_missing
+sentence		also needto book a hotel	Also need to book a hotel	noise:space_missing
+sentence		i'd like to go fromcambridge to ely	I'd like to go from cambridge to ely	noise:space_missing
+sentence		andit will just be me	and it will just be me	noise:space_missing
+sentence		cojld you provide the postcode and star of the hotel	could you provide the postcode and star of the hotel	noise:adjacent_key
+sentence		saturday departing drom cambridge	Saturday departing from cambridge	noise:adjacent_key
+sentence		a fheap option please	A cheap option please	noise:adjacent_key
+sentence		cpuld you tell me some attractions in cambridge	could you tell me some attractions in cambridge	noise:adjacent_key
+sentence		give me the refsrence number	Give me the reference number	noise:adjacent_key
+sentence		can you suggest a french restaurant in rhe north end	Can you suggest a french restaurant in the north end	noise:adjacent_key
+sentence		that zhould be everything	that should be everything	noise:adjacent_key
+sentence		have a lovely dzy	Have a lovely day	noise:adjacent_key
+sentence		it is trinoty college	It is trinity college	noise:adjacent_key
+sentence		whay is their postcode	What is their postcode	noise:adjacent_key
+sentence		what the adxress and area of town	what the address and area of town	noise:adjacent_key
+sentence		you've given me the depaeture time	You've given me the departure time	noise:adjacent_key
+sentence		perhaps an attraction in ghe city centre	Perhaps an attraction in the city centre	noise:adjacent_key
+sentence		i'm hoping to finc a nightclub in town	I'm hoping to find a nightclub in town	noise:adjacent_key
+sentence		what can ypu tell me about christ's college	What can you tell me about christ's college	noise:adjacent_key
+sentence		arriving by my reservation tume	arriving by my reservation time	noise:adjacent_key
+sentence		can you do thaf for me	Can you do that for me	noise:adjacent_key
+sentence		can yoh help with trains	can you help with trains	noise:adjacent_key
+sentence		as long as it is near ths restaurant	as long as it is near the restaurant	noise:adjacent_key
+sentence		is therr a contact number available	Is there a contact number available	noise:adjacent_key
+sentence		i'm also lloking for a restaurant	I'm also looking for a restaurant	noise:adjacent_key
+sentence		i'd like to go to oeicester please	I'd like to go to leicester please	noise:adjacent_key
+sentence		that would be uust fine	That would be just fine	noise:adjacent_key
+sentence		a moderate price ranhe	A moderate price range	noise:adjacent_key
+sentence		what about mediterranean vood	What about mediterranean food	noise:adjacent_key
+sentence		tgank you have a good one	thank you have a good one	noise:adjacent_key
+sentence		uow about an expensive british place	How about an expensive british place	noise:adjacent_key
+sentence		i'd actually prefer to stay on tne west side	I'd actually prefer to stay on the west side	noise:adjacent_key
+sentence		can you also find me a trakn	Can you also find me a train	noise:adjacent_key
+sentence		thanks for helpjng me make it happen	Thanks for helping me make it happen	noise:adjacent_key
+sentence		and givw me car type and contact info	And give me car type and contact info	noise:adjacent_key
+sentence		i'm looking for a nice place to ewt	I'm looking for a nice place to eat	noise:adjacent_key
+sentence		i'd like some information about a placr to go next	I'd like some information about a place to go next	noise:adjacent_key
+sentence		please help me make a taxi resefvation	Please help me make a taxi reservation	noise:adjacent_key
+sentence		yoj have met all my needs for today	You have met all my needs for today	noise:adjacent_key
+sentence		no need to boik for now	no need to book for now	noise:adjacent_key
+sentence		book that for me plsase	Book that for me please	noise:adjacent_key
+sentence		i'd lioe to stay on friday	I'd like to stay on friday	noise:adjacent_key
+sentence		are there any good entertainment places in the east srea	are there any good entertainment places in the east area	noise:adjacent_key
+sentence		actually i'm nore interested in middle eastern foods	Actually I'm more interested in middle eastern foods	noise:adjacent_key
+sentence		what kins of food	What kind of food	noise:adjacent_key
+sentence		what's the departure time and travel time on tjat	What's the departure time and travel time on that	noise:adjacent_key
+sentence		either kne will work	Either one will work	noise:adjacent_key
+sentence		and in the center of yown	and in the center of town	noise:adjacent_key
+sentence		what would you recommend for a person eating aoone	What would you recommend for a person eating alone	noise:adjacent_key
+sentence		it doesn't have to be a swimming plol	It doesn't have to be a swimming pool	noise:adjacent_key
+sentence		make the reservation plezse	make the reservation please	noise:adjacent_key
+sentence		we're all coming to cambridge togetjer	we're all coming to cambridge together	noise:adjacent_key
+sentence		once you make the bpoking	Once you make the booking	noise:adjacent_key
+sentence		i'd just like to book a taxi between ghe two	I'd just like to book a taxi between the two	noise:adjacent_key
+sentence		just thwir phone number	just their phone number	noise:adjacent_key
+sentence		can you assist me witu that	can you assist me with that	noise:adjacent_key
+sentence		i'm looking for a restaurant in tne centre	I'm looking for a restaurant in the centre	noise:adjacent_key
+sentence		i'm looking for an expensive chinese restaurant in cambriege	I'm looking for an expensive chinese restaurant in cambridge	noise:adjacent_key
+sentence		will you handle thks	Will you handle this	noise:adjacent_key
+sentence		what is the entrance fee and addfess for that location	what is the entrance fee and address for that location	noise:adjacent_key
+sentence		either oje is fine	either one is fine	noise:adjacent_key
+sentence		that workw for me	that works for me	noise:adjacent_key
+sentence		do you have anything wifh that name	Do you have anything with that name	noise:adjacent_key
+sentence		caj you find me a park in the south	Can you find me a park in the south	noise:adjacent_key
+sentence		what is the other option availagle	What is the other option available	noise:adjacent_key
+sentence		i'm also lkoking to book a train	I'm also looking to book a train	noise:adjacent_key
+sentence		i'd likr to be in the east	I'd like to be in the east	noise:adjacent_key
+sentence		chuechill college will be fine	Churchill college will be fine	noise:adjacent_key
+sentence		i'm looking in particular fof the mahal of cambridge	I'm looking in particular for the mahal of cambridge	noise:adjacent_key
+sentence		something in tge center	something in the center	noise:adjacent_key
+sentence		i'll also need sonewhere to go while i'm in town	I'll also need somewhere to go while I'm in town	noise:adjacent_key
+sentence		i'd like a recommendation for a restsurant	I'd like a recommendation for a restaurant	noise:adjacent_key
+sentence		give me their phone humber	give me their phone number	noise:adjacent_key
+sentence		could yoj please check again	Could you please check again	noise:adjacent_key
+sentence		what can you rwcommend	What can you recommend	noise:adjacent_key
+sentence		what is the gotal travel time	What is the total travel time	noise:adjacent_key
+sentence		for the same grpup of people	For the same group of people	noise:adjacent_key
+sentence		and i'll be travellong to cambridge	And I'll be travelling to cambridge	noise:adjacent_key
+sentence		and provide tge reference number	and provide the reference number	noise:adjacent_key
+sentence		what place would you reckmmend	What place would you recommend	noise:adjacent_key
+sentence		rhe varsity is good	The varsity is good	noise:adjacent_key
+sentence		that's it fkr now	That's it for now	noise:adjacent_key
+sentence		what about a nightclub womewhere	What about a nightclub somewhere	noise:adjacent_key
+sentence		let's go qith that	Let's go with that	noise:adjacent_key
+sentence		could you give me tbe phone number	could you give me the phone number	noise:adjacent_key
+sentence		thank you for the referejce number	Thank you for the reference number	noise:adjacent_key
+sentence		i'd like a moderately priced hotel with free parkong	I'd like a moderately priced hotel with free parking	noise:adjacent_key
+sentence		can you tell me what rhe travel time is	Can you tell me what the travel time is	noise:adjacent_key
+sentence		just tell me the attraction type pleqse	Just tell me the attraction type please	noise:adjacent_key
+sentence		will you give me the phone numbef	Will you give me the phone number	noise:adjacent_key
+sentence		zny attraction is fine	Any attraction is fine	noise:adjacent_key
+sentence		i'll need rhe postcode	I'll need the postcode	noise:adjacent_key
+sentence		that cuts it a little closs but it will do	That cuts it a little close but it will do	noise:adjacent_key
+sentence		i'm not reaxy to reserve today	I'm not ready to reserve today	noise:adjacent_key
+sentence		i'd like to go to cambridhe	I'd like to go to cambridge	noise:adjacent_key
+sentence		what is the price range of ths acorn guest house	What is the price range of the acorn guest house	noise:adjacent_key
+sentence		tbat does not matter	that does not matter	noise:adjacent_key
+sentence		can you tell me the postcode for tye museum	Can you tell me the postcode for the museum	noise:adjacent_key
+sentence		so please teol me everything that is available	so please tell me everything that is available	noise:adjacent_key
+sentence		fhat would work great	that would work great	noise:adjacent_key
+sentence		a mueeum is good	a museum is good	noise:adjacent_key
+sentence		yoj can pick one for me	You can pick one for me	noise:adjacent_key
+sentence		alright tekl me the star rating	Alright tell me the star rating	noise:adjacent_key
+sentence		what attraftions do they offer there	What attractions do they offer there	noise:adjacent_key
+sentence		i'm looking for some hungarian food restauramts near the centre	I'm looking for some hungarian food restaurants near the centre	noise:adjacent_key
+sentence		the restaurant should be in the expensive price rabge	The restaurant should be in the expensive price range	noise:adjacent_key
+sentence		what sre the travel times for those trains	What are the travel times for those trains	noise:adjacent_key
+sentence		preferably ome in the centre of town	Preferably one in the centre of town	noise:adjacent_key
+sentence		then give me the referenxe number	Then give me the reference number	noise:adjacent_key
+sentence		dkes that train go there	Does that train go there	noise:adjacent_key
+sentence		please give me thd price options	Please give me the price options	noise:adjacent_key
+sentence		can you give me theit postcode	Can you give me their postcode	noise:adjacent_key
+sentence		what was to total travel time for that train bioking	What was to total travel time for that train booking	noise:adjacent_key
+sentence		moderately lriced in the centre	Moderately priced in the centre	noise:adjacent_key
+sentence		nooe that would be it	Nope that would be it	noise:adjacent_key
+sentence		i'll actuallh be departing from leicester	I'll actually be departing from leicester	noise:adjacent_key
+sentence		thano you for booking that	Thank you for booking that	noise:adjacent_key
+sentence		no fhere is not	No there is not	noise:adjacent_key
+sentence		moderately priced znd in the centre	Moderately priced and in the centre	noise:adjacent_key
+sentence		thsnk you so much for all the information	Thank you so much for all the information	noise:adjacent_key
+sentence		havr you heard of it	Have you heard of it	noise:adjacent_key
+sentence		the dirst one is fine	The first one is fine	noise:adjacent_key
+sentence		what is my departure tkme	What is my departure time	noise:adjacent_key
+sentence		please provude the address	please provide the address	noise:adjacent_key
+sentence		wgat would be the next available if not on sunday	What would be the next available if not on sunday	noise:adjacent_key
+sentence		do they have an entrance cee	Do they have an entrance fee	noise:adjacent_key
+sentence		i'm looking for a park in thw centre of town	I'm looking for a park in the centre of town	noise:adjacent_key
+sentence		you have been jost helpful	you have been most helpful	noise:adjacent_key
+sentence		couod you let me know the total travel time	Could you let me know the total travel time	noise:adjacent_key
+sentence		fjnd me the phone number	find me the phone number	noise:adjacent_key
+sentence		could you try another expensive turkish restaursnt in the centre	Could you try another expensive turkish restaurant in the centre	noise:adjacent_key
+sentence		what are ths options	What are the options	noise:adjacent_key
+sentence		what is the phone number fot that place	what is the phone number for that place	noise:adjacent_key
+sentence		albeif a bit early	albeit a bit early	noise:adjacent_key
+sentence		find me an expensive hotel woth free parking	Find me an expensive hotel with free parking	noise:adjacent_key
+sentence		i'd be going to holy trinjty church	I'd be going to holy trinity church	noise:adjacent_key
+sentence		expensivd would be fine	Expensive would be fine	noise:adjacent_key
+sentence		great that will be everything ghanks	Great that will be everything thanks	noise:adjacent_key
+sentence		please send me the reference numbet	Please send me the reference number	noise:adjacent_key
+sentence		please bpok a table	please book a table	noise:adjacent_key
+sentence		i'm actually lopking for a train	I'm actually looking for a train	noise:adjacent_key
+sentence		sny one of those is fine	Any one of those is fine	noise:adjacent_key
+sentence		i'm leaving frim cambridge and county folk museum	I'm leaving from cambridge and county folk museum	noise:adjacent_key
+sentence		a park or swimming on tne east side	A park or swimming on the east side	noise:adjacent_key
+sentence		tang chinese souhds good	Tang chinese sounds good	noise:adjacent_key
+sentence		the restaurant should serve italuan food	The restaurant should serve italian food	noise:adjacent_key
+sentence		is the name of tye restaurant ask restaurant	Is the name of the restaurant ask restaurant	noise:adjacent_key
+sentence		tbe curry prince sounds good	The curry prince sounds good	noise:adjacent_key
+sentence		get me the trzvel time	get me the travel time	noise:adjacent_key
+sentence		i'm looking flr a train to cambridge	I'm looking for a train to cambridge	noise:adjacent_key
+sentence		wyich one do you suggest	Which one do you suggest	noise:adjacent_key
+sentence		please give me a referencs number	Please give me a reference number	noise:adjacent_key
+sentence		i'm really craving slme lebanese right now	I'm really craving some lebanese right now	noise:adjacent_key
+sentence		ppease send me the car type and contact number please	Please send me the car type and contact number please	noise:adjacent_key
+context_realword	You've given me 	he departure time	the departure time	noise:realword_edit the->he
+context_realword	How about one that 	serve spanish food	serves spanish food	noise:realword_edit serves->serve
+context_realword	What is 	he travel time and price	the travel time and price	noise:realword_edit the->he
+context_realword	let's give chinese 	flood a try	food a try	noise:realword_edit food->flood
+context_realword	What other 	restaurant in that area serve italian food	restaurants in that area serve italian food	noise:realword_edit restaurants->restaurant
+context_realword	I'd like to 	to to leicester please	go to leicester please	noise:realword_edit go->to
+context_realword	which area is 	hat	that	noise:realword_edit that->hat
+context_realword	Can you let me 	now the postcode	know the postcode	noise:realword_edit know->now
+context_realword	I'm all 	est now	set now	noise:realword_edit set->est
+context_realword	Can you 	fry booking for one night	try booking for one night	noise:realword_edit try->fry
+context_realword	And give me 	he reference number too	the reference number too	noise:realword_edit the->he
+context_realword	Which one 	so you recommend	do you recommend	noise:realword_edit do->so
+context_realword	Can you 	boom me a room for saturday	book me a room for saturday	noise:realword_edit book->boom
+context_realword	that would work 	treat	great	noise:realword_edit great->treat
+context_realword	the one 	on the east please	in the east please	noise:realword_edit in->on
+context_realword	Can you help me find 	kit	it	noise:realword_edit it->kit
+context_realword	that would be 	wall	all	noise:realword_edit all->wall
+context_realword	Can you tell me how much 	he ticket is	the ticket is	noise:realword_edit the->he
+context_realword	What kind 	if hotel	of hotel	noise:realword_edit of->if
+context_realword	Just the address 	lease	please	noise:realword_edit please->lease
+context_realword	Thank you for 	he address	the address	noise:realword_edit the->he
+context_realword	Do they have internet 	three	there	noise:realword_edit there->three
+context_realword	Thank you very much for your 	hell today	help today	noise:realword_edit help->hell
+context_realword	Could you find 	lone for me please	one for me please	noise:realword_edit one->lone
+context_realword	That'll be 	wall thanks so much	all thanks so much	noise:realword_edit all->wall
+context_realword	Good day to you also 	be	bye	noise:realword_edit bye->be
+context_realword	Can you book it 	pleas	please	noise:realword_edit please->pleas
+context_realword	preferably in the centre of 	own	town	noise:realword_edit town->own
+context_realword	Could you give me 	he name of the museum	the name of the museum	noise:realword_edit the->he
+context_realword	Please find a european restaurant 	on the centre	in the centre	noise:realword_edit in->on
+context_realword	free admission would 	he nice	be nice	noise:realword_edit be->he
+context_realword	thank you for helping me 	wit my trip	with my trip	noise:realword_edit with->wit
+context_realword	let's not worry about booking it 	must now	just now	noise:realword_edit just->must
+context_realword	I'd just like to book a taxi between 	he two	the two	noise:realword_edit the->he
+context_realword	so the closest one 	go that time please	to that time please	noise:realword_edit to->go
+context_realword	Do any of them have 	tree parking	free parking	noise:realword_edit free->tree
+context_realword	What is 	he other option available	the other option available	noise:realword_edit the->he
+context_realword	do you 	boo those	book those	noise:realword_edit book->boo
+context_realword	What looks 	god to you	good to you	noise:realword_edit good->god
+context_realword	Something cheap would 	he good	be good	noise:realword_edit be->he
+context_realword	What's your favorite college to visit 	kin cambridge	in cambridge	noise:realword_edit in->kin
+context_realword	can you please 	must tell me the postcode and address	just tell me the postcode and address	noise:realword_edit just->must
+context_realword	I'm actually also looking 	foe a place to stay	for a place to stay	noise:realword_edit for->foe
+context_realword	Expensive would 	he great	be great	noise:realword_edit be->he
+context_realword	What is the 	stat rating	star rating	noise:realword_edit star->stat
+context_realword	If you could recommend 	lone	one	noise:realword_edit one->lone
+context_realword	Are there 	ant boat attractions in the west	any boat attractions in the west	noise:realword_edit any->ant
+context_realword	And the attraction type 	us a museum	is a museum	noise:realword_edit is->us
+context_realword	I'd actually 	refer to stay on the west side	prefer to stay on the west side	noise:realword_edit prefer->refer
+context_realword	I'll be 	hearing for cambridge	heading for cambridge	noise:realword_edit heading->hearing
+context_realword	What about architecture 	attraction	attractions	noise:realword_edit attractions->attraction
+context_realword	and fee information 	lease	please	noise:realword_edit please->lease
+context_realword	type of room does 	no matter	not matter	noise:realword_edit not->no
+context_realword	what part of town is the mumford 	kin again	in again	noise:realword_edit in->kin
+context_realword	Can you please tell me the entrance 	few	fee	noise:realword_edit fee->few
+context_realword	What's their address 	sand postcode	and postcode	noise:realword_edit and->sand
+context_realword	Can you find an attraction in 	he centre	the centre	noise:realword_edit the->he
+context_realword	Are you aware of 	ant	any	noise:realword_edit any->ant
+context_realword	The first one is 	find	fine	noise:realword_edit fine->find
+context_realword	It does need to 	he cheap though	be cheap though	noise:realword_edit be->he
+context_realword	What is the 	gravel time for that trip	travel time for that trip	noise:realword_edit travel->gravel
+context_realword	Is there a 	rain for that	train for that	noise:realword_edit train->rain
+context_realword	Could you 	hell me find a hotel	help me find a hotel	noise:realword_edit help->hell
+context_realword	What else 	us available	is available	noise:realword_edit is->us
+context_realword	Can you also book a 	tax for me	taxi for me	noise:realword_edit taxi->tax
+context_realword	It should 	he in the moderate price range	be in the moderate price range	noise:realword_edit be->he
+context_realword	That should 	he fine	be fine	noise:realword_edit be->he
+context_realword	And what area of 	tow is that in	town is that in	noise:realword_edit town->tow
+context_realword	Nope that would be 	if	it	noise:realword_edit it->if
+context_realword	Are there 	ant churches or museums on the east side	any churches or museums on the east side	noise:realword_edit any->ant
+context_realword	I'm coming 	rom peterborough and going to cambridge	from peterborough and going to cambridge	noise:realword_edit from->rom
+context_realword	what's the 	fist one on the list	first one on the list	noise:realword_edit first->fist
+context_realword	entrance fee and postcode 	pleas	please	noise:realword_edit please->pleas
+context_realword	I'll be 	traveling on wednesday	travelling on wednesday	noise:realword_edit travelling->traveling
+context_realword	What is the address 	sand entrance fee	and entrance fee	noise:realword_edit and->sand
+context_realword	Yes it must have WiFi and 	he moderately priced	be moderately priced	noise:realword_edit be->he
+context_realword	Find me an expensive hotel with 	fee parking	free parking	noise:realword_edit free->fee
+context_realword	When are the arrival 	time	times	noise:realword_edit times->time
+context_realword	How about italian 	good	food	noise:realword_edit food->good
+context_realword	Actually don't 	boom it just yet on second thought	book it just yet on second thought	noise:realword_edit book->boom
+context_realword	And if you could 	five me a reference number	give me a reference number	noise:realword_edit give->five
+context_realword	the closest museum would be 	fin	fine	noise:realword_edit fine->fin
+context_realword	Is the name of the restaurant 	as restaurant	ask restaurant	noise:realword_edit ask->as
+context_realword	Is there a street address or landmark to locate 	then	them	noise:realword_edit them->then
+context_realword	Something you think is the 	vest	best	noise:realword_edit best->vest
+context_realword	Can you book 	hat restaurant for me	that restaurant for me	noise:realword_edit that->hat
+context_realword	I'd like a place 	kin the south	in the south	noise:realword_edit in->kin
+context_realword	how about 	must something that's really overpriced	just something that's really overpriced	noise:realword_edit just->must
+context_realword	Any you recommend will be 	vine	fine	noise:realword_edit fine->vine
+context_realword	I'm willing to 	fry something new	try something new	noise:realword_edit try->fry
+context_realword	Just the 	are and postcode please	area and postcode please	noise:realword_edit area->are
+context_realword	Can you find me a museum 	go visit	to visit	noise:realword_edit to->go
+context_realword	May have some information 	ion a restaurant in town	on a restaurant in town	noise:realword_edit on->ion
+context_realword	please book a 	tale	table	noise:realword_edit table->tale
+context_realword	No that's all right have a 	treat day	great day	noise:realword_edit great->treat
+context_realword	Please see 	hat you can find out about jesus college	what you can find out about jesus college	noise:realword_edit what->hat
+context_realword	Parking and WiFi do 	hot matter	not matter	noise:realword_edit not->hot
+context_realword	No particular 	par of town	part of town	noise:realword_edit part->par
+context_realword	that could 	he anywhere	be anywhere	noise:realword_edit be->he
+context_realword	I'm looking for colleges in 	he centre	the centre	noise:realword_edit the->he
+context_realword	Thank you 	tor the reference number	for the reference number	noise:realword_edit for->tor
+context_realword	could you 	five me the phone number	give me the phone number	noise:realword_edit give->five
+context_realword	Could you give me the price 	tor this train	for this train	noise:realword_edit for->tor
+context_realword	Could you also please provide me 	wit the reference number	with the reference number	noise:realword_edit with->wit
+context_realword	I'll need their phone number 	an postcode	and postcode	noise:realword_edit and->an
+context_realword	I'm looking for an italian restaurant 	kin the north	in the north	noise:realword_edit in->kin
+context_realword	I'm looking for a park in the centre 	or town	of town	noise:realword_edit of->or
+context_realword	We could probably go earlier in 	he evening	the evening	noise:realword_edit the->he
+context_realword	A cheap option 	pleas	please	noise:realword_edit please->pleas
+context_realword	Do you 	ave any chinese restaurants	have any chinese restaurants	noise:realword_edit have->ave
+context_realword	Okay thank you for 	you help	your help	noise:realword_edit your->you
+context_realword	Thanks for being 	do helpful today	so helpful today	noise:realword_edit so->do
+context_realword	let's try 	tor a cheap hotel	for a cheap hotel	noise:realword_edit for->tor
+context_realword	recommend one and book 	foe me	for me	noise:realword_edit for->foe
+context_realword	I'm not ready to 	hook just yet	book just yet	noise:realword_edit book->hook
+context_realword	Are there any cheap indian 	restaurant available	restaurants available	noise:realword_edit restaurants->restaurant
+context_realword	Could you check 	foe tuesday	for tuesday	noise:realword_edit for->foe
+context_realword	British cuisine is 	fin	fine	noise:realword_edit fine->fin
+context_realword	I'd also like 	he price range please	the price range please	noise:realword_edit the->he
+context_realword	Are there any in the centre of 	own	town	noise:realword_edit town->own
+context_realword	You have a fantastic day 	ads well	as well	noise:realword_edit as->ads
+context_realword	Just pick 	on for monday	one for monday	noise:realword_edit one->on
+context_realword	this is a surprise family 	trio	trip	noise:realword_edit trip->trio
+context_realword	The area doesn't 	matte	matter	noise:realword_edit matter->matte
+context_realword	The varsity 	us good	is good	noise:realword_edit is->us
+context_realword	Can you help me find a 	rain	train	noise:realword_edit train->rain
+context_realword	Thank you 	tor the info	for the info	noise:realword_edit for->tor
+context_realword	Thanks for 	wall your help	all your help	noise:realword_edit all->wall
+context_realword	Just confirming it's in the west 	pat of town	part of town	noise:realword_edit part->pat
+context_realword	I'm not particular on 	he area	the area	noise:realword_edit the->he
+context_realword	are there any good entertainment places in 	he east area	the east area	noise:realword_edit the->he
+context_realword	can you give me 	heir phone number and postcode please	their phone number and postcode please	noise:realword_edit their->heir
+context_realword	I'm looking for a moderately priced place 	go stay	to stay	noise:realword_edit to->go
+context_realword	please get me tickets for 	he same group of people	the same group of people	noise:realword_edit the->he
+context_realword	Okay what about any type 	if theatre	of theatre	noise:realword_edit of->if
+context_realword	tell me 	bout the ones to the north	about the ones to the north	noise:realword_edit about->bout
+context_realword	No need to 	hook a ticket	book a ticket	noise:realword_edit book->hook
+context_realword	can you help me find a train 	bow	now	noise:realword_edit now->bow
+context_realword	let's try a restaurant 	hat serves international food	that serves international food	noise:realword_edit that->hat
+context_realword	Do you have any 	suggestion	suggestions	noise:realword_edit suggestions->suggestion
+context_realword	address and 	are please	area please	noise:realword_edit area->are
+context_realword	I'm looking 	or a pizza hut city centre	for a pizza hut city centre	noise:realword_edit for->or
+context_realword	just the price 	sand arrival time	and arrival time	noise:realword_edit and->sand
+context_realword	Have a great 	dat	day	noise:realword_edit day->dat
+context_realword	No not at 	wall	all	noise:realword_edit all->wall
+context_realword	Can you 	fry entertainment in the same area please	try entertainment in the same area please	noise:realword_edit try->fry
+context_realword	From cambridge 	go london liverpool street	to london liverpool street	noise:realword_edit to->go
+context_realword	what is 	he reference number	the reference number	noise:realword_edit the->he
+context_realword	What is 	heir phone number	their phone number	noise:realword_edit their->heir
+context_realword	It will be for two 	night	nights	noise:realword_edit nights->night
+sentence		id really like to visit a museum	I'd really like to visit a museum	noise:contraction
+sentence		ill need the reference number	I'll need the reference number	noise:contraction
+sentence		im also looking for a museum	I'm also looking for a museum	noise:contraction
+sentence		im also looking for places to go in town	I'm also looking for places to go in town	noise:contraction
+sentence		that wont be necessary	That won't be necessary	noise:contraction
+sentence		ill take the expensive one	I'll take the expensive one	noise:contraction
+sentence		ill need the travel time	I'll need the travel time	noise:contraction
+sentence		lets go ahead and book it	Let's go ahead and book it	noise:contraction
+sentence		im trying to find someplace to visit in town	I'm trying to find someplace to visit in town	noise:contraction
+sentence		expensive is what im looking for	expensive is what I'm looking for	noise:contraction
+sentence		im looking for a nice place to eat	I'm looking for a nice place to eat	noise:contraction
+sentence		its called india house	It's called india house	noise:contraction
+sentence		thats all thank you	that's all thank you	noise:contraction
+sentence		im looking for some traditional food	I'm looking for some traditional food	noise:contraction
+sentence		ill be leaving from cambridge on friday	I'll be leaving from cambridge on friday	noise:contraction
+sentence		and then ill need a taxi as well	and then I'll need a taxi as well	noise:contraction
+sentence		and ill be travelling to cambridge	And I'll be travelling to cambridge	noise:contraction
+sentence		whats the address of your favorite one	What's the address of your favorite one	noise:contraction
+sentence		id just like the address for now	I'd just like the address for now	noise:contraction
+sentence		do you know what area in the city theyre located	do you know what area in the city they're located	noise:contraction
+sentence		its a hotel in cambridge	It's a hotel in cambridge	noise:contraction
+sentence		thanks thats all for today	thanks that's all for today	noise:contraction
+sentence		ill need the reference number too please	I'll need the reference number too please	noise:contraction
+sentence		im also looking for a train leaving peterborough	I'm also looking for a train leaving peterborough	noise:contraction
+sentence		id like catalan food	I'd like catalan food	noise:contraction
+sentence		im looking for a place to sleep	I'm looking for a place to sleep	noise:contraction
+sentence		im also looking for an expensive restaurant in the south	I'm also looking for an expensive restaurant in the south	noise:contraction
+sentence		thats all ill need today	That's all I'll need today	noise:contraction
+sentence		im looking for a place to go in cambridge	I'm looking for a place to go in cambridge	noise:contraction
+sentence		id like one in the type of entertainment please	I'd like one in the type of entertainment please	noise:contraction
+sentence		id be going to holy trinity church	I'd be going to holy trinity church	noise:contraction
+sentence		im also going to need a train	I'm also going to need a train	noise:contraction
+sentence		im also looking for a train that leaves leicester	I'm also looking for a train that leaves leicester	noise:contraction
+sentence		im looking for a hotel on the east side	I'm looking for a hotel on the east side	noise:contraction
+sentence		im also looking to book a train	I'm also looking to book a train	noise:contraction
+sentence		lets go with the train first	Let's go with the train first	noise:contraction
+sentence		thatll do for now	that'll do for now	noise:contraction
+sentence		it doesnt need to be a hotel	It doesn't need to be a hotel	noise:contraction
+sentence		if that time doesnt work	if that time doesn't work	noise:contraction
+sentence		id like to go from cambridge to ely	I'd like to go from cambridge to ely	noise:contraction
+sentence		im looking for a chinese restaurant as well	I'm looking for a chinese restaurant as well	noise:contraction
+sentence		lets not worry about booking it just now	let's not worry about booking it just now	noise:contraction
+sentence		just confirming its in the west part of town	Just confirming it's in the west part of town	noise:contraction
+sentence		im looking for a restaurant suggestion in cambridge	I'm looking for a restaurant suggestion in cambridge	noise:contraction
+sentence		and the entrance fee id have to pay	and the entrance fee I'd have to pay	noise:contraction
+sentence		im also looking for a place to eat	I'm also looking for a place to eat	noise:contraction
+sentence		im actually looking for a train	I'm actually looking for a train	noise:contraction
+sentence		id prefer a four star hotel	I'd prefer a four star hotel	noise:contraction
+sentence		id like to book it myself	I'd like to book it myself	noise:contraction
+sentence		im looking for any places that are near the centre	I'm looking for any places that are near the centre	noise:contraction
+sentence		im also looking for a museum near the restaurant	I'm also looking for a museum near the restaurant	noise:contraction
+sentence		youve been a great help	You've been a great help	noise:contraction
+sentence		thanks for everything youve helped me with	Thanks for everything you've helped me with	noise:contraction
+sentence		im headed to the soul tree nightclub	I'm headed to the soul tree nightclub	noise:contraction
+sentence		id like to go to leicester please	I'd like to go to leicester please	noise:contraction
+sentence		im also looking for an expensive hotel	I'm also looking for an expensive hotel	noise:contraction
+sentence		heres a weird one	Here's a weird one	noise:contraction
+sentence		youve given me the departure time	You've given me the departure time	noise:contraction
+sentence		ill need their phone number and postcode	I'll need their phone number and postcode	noise:contraction
+sentence		im actually also looking for a place to stay	I'm actually also looking for a place to stay	noise:contraction
+sentence		im looking to book lodging for a place to stay	I'm looking to book lodging for a place to stay	noise:contraction
+sentence		im looking for an entertaining tourist attraction	I'm looking for an entertaining tourist attraction	noise:contraction
+sentence		im looking for a train from ely	I'm looking for a train from ely	noise:contraction
+sentence		im in the mood for italian food	I'm in the mood for italian food	noise:contraction
+sentence		ill also need the reference number	I'll also need the reference number	noise:contraction
+sentence		id like three tickets	I'd like three tickets	noise:contraction
+sentence		and ill need the address	and I'll need the address	noise:contraction
+sentence		im not concerned about that	I'm not concerned about that	noise:contraction
+sentence		im hoping to find a nightclub in town	I'm hoping to find a nightclub in town	noise:contraction
+sentence		thats it for me	that's it for me	noise:contraction
+sentence		dont worry about booking the room	don't worry about booking the room	noise:contraction
+sentence		im looking for a jamaican restaurant in the east	I'm looking for a jamaican restaurant in the east	noise:contraction
+sentence		were all coming to cambridge together	we're all coming to cambridge together	noise:contraction
+sentence		im also looking to leave on tuesday by train	I'm also looking to leave on tuesday by train	noise:contraction
+sentence		ill try the folk museum	I'll try the folk museum	noise:contraction
+sentence		id like a moderately priced place to stay	I'd like a moderately priced place to stay	noise:contraction
+sentence		im also looking for an architecture attraction near the restaurant	I'm also looking for an architecture attraction near the restaurant	noise:contraction
+sentence		id like an expensive restaurant please	I'd like an expensive restaurant please	noise:contraction
+sentence		ill try the peking restaurant	I'll try the peking restaurant	noise:contraction
+sentence		thats not important to me	that's not important to me	noise:contraction
+sentence		were checking in on tuesday	We're checking in on tuesday	noise:contraction
+sentence		im really craving some lebanese right now	I'm really craving some lebanese right now	noise:contraction
+sentence		im also looking for a restaurant	I'm also looking for a restaurant	noise:contraction
+sentence		id also like a multiple sports attractions in the centre	I'd also like a multiple sports attractions in the centre	noise:contraction
+sentence		im interested in a restaurant called rice house	I'm interested in a restaurant called rice house	noise:contraction
+sentence		im not sure right now	I'm not sure right now	noise:contraction
+sentence		id like to stay on friday	I'd like to stay on friday	noise:contraction
+sentence		im not familiar with trains at all unfortunately	I'm not familiar with trains at all unfortunately	noise:contraction
+sentence		im looking for a hotel	I'm looking for a hotel	noise:contraction
+sentence		id like to be in the east	I'd like to be in the east	noise:contraction
+sentence		well take the expensive one	we'll take the expensive one	noise:contraction
+sentence		im departing from cambridge	I'm departing from cambridge	noise:contraction
+sentence		im looking for a nightclub to go to	I'm looking for a nightclub to go to	noise:contraction
+sentence		im also looking for a place to stay	I'm also looking for a place to stay	noise:contraction
+sentence		id like to find a park attraction	I'd like to find a park attraction	noise:contraction
+sentence		ive really got to go	I've really got to go	noise:contraction
+sentence		ill be leaving norwich	I'll be leaving norwich	noise:contraction
+sentence		im looking for a restaurant in the centre of town	I'm looking for a restaurant in the centre of town	noise:contraction
+sentence		and if theres an entrance fee	and if there's an entrance fee	noise:contraction
+sentence		id like to know if it has free parking	I'd like to know if it has free parking	noise:contraction
+sentence		im looking for boat related attractions in the west	I'm looking for boat related attractions in the west	noise:contraction
+sentence		it doesnt matter to me	It doesn't matter to me	noise:contraction
+sentence		id like a recommendation for a restaurant	I'd like a recommendation for a restaurant	noise:contraction
+sentence		im looking for a museum in the west	I'm looking for a museum in the west	noise:contraction
+sentence		id like a taxi from there to my hotel	I'd like a taxi from there to my hotel	noise:contraction
+sentence		id like to go to cambridge	I'd like to go to cambridge	noise:contraction
+sentence		im excited to visit cambridge	I'm excited to visit cambridge	noise:contraction
+sentence		ill be going to restaurant one seven	I'll be going to restaurant one seven	noise:contraction
+sentence		thatll be all for today	that'll be all for today	noise:contraction
+sentence		ill be departing from norwich	I'll be departing from norwich	noise:contraction
+sentence		yes id like one in the expensive range	Yes I'd like one in the expensive range	noise:contraction
+sentence		im looking for a restaurant in the centre	I'm looking for a restaurant in the centre	noise:contraction
+sentence		no it doesnt matter	No it doesn't matter	noise:contraction
+sentence		im looking for a restaurant with modern european food	I'm looking for a restaurant with modern european food	noise:contraction
+sentence		im looking to book a train too	I'm looking to book a train too	noise:contraction
+sentence		also im looking for a chinese restaurant that is expensive	Also I'm looking for a chinese restaurant that is expensive	noise:contraction
+sentence		im also looking for a hotel	I'm also looking for a hotel	noise:contraction
+sentence		thats an early arrival	That's an early arrival	noise:contraction
+sentence		id like to know the entrance fee	I'd like to know the entrance fee	noise:contraction
+sentence		im looking for a train please	I'm looking for a train please	noise:contraction
+sentence		just need to know what area its in	Just need to know what area it's in	noise:contraction
+sentence		ill be traveling on wednesday	I'll be traveling on wednesday	noise:contraction
+sentence		ill take care of it later	I'll take care of it later	noise:contraction
+sentence		hmmm im not sure	Hmmm I'm not sure	noise:contraction
+sentence		that is all ill need	That is all I'll need	noise:contraction
+sentence		thats it for today	That's it for today	noise:contraction
+sentence		im also looking for somewhere to stay in the north	I'm also looking for somewhere to stay in the north	noise:contraction
+sentence		whats the departure time and price	what's the departure time and price	noise:contraction
+sentence		im looking for a train ticket	I'm looking for a train ticket	noise:contraction
+sentence		lets go with korean	Let's go with korean	noise:contraction
+sentence		im also looking for information on all saints church	I'm also looking for information on all saints church	noise:contraction
+sentence		it doesnt matter and it doesnt need to include internet	It doesn't matter and it doesn't need to include internet	noise:contraction
+sentence		id like to find a restaurant to eat at too	I'd like to find a restaurant to eat at too	noise:contraction
+sentence		im also looking for a train that goes to cambridge	I'm also looking for a train that goes to cambridge	noise:contraction
+sentence		youve been very helpful	You've been very helpful	noise:contraction
+sentence		im leaving from cambridge on sunday	I'm leaving from cambridge on sunday	noise:contraction
+sentence		im looking for things to do in the west	I'm looking for things to do in the west	noise:contraction
+sentence		whats good to visit	What's good to visit	noise:contraction
+sentence		im also looking for a particular attraction	I'm also looking for a particular attraction	noise:contraction
+sentence		id like eight tickets	I'd like eight tickets	noise:contraction
+sentence		cant you suggest something please	Can't you suggest something please	noise:contraction
+sentence		and wed like to go to norwich please	and we'd like to go to norwich please	noise:contraction
+sentence		ill just need the departure time and price	I'll just need the departure time and price	noise:contraction
+sentence		im looking for some places to go in town	I'm looking for some places to go in town	noise:contraction
+sentence		id like a taxi to get there	I'd like a taxi to get there	noise:contraction
+sentence		im thinking it may be nice to visit a college	I'm thinking it may be nice to visit a college	noise:contraction
+sentence		id like to book that for one person	I'd like to book that for one person	noise:contraction
+sentence		im leaving from cambridge on friday	I'm leaving from cambridge on friday	noise:contraction
+sentence		were looking for a place to stay in cambridge	We're looking for a place to stay in cambridge	noise:contraction
+sentence		im traveling on monday	I'm traveling on monday	noise:contraction
+sentence		we will bestaying for ive nights	We will be staying for five nights	noise:multi
+sentence		anythingn the cwntre of town available	Anything in the centre of town available	noise:multi
+sentence		the peopleportraits exhibit is an amazing experience	The people portraits exhibit is an amazing experience	noise:multi
+sentence		o ayead and book it	Go ahead and book it	noise:multi
+sentence		britis hcuisi e is fine	British cuisine is fine	noise:multi
+sentence		leasefind an indian restaurant in the centre of town	Please find an indian restaurant in the centre of town	noise:multi
+sentence		look ing for a lace to dine	looking for a place to dine	noise:multi
+sentence		pleasr provide me witha reference number	Please provide me with a reference number	noise:multi
+sentence		is there an train leaving sooner	Is there any train leaving sooner	noise:multi
+sentence		havea nice daya lso	Have a nice day also	noise:multi
+sentence		no that's allf r noa	No that's all for now	noise:multi
+sentence		as lonb as internetand parking are free	as long as internet and parking are free	noise:multi
+sentence		andp ost code ple ase	and post code please	noise:multi
+sentence		whatabout colleges in he west	What about colleges in the west	noise:multi
+sentence		tha nks o much fod all the help	Thanks so much for all the help	noise:multi
+sentence		hat should be all for tlday	that should be all for today	noise:multi
+sentence		can you also help me with a pl acd to stay	Can you also help me with a place to stay	noise:multi
+sentence		do you have any goo dattractions in the ast	Do you have any good attractions in the east	noise:multi
+sentence		can youg ive me some information on all sain ts church	Can you give me some information on all saints church	noise:multi
+sentence		som ething heap would be more within my budget	Something cheap would be more within my budget	noise:multi
+sentence		am lo oking fof a train	am looking for a train	noise:multi
+sentence		but if you can't de cide	but if you can't decide	noise:multi
+sentence		what if we try tqon ights	What if we try two nights	noise:multi
+sentence		can you also help mewith a hoteo	Can you also help me with a hotel	noise:multi
+sentence		area oes not mat ter	Area does not matter	noise:multi
+sentence		ple ase send e the reference number	Please send me the reference number	noise:multi
+sentence		i'll als need a reference number	I'll also need a reference number	noise:multi
+sentence		i'd lso like a multiple spprts attractions in the centre	I'd also like a multiple sports attractions in the centre	noise:multi
+sentence		i'd be going o holy trinit ychurch	I'd be going to holy trinity church	noise:multi
+sentence		and this trainleaves from cambridge	And this train leaves from cambridge	noise:multi
+sentence		ust an expensive indjan place	Just an expensive indian place	noise:multi
+sentence		thankyou for thei nformation	Thank you for the information	noise:multi
+sentence		gre at thank yo uthat shouldbe all	Great thank you that should be all	noise:multi
+sentence		i'd likd a reservation orwednesday	I'd like a reservation for wednesday	noise:multi
+sentence		pleaseprovide a referencen umber	Please provide a reference number	noise:multi
+sentence		a park or swimming on theast side	A park or swimming on the east side	noise:multi
+sentence		address anda eaplease	address and area please	noise:multi
+sentence		from cambrirge n saturday	From cambridge on saturday	noise:multi
+sentence		moderatep rices in the cent re is necessary	Moderate prices in the centre is necessary	noise:multi
+sentence		moderately rice dajd in the centre	Moderately priced and in the centre	noise:multi
+sentence		it should be onthe expensi ve side	It should be on the expensive side	noise:multi
+sentence		how uch is that rain ride going to cost me	how much is that train ride going to cost me	noise:multi
+sentence		and i'll needthe address	and I'll need the address	noise:multi
+sentence		i'm nlt ready to ook quitey et	I'm not ready to book quite yet	noise:multi
+sentence		anr departure timeplease	and departure time please	noise:multi
+sentence		go ahead ahd bookthat	go ahead and book that	noise:multi
+sentence		ou ar enot be ing very helpful	You are not being very helpful	noise:multi
+sentence		o thanksagain for all of your help	No thanks again for all of your help	noise:multi
+sentence		i'm lso looking fora train departing from cambridge	I'm also looking for a train departing from cambridge	noise:multi
+sentence		i'm looking vor colleges in the ce ntre	I'm looking for colleges in the centre	noise:multi
+sentence		lso inc lude thereference number	Also include the reference number	noise:multi
+sentence		looking fora par ticular uotel	looking for a particular hotel	noise:multi
+sentence		i'd like something n the xpemsive price range	I'd like something in the expensive price range	noise:multi
+sentence		ho wahout a museum instead	How about a museum instead	noise:multi
+sentence		and nly the ad dress is necessary	and only the address is necessary	noise:multi
+sentence		thearea doesn't atter	The area doesn't matter	noise:multi
+sentence		but i'd ike it o be moderately pric ed	but I'd like it to be moderately priced	noise:multi
+sentence		i'll be leavingr om leicester on sund ay	I'll be leaving from leicester on sunday	noise:multi
+sentence		is there a con tact umber available	Is there a contact number available	noise:multi
+sentence		ould you jelp me with my plans	could you help me with my plans	noise:multi
+sentence		hatis thee xact departure time please	What is the exact departure time please	noise:multi
+sentence		what is theaddress fory ur suggested restaurant varsity	What is the address for your suggested restaurant varsity	noise:multi
+sentence		i'd like theif phone number an dpostcode	I'd like their phone number and postcode	noise:multi
+sentence		my boyfriend gothimself artested	My boyfriend got himself arrested	noise:multi
+sentence		could you recommen dany local ci nemas in he area	could you recommend any local cinemas in the area	noise:multi
+sentence		are there any african restaurants outside f thecity center	Are there any african restaurants outside of the city center	noise:multi
+sentence		you have met all my needsfor tod ay	You have met all my needs for today	noise:multi
+sentence		does thexpress by holiday inn have free parking	Does the express by holiday inn have free parking	noise:multi
+sentence		it doesn't have tobe a swimmingp ool	It doesn't have to be a swimming pool	noise:multi
+sentence		i'm trying o find someplace to vjsit in town	I'm trying to find someplace to visit in town	noise:multi
+sentence		i'm lookin gfor a nice lace to eat	I'm looking for a nice place to eat	noise:multi
+sentence		what kinds of things wre thereto do	What kinds of things are there to do	noise:multi
+sentence		how much is that r ain	How much is that train	noise:multi
+sentence		please booo thehamilton lodge	Please book the hamilton lodge	noise:multi
+sentence		no tha twikl be it	No that will be it	noise:multi
+sentence		can yi uhelp me findit	Can you help me find it	noise:multi
+sentence		no tha did it	No that did it	noise:multi
+sentence		just he address ple ase	Just the address please	noise:multi
+sentence		could yoy provide meith their address	could you provide me with their address	noise:multi
+sentence		and if youcan	And if you can	noise:multi
+sentence		i'm hopi g you canh elp me	I'm hoping you can help me	noise:multi
+sentence		what kind of expejsive koreanrestaurants do youh ave available	What kind of expensive korean restaurants do you have available	noise:multi
+sentence		it would be fort he samegroup of people	it would be for the same group of people	noise:multi
+sentence		i'm com ing from peterborough and goin gtocambridge	I'm coming from peterborough and going to cambridge	noise:multi
+sentence		ahd there hasbeen a change in plans	And there has been a change in plans	noise:multi
+sentence		than kyou so much for your help	Thank you so much for your help	noise:multi
+sentence		howabout internationa lfood	How about international food	noise:multi
+sentence		co uld you try another expensive turkish restaurant in the entre	Could you try another expensive turkish restaurant in the centre	noise:multi
+sentence		i'd like somechines efood	I'd like some chinese food	noise:multi
+sentence		how abouy one thatserves spanish food	How about one that serves spanish food	noise:multi
+sentence		what is the address and phon enum ber	What is the address and phone number	noise:multi
+sentence		couldyou please send e the phone number	Could you please send me the phone number	noise:multi
+sentence		i'm lpoking for a rain from ely	I'm looking for a train from ely	noise:multi
+sentence		can yo ufind me a ark in the south	Can you find me a park in the south	noise:multi
+sentence		and postcodefor shanghai fami ly restaurant	and postcode for shanghai family restaurant	noise:multi
+sentence		an you please booi for saturday	Can you please book for saturday	noise:multi
+sentence		you have a gteat day ow	You have a great day now	noise:multi
+sentence		preferably ohe with fre eparking	Preferably one with free parking	noise:multi
+sentence		anf i'll be tra velling to cambridge	And I'll be travelling to cambridge	noise:multi
+sentence		arethere any japanese restau rants in the centre of town	Are there any japanese restaurants in the centre of town	noise:multi
+sentence		ths college should be in thew est	the college should be in the west	noise:multi
+sentence		i'm n the moof for italian food	I'm in the mood for italian food	noise:multi
+sentence		saint jo hns chop shoph ouse	Saint johns chop shop house	noise:multi
+sentence		whatis the starr ating	What is the star rating	noise:multi
+sentence		particularly some type ofn zttraction	particularly some type of an attraction	noise:multi
+sentence		no that is all forn w	No that is all for now	noise:multi
+sentence		i'm leaving from london kings cross nd goi ng tocambridge	I'm leaving from london kings cross and going to cambridge	noise:multi
+sentence		could you also provide their phone numbera nd entrance ees	Could you also provide their phone number and entrance fees	noise:multi
+sentence		cqnyou help me book a taxi	can you help me book a taxi	noise:multi
+sentence		i'll eed thereference number too please	I'll need the reference number too please	noise:multi
+sentence		nop ethzt should be it thanks	Nope that should be it thanks	noise:multi
+sentence		i'm looking for a restaurants uggestion n cambridge	I'm looking for a restaurant suggestion in cambridge	noise:multi
+sentence		an you just give me th eadd ress	Can you just give me the address	noise:multi
+sentence		yes that worjsfor me	Yes that works for me	noise:multi
+sentence		couldbe pldasec all a cab	Could be please call a cab	noise:multi
+sentence		you have bewn e lpful	You have been helpful	noise:multi
+sentence		can you makesomer ecommendations	Can you make some recommendations	noise:multi
+sentence		so he closest one to that time ple ase	so the closest one to that time please	noise:multi
+sentence		you hwve been of grea thelp	you have been of great help	noise:multi
+sentence		can you tell me ab out frain sleaving monday	Can you tell me about trains leaving monday	noise:multi
+sentence		do you haveinformation on all res taurangs	Do you have information on all restaurants	noise:multi
+sentence		yo uhave been so helpf ul	You have been so helpful	noise:multi
+sentence		well ho wabout africanfood	well how about african food	noise:multi
+sentence		ouldy ou verify the type of food saigon city serves	Could you verify the type of food saigon city serves	noise:multi
+sentence		it's a little early inth emorning	It's a little early in the morning	noise:multi
+sentence		let's not worry about booking it justnow	let's not worry about booking it just now	noise:multi
+sentence		nollace in particular	no place in particular	noise:multi
+sentence		the ucky star would bejust fine	The lucky star would be just fine	noise:multi
+sentence		and hone number for cur ry prince	and phone number for curry prince	noise:multi
+sentence		i'll need to book gorf riday	I'll need to book for friday	noise:multi
+sentence		howzbout african ood	How about african food	noise:multi
+sentence		how abkut a place withb ritish food	How about a place with british food	noise:multi
+sentence		whay is my depar ture time	What is my departure time	noise:multi
+sentence		howa bout a college in he centre	how about a college in the centre	noise:multi
+sentence		thanls again orhelping	thanks again for helping	noise:multi
+sentence		you've beena bi ghelp	You've been a big help	noise:multi
+sentence		hat is all thank you for you rhelp	That is all thank you for your help	noise:multi
+sentence		coul dyou help me find ahotel	Could you help me find a hotel	noise:multi
+sentence		jhst the price and arri val time	just the price and arrival time	noise:multi
+sentence		are thereany hat serve italian food	Are there any that serve italian food	noise:multi
+sentence		what is th erating of this ho tel	What is the rating of this hotel	noise:multi
+sentence		what time doesthe fi rst train depart	What time does the first train depart	noise:multi
+sentence		thank you somucha nd have a great day	Thank you so much and have a great day	noise:multi
+sentence		hwt sounds interesting actually	That sounds interesting actually	noise:multi
+sentence		get me a taxi to uyhes hall please	Get me a taxi to hughes hall please	noise:multi
+sentence		hank you somuch	Thank you so much	noise:multi
+sentence		do you have one that youwould rec ommend	do you have one that you would recommend	noise:multi
+sentence		and i'll be di nings olo	and I'll be dining solo	noise:multi
+sentence		uow about one that serves indian food in thatarea	how about one that serves indian food in that area	noise:multi
+sentence		re there anym uswums	Are there any museums	noise:multi
+sentence		Any time will do	Any time will do	negative:clean
+sentence		are there any moderately priced restaurants in centre	are there any moderately priced restaurants in centre	negative:clean
+sentence		Can you try booking for one night	Can you try booking for one night	negative:clean
+sentence		Could you please send me the phone number	Could you please send me the phone number	negative:clean
+sentence		Please give me the price options	Please give me the price options	negative:clean
+sentence		It's a little early in the morning	It's a little early in the morning	negative:clean
+sentence		No that isn't necessary	No that isn't necessary	negative:clean
+sentence		I'm looking for a hotel on the east side	I'm looking for a hotel on the east side	negative:clean
+sentence		Thanks and have a good day	Thanks and have a good day	negative:clean
+sentence		What is their postcode	What is their postcode	negative:clean
+sentence		Are there any that meet my criteria in the south	Are there any that meet my criteria in the south	negative:clean
+sentence		No on the hotel	No on the hotel	negative:clean
+sentence		What's the departure time and travel time on that	What's the departure time and travel time on that	negative:clean
+sentence		What is the travel time and price	What is the travel time and price	negative:clean
+sentence		Please give me the number to the hamilton lodge	Please give me the number to the hamilton lodge	negative:clean
+sentence		please give me travel time	please give me travel time	negative:clean
+sentence		early trains usually aren't that full	early trains usually aren't that full	negative:clean
+sentence		Can you help me find a hotel instead	Can you help me find a hotel instead	negative:clean
+sentence		get me the address and entrance fee	get me the address and entrance fee	negative:clean
+sentence		pick something tasty for us and book a table	pick something tasty for us and book a table	negative:clean
+sentence		I'm hoping to find a nightclub in town	I'm hoping to find a nightclub in town	negative:clean
+sentence		Is there any other type of hotel in the area	Is there any other type of hotel in the area	negative:clean
+sentence		Can you do that for me	Can you do that for me	negative:clean
+sentence		Could you please tell me the price for that train	Could you please tell me the price for that train	negative:clean
+sentence		In the centre of town please	In the centre of town please	negative:clean
+sentence		Sure that would be great	Sure that would be great	negative:clean
+sentence		Anywhere in town is fine	Anywhere in town is fine	negative:clean
+sentence		Please help me make a taxi reservation	Please help me make a taxi reservation	negative:clean
+sentence		Are there any restaurants that serve mediterranean food	Are there any restaurants that serve mediterranean food	negative:clean
+sentence		Are there any trains from london kings cross to cambridge	Are there any trains from london kings cross to cambridge	negative:clean
+sentence		A moderate price range	A moderate price range	negative:clean
+sentence		free parking is not necessary	free parking is not necessary	negative:clean
+sentence		What about a nightclub somewhere	What about a nightclub somewhere	negative:clean
+sentence		Are there any african restaurants outside of the city center	Are there any african restaurants outside of the city center	negative:clean
+sentence		I'll need the reference number too please	I'll need the reference number too please	negative:clean
+sentence		You have a great day as well	You have a great day as well	negative:clean
+sentence		I'm actually looking for a train	I'm actually looking for a train	negative:clean
+sentence		and postcode for that location	and postcode for that location	negative:clean
+sentence		the for same group of people please	the for same group of people please	negative:clean
+sentence		Just myself will be travelling	Just myself will be travelling	negative:clean
+sentence		Are there any attractions in the west of town	Are there any attractions in the west of town	negative:clean
+sentence		What is the travel time	What is the travel time	negative:clean
+sentence		as long as the restaurant is near the nightclub	as long as the restaurant is near the nightclub	negative:clean
+sentence		Is that one of the free ones	Is that one of the free ones	negative:clean
+sentence		could you let me know the reference number	could you let me know the reference number	negative:clean
+sentence		Whatever you think is good	Whatever you think is good	negative:clean
+sentence		how many are expensive	how many are expensive	negative:clean
+sentence		how about lebanese food	how about lebanese food	negative:clean
+sentence		Can you help me with this	Can you help me with this	negative:clean
+sentence		what is the postcode and entrance fee	what is the postcode and entrance fee	negative:clean
+sentence		we're all coming to cambridge together	we're all coming to cambridge together	negative:clean
+sentence		I'd like to find a place to go	I'd like to find a place to go	negative:clean
+sentence		I'll have to discuss it with my wife	I'll have to discuss it with my wife	negative:clean
+sentence		What are the entrance fees like	What are the entrance fees like	negative:clean
+sentence		I'm also looking for a hotel	I'm also looking for a hotel	negative:clean
+sentence		Yes something creative and unusual	Yes something creative and unusual	negative:clean
+sentence		Can you check on that for me	Can you check on that for me	negative:clean
+sentence		Can you recommend one and give me their address	Can you recommend one and give me their address	negative:clean
+sentence		After rethinking some things	After rethinking some things	negative:clean
+sentence		Are there any other museums in that area	Are there any other museums in that area	negative:clean
+sentence		What time will the taxi arrive	What time will the taxi arrive	negative:clean
+sentence		What can you recommend	What can you recommend	negative:clean
+sentence		What's their address and postcode	What's their address and postcode	negative:clean
+sentence		since it's close to the restaurant	since it's close to the restaurant	negative:clean
+sentence		Can you please make a reservation for just me	Can you please make a reservation for just me	negative:clean
+sentence		Are there any mediterranean places in the centre	Are there any mediterranean places in the centre	negative:clean
+sentence		How about a restaurant that serves italian food	How about a restaurant that serves italian food	negative:clean
+sentence		and phone number for carolina bed and breakfast	and phone number for carolina bed and breakfast	negative:clean
+sentence		Should be moderately priced	Should be moderately priced	negative:clean
+sentence		I'm looking for a pizza hut city centre	I'm looking for a pizza hut city centre	negative:clean
+sentence		Can you tell me about it	Can you tell me about it	negative:clean
+sentence		if you can book it for three people	if you can book it for three people	negative:clean
+sentence		and postcode for graffiti	and postcode for graffiti	negative:clean
+sentence		car type and contact number would be helpful too please	car type and contact number would be helpful too please	negative:clean
+sentence		Just the area and postcode please	Just the area and postcode please	negative:clean
+sentence		Which one sounds the best	Which one sounds the best	negative:clean
+sentence		I'm also looking for a train that goes to cambridge	I'm also looking for a train that goes to cambridge	negative:clean
+sentence		I'll be leaving from cambridge on friday	I'll be leaving from cambridge on friday	negative:clean
+sentence		What would be the next available if not on sunday	What would be the next available if not on sunday	negative:clean
+sentence		I'll need the postcode	I'll need the postcode	negative:clean
+sentence		Any attraction is fine	Any attraction is fine	negative:clean
+sentence		address with postcode and the phone number	address with postcode and the phone number	negative:clean
+sentence		Could you check again for an expensive one	Could you check again for an expensive one	negative:clean
+sentence		and give me the star rating and phone number	and give me the star rating and phone number	negative:clean
+sentence		well what is it	well what is it	negative:clean
+sentence		Is there a lebanese option	Is there a lebanese option	negative:clean
+sentence		Yes can you give me the travel time	Yes can you give me the travel time	negative:clean
+sentence		how about wednesday instead	how about wednesday instead	negative:clean
+sentence		I'm leaving from cambridge and county folk museum	I'm leaving from cambridge and county folk museum	negative:clean
+sentence		I'm looking for a specific restaurant	I'm looking for a specific restaurant	negative:clean
+sentence		Just anything you would recommend	Just anything you would recommend	negative:clean
+sentence		I'm also looking for places to go in town	I'm also looking for places to go in town	negative:clean
+sentence		Thanks for being so helpful today	Thanks for being so helpful today	negative:clean
+sentence		How about a chinese restaurant	How about a chinese restaurant	negative:clean
+sentence		Can you please find one for me	Can you please find one for me	negative:clean
+sentence		Thank you very much for your help today	Thank you very much for your help today	negative:clean
+sentence		Can you find me a museum to visit	Can you find me a museum to visit	negative:clean
+sentence		No but what is the address and phone number	No but what is the address and phone number	negative:clean
+sentence		that train would work better for me	that train would work better for me	negative:clean
+sentence		Do you have any swimming pools	Do you have any swimming pools	negative:clean
+sentence		You have been extremely helpful	You have been extremely helpful	negative:clean
+sentence		You have been a huge help	You have been a huge help	negative:clean
+sentence		in the east area	in the east area	negative:clean
+sentence		Can you offer a recommendation	Can you offer a recommendation	negative:clean
+sentence		please make the booking and email me the reference number	please make the booking and email me the reference number	negative:clean
+sentence		can you give me the reference number	can you give me the reference number	negative:clean
+sentence		That is very helpful	That is very helpful	negative:clean
+sentence		Cheap price range in the centre	Cheap price range in the centre	negative:clean
+sentence		and provide the reference number	and provide the reference number	negative:clean
+sentence		Great thanks so much	Great thanks so much	negative:clean
+sentence		How much is the cheapest place	How much is the cheapest place	negative:clean
+sentence		What time does the train arrive to peterborough	What time does the train arrive to peterborough	negative:clean
+sentence		Are there any japanese restaurants in the centre of town	Are there any japanese restaurants in the centre of town	negative:clean
+sentence		I'm looking for a place to eat some indian food	I'm looking for a place to eat some indian food	negative:clean
+sentence		That sounds like it would work	That sounds like it would work	negative:clean
+sentence		I'm willing to pay a moderate amount of money	I'm willing to pay a moderate amount of money	negative:clean
+sentence		which place is your favorite	which place is your favorite	negative:clean
+sentence		look for a cheap restaurant	look for a cheap restaurant	negative:clean
+sentence		I'm also looking to book a train	I'm also looking to book a train	negative:clean
+sentence		I'm also looking for somewhere to stay in the north	I'm also looking for somewhere to stay in the north	negative:clean
+sentence		Please provide me with a reference number	Please provide me with a reference number	negative:clean
+sentence		I'll also need the reference number	I'll also need the reference number	negative:clean
+sentence		Is there an expensive african restaurant in town	Is there an expensive african restaurant in town	negative:clean
+sentence		Can you help me find a restaurant in the centre	Can you help me find a restaurant in the centre	negative:clean
+sentence		how much is that ticket	how much is that ticket	negative:clean
+sentence		address of that place	address of that place	negative:clean
+sentence		Can you tell me the price	Can you tell me the price	negative:clean
+sentence		I'll book the table myself	I'll book the table myself	negative:clean
+sentence		Do they charge an entrance fee	Do they charge an entrance fee	negative:clean
+sentence		How about modern european food	How about modern european food	negative:clean
+sentence		No it has to be expensive	No it has to be expensive	negative:clean
+sentence		And thanks again for your help	And thanks again for your help	negative:clean
+sentence		Can you please tell me the entrance fee	Can you please tell me the entrance fee	negative:clean
+sentence		get me the travel time	get me the travel time	negative:clean
+sentence		Just an expensive restaurant	Just an expensive restaurant	negative:clean
+sentence		Can you tell me more about it	Can you tell me more about it	negative:clean
+sentence		I'd like to leave on saturday	I'd like to leave on saturday	negative:clean
+sentence		Can you also help me with a place to stay	Can you also help me with a place to stay	negative:clean
+sentence		Does that train leave on friday	Does that train leave on friday	negative:clean
+sentence		one with free parking	one with free parking	negative:clean
+sentence		Yes and also looking for places to go in town	Yes and also looking for places to go in town	negative:clean
+sentence		The area does not matter	The area does not matter	negative:clean
+sentence		It will just be for me on wednesday	It will just be for me on wednesday	negative:clean
+sentence		What about boats instead	What about boats instead	negative:clean
+sentence		From cambridge to london liverpool street	From cambridge to london liverpool street	negative:clean
+sentence		Do either of them have free parking included	Do either of them have free parking included	negative:clean
+sentence		We will be staying for five nights	We will be staying for five nights	negative:clean
+sentence		I'm also quite hungry	I'm also quite hungry	negative:clean
+sentence		Does it have a four star rating	Does it have a four star rating	negative:clean
+sentence		I'm looking for a place to sleep	I'm looking for a place to sleep	negative:clean
+sentence		I'd like a reservation for wednesday	I'd like a reservation for wednesday	negative:clean
+sentence		but can you tell me the entrance fee and address	but can you tell me the entrance fee and address	negative:clean
+sentence		No booking for today	No booking for today	negative:clean
+sentence		Somewhere in the centre	Somewhere in the centre	negative:clean
+sentence		Would you mind double checking	Would you mind double checking	negative:clean
+sentence		What type of car is it	What type of car is it	negative:clean
+sentence		And this train leaves from cambridge	And this train leaves from cambridge	negative:clean
+sentence		I'd like a taxi from there to my hotel	I'd like a taxi from there to my hotel	negative:clean
+sentence		Can you help me find a restaurant	Can you help me find a restaurant	negative:clean
+sentence		Do you have any recommendations	Do you have any recommendations	negative:clean
+sentence		I'd like to stay in the north	I'd like to stay in the north	negative:clean
+sentence		and phone number of all saints church	and phone number of all saints church	negative:clean
+sentence		Please don't reserve a table just yet	Please don't reserve a table just yet	negative:clean
+sentence		are there any in town	are there any in town	negative:clean
+sentence		Something in the south	Something in the south	negative:clean
+sentence		How about an indian restaurant	How about an indian restaurant	negative:clean
+sentence		I'm not concerned about that	I'm not concerned about that	negative:clean
+sentence		are there any expensive restaurants in the city centre	are there any expensive restaurants in the city centre	negative:clean
+sentence		Where is that located	Where is that located	negative:clean
+sentence		it will be me and a friend	it will be me and a friend	negative:clean
+sentence		try for two days	try for two days	negative:clean
+sentence		Great and what will be the cost of each ticket	Great and what will be the cost of each ticket	negative:clean
+sentence		travel time and departure time	travel time and departure time	negative:clean
+sentence		Are there any trains that leave on thursday	Are there any trains that leave on thursday	negative:clean
+sentence		that would work for me	that would work for me	negative:clean
+sentence		Can you help with a hotel room	Can you help with a hotel room	negative:clean
+sentence		I'd like a recommendation	I'd like a recommendation	negative:clean
+sentence		No thanks again for all of your help	No thanks again for all of your help	negative:clean
+sentence		Thanks for helping me	Thanks for helping me	negative:clean
+sentence		Thanks for your help with the hotel	Thanks for your help with the hotel	negative:clean
+sentence		Sure you can book that for me	Sure you can book that for me	negative:clean
+sentence		I'd like a moderately priced hotel with free parking	I'd like a moderately priced hotel with free parking	negative:clean
+sentence		I'm not picky as long as the prices are low	I'm not picky as long as the prices are low	negative:clean
+sentence		can you give me some basic info on them	can you give me some basic info on them	negative:clean
+sentence		I'd like one in the type of entertainment please	I'd like one in the type of entertainment please	negative:clean
+sentence		No that will be all for today	No that will be all for today	negative:clean
+sentence		how about one that serves indian food in that area	how about one that serves indian food in that area	negative:clean
+sentence		Something in the cheap price range including free parking	Something in the cheap price range including free parking	negative:clean
+sentence		We're checking in on tuesday	We're checking in on tuesday	negative:clean
+sentence		Great thank you that should be all	Great thank you that should be all	negative:clean
+sentence		I'd like an entertainment attraction	I'd like an entertainment attraction	negative:clean
+sentence		Which one is the best	Which one is the best	negative:clean
+sentence		I'll need their phone number and postcode	I'll need their phone number and postcode	negative:clean
+sentence		that seems like everything	that seems like everything	negative:clean
+sentence		Can you try the same parameters at another hotel	Can you try the same parameters at another hotel	negative:clean
+sentence		No not at all	No not at all	negative:clean
+sentence		thanks so much for everything today	thanks so much for everything today	negative:clean
+sentence		It should be on the expensive side	It should be on the expensive side	negative:clean
+sentence		Heading to norwich on tuesday	Heading to norwich on tuesday	negative:clean
+sentence		I'm looking for cambridge	I'm looking for cambridge	negative:clean
+sentence		That won't be needed thank you	That won't be needed thank you	negative:clean
+sentence		I'd like to see some multiple sports venues	I'd like to see some multiple sports venues	negative:clean
+sentence		I'd like to go to cambridge	I'd like to go to cambridge	negative:clean
+sentence		Please recommend one and book it for six people	Please recommend one and book it for six people	negative:clean
+sentence		It will be for two nights	It will be for two nights	negative:clean
+sentence		attraction type and an entrance fee if any	attraction type and an entrance fee if any	negative:clean
+sentence		I'm looking for an attraction called williams art and antiques	I'm looking for an attraction called williams art and antiques	negative:clean
+sentence		Do any of them specialize in chinese	Do any of them specialize in chinese	negative:clean
+sentence		No there is not	No there is not	negative:clean
+sentence		and the reference number	and the reference number	negative:clean
+sentence		What was to total travel time for that train booking	What was to total travel time for that train booking	negative:clean
+sentence		what's the departure time and price	what's the departure time and price	negative:clean
+sentence		but need some help finding a certain restaurant	but need some help finding a certain restaurant	negative:clean
+sentence		what are my three choices before we make a reservation	what are my three choices before we make a reservation	negative:clean
+sentence		how about starting on friday	how about starting on friday	negative:clean
+sentence		I'm just gathering information	I'm just gathering information	negative:clean
+sentence		I'm looking for a train from cambridge please	I'm looking for a train from cambridge please	negative:clean
+sentence		European would be nice	European would be nice	negative:clean
+sentence		Thank you for the address	Thank you for the address	negative:clean
+sentence		we'll take the expensive one	we'll take the expensive one	negative:clean
+sentence		what nightclubs are in cambridge	what nightclubs are in cambridge	negative:clean
+sentence		There are no brazilian restaurants anywhere in cambridge	There are no brazilian restaurants anywhere in cambridge	negative:clean
+sentence		and post code please	and post code please	negative:clean
+sentence		Just get me the address	Just get me the address	negative:clean
+sentence		Any cheap italian restaurant on the north side	Any cheap italian restaurant on the north side	negative:clean
+sentence		What is the contact number for the taxi	What is the contact number for the taxi	negative:clean
+sentence		Could you give me more info on that place then	Could you give me more info on that place then	negative:clean
+sentence		Thank you good bye	Thank you good bye	negative:clean
+sentence		The restaurant is for six as well	The restaurant is for six as well	negative:clean
+sentence		What is the address and phone number	What is the address and phone number	negative:clean
+sentence		Before we do that	Before we do that	negative:clean
+sentence		Could you give me the name of the museum	Could you give me the name of the museum	negative:clean
+sentence		what part of town is the mumford in again	what part of town is the mumford in again	negative:clean
+sentence		can you assist me with that	can you assist me with that	negative:clean
+sentence		We'll be arriving on wednesday	We'll be arriving on wednesday	negative:clean
+sentence		Go ahead and book it	Go ahead and book it	negative:clean
+sentence		Yes that sounds good	Yes that sounds good	negative:clean
+sentence		I'll be coming from leicester	I'll be coming from leicester	negative:clean
+sentence		No on the phone number	No on the phone number	negative:clean
+sentence		Expensive range should do it	Expensive range should do it	negative:clean
+sentence		And that's the car make and contact number	And that's the car make and contact number	negative:clean
+sentence		make the reservation please	make the reservation please	negative:clean
+sentence		Just need to know what area it's in	Just need to know what area it's in	negative:clean
+sentence		Thank you for being so helpful	Thank you for being so helpful	negative:clean
+sentence		could you provide the postcode and star of the hotel	could you provide the postcode and star of the hotel	negative:clean
+sentence		could you try again	could you try again	negative:clean
+sentence		Thank you so much	Thank you so much	negative:clean
+sentence		Have a nice day also	Have a nice day also	negative:clean
+sentence		Thanks for all the info	Thanks for all the info	negative:clean
+sentence		Can you give me a car type and their number	Can you give me a car type and their number	negative:clean
+sentence		yes please book a taxi	yes please book a taxi	negative:clean
+sentence		as long as it has free parking	as long as it has free parking	negative:clean
+sentence		Can you suggest a french restaurant in the north end	Can you suggest a french restaurant in the north end	negative:clean
+sentence		do you know any restaurants near me in the city	do you know any restaurants near me in the city	negative:clean
+sentence		and I'm willing to pay quite a bit of money	and I'm willing to pay quite a bit of money	negative:clean
+sentence		I'll be going from the attraction to the hotel	I'll be going from the attraction to the hotel	negative:clean
+sentence		let's not worry about booking it just now	let's not worry about booking it just now	negative:clean
+sentence		could you give me the address and phone number	could you give me the address and phone number	negative:clean
+sentence		Thank you for the train and college information	Thank you for the train and college information	negative:clean
+sentence		If not tell me about turkish restaurants instead	If not tell me about turkish restaurants instead	negative:clean
+sentence		What kinds of things are there to do	What kinds of things are there to do	negative:clean
+sentence		Can you recommend a few	Can you recommend a few	negative:clean
+sentence		Money is no object	Money is no object	negative:clean
+sentence		For the same number of people	For the same number of people	negative:clean
+sentence		I'm also looking for information on all saints church	I'm also looking for information on all saints church	negative:clean
+sentence		What is the exact departure time	What is the exact departure time	negative:clean
+sentence		Can you find an attraction in the centre	Can you find an attraction in the centre	negative:clean
+sentence		I'm also looking for a cheap hotel to crash in	I'm also looking for a cheap hotel to crash in	negative:clean
+sentence		Can you find a hotel named worth house for me	Can you find a hotel named worth house for me	negative:clean
+sentence		Can you handle this also	Can you handle this also	negative:clean
+sentence		Perhaps the center of town	Perhaps the center of town	negative:clean
+sentence		It should be in the moderate price range	It should be in the moderate price range	negative:clean
+sentence		can you let me know if it has free parking	can you let me know if it has free parking	negative:clean
+sentence		I'd prefer a moderately priced place in the north	I'd prefer a moderately priced place in the north	negative:clean
+sentence		Any ideas for me	Any ideas for me	negative:clean
+sentence		I'm looking in particular for the mahal of cambridge	I'm looking in particular for the mahal of cambridge	negative:clean
+sentence		Can you recommend an expensive hotel in the north	Can you recommend an expensive hotel in the north	negative:clean
+sentence		the expensive price range please	the expensive price range please	negative:clean
+sentence		Thanks for your help today	Thanks for your help today	negative:clean
+sentence		and phone number of one of them	and phone number of one of them	negative:clean
+sentence		Can we try three nights	Can we try three nights	negative:clean
+sentence		Go ahead and make a reservation please	Go ahead and make a reservation please	negative:clean
+sentence		and phone number for golden house	and phone number for golden house	negative:clean
+sentence		Do you have a reference number	Do you have a reference number	negative:clean
+sentence		That's all the information I'm looking for	That's all the information I'm looking for	negative:clean
+sentence		Area does not matter	Area does not matter	negative:clean
+sentence		Could you tell me the name of that architecture attraction	Could you tell me the name of that architecture attraction	negative:clean
+sentence		And there has been a change in plans	And there has been a change in plans	negative:clean
+sentence		Can you recommend one and give me the address	Can you recommend one and give me the address	negative:clean
+sentence		Is there a train for that	Is there a train for that	negative:clean
+sentence		Can you please give me the reference number as well	Can you please give me the reference number as well	negative:clean
+sentence		Would you mind suggesting one to visit	Would you mind suggesting one to visit	negative:clean
+sentence		I'm looking for a restaurant in the city centre	I'm looking for a restaurant in the city centre	negative:clean
+sentence		I'm departing from cambridge	I'm departing from cambridge	negative:clean
+sentence		The area should be the centre	The area should be the centre	negative:clean
+sentence		I'll just set my alarm extra loud	I'll just set my alarm extra loud	negative:clean
+sentence		what about the type of a museum	what about the type of a museum	negative:clean
+sentence		Actually I'm more interested in middle eastern foods	Actually I'm more interested in middle eastern foods	negative:clean
+sentence		just please give me the travel time	just please give me the travel time	negative:clean
+sentence		Can you help me book a ticket	Can you help me book a ticket	negative:clean

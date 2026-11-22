@@ -1,0 +1,603 @@
+# AnIME ood_tm2_v1：Taskmaster-2 (Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/) USER 话轮
+# food-ordering / music / sports / movies 领域；仅评测，L2 构建按 eval/** 去泄漏；seed=20261123；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核
+# category	context	input	expected	notes
+sentence		i'm looking or two cheese burgers with pickles	I'm looking for two cheese burgers with pickles	noise:leading_drop
+sentence		what's the nearest theater ear me	What's the nearest theater near me	noise:leading_drop
+sentence		great i'll go at ight	great I'll go at night	noise:leading_drop
+sentence		show me newer music y katy perry	Show me newer music by Katy perry	noise:leading_drop
+sentence		what ime does sing play	What time does sing play	noise:leading_drop
+sentence		what's he record of the kansas city royals	What's the record of the kansas city royals	noise:leading_drop
+sentence		like every song on it's eally good	Like every song on it's really good	noise:leading_drop
+sentence		what time are hey playing and which location	What time are they playing and which location	noise:leading_drop
+sentence		i'll ee a trailer	I'll see a trailer	noise:leading_drop
+sentence		that sounds really ool	That sounds really cool	noise:leading_drop
+sentence		he name of the theater	The name of the theater	noise:leading_drop
+sentence		just give me any ind of pop music	Just give me any kind of pop music	noise:leading_drop
+sentence		who do they play after they play he raptors	Who do they play after they play the raptors	noise:leading_drop
+sentence		what's he record for the la galaxy	What's the record for the la galaxy	noise:leading_drop
+sentence		and what time is it playing at he nearest theater	And what time is it playing at the nearest theater	noise:leading_drop
+sentence		can you play me something rom a different album	Can you play me something from a different album	noise:leading_drop
+sentence		what's the score of their last ame	What's the score of their last game	noise:leading_drop
+sentence		so how much is t in hulu plus	so how much is it in hulu plus	noise:leading_drop
+sentence		what was the score of their ame	What was the score of their game	noise:leading_drop
+sentence		who's in first place in the national eague list	Who's in first place in the national league list	noise:leading_drop
+sentence		nd thanks a lot for assistance	and thanks a lot for assistance	noise:leading_drop
+sentence		his is a really great choice assistant	This is a really great choice assistant	noise:leading_drop
+sentence		i'm not really ure	I'm not really sure	noise:leading_drop
+sentence		this is n awful song	This is an awful song	noise:leading_drop
+sentence		we're thinking about o watch a comedy	We're thinking about to watch a comedy	noise:leading_drop
+sentence		i'm trying to find new artists o listen to	I'm trying to find new artists to listen to	noise:leading_drop
+sentence		i'd ike to watch aliens movie	I'd like to watch aliens movie	noise:leading_drop
+sentence		can you tell e what place they're in right now	Can you tell me what place they're in right now	noise:leading_drop
+sentence		how about ridge of spies	How about bridge of spies	noise:leading_drop
+sentence		who do they play in their ext game	Who do they play in their next game	noise:leading_drop
+sentence		can you help me with placing n order	Can you help me with placing an order	noise:leading_drop
+sentence		could you tell me what s their current record	Could you tell me what is their current record	noise:leading_drop
+sentence		what lace are the charlotte hornets in	What place are the charlotte hornets in	noise:leading_drop
+sentence		one more ong i'll do it	One more song I'll do it	noise:leading_drop
+sentence		can you see if the ong gas panic	Can you see if the song gas panic	noise:leading_drop
+sentence		can you find me another ong from the eagles	Can you find me another song from the eagles	noise:leading_drop
+sentence		go let t out	Go let it out	noise:leading_drop
+sentence		ll kinds of stuff	all kinds of stuff	noise:leading_drop
+sentence		it makes me think of ld school holiday songs	It makes me think of old school holiday songs	noise:leading_drop
+sentence		i'll just take that one hen	I'll just take that one then	noise:leading_drop
+sentence		who is first place in the national league ast	Who is first place in the national league east	noise:boundary_gemination
+sentence		what kind of rotten tomatoes core is it in	What kind of rotten tomatoes score is it in	noise:boundary_gemination
+sentence		yes and a side of fries and a sweet ea	Yes and a side of fries and a sweet tea	noise:boundary_gemination
+sentence		what are people saying about he mummy like the critics	What are people saying about the mummy like the critics	noise:boundary_gemination
+sentence		how close is the theater from y house	How close is the theater from my house	noise:boundary_gemination
+sentence		how is porting kansas city doing	how is sporting kansas city doing	noise:boundary_gemination
+sentence		what ime does the movie time for rogue one	What time does the movie time for rogue one	noise:boundary_gemination
+sentence		let me get hree tickets	Let me get three tickets	noise:boundary_gemination
+sentence		they're a football eague	They're a football league	noise:boundary_gemination
+sentence		i'd like to go ahead and rent hat	I'd like to go ahead and rent that	noise:boundary_gemination
+sentence		like a slower christmas ong	like a slower christmas song	noise:boundary_gemination
+sentence		something that was at he big box office hit	something that was at the big box office hit	noise:boundary_gemination
+sentence		i'd like to find the song as panic	I'd like to find the song gas panic	noise:boundary_gemination
+sentence		give me the times for ough night	Give me the times for rough night	noise:boundary_gemination
+sentence		that's not a bad eal	That's not a bad deal	noise:boundary_gemination
+sentence		my favorite team is wansea city	My favorite team is swansea city	noise:boundary_gemination
+sentence		what place are brighton in the nglish premier league soccer	What place are brighton in the english premier league soccer	noise:boundary_gemination
+sentence		is that near times quare	is that near times square	noise:boundary_gemination
+sentence		where is the closest heater	Where is the closest theater	noise:boundary_gemination
+sentence		you tried your best o get these songs to play	you tried your best to get these songs to play	noise:boundary_gemination
+sentence		i'm looking for a movie to buy or ent	I'm looking for a movie to buy or rent	noise:boundary_gemination
+sentence		i'd like to rder three orders of pad thai	I'd like to order three orders of pad thai	noise:boundary_gemination
+sentence		is that o purchase or to rent	Is that to purchase or to rent	noise:boundary_gemination
+sentence		do you know hat they're playing right now	Do you know what they're playing right now	noise:boundary_gemination
+sentence		i'm a fan of the san jose arthquakes	I'm a fan of the san Jose earthquakes	noise:boundary_gemination
+sentence		what are some movie times at he theater	What are some movie times at the theater	noise:boundary_gemination
+sentence		tell me more about he prestige	Tell me more about the prestige	noise:boundary_gemination
+sentence		do you know hat place atlanta united fc is in	do you know what place atlanta united fc is in	noise:boundary_gemination
+sentence		and how many goals have ach of them scored	And how many goals have each of them scored	noise:boundary_gemination
+sentence		and who's their home run leader ight now	And who's their home run leader right now	noise:boundary_gemination
+sentence		so they are in the astern conference	so they are in the eastern conference	noise:boundary_gemination
+sentence		how far is the theater from y location	how far is the theater from my location	noise:boundary_gemination
+sentence		who did the packers play last ime	Who did the packers play last time	noise:boundary_gemination
+sentence		just o change up once more	Just to change up once more	noise:boundary_gemination
+sentence		play ou think you could just find a female singer	Play you think you could just find a female singer	noise:boundary_gemination
+sentence		something with igh ratings on rotten tomatoes	Something with high ratings on rotten tomatoes	noise:boundary_gemination
+sentence		what ime is snatched playing	What time is snatched playing	noise:boundary_gemination
+sentence		rotten tomatoes rating should be ight	Rotten tomatoes rating should be eight	noise:boundary_gemination
+sentence		can you please play a different rack	Can you please play a different track	noise:boundary_gemination
+sentence		i've heard of all day but not he savages	I've heard of all day but not the savages	noise:boundary_gemination
+sentence		can yo uplay me a song by led zeppelin	Can you play me a song by led zeppelin	noise:space_shift
+sentence		how did the jaguars do in their las tgame	How did the jaguars do in their last game	noise:space_shift
+sentence		i'm looking for two cheese burgersw ith pickles	I'm looking for two cheese burgers with pickles	noise:space_shift
+sentence		this ones ounds very good	This one sounds very good	noise:space_shift
+sentence		a die tcoke or pepsi	A diet coke or Pepsi	noise:space_shift
+sentence		i'm an english premier leagu efootball fan	I'm an english premier league football fan	noise:space_shift
+sentence		this is a goods ong as well	This is a good song as well	noise:space_shift
+sentence		what is the cleveland brown srecord	What is the cleveland browns record	noise:space_shift
+sentence		i'm lookin gfor a movie to watch at night	I'm looking for a movie to watch at night	noise:space_shift
+sentence		i'd likeh elp listening to the music of blake shelton	I'd like help listening to the music of blake Shelton	noise:space_shift
+sentence		coul dyou tell me what place is toronto fc in	Could you tell me what place is toronto fc in	noise:space_shift
+sentence		i'd like to listen to travi sscott	I'd like to listen to Travis scott	noise:space_shift
+sentence		louisc ardinals do in their last game	Louis cardinals do in their last game	noise:space_shift
+sentence		can we cancelt he messengers	Can we cancel the messengers	noise:space_shift
+sentence		a larg eorder of pad thai	a large order of pad thai	noise:space_shift
+sentence		is that moviec ritically acclaimed	Is that movie critically acclaimed	noise:space_shift
+sentence		like a pillow thaty ou sleep on	like a pillow that you sleep on	noise:space_shift
+sentence		whend id the cubs play last	When did the cubs play last	noise:space_shift
+sentence		tha tshould be all for me	that should be all for me	noise:space_shift
+sentence		which team is behinda nd by how many games	Which team is behind and by how many games	noise:space_shift
+sentence		i'm interested in burnleya nd west bromwich	I'm interested in burnley and west bromwich	noise:space_shift
+sentence		either of the teams gotten into disciplinar ytrouble	Either of the teams gotten into disciplinary trouble	noise:space_shift
+sentence		can you find anythinge lse played mr	Can you find anything else played Mr	noise:space_shift
+sentence		can you make sure we get utensils wit hthat	Can you make sure we get utensils with that	noise:space_shift
+sentence		give me dramaticm ovie	Give me dramatic movie	noise:space_shift
+sentence		maybe one of her newer song slike a million reasons	Maybe one of her newer songs like a million reasons	noise:space_shift
+sentence		wha ttheater is that in	What theater is that in	noise:space_shift
+sentence		now let's get to thef irst one	Now let's get to the first one	noise:space_shift
+sentence		can you send me thet ickets	Can you send me the tickets	noise:space_shift
+sentence		can you tell me whatp lace they're in right now	Can you tell me what place they're in right now	noise:space_shift
+sentence		find a theate rnearby	Find a theater nearby	noise:space_shift
+sentence		that wasr eally helpful	that was really helpful	noise:space_shift
+sentence		is thi sthe carpenters	Is this the carpenters	noise:space_shift
+sentence		we'll go and playt hat video	We'll go and play that video	noise:space_shift
+sentence		i'm going to go ge tthis movie then	I'm going to go get this movie then	noise:space_shift
+sentence		lettuce and three largeb ites	lettuce and three large bites	noise:space_shift
+sentence		what record righ tnow does liverpool have	What record right now does liverpool have	noise:space_shift
+sentence		that's no tbad at all	That's not bad at all	noise:space_shift
+sentence		how is crysta lpalace doing	How is crystal palace doing	noise:space_shift
+sentence		who is the huddersfiel dtown striker	Who is the huddersfield town striker	noise:space_shift
+sentence		do you have any other opt ions	do you have any other options	noise:space_extra
+sentence		what time is that movie playi ng	What time is that movie playing	noise:space_extra
+sentence		that's another gre at tune	That's another great tune	noise:space_extra
+sentence		give me the late st show you have	Give me the latest show you have	noise:space_extra
+sentence		who's the goal keeper for tottenham	Who's the goalkeeper for tottenham	noise:space_extra
+sentence		well i'm fini shed after that	Well I'm finished after that	noise:space_extra
+sentence		could you please tell me who their goal ke eper is	could you please tell me who their goal keeper is	noise:space_extra
+sentence		have a good rest of your eve ning	Have a good rest of your evening	noise:space_extra
+sentence		i'd like to see a hor ror film	I'd like to see a horror film	noise:space_extra
+sentence		i'm looking for a doc umentary	I'm looking for a documentary	noise:space_extra
+sentence		i'm looking for a good mo vie to see tonight	I'm looking for a good movie to see tonight	noise:space_extra
+sentence		how many ga mes back are the toronto blue jays	How many games back are the toronto blue jays	noise:space_extra
+sentence		can you change it to lime pop mus ic now	Can you change it to lime pop music now	noise:space_extra
+sentence		with whom they are goi ng to play next week	With whom they are going to play next week	noise:space_extra
+sentence		and what time it is screen ing	and what time it is screening	noise:space_extra
+sentence		what pla ce are arsenal in	What place are arsenal in	noise:space_extra
+sentence		what's the record for the colorado rap tors right now	what's the record for the colorado raptors right now	noise:space_extra
+sentence		last game that they pla yed	Last game that they played	noise:space_extra
+sentence		i'd like to or der greek food for two people	I'd like to order greek food for two people	noise:space_extra
+sentence		are there any good in die films	Are there any good indie films	noise:space_extra
+sentence		we got the cool holy mu sic	We got the cool holy music	noise:space_extra
+sentence		but who are the act ors then	but who are the actors then	noise:space_extra
+sentence		are the cubs playing ri ght now	Are the cubs playing right now	noise:space_extra
+sentence		preferably one that has a fe male lead character	Preferably one that has a female lead character	noise:space_extra
+sentence		how about same group but give me a dif ferent song	How about same group but give me a different song	noise:space_extra
+sentence		please ch ange it to a different artist	Please change it to a different artist	noise:space_extra
+sentence		and as for the major le ague soccer	And as for the major league soccer	noise:space_extra
+sentence		ta sty dinner tonight with your help	tasty dinner tonight with your help	noise:space_extra
+sentence		i'd like to see a mov ie	I'd like to see a movie	noise:space_extra
+sentence		and how many games is it poi nts to floor	and how many games is it points to floor	noise:space_extra
+sentence		the last game they pla yed	The last game they played	noise:space_extra
+sentence		i'd like two hot dogs with musta rd	I'd like two hot dogs with mustard	noise:space_extra
+sentence		now i'm wondering who's the current man ager for huddersfield town	Now I'm wondering who's the current manager for huddersfield town	noise:space_extra
+sentence		how many gam es have the colorado rockies won so far	How many games have the colorado rockies won so far	noise:space_extra
+sentence		you can't find their games sche dule	You can't find their games schedule	noise:space_extra
+sentence		a medium conta iner of that	a medium container of that	noise:space_extra
+sentence		i'm interest ed in the glass castle	I'm interested in the glass castle	noise:space_extra
+sentence		how many games have southampton play ed so far	How many games have southampton played so far	noise:space_extra
+sentence		wh ich teams are strongest rivals they went up against	which teams are strongest rivals they went up against	noise:space_extra
+sentence		and who's in last pla ce in the american league west	And who's in last place in the american league west	noise:space_extra
+sentence		who plays as centerfielder for the pittsburgh pirates	Who plays as center fielder for the pittsburgh pirates	noise:space_missing
+sentence		lookslike that should be good	Looks like that should be good	noise:space_missing
+sentence		you've done asuperb job once again	You've done a superb job once again	noise:space_missing
+sentence		how many goalshave they each scored	How many goals have they each scored	noise:space_missing
+sentence		thankyou for providing me information about the fc	thank you for providing me information about the fc	noise:space_missing
+sentence		can you tell me ifthe detroit tigers play today	Can you tell me if the detroit tigers play today	noise:space_missing
+sentence		i'd likesome help browsing the music of chicago	I'd like some help browsing the music of chicago	noise:space_missing
+sentence		what are mychoices	what are my choices	noise:space_missing
+sentence		a little bitmore new	a little bit more new	noise:space_missing
+sentence		how abouta thriller or horror suspense	How about a thriller or horror suspense	noise:space_missing
+sentence		i'd like some help browsingclassical music	I'd like some help browsing classical music	noise:space_missing
+sentence		not thegreatest record	Not the greatest record	noise:space_missing
+sentence		this is apretty good band	this is a pretty good band	noise:space_missing
+sentence		thatshould be here for me	That should be here for me	noise:space_missing
+sentence		how aboutsomething offer chinese	How about something offer chinese	noise:space_missing
+sentence		seeif you can surprise me	see if you can surprise me	noise:space_missing
+sentence		this song's allright	This song's all right	noise:space_missing
+sentence		i'd liketo hear moth into the flame	I'd like to hear moth into the flame	noise:space_missing
+sentence		i'd like to hearanother david's bowie song	I'd like to hear another david's bowie song	noise:space_missing
+sentence		this one is a little bit moresmooth	This one is a little bit more smooth	noise:space_missing
+sentence		i'd liketo know about phoenix suns	I'd like to know about phoenix suns	noise:space_missing
+sentence		thank you for helping mewith that today	Thank you for helping me with that today	noise:space_missing
+sentence		andwho the voices for batman	And who the voices for batman	noise:space_missing
+sentence		preferably in theevening	Preferably in the evening	noise:space_missing
+sentence		the interview probablywhat year was that one	The interview probably what year was that one	noise:space_missing
+sentence		that's acute one	that's a cute one	noise:space_missing
+sentence		who is the starting goalkeeperfor everton	Who is the starting goalkeeper for everton	noise:space_missing
+sentence		a side of yellowrice	a side of yellow rice	noise:space_missing
+sentence		what placeare the atlanta united fc at	What place are the atlanta united fc at	noise:space_missing
+sentence		what is stoke city's recordright now	What is stoke city's record right now	noise:space_missing
+sentence		i'm trying to find somemusic to listen to	I'm trying to find some music to listen to	noise:space_missing
+sentence		one ofthe best songs ever	One of the best songs ever	noise:space_missing
+sentence		and whois the king's starting center	And who is the king's starting center	noise:space_missing
+sentence		let me take oneticket	Let me take one ticket	noise:space_missing
+sentence		thank you verymuch have a great and wonderful day	Thank you very much have a great and wonderful day	noise:space_missing
+sentence		i'm near theuniversity	I'm near the university	noise:space_missing
+sentence		do you think theywill win their next game	Do you think they will win their next game	noise:space_missing
+sentence		arethe baltimore orioles playing right now	Are the baltimore orioles playing right now	noise:space_missing
+sentence		that came outrecently	that came out recently	noise:space_missing
+sentence		who are they scheduledto play next	who are they scheduled to play next	noise:space_missing
+sentence		show me more mueic of similar genre	Show me more music of similar genre	noise:adjacent_key
+sentence		i'd likr to hear some music by jackson brown	I'd like to hear some music by jackson brown	noise:adjacent_key
+sentence		current replying your movile receiver	Current replying your mobile receiver	noise:adjacent_key
+sentence		he looks lioe a thumb	He looks like a thumb	noise:adjacent_key
+sentence		what conference are the buffapo bills in	what conference are the buffalo bills in	noise:adjacent_key
+sentence		let's try something probably loke one of his different albums	Let's try something probably like one of his different albums	noise:adjacent_key
+sentence		this movie looks reakly good	This movie looks really good	noise:adjacent_key
+sentence		could you play me nrw male artists	could you play me new male artists	noise:adjacent_key
+sentence		how much the tivket prices	How much the ticket prices	noise:adjacent_key
+sentence		do gou have anymore choices	Do you have anymore choices	noise:adjacent_key
+sentence		this song sounds realky cool actually	This song sounds really cool actually	noise:adjacent_key
+sentence		and how many games out of first place are thdy	And how many games out of first place are they	noise:adjacent_key
+sentence		who owns tye new york knicks	Who owns the new york knicks	noise:adjacent_key
+sentence		who play as tje catcher	Who play as the catcher	noise:adjacent_key
+sentence		but do you have something by a different artost	but do you have something by a different artist	noise:adjacent_key
+sentence		i'm wondering who is fheir manager at the moment	I'm wondering who is their manager at the moment	noise:adjacent_key
+sentence		what conference do the wadriors play in	What conference do the warriors play in	noise:adjacent_key
+sentence		i'm looking to buy spme breakfast	I'm looking to buy some breakfast	noise:adjacent_key
+sentence		i'm concerjed about ratings	I'm concerned about ratings	noise:adjacent_key
+sentence		how much are thd ticket prices	How much are the ticket prices	noise:adjacent_key
+sentence		play something by red hkt chili peppers	Play something by red hot chili peppers	noise:adjacent_key
+sentence		i'm located in new ykrk city near times square	I'm located in new york city near times square	noise:adjacent_key
+sentence		is that on betflix	Is that on Netflix	noise:adjacent_key
+sentence		could you fibd me something else	Could you find me something else	noise:adjacent_key
+sentence		that's pretty gpod to here	That's pretty good to here	noise:adjacent_key
+sentence		and how many games havw they played so far total	And how many games have they played so far total	noise:adjacent_key
+sentence		who will rhe play against next sunday	Who will the play against next sunday	noise:adjacent_key
+sentence		that would be like john widk	That would be like john wick	noise:adjacent_key
+sentence		do you knoa who their coach is	Do you know who their coach is	noise:adjacent_key
+sentence		can you tell me what's the nearesr theater playing it	Can you tell me what's the nearest theater playing it	noise:adjacent_key
+sentence		it's nice ahd mellow	It's nice and mellow	noise:adjacent_key
+sentence		it's a really catcuy	it's a really catchy	noise:adjacent_key
+sentence		who is the hrad coach of the phoenix suns	Who is the head coach of the phoenix suns	noise:adjacent_key
+sentence		i'm going to sde it	I'm going to see it	noise:adjacent_key
+sentence		sounds like a gkod deal	Sounds like a good deal	noise:adjacent_key
+sentence		whsre did they play last	Where did they play last	noise:adjacent_key
+sentence		is tom hanks in tnat	Is tom hanks in that	noise:adjacent_key
+sentence		what olace is stoke city in right now	What place is stoke city in right now	noise:adjacent_key
+sentence		i'm onterested in moonlight	I'm interested in moonlight	noise:adjacent_key
+sentence		what is tne atlanta united football clubs record	What is the atlanta united football clubs record	noise:adjacent_key
+context_realword	Tell me 	hen you're ready	when you're ready	noise:realword_edit when->hen
+context_realword	the atlanta hawks 	an the new york knicks	and the new york knicks	noise:realword_edit and->an
+context_realword	It's good 	go hear the fare	to hear the fare	noise:realword_edit to->go
+context_realword	But thank you for providing me 	wall this information	all this information	noise:realword_edit all->wall
+context_realword	about that movie's 	rating	ratings	noise:realword_edit ratings->rating
+context_realword	What's the top rated 	on	one	noise:realword_edit one->on
+context_realword	Let me 	heat something by radiohead	hear something by radiohead	noise:realword_edit hear->heat
+context_realword	I'm in what movie 	heater	theater	noise:realword_edit theater->heater
+context_realword	What was 	heir record	their record	noise:realword_edit their->heir
+context_realword	Just say a 	dirt coke	diet coke	noise:realword_edit diet->dirt
+context_realword	Have they acquired 	of traded any players recently	or traded any players recently	noise:realword_edit or->of
+context_realword	And do you know what it's 	rate	rated	noise:realword_edit rated->rate
+context_realword	who is favored to 	in	win	noise:realword_edit win->in
+context_realword	Would you know if they 	player today	played today	noise:realword_edit played->player
+context_realword	That's not 	top long to wait	too long to wait	noise:realword_edit too->top
+context_realword	What are the options 	gain	again	noise:realword_edit again->gain
+context_realword	and I'm excited to 	wee it	see it	noise:realword_edit see->wee
+context_realword	And could you 	fell me who's their goalkeeper	tell me who's their goalkeeper	noise:realword_edit tell->fell
+context_realword	How did they do 	hen they played last	when they played last	noise:realword_edit when->hen
+context_realword	Who's going to 	in the series	win the series	noise:realword_edit win->in
+context_realword	Can you rank them by user 	review	reviews	noise:realword_edit reviews->review
+context_realword	you could find it with billy crystal in 	if	it	noise:realword_edit it->if
+context_realword	in what place 	ware the la clippers in	are the la clippers in	noise:realword_edit are->ware
+context_realword	Okay tell me more 	bout that	about that	noise:realword_edit about->bout
+context_realword	She lite a fire by 	lore huron	lord huron	noise:realword_edit lord->lore
+context_realword	Could you possibly play some mariah 	carry christmas music	carey christmas music	noise:realword_edit carey->carry
+context_realword	I'm looking for a 	move to watch at home	movie to watch at home	noise:realword_edit movie->move
+context_realword	Can you reload 	kit	it	noise:realword_edit it->kit
+context_realword	Could you play music by 	fifty harmony	fifth harmony	noise:realword_edit fifth->fifty
+context_realword	I'd like to add one salad 	wit the house dressing	with the house dressing	noise:realword_edit with->wit
+context_realword	What's the record of the pittsburgh 	pirate	pirates	noise:realword_edit pirates->pirate
+context_realword	That will 	worm for me	work for me	noise:realword_edit work->worm
+context_realword	So it has good 	review	reviews	noise:realword_edit reviews->review
+context_realword	it can be 	bout anything	about anything	noise:realword_edit about->bout
+context_realword	How many games behind first place are 	hey	they	noise:realword_edit they->hey
+context_realword	And do you 	now who's pitching tonight	know who's pitching tonight	noise:realword_edit know->now
+context_realword	what's their finest 	bout	about	noise:realword_edit about->bout
+context_realword	A classic jazz 	gut	guy	noise:realword_edit guy->gut
+context_realword	I'm looking 	or something relatively new	for something relatively new	noise:realword_edit for->or
+context_realword	Who is in 	fist in the national league east	first in the national league east	noise:realword_edit first->fist
+sentence		ill take the covenant	I'll take the covenant	noise:contraction
+sentence		id like to listen to some hank williams	I'd like to listen to some hank williams	noise:contraction
+sentence		whos the star player of the chicago bulls	Who's the star player of the chicago bulls	noise:contraction
+sentence		who is first in their conference that theyre in	Who is first in their conference that they're in	noise:contraction
+sentence		im just looking for a showing	I'm just looking for a showing	noise:contraction
+sentence		ive just heard this one a lot of times	I've just heard this one a lot of times	noise:contraction
+sentence		not everyones the same	Not everyone's the same	noise:contraction
+sentence		sounds like theyre doing really well	Sounds like they're doing really well	noise:contraction
+sentence		lets go with the comedy	Let's go with the comedy	noise:contraction
+sentence		thats a pretty good prediction	That's a pretty good prediction	noise:contraction
+sentence		im not like in love with it	I'm not like in love with it	noise:contraction
+sentence		im in seattle near university of washington	I'm in seattle near university of washington	noise:contraction
+sentence		thats pretty much all im looking to get	That's pretty much all I'm looking to get	noise:contraction
+sentence		id like to do a comparison of two teams	I'd like to do a comparison of two teams	noise:contraction
+sentence		whats the rating for the last one	What's the rating for the last one	noise:contraction
+sentence		could you tell me whats out	could you tell me what's out	noise:contraction
+sentence		so far it doesnt sound that bad	So far it doesn't sound that bad	noise:contraction
+sentence		my last question is whos the leicester citys striker	My last question is who's the leicester city's striker	noise:contraction
+sentence		im done with that movie trailer	I'm done with that movie trailer	noise:contraction
+sentence		im looking for a movie to buy at my home	I'm looking for a movie to buy at my home	noise:contraction
+sentence		its called morning glory	It's called morning glory	noise:contraction
+sentence		ill take the first one	I'll take the first one	noise:contraction
+sentence		whos the starting small ford	Who's the starting small ford	noise:contraction
+sentence		im a fan of the san jose earthquakes	I'm a fan of the san Jose earthquakes	noise:contraction
+sentence		so ill just keep listening to this	So I'll just keep listening to this	noise:contraction
+sentence		thatll just be two people	That'll just be two people	noise:contraction
+sentence		thats not really similar	that's not really similar	noise:contraction
+sentence		id like to hear some music by taylor swift	I'd like to hear some music by taylor swift	noise:contraction
+sentence		so whats the highest rating on rotten tomatoes	So what's the highest rating on rotten tomatoes	noise:contraction
+sentence		id like to see an action movie	I'd like to see an action movie	noise:contraction
+sentence		id also prefer if it was a a film critic	I'd also prefer if it was a a film critic	noise:contraction
+sentence		whats the record of the milwaukee brewers	What's the record of the milwaukee brewers	noise:contraction
+sentence		whats the buffalo bills current record	What's the buffalo bills current record	noise:contraction
+sentence		im kinda interested on the post	I'm kinda interested on the post	noise:contraction
+sentence		lets try a drama this time in google play	Let's try a drama this time in google play	noise:contraction
+sentence		thats an upbeat song	That's an upbeat song	noise:contraction
+sentence		thats a song you can dance to	That's a song you can dance to	noise:contraction
+sentence		id like to try billie joel tonight	I'd like to try Billie joel tonight	noise:contraction
+sentence		im looking for one on the red box	I'm looking for one on the red box	noise:contraction
+sentence		im in st johns	I'm in st johns	noise:contraction
+sentence		i'm not real y sure	I'm not really sure	noise:multi
+sentence		i'm loo king to watch acrime kind of movie	I'm looking to watch a crime kind of movie	noise:multi
+sentence		co uld you pla ysomething else bythem	Could you play something else by them	noise:multi
+sentence		who's theirle ading scorer	Who's their leading scorer	noise:multi
+sentence		whatm ovies re coming out omorrow	What movies are coming out tomorrow	noise:multi
+sentence		i'm going to buyt he ifth harmony songs	I'm going to buy the fifth harmony songs	noise:multi
+sentence		who the br owns play nextw eek	Who the browns play next week	noise:multi
+sentence		what are thetimes fo rfate of the fu rious	What are the times for fate of the furious	noise:multi
+sentence		it's called gr eeb light	It's called green light	noise:multi
+sentence		what time is la lap and at	What time is la la land at	noise:multi
+sentence		i've heard oo dth ings about it	I've heard good things about it	noise:multi
+sentence		do you know hen their nedt game is	Do you know when their next game is	noise:multi
+sentence		what's theirc hances that they're inthe playoffs	what's their chances that they're in the playoffs	noise:multi
+sentence		a team thatp lays in the national basmetball association	a team that plays in the national basketball association	noise:multi
+sentence		whatcan you tell me about liverpool and sto ke city	what can you tell me about liverpool and stoke city	noise:multi
+sentence		that sounds i'll have o pick upthat album	That sounds I'll have to pick up that album	noise:multi
+sentence		and what about the beau tyand the beast	And what about the beauty and the beast	noise:multi
+sentence		and ho willthey be playing in th eir next game	And who will they be playing in their next game	noise:multi
+sentence		can you give me the synops is f la la land	Can you give me the synopsis of la la land	noise:multi
+sentence		who is the head coach of the phkeni xsuns	Who is the head coach of the phoenix suns	noise:multi
+sentence		what is the current standing inthe le ague	What is the current standing in the league	noise:multi
+sentence		i'm wondering ho is the cu rrent manager for everton	I'm wondering who is the current manager for everton	noise:multi
+sentence		anh type of adventure ovie wouldbe great	Any type of adventure movie would be great	noise:multi
+sentence		i'm just notsu re which ones are out right now	I'm just not sure which ones are out right now	noise:multi
+sentence		what wasthe last mame	what was the last name	noise:multi
+sentence		and what's their ha nces of making to the playoffs	And what's their chances of making to the playoffs	noise:multi
+sentence		sou nds like they're doing really ell	Sounds like they're doing really well	noise:multi
+sentence		witg must ard and chili on it	With mustard and chili on it	noise:multi
+sentence		vre at thank you so much	Great thank you so much	noise:multi
+sentence		and who's in first plqce in the national eague west	And who's in first place in the national league west	noise:multi
+sentence		couldy ou get that one onamazon for me	Could you get that one on amazon for me	noise:multi
+sentence		i'd like to hear something from kendrick la mwr	I'd like to hear something from Kendrick Lamar	noise:multi
+sentence		i'm thinking something by ou rladypeace	I'm thinking something by our lady peace	noise:multi
+sentence		at hat time is it playingf or tomorrow or thursday	At what time is it playing for tomorrow or thursday	noise:multi
+sentence		couldyou plays omething that's ery popular	Could you play something that's very popular	noise:multi
+sentence		i'd loke three orders of sweet nd sour pork	I'd like three orders of sweet and sour pork	noise:multi
+sentence		what imes isit available	What times is it available	noise:multi
+sentence		i'll give it ano the rtry	I'll give it another try	noise:multi
+sentence		it's pretty good cjill usic	It's pretty good chill music	noise:multi
+sentence		and who's the starting point guardfor the indi ana pacers	And who's the starting point guard for the indiana pacers	noise:multi
+sentence		and myfinal queztion	And my final question	noise:multi
+sentence		whom did ne wcastle play ast	Whom did newcastle play last	noise:multi
+sentence		and a bo ttle of ed wine also	And a bottle of red wine also	noise:multi
+sentence		how are the texas ra ngers oing	How are the texas rangers doing	noise:multi
+sentence		and whoks their goal keeper	And who is their goal keeper	noise:multi
+sentence		in hewestern conference	In the western conference	noise:multi
+sentence		we'll ust goaith wonder woman	We'll just go with wonder woman	noise:multi
+sentence		who's tyei rcoach this year	Who's their coach this year	noise:multi
+sentence		maybe i'm interwsted in girl on the rain	maybe I'm interested in girl on the train	noise:multi
+sentence		we'll justneedt wo	we'll just need two	noise:multi
+sentence		it is oma yfor me	It is okay for me	noise:multi
+sentence		you just answered my nex tq uestion	You just answered my next question	noise:multi
+sentence		i'm looking to rent one through huluplus	I'm looking to rent one through hulu plus	noise:multi
+sentence		can you tdll me the atl anta braves record	Can you tell me the atlanta braves record	noise:multi
+sentence		somethin glikea crime	Something like a crime	noise:multi
+sentence		that was new ome	That was new to me	noise:multi
+sentence		who did liverpoolplay lzst	Who did liverpool play last	noise:multi
+sentence		andrelish n them	and relish on them	noise:multi
+sentence		play me from he same simil ar artist	Play me from the same similar artist	noise:multi
+sentence		sothanj you for your help	so thank you for your help	noise:multi
+sentence		all op old movie sthat are top rated	All top old movies that are top rated	noise:multi
+sentence		whoever actre ss has that under her elt	whoever actress has that under her belt	noise:multi
+sentence		i'm kooking for a ew released movie	I'm looking for a new released movie	noise:multi
+sentence		i'd like to order ake out mexican for two peop le	I'd like to order take out mexican for two people	noise:multi
+sentence		is that theonly team they lay nextw eek	is that the only team they play next week	noise:multi
+sentence		this unds like really nice	This sounds like really nice	noise:multi
+sentence		somethingthat woul dmake me dance	Something that would make me dance	noise:multi
+sentence		which one hasthe est reviews on rotten tomatoes	Which one has the best reviews on rotten tomatoes	noise:multi
+sentence		anywesfern for me to watch	Any western for me to watch	noise:multi
+sentence		what's he current winloss record	What's the current win loss record	noise:multi
+sentence		howwell is west bromwich oint right now	How well is west bromwich doing right now	noise:multi
+sentence		something that's faurly newrelease	Something that's fairly new release	noise:multi
+sentence		hat one's a perfectsong	That one's a perfect song	noise:multi
+sentence		give mesome optio ns	Give me some options	noise:multi
+sentence		what lace are the los angeles lakersin	What place are the Los Angeles lakers in	noise:multi
+sentence		lo ui scardinals play next sunday	Louis cardinals play next sunday	noise:multi
+sentence		i'm watchkngat home	I'm watching at home	noise:multi
+sentence		this one isn't llayingfor me in the window	This one isn't playing for me in the window	noise:multi
+sentence		i'll take twot ick ets tonight	I'll take two tickets tonight	noise:multi
+sentence		i'd like o see a good part ner movie	I'd like to see a good partner movie	noise:multi
+sentence		do you know what place the chicago cubs are in	do you know what place the chicago cubs are in	negative:clean
+sentence		Who is the most likely to win that game	Who is the most likely to win that game	negative:clean
+sentence		Let me get two waters	Let me get two waters	negative:clean
+sentence		which he is not singing by himself	which he is not singing by himself	negative:clean
+sentence		What team is dc united playing next	What team is dc united playing next	negative:clean
+sentence		What's the first world series the oakland athletics won	What's the first world series the oakland athletics won	negative:clean
+sentence		I'm trying to pick a movie night with my friends	I'm trying to pick a movie night with my friends	negative:clean
+sentence		Something fairly new with good audience ratings	Something fairly new with good audience ratings	negative:clean
+sentence		He's one of my favorite players	He's one of my favorite players	negative:clean
+sentence		How is sporting kansas city doing at the moment	How is sporting kansas city doing at the moment	negative:clean
+sentence		tell me about boss baby	tell me about boss baby	negative:clean
+sentence		What other dramas do you have available	What other dramas do you have available	negative:clean
+sentence		Maybe one that's recent	Maybe one that's recent	negative:clean
+sentence		a side of french fries	a side of french fries	negative:clean
+sentence		Which one has high ratings on rotten tomatoes	Which one has high ratings on rotten tomatoes	negative:clean
+sentence		Can you please name them	Can you please name them	negative:clean
+sentence		Let's go see hidden figures	Let's go see hidden figures	negative:clean
+sentence		What about a romantic comedy	What about a romantic comedy	negative:clean
+sentence		and which conference are they in	and which conference are they in	negative:clean
+sentence		Okay and results for sports in western conference	Okay and results for sports in western conference	negative:clean
+sentence		I'd like to get two tickets	I'd like to get two tickets	negative:clean
+sentence		Can you tell me the record to leicester city	Can you tell me the record to leicester city	negative:clean
+sentence		Could you give me some information about major league baseball	Could you give me some information about major league baseball	negative:clean
+sentence		Play something by Kendrick Lamar	Play something by Kendrick Lamar	negative:clean
+sentence		I'm not looking for a theater	I'm not looking for a theater	negative:clean
+sentence		I'm looking to hear a song by oasis	I'm looking to hear a song by oasis	negative:clean
+sentence		that's great let's do that one	that's great let's do that one	negative:clean
+sentence		I've got two different orders	I've got two different orders	negative:clean
+sentence		And who currently is the manager of liverpool	And who currently is the manager of liverpool	negative:clean
+sentence		I'm sorry that video is not playing	I'm sorry that video is not playing	negative:clean
+sentence		they look like they are in first place	they look like they are in first place	negative:clean
+sentence		And can you tell me who is their goalkeeper	And can you tell me who is their goalkeeper	negative:clean
+sentence		Thanks for answering my questions about them	Thanks for answering my questions about them	negative:clean
+sentence		and that'll be it for me	and that'll be it for me	negative:clean
+sentence		Can you find me some	Can you find me some	negative:clean
+sentence		that would be helpful	that would be helpful	negative:clean
+sentence		I'm in new york city	I'm in new york city	negative:clean
+sentence		This one seems a little too close to the original	This one seems a little too close to the original	negative:clean
+sentence		Could you play a song by fifth harmony	Could you play a song by fifth harmony	negative:clean
+sentence		Could you tell me what time it's playing near me	Could you tell me what time it's playing near me	negative:clean
+sentence		He is played in a lot of good especially sully	He is played in a lot of good especially sully	negative:clean
+sentence		I'll go with american psycho	I'll go with american psycho	negative:clean
+sentence		for a thai beef sandwich	for a thai beef sandwich	negative:clean
+sentence		Chelsea and manchester city	Chelsea and manchester city	negative:clean
+sentence		Something that is recently out of the theater	Something that is recently out of the theater	negative:clean
+sentence		I've never heard of paper route	I've never heard of paper route	negative:clean
+sentence		Is west bromwich playing right now	Is west bromwich playing right now	negative:clean
+sentence		kind of like nightmare fuel	kind of like nightmare fuel	negative:clean
+sentence		I'm looking for a film to see in this year	I'm looking for a film to see in this year	negative:clean
+sentence		Have either team made any recent trades	Have either team made any recent trades	negative:clean
+sentence		You better take care now	You better take care now	negative:clean
+sentence		Who are the atlanta united football club playing today	Who are the atlanta united football club playing today	negative:clean
+sentence		In which conference are they in	In which conference are they in	negative:clean
+sentence		something that's new out there	something that's new out there	negative:clean
+sentence		And this one's blocked	And this one's blocked	negative:clean
+sentence		Play me that one	Play me that one	negative:clean
+sentence		Great and one of them is a child	Great and one of them is a child	negative:clean
+sentence		And the other one to be sausage and red pepper	And the other one to be sausage and red pepper	negative:clean
+sentence		I've never heard of him	I've never heard of him	negative:clean
+sentence		I'm looking for a good drama one	I'm looking for a good drama one	negative:clean
+sentence		What is the record of everton and swansea city	What is the record of everton and swansea city	negative:clean
+sentence		Who are some of the actors in those	Who are some of the actors in those	negative:clean
+sentence		and I'm looking to see a movie tonight	and I'm looking to see a movie tonight	negative:clean
+sentence		It's not really working for me	It's not really working for me	negative:clean
+sentence		Thank you for your tremendous help	Thank you for your tremendous help	negative:clean
+sentence		what actors are in that movie	what actors are in that movie	negative:clean
+sentence		Let's try a different song on the same album	Let's try a different song on the same album	negative:clean
+sentence		Some of their older stuff was pretty cool	Some of their older stuff was pretty cool	negative:clean
+sentence		that one is not playing	that one is not playing	negative:clean
+sentence		how are the detroit tigers doing	how are the detroit tigers doing	negative:clean
+sentence		this is the best one	this is the best one	negative:clean
+sentence		I'd like to get some spare ribs	I'd like to get some spare ribs	negative:clean
+sentence		The song is called by wrong way by sublime	The song is called by wrong way by sublime	negative:clean
+sentence		I'm interested in movie with billy crystal in them	I'm interested in movie with billy crystal in them	negative:clean
+sentence		Thank you for the suggestions	Thank you for the suggestions	negative:clean
+sentence		Where are they in the standings right now	Where are they in the standings right now	negative:clean
+sentence		With the salads and sweet potato fries	With the salads and sweet potato fries	negative:clean
+sentence		Show me different album	Show me different album	negative:clean
+sentence		He is a good player	He is a good player	negative:clean
+sentence		Which team is in last place in american league central	Which team is in last place in american league central	negative:clean
+sentence		I'd like to hear something by the rolling stones	I'd like to hear something by the rolling stones	negative:clean
+sentence		I'm looking for maybe a drama	I'm looking for maybe a drama	negative:clean
+sentence		And who did they play on last saturday	And who did they play on last saturday	negative:clean
+sentence		I'm going to like Roy woods	I'm going to like Roy woods	negative:clean
+sentence		How many games have everton played so far	How many games have everton played so far	negative:clean
+sentence		What other comedies are currently out	What other comedies are currently out	negative:clean
+sentence		Comedy that is highly rated	Comedy that is highly rated	negative:clean
+sentence		Three to five star	Three to five star	negative:clean
+sentence		I'm hoping you can help me	I'm hoping you can help me	negative:clean
+sentence		I'd like to order hot dogs for one	I'd like to order hot dogs for one	negative:clean
+sentence		I'm a fan of montreal impact	I'm a fan of montreal impact	negative:clean
+sentence		how many games back from first play are they	how many games back from first play are they	negative:clean
+sentence		so thank you for providing that info	so thank you for providing that info	negative:clean
+sentence		Can you tell me if they played today	Can you tell me if they played today	negative:clean
+sentence		Who is more likely to win this final	Who is more likely to win this final	negative:clean
+sentence		I've been meaning to watch this for a while	I've been meaning to watch this for a while	negative:clean
+sentence		Let me know the movie timing	Let me know the movie timing	negative:clean
+sentence		Can you tell me what city they play in	Can you tell me what city they play in	negative:clean
+sentence		It could be cool	It could be cool	negative:clean
+sentence		It's new to me	It's new to me	negative:clean
+sentence		I'm a kansas city chiefs fan	I'm a kansas city chiefs fan	negative:clean
+sentence		where are they located	where are they located	negative:clean
+sentence		How many years behind is the boston red sox	How many years behind is the boston red sox	negative:clean
+sentence		I'd like to order take out for three people	I'd like to order take out for three people	negative:clean
+sentence		A diet coke or Pepsi	A diet coke or Pepsi	negative:clean
+sentence		How did they do in the last game	How did they do in the last game	negative:clean
+sentence		How far is that	How far is that	negative:clean
+sentence		How about a similar song by a different artist	How about a similar song by a different artist	negative:clean
+sentence		What conference are the chicago bulls in	What conference are the chicago bulls in	negative:clean
+sentence		How can you play me another one	How can you play me another one	negative:clean
+sentence		but let's go for a different album	but let's go for a different album	negative:clean
+sentence		thank you very much for your help today	thank you very much for your help today	negative:clean
+sentence		I'd prefer action movies	I'd prefer action movies	negative:clean
+sentence		can you play something from their messengers album	can you play something from their messengers album	negative:clean
+sentence		Who is our coach	Who is our coach	negative:clean
+sentence		What's a time on saturday that you got	What's a time on saturday that you got	negative:clean
+sentence		Any any other choices	Any any other choices	negative:clean
+sentence		Tell me more about the big stick	Tell me more about the big stick	negative:clean
+sentence		It's up in new york city	It's up in new york city	negative:clean
+sentence		Is it available on google play to rent	Is it available on google play to rent	negative:clean
+sentence		today or out last weekend	today or out last weekend	negative:clean
+sentence		You gave me so good answers so	You gave me so good answers so	negative:clean
+sentence		How's war of the planet of the apes	How's war of the planet of the apes	negative:clean
+sentence		this is the last show	this is the last show	negative:clean
+sentence		Who is the starting point guard for the brooklyn nets	Who is the starting point guard for the brooklyn nets	negative:clean
+sentence		Maybe something with Elvis presley in it	Maybe something with Elvis presley in it	negative:clean
+sentence		This is a pretty good selection	This is a pretty good selection	negative:clean
+sentence		I've had of the band	I've had of the band	negative:clean
+sentence		Who won the last new york red bulls game	Who won the last new york red bulls game	negative:clean
+sentence		Now I'm looking for a song by the band oasis	Now I'm looking for a song by the band oasis	negative:clean
+sentence		Are the pirates playing on next sunday	Are the pirates playing on next sunday	negative:clean
+sentence		Like more of a ballad song	Like more of a ballad song	negative:clean
+sentence		Good thriller and I'm in times square	Good thriller and I'm in times square	negative:clean
+sentence		Who was their starting point guard	Who was their starting point guard	negative:clean
+sentence		That's available on amazon	That's available on amazon	negative:clean
+sentence		I'm looking to buy a movie at home	I'm looking to buy a movie at home	negative:clean
+sentence		definitely the one opening this week	definitely the one opening this week	negative:clean
+sentence		And my city is Los Angeles	And my city is Los Angeles	negative:clean
+sentence		Who are the actors in the movie underworld	Who are the actors in the movie underworld	negative:clean
+sentence		What place are the earthquakes in	What place are the earthquakes in	negative:clean
+sentence		That must have been a very exciting game	That must have been a very exciting game	negative:clean
+sentence		but I've heard this song plenty of times	but I've heard this song plenty of times	negative:clean
+sentence		I'm looking for help finding a movie	I'm looking for help finding a movie	negative:clean
+sentence		What is it rated	What is it rated	negative:clean
+sentence		Let's pick hard boiled	Let's pick hard boiled	negative:clean
+sentence		that's what I'm looking for	that's what I'm looking for	negative:clean
+sentence		What place is the west ham united team in	What place is the west ham united team in	negative:clean
+sentence		that's a pretty amount of games	that's a pretty amount of games	negative:clean
+sentence		How many divisions have the indians won	How many divisions have the indians won	negative:clean
+sentence		Once the beat kicks in	Once the beat kicks in	negative:clean
+sentence		That's one of my favorites	That's one of my favorites	negative:clean
+sentence		Where are they airing it	Where are they airing it	negative:clean
+sentence		I'd like to ask about the montreal impact	I'd like to ask about the montreal impact	negative:clean
+sentence		And what's the name of the theater it's playing at	And what's the name of the theater it's playing at	negative:clean
+sentence		Who will bournemouth play against next	Who will bournemouth play against next	negative:clean
+sentence		I'd like one giant bacon cheese dog	I'd like one giant bacon cheese dog	negative:clean
+sentence		Can you help me find new music	Can you help me find new music	negative:clean
+sentence		Cool and what was their score last game	Cool and what was their score last game	negative:clean
+sentence		I'd like to hear music by taylor swift	I'd like to hear music by taylor swift	negative:clean
+sentence		I'm done watching the trailer	I'm done watching the trailer	negative:clean
+sentence		maybe a movie with tom hanks	maybe a movie with tom hanks	negative:clean
+sentence		Either you say it again	Either you say it again	negative:clean
+sentence		it's correct and to be very specific	it's correct and to be very specific	negative:clean
+sentence		I'd like to rent a thriller tonight	I'd like to rent a thriller tonight	negative:clean
+sentence		What are some movie times at the theater	What are some movie times at the theater	negative:clean
+sentence		Could you play a song by lord huron	Could you play a song by lord huron	negative:clean
+sentence		Is manchester city playing right now	Is manchester city playing right now	negative:clean
+sentence		This song is too upbeat	This song is too upbeat	negative:clean
+sentence		I'd like to browse the music of Adele	I'd like to browse the music of Adele	negative:clean
+sentence		I'll just put that on my phone	I'll just put that on my phone	negative:clean
+sentence		Sometime in the evening	Sometime in the evening	negative:clean
+sentence		Who's the starting point guard from the indiana pacers	Who's the starting point guard from the indiana pacers	negative:clean
+sentence		Either one is fine	Either one is fine	negative:clean
+sentence		I'll go with that	I'll go with that	negative:clean
+sentence		Can you send me the details of where's it playing	Can you send me the details of where's it playing	negative:clean
+sentence		Can you play something by Metallica	Can you play something by Metallica	negative:clean
+sentence		Just chicken soup with extra chicken	Just chicken soup with extra chicken	negative:clean
+sentence		Who is the older team	Who is the older team	negative:clean
+sentence		They're one of my favorite teams	They're one of my favorite teams	negative:clean
+sentence		Who won that game	Who won that game	negative:clean
+sentence		I'm hope that you can help me to find one	I'm hope that you can help me to find one	negative:clean
+sentence		it can be or it cannot	it can be or it cannot	negative:clean
+sentence		On what service is it available	On what service is it available	negative:clean
+sentence		I'd like to order some pizza	I'd like to order some pizza	negative:clean
+sentence		I'm wondering when was their last game	I'm wondering when was their last game	negative:clean
+sentence		let's go let's see that one	let's go let's see that one	negative:clean
+sentence		Who is their striker	Who is their striker	negative:clean
+sentence		Can you play me a song by Selena Gomez	Can you play me a song by Selena Gomez	negative:clean
+sentence		but this is really nice	but this is really nice	negative:clean
+sentence		That's actually pretty good	That's actually pretty good	negative:clean
+sentence		Who is there goalkeeper	Who is there goalkeeper	negative:clean
+sentence		I'm good with that	I'm good with that	negative:clean
+sentence		what is the other timing in the late night shows	what is the other timing in the late night shows	negative:clean
+sentence		this definitely looks like it'll do	this definitely looks like it'll do	negative:clean
+sentence		Ask when did they play the game	Ask when did they play the game	negative:clean
+sentence		Let me say something	Let me say something	negative:clean
+sentence		That sounds like a pretty good deal	That sounds like a pretty good deal	negative:clean
+sentence		This is really a good one	This is really a good one	negative:clean
+sentence		Could you repeat the question	Could you repeat the question	negative:clean
+sentence		Can you tell me what place crystal palace are in	Can you tell me what place crystal palace are in	negative:clean
