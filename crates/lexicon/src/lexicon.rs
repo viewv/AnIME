@@ -304,7 +304,7 @@ impl Lexicon {
             };
             let (terminal_hits, completion_hits) =
                 self.trie
-                    .fuzzy_search_with_width(&needle, eff_edit, 3, eff_beam);
+                    .fuzzy_search_with_width(&needle, eff_edit, 5, eff_beam);
 
             for hit in terminal_hits {
                 let slot = &self.words[hit.word_id as usize];

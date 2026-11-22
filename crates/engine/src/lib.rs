@@ -5,7 +5,7 @@ mod confusables;
 
 use std::collections::HashMap;
 
-use anime_lexicon::{LexiconCandidate, LexiconProvider, QueryOptions};
+use anime_lexicon::{LexiconCandidate, LexiconMatchKind, LexiconProvider, QueryOptions};
 use anime_lm_neural::{NeuralCandidate, NeuralSentenceModel};
 use anime_lm_ngram::{LatticeSlot, NgramModel, SlotCandidate};
 use anime_protocol::{
@@ -518,6 +518,11 @@ where
             }
 
             expand_slot_confusables(tok, &mut slot_cands, has_prev_word_ctx);
+            slot_cands.sort_by(|a, b| {
+                b.lex_score
+                    .total_cmp(&a.lex_score)
+                    .then_with(|| a.word.cmp(&b.word))
+            });
 
             for sc in slot_cands {
                 let low = sc.word.to_ascii_lowercase();
@@ -558,8 +563,16 @@ where
                 if slot_idx == 0 {
                     first_hits = hits.iter().take(2).cloned().collect();
                 }
+                let is_closed_word = slot_idx + 1 < tokens.len() || self.preedit.ends_with(' ');
+                let has_exact_hit = hits.iter().any(|h| h.kind == LexiconMatchKind::Exact);
                 let mut slot_cands: Vec<SlotCandidate> = hits
                     .into_iter()
+                    .filter(|h| {
+                        // 已按空格闭合的非末尾精确合法词不扩展前缀补全，避免无故变成长词（如 build->building）
+                        !(is_closed_word
+                            && has_exact_hit
+                            && h.kind == LexiconMatchKind::Completion)
+                    })
                     .map(|h| SlotCandidate {
                         word: h.word,
                         lex_score: h.score,
@@ -572,6 +585,12 @@ where
                     });
                 }
                 expand_slot_confusables(tok, &mut slot_cands, true);
+                // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
+                slot_cands.sort_by(|a, b| {
+                    b.lex_score
+                        .total_cmp(&a.lex_score)
+                        .then_with(|| a.word.cmp(&b.word))
+                });
                 slots.push(LatticeSlot {
                     raw_token: tok.clone(),
                     start_char: *start_char,
@@ -1267,6 +1286,96 @@ mod tests {
         assert_eq!(
             pushed.candidates.last().map(|c| c.kind),
             Some(CandidateKind::Raw)
+        );
+    }
+
+    #[test]
+    fn closed_exact_word_skips_completions_and_confusables_survive_slot_cap() {
+        // 造出 >= 12 个以 "we" / "the" / "build" 开头的词，验证闭合精确词不会被扩展成前缀补全，
+        // 且 where/were/we're/wear 易混词不会被 MAX_CANDS_PER_SLOT=10 截断。
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("the", 7.7),
+                ("build", 5.8),
+                ("building", 6.2),
+                ("buildings", 5.9),
+                ("builder", 5.4),
+                ("passed", 5.6),
+                ("where", 6.8),
+                ("were", 6.7),
+                ("happy", 5.9),
+                ("whereby", 4.5),
+                ("wherein", 4.4),
+                ("whereof", 4.3),
+                ("whereas", 5.0),
+                ("wherever", 5.1),
+                ("wherewith", 3.5),
+                ("wheresoever", 3.2),
+                ("whereabouts", 4.2),
+                ("whereupon", 4.1),
+                ("wherefore", 4.0),
+                ("there", 6.6),
+                ("their", 6.5),
+                ("they're", 6.2),
+                ("coming", 5.7),
+                ("thereby", 5.0),
+                ("therefore", 5.5),
+                ("therein", 4.6),
+                ("thereof", 4.7),
+                ("thereon", 4.1),
+                ("thereto", 3.8),
+                ("therewith", 3.9),
+                ("theirs", 4.8),
+                ("themselves", 5.6),
+            ],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![
+                ("the", 900),
+                ("build", 200),
+                ("building", 600),
+                ("passed", 250),
+                ("there", 500),
+                ("their", 450),
+                ("they're", 420),
+                ("coming", 260),
+                ("where", 480),
+                ("were", 460),
+                ("happy", 240),
+            ],
+            vec![
+                ("the", "building", 180),
+                ("building", "passed", 140),
+                ("the", "build", 90),
+                ("build", "passed", 90),
+                ("they're", "coming", 160),
+                ("were", "happy", 150),
+            ],
+            Vec::<(&str, &str, &str, u32)>::new(),
+        );
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+        let st = feed_text(&mut sess, "the build passed");
+        assert!(
+            !st.candidates.iter().any(|c| c.text.contains("building")),
+            "closed exact word 'build' should not expand to 'building': {:?}",
+            st.candidates
+        );
+
+        sess.reset();
+        let st2 = feed_text(&mut sess, "there coming");
+        assert!(
+            st2.candidates.iter().any(|c| c.text == "they're coming"),
+            "expected confusable 'they're coming' inside candidates despite 10+ 'there*' completions: {:?}",
+            st2.candidates
+        );
+
+        sess.reset();
+        let st3 = feed_text(&mut sess, "where happy");
+        assert!(
+            st3.candidates.iter().any(|c| c.text == "were happy"),
+            "expected 'where' confusable 'were' inside candidates: {:?}",
+            st3.candidates
         );
     }
 }

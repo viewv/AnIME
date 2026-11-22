@@ -22,34 +22,83 @@ pub fn trim_context_tail(context_before: &str, max_chars: usize) -> &str {
     tail
 }
 
+fn longest_shared_word_prefix<'a>(non_empty: &[&'a str]) -> Option<&'a str> {
+    if non_empty.len() < 2 {
+        return None;
+    }
+    let first = non_empty[0];
+    let bytes = first.as_bytes();
+    let mut best_end: Option<usize> = None;
+    for (idx, &b) in bytes.iter().enumerate() {
+        if b != b' ' || idx == 0 || bytes[idx - 1] == b' ' {
+            continue;
+        }
+        let with_space_len = idx + 1;
+        let with_space = &first[..with_space_len];
+        let all_match = non_empty.iter().all(|&cand| {
+            cand.starts_with(with_space)
+                && !cand[with_space_len..]
+                    .trim_start_matches([' ', '\t'])
+                    .is_empty()
+        });
+        if all_match {
+            best_end = Some(idx);
+        }
+    }
+    best_end.map(|end| &first[..end])
+}
+
 /// 将 `context_before` 与候选列表规整为 BPE 友好的 `(shared_prefix, candidate_suffixes)`：
-/// 英文 BPE 分词器习惯将词前空格并入词 token（如 `Ġapple`），若保留前缀末尾空格再紧接无空格
-/// 候选词会导致前缀末空格单独成 token，显著扭曲对数概率。
+/// 1. 英文 BPE 分词器习惯将词前空格并入词 token（如 `Ġapple`），将前缀末尾空格挪至各候选开头避免孤立空格 token 扭曲概率；
+/// 2. 将所有非空候选共同拥有的整词边界前缀折叠进 `shared_prefix`——同一共同前缀的对数概率为常数，
+///    在零均值中心化 `normalize_rerank_scores` 后精确抵消，同时能复用前缀 KV-Cache 把多词整句后缀降至接近单步 O(1) decode。
 pub fn split_prefix_and_candidates(
     context_before: &str,
     candidates: &[String],
 ) -> (String, Vec<String>) {
     let tail = trim_context_tail(context_before, MAX_CONTEXT_CHARS);
     let has_trailing_space = tail.ends_with(' ') || tail.ends_with('\t');
-    let trimmed_prefix = tail.trim_end_matches([' ', '\t']).to_string();
-    let needs_leading_space =
+    let trimmed_prefix = tail.trim_end_matches([' ', '\t']);
+    let base_needs_space =
         has_trailing_space && !trimmed_prefix.is_empty() && !trimmed_prefix.ends_with(['\n', '\r']);
 
-    let formatted = candidates
-        .iter()
-        .map(|cand| {
-            let core = cand.trim();
+    let cores: Vec<&str> = candidates.iter().map(|cand| cand.trim()).collect();
+    let non_empty: Vec<&str> = cores.iter().copied().filter(|c| !c.is_empty()).collect();
+    let shared_words = longest_shared_word_prefix(&non_empty);
+
+    let (final_prefix, final_needs_space) = if let Some(words) = shared_words {
+        let mut combined = String::with_capacity(trimmed_prefix.len() + 1 + words.len());
+        combined.push_str(trimmed_prefix);
+        if base_needs_space {
+            combined.push(' ');
+        }
+        combined.push_str(words);
+        (combined, true)
+    } else {
+        (trimmed_prefix.to_string(), base_needs_space)
+    };
+
+    let formatted = cores
+        .into_iter()
+        .map(|core| {
             if core.is_empty() {
                 String::new()
-            } else if needs_leading_space {
-                format!(" {core}")
             } else {
-                core.to_string()
+                let tail_piece = if let Some(words) = shared_words {
+                    core[words.len()..].trim_start_matches([' ', '\t'])
+                } else {
+                    core
+                };
+                if final_needs_space {
+                    format!(" {tail_piece}")
+                } else {
+                    tail_piece.to_string()
+                }
             }
         })
         .collect();
 
-    (trimmed_prefix, formatted)
+    (final_prefix, formatted)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -173,6 +222,28 @@ mod tests {
         let (empty_ctx, cands2) = split_prefix_and_candidates("", &["apple".into()]);
         assert_eq!(empty_ctx, "");
         assert_eq!(cands2, vec!["apple"]);
+
+        // 候选整句共同词边界前缀折叠进 shared_prefix
+        let (fold_prefix, fold_cands) = split_prefix_and_candidates(
+            "",
+            &["we didn't see the bug".into(), "we didn't see the big".into()],
+        );
+        assert_eq!(fold_prefix, "we didn't see the");
+        assert_eq!(fold_cands, vec![" bug", " big"]);
+
+        let (fold_ctx, fold_ctx_cands) = split_prefix_and_candidates(
+            "Done. ",
+            &["The build passed".into(), "The build failed".into()],
+        );
+        assert_eq!(fold_ctx, "Done. The build");
+        assert_eq!(fold_ctx_cands, vec![" passed", " failed"]);
+
+        let (partial_prefix, partial_cands) = split_prefix_and_candidates(
+            "",
+            &["we see the".into(), "we see the bug".into()],
+        );
+        assert_eq!(partial_prefix, "we see");
+        assert_eq!(partial_cands, vec![" the", " the bug"]);
     }
 
     #[test]
