@@ -23,6 +23,7 @@ if str(SCRIPT_DIR) not in sys.path:
 import build_eval_benchmark  # noqa: E402
 import build_eval_v2  # noqa: E402
 import build_eval_v3  # noqa: E402
+import replay_local_log  # noqa: E402
 import build_ngram_kn  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
@@ -707,6 +708,31 @@ class TestEvalV3Builder(unittest.TestCase):
             self.assertTrue(all(len(c) >= 4 for c in a))
             self.assertEqual(len(a), len({" ".join(c) for c in a}))
             self.assertEqual(build_eval_v3.librispeech_holdout_clauses(gz, lex, bucket=0), [])
+
+
+class TestReplayLocalLog(unittest.TestCase):
+    def test_convert_categorizes_and_skips_malformed(self):
+        rows, skipped = replay_local_log.convert([
+            "# comment",
+            "\ti want o go\tI want to go",
+            "\tbeautif\tbeautiful",
+            "\tteh\tthe",
+            "Hello \tapple\tapple",
+            "only two\tcolumns",
+            "\t\tempty typed",
+        ])
+        cats = [r.split("\t")[0] for r in rows]
+        self.assertEqual(cats, ["sentence", "prefix", "typo_simple", "exact"])
+        self.assertTrue(all(r.endswith("\tsource:local") for r in rows))
+        self.assertEqual(skipped, 2)
+
+    def test_refuses_to_write_under_eval(self):
+        with tempfile.TemporaryDirectory() as td:
+            log = Path(td) / "log.tsv"
+            log.write_text("\tteh\tthe\n", encoding="utf-8")
+            rc = replay_local_log.main([str(log), "--out", str(REPO_ROOT / "eval/local.tsv"), "--convert-only"])
+            self.assertEqual(rc, 2)
+            self.assertFalse((REPO_ROOT / "eval/local.tsv").exists())
 
 
 if __name__ == "__main__":

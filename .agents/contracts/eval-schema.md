@@ -71,3 +71,11 @@ category<TAB>context<TAB>input<TAB>expected<TAB>notes
 | Phase 1（L1 + L2 MVP） | >= 98% | >= 85% | >= 75% | 单样本 p99 <= 5 ms（历史口径） |
 | Phase 2（+ L3 神经） | >= 99% | >= 92% | >= 85%（+ `context_realword` >= 85%） | 单样本 p99 <= 5 ms（历史口径），L3 <= 30 ms |
 | Phase 3 起（现行） | >= 99% | >= 92% | >= 85%（+ `context_realword` >= 85%） | 单键 p50 <= 3 ms、p99 <= 10 ms、max <= 16 ms；L3 <= 30 ms |
+
+---
+
+## 4. 本机打字记录回放（隐私约定）
+
+- 用户本人的打字记录（`context_before<TAB>typed<TAB>committed`）只能经 `scripts/data_pipeline/replay_local_log.py` 在本机转换为评测 TSV，输出固定在已被 `.gitignore` 的 `data/compiled/local/`；脚本拒绝写入 `eval/`。
+- 该数据**不得**进入 Git、任何训练语料或去泄漏参照之外的用途；报告只允许聚合指标，不得包含样本原文。
+- 转换后的行使用 `source:local` 标签，类别按启发式自动推断（多词 → `sentence`，相同 → `exact`，前缀 → `prefix`，其余 → `typo_simple`）。
