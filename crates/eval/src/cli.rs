@@ -66,7 +66,7 @@ Options:
   --format <text|json|md>   Stdout output format (default: text)
   --json-out <PATH>         Write JSON report to PATH
   --md-out <PATH>           Write Markdown report to PATH
-  --gate <PRESET|RULE>      Gate rule (phase0|phase1|phase2 or <target>.<metric>>=|<=>val; repeatable)
+  --gate <PRESET|RULE>      Gate rule (phase0..phase3 or <target>.<metric>>=|<=>val; repeatable)
   --strict-gate             Use strict case-sensitive accuracy metrics for gate rules
   --show-failures <N>       Include up to N sample misses in output (default: 0)
   --lexicon <PATH>          Load compiled .animelex.bin lexicon asset

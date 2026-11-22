@@ -35,8 +35,9 @@ cargo run --release -p anime-eval -- eval/benchmarks/core_v1.tsv \
 # 运行本地生成的 9,888 条大规模真实评测集
 cargo run --release -p anime-eval -- data/compiled/eval_large_open.tsv
 
-# 启用阶段门禁检查（phase0 / phase1 / phase2 或自定义规则，不达标返回退出码 2）
+# 启用阶段门禁检查（phase0 ~ phase3 或自定义规则；延迟指标为单键口径 key_p50_us / key_p99_us / key_max_us，不达标返回退出码 2）
 cargo run -p anime-eval -- eval/fixtures/smoke.tsv --gate phase0
 cargo run --release -p anime-eval -- eval/benchmarks/core_v1.tsv --gate phase1 --show-failures 15
+cargo run --release -p anime-eval -- eval/benchmarks/core_v1.tsv --gate phase3
 cargo run --release -p anime-eval -- eval/benchmarks/core_v1.tsv --gate exact.strict_top1>=98 --gate sentence.top3>=80
 ```

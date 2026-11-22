@@ -1,4 +1,5 @@
-//! 离线评测门槛检查（--gate）：内置 phase0/phase1/phase2 契约门禁并支持自定义规则。
+//! 离线评测门槛检查（--gate）：内置 phase0~phase3 契约门禁并支持自定义规则。
+//! 延迟门禁一律按单键口径（`eval-schema.md` §3）；单样本累计耗时只出现在报告中，不可作门禁。
 
 use crate::metrics::{CategoryStats, EvalReport};
 use crate::tsv::Category;
@@ -33,8 +34,9 @@ pub enum GateMetric {
     StrictTop1,
     StrictTop3,
     StrictTop5,
-    P50Us,
-    P99Us,
+    KeyP50Us,
+    KeyP99Us,
+    KeyMaxUs,
 }
 
 impl GateMetric {
@@ -46,14 +48,15 @@ impl GateMetric {
             Self::StrictTop1 => "strict_top1",
             Self::StrictTop3 => "strict_top3",
             Self::StrictTop5 => "strict_top5",
-            Self::P50Us => "p50_us",
-            Self::P99Us => "p99_us",
+            Self::KeyP50Us => "key_p50_us",
+            Self::KeyP99Us => "key_p99_us",
+            Self::KeyMaxUs => "key_max_us",
         }
     }
 
     pub fn unit(self) -> &'static str {
         match self {
-            Self::P50Us | Self::P99Us => "us",
+            Self::KeyP50Us | Self::KeyP99Us | Self::KeyMaxUs => "us",
             _ => "%",
         }
     }
@@ -66,8 +69,10 @@ impl GateMetric {
             "strict_top1" => Some(Self::StrictTop1),
             "strict_top3" => Some(Self::StrictTop3),
             "strict_top5" => Some(Self::StrictTop5),
-            "p50_us" => Some(Self::P50Us),
-            "p99_us" => Some(Self::P99Us),
+            // `p50_us` / `p99_us` 为旧名兼容别名，语义已统一为单键口径
+            "key_p50_us" | "p50_us" => Some(Self::KeyP50Us),
+            "key_p99_us" | "p99_us" => Some(Self::KeyP99Us),
+            "key_max_us" => Some(Self::KeyMaxUs),
             _ => None,
         }
     }
@@ -89,8 +94,9 @@ impl GateMetric {
             Self::StrictTop1 => stats.strict_top1_pct(),
             Self::StrictTop3 => stats.strict_top3_pct(),
             Self::StrictTop5 => stats.strict_top5_pct(),
-            Self::P50Us => stats.p50_us() as f64,
-            Self::P99Us => stats.p99_us() as f64,
+            Self::KeyP50Us => stats.key_p50_us() as f64,
+            Self::KeyP99Us => stats.key_p99_us() as f64,
+            Self::KeyMaxUs => stats.key_max_us() as f64,
         }
     }
 }
@@ -168,7 +174,7 @@ pub fn parse_gate_spec(spec: &str, strict_gate: bool) -> Result<Vec<GateRule>, S
     match trimmed {
         "phase0" => Ok(vec![GateRule::new(
             GateTarget::Overall,
-            GateMetric::P99Us,
+            GateMetric::KeyP99Us,
             GateOp::Le,
             500.0,
         )]),
@@ -193,7 +199,7 @@ pub fn parse_gate_spec(spec: &str, strict_gate: bool) -> Result<Vec<GateRule>, S
             ),
             GateRule::new(
                 GateTarget::Overall,
-                GateMetric::P99Us,
+                GateMetric::KeyP99Us,
                 GateOp::Le,
                 5000.0,
             ),
@@ -225,11 +231,38 @@ pub fn parse_gate_spec(spec: &str, strict_gate: bool) -> Result<Vec<GateRule>, S
             ),
             GateRule::new(
                 GateTarget::Overall,
-                GateMetric::P99Us,
+                GateMetric::KeyP99Us,
                 GateOp::Le,
                 5000.0,
             ),
         ]),
+        "phase3" => {
+            let mut rules: Vec<GateRule> = parse_gate_spec("phase2", strict_gate)?
+                .into_iter()
+                .filter(|r| r.metric.unit() != "us")
+                .collect();
+            rules.extend([
+                GateRule::new(
+                    GateTarget::Overall,
+                    GateMetric::KeyP50Us,
+                    GateOp::Le,
+                    3000.0,
+                ),
+                GateRule::new(
+                    GateTarget::Overall,
+                    GateMetric::KeyP99Us,
+                    GateOp::Le,
+                    10_000.0,
+                ),
+                GateRule::new(
+                    GateTarget::Overall,
+                    GateMetric::KeyMaxUs,
+                    GateOp::Le,
+                    16_000.0,
+                ),
+            ]);
+            Ok(rules)
+        }
         _ => parse_custom_rule(trimmed, strict_gate).map(|r| vec![r]),
     }
 }
@@ -241,7 +274,7 @@ fn parse_custom_rule(raw: &str, strict_gate: bool) -> Result<GateRule, String> {
         (l, GateOp::Le, r)
     } else {
         return Err(format!(
-            "invalid gate spec '{raw}': expected preset (phase0|phase1|phase2) or '<target>.<metric>>=<val>' / '<target>.<metric><=<val>'"
+            "invalid gate spec '{raw}': expected preset (phase0|phase1|phase2|phase3) or '<target>.<metric>>=<val>' / '<target>.<metric><=<val>'"
         ));
     };
 

@@ -10,7 +10,7 @@ pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures
     let _ = writeln!(out, "AnIME Offline Eval Report ({})", report.dataset);
     let _ = writeln!(
         out,
-        "{:<18} {:>5} {:>7} {:>7} {:>7} {:>8} {:>8} {:>8} {:>9} {:>9}",
+        "{:<18} {:>5} {:>7} {:>7} {:>7} {:>8} {:>8} {:>8} {:>9} {:>9} {:>10} {:>11}",
         "category",
         "total",
         "top1%",
@@ -19,15 +19,17 @@ pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures
         "strict1%",
         "strict3%",
         "strict5%",
-        "p50(us)",
-        "p99(us)"
+        "key50(us)",
+        "key99(us)",
+        "keymax(us)",
+        "sample50(us)"
     );
-    let _ = writeln!(out, "{}", "-".repeat(95));
+    let _ = writeln!(out, "{}", "-".repeat(118));
 
     for (cat, stats) in &report.by_cat {
         write_text_row(&mut out, cat.as_str(), stats);
     }
-    let _ = writeln!(out, "{}", "-".repeat(95));
+    let _ = writeln!(out, "{}", "-".repeat(118));
     write_text_row(&mut out, "TOTAL", &report.overall);
 
     if let Some(g) = gate {
@@ -110,7 +112,7 @@ pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures
 fn write_text_row(out: &mut String, label: &str, stats: &CategoryStats) {
     let _ = writeln!(
         out,
-        "{:<18} {:>5} {:>6.1}% {:>6.1}% {:>6.1}% {:>7.1}% {:>7.1}% {:>7.1}% {:>9} {:>9}",
+        "{:<18} {:>5} {:>6.1}% {:>6.1}% {:>6.1}% {:>7.1}% {:>7.1}% {:>7.1}% {:>9} {:>9} {:>10} {:>11}",
         label,
         stats.total,
         stats.top1_pct(),
@@ -119,8 +121,10 @@ fn write_text_row(out: &mut String, label: &str, stats: &CategoryStats) {
         stats.strict_top1_pct(),
         stats.strict_top3_pct(),
         stats.strict_top5_pct(),
-        stats.p50_us(),
-        stats.p99_us()
+        stats.key_p50_us(),
+        stats.key_p99_us(),
+        stats.key_max_us(),
+        stats.sample_p50_us()
     );
 }
 
@@ -133,21 +137,26 @@ pub fn render_markdown(
     let _ = writeln!(out, "# AnIME Offline Eval Report\n");
     let _ = writeln!(
         out,
-        "- Dataset: `{}`\n- Total samples: `{}`\n- Overall Top-1 (case-insensitive / strict): `{:.1}%` / `{:.1}%`\n- Overall Latency (p50 / p99): `{} us` / `{} us`\n",
+        "- Dataset: `{}`\n- Total samples: `{}`\n- Overall Top-1 (case-insensitive / strict): `{:.1}%` / `{:.1}%`\n- Overall Key Latency (p50 / p99 / max): `{} us` / `{} us` / `{} us`\n- Sample Total Latency p50 (reference only): `{} us`\n",
         report.dataset,
         report.overall.total,
         report.overall.top1_pct(),
         report.overall.strict_top1_pct(),
-        report.overall.p50_us(),
-        report.overall.p99_us()
+        report.overall.key_p50_us(),
+        report.overall.key_p99_us(),
+        report.overall.key_max_us(),
+        report.overall.sample_p50_us()
     );
 
     let _ = writeln!(out, "## Category Metrics\n");
     let _ = writeln!(
         out,
-        "| category | total | top1% | top3% | top5% | strict1% | strict3% | strict5% | p50(us) | p99(us) |"
+        "| category | total | top1% | top3% | top5% | strict1% | strict3% | strict5% | key50(us) | key99(us) | keymax(us) | sample50(us) |"
     );
-    let _ = writeln!(out, "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+    let _ = writeln!(
+        out,
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
+    );
     for (cat, stats) in &report.by_cat {
         write_md_row(&mut out, cat.as_str(), stats);
     }
@@ -230,7 +239,7 @@ pub fn render_markdown(
 fn write_md_row(out: &mut String, label: &str, stats: &CategoryStats) {
     let _ = writeln!(
         out,
-        "| {} | {} | {:.1}% | {:.1}% | {:.1}% | {:.1}% | {:.1}% | {:.1}% | {} | {} |",
+        "| {} | {} | {:.1}% | {:.1}% | {:.1}% | {:.1}% | {:.1}% | {:.1}% | {} | {} | {} | {} |",
         label,
         stats.total,
         stats.top1_pct(),
@@ -239,8 +248,10 @@ fn write_md_row(out: &mut String, label: &str, stats: &CategoryStats) {
         stats.strict_top1_pct(),
         stats.strict_top3_pct(),
         stats.strict_top5_pct(),
-        stats.p50_us(),
-        stats.p99_us()
+        stats.key_p50_us(),
+        stats.key_p99_us(),
+        stats.key_max_us(),
+        stats.sample_p50_us()
     );
 }
 
@@ -393,8 +404,11 @@ fn write_json_stats(out: &mut String, stats: &CategoryStats, indent: usize) {
         "{inner}\"strict_top5_pct\": {:.2},",
         stats.strict_top5_pct()
     );
-    let _ = writeln!(out, "{inner}\"latency_p50_us\": {},", stats.p50_us());
-    let _ = writeln!(out, "{inner}\"latency_p99_us\": {}", stats.p99_us());
+    let _ = writeln!(out, "{inner}\"key_latency_p50_us\": {},", stats.key_p50_us());
+    let _ = writeln!(out, "{inner}\"key_latency_p99_us\": {},", stats.key_p99_us());
+    let _ = writeln!(out, "{inner}\"key_latency_max_us\": {},", stats.key_max_us());
+    let _ = writeln!(out, "{inner}\"sample_total_p50_us\": {},", stats.sample_p50_us());
+    let _ = writeln!(out, "{inner}\"sample_total_p99_us\": {}", stats.sample_p99_us());
     let _ = write!(out, "{pad}}}");
 }
 

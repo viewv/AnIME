@@ -251,7 +251,9 @@ mod tests {
 
     use crate::cli::{OutputFormat, parse_args};
     use crate::gate::{evaluate_gates, parse_gate_spec};
-    use crate::metrics::{CategoryStats, EvalReport, run_eval, run_eval_with_session};
+    use crate::metrics::{
+        CategoryStats, EvalReport, SampleTiming, run_eval, run_eval_with_session,
+    };
     use crate::report::{render_json, render_markdown, render_text};
     use crate::tsv::{Category, parse_tsv};
 
@@ -378,19 +380,74 @@ context_realword\tgo \tform here\tfrom here\tcontext
         assert_eq!(report.failures[0].cs_rank, None);
     }
 
+    fn keys(us: &[u128]) -> SampleTiming {
+        SampleTiming {
+            key_us: us.to_vec(),
+            key_max_us: us.iter().copied().max().unwrap_or(0),
+        }
+    }
+
+    #[test]
+    fn per_key_latency_is_separated_from_sample_total() {
+        let mut stats = CategoryStats::default();
+        // 两条样本：逐键耗时都远低于各自累计总耗时
+        stats.record(Some(0), Some(0), &keys(&[100, 200, 300]));
+        stats.record(Some(0), Some(0), &keys(&[400, 500]));
+        stats.finalize();
+        assert_eq!(stats.key_latencies_us.len(), 5);
+        assert_eq!(stats.key_p50_us(), 300);
+        assert_eq!(stats.key_p99_us(), 500);
+        assert_eq!(stats.key_max_us(), 500);
+        assert_eq!(stats.sample_p50_us(), 600);
+        assert_eq!(stats.sample_p99_us(), 900);
+
+        // 超长预编辑上的按键不计入 key_max（由 run_eval 在采样时过滤）
+        let long = SampleTiming {
+            key_us: vec![100, 90_000],
+            key_max_us: 100,
+        };
+        let mut s2 = CategoryStats::default();
+        s2.record(Some(0), Some(0), &long);
+        assert_eq!(s2.key_max_us(), 100);
+        assert_eq!(s2.key_p99_us(), 90_000);
+    }
+
+    #[test]
+    fn phase3_gate_uses_per_key_budget_and_legacy_alias() {
+        let rules = parse_gate_spec("phase3", false).expect("phase3");
+        let latency: Vec<_> = rules
+            .iter()
+            .filter(|r| r.metric.unit() == "us")
+            .map(|r| (r.metric.as_str(), r.threshold))
+            .collect();
+        assert_eq!(
+            latency,
+            vec![
+                ("key_p50_us", 3000.0),
+                ("key_p99_us", 10_000.0),
+                ("key_max_us", 16_000.0)
+            ]
+        );
+        assert!(rules.iter().any(|r| r.label == "context_realword.top3"));
+
+        let alias = parse_gate_spec("total.p99_us<=10", false).expect("alias");
+        assert_eq!(alias[0].metric.as_str(), "key_p99_us");
+        assert!(parse_gate_spec("total.key_max_us<=16000", false).is_ok());
+    }
+
     #[test]
     fn gate_presets_custom_rules_and_missing_category() {
         let mut by_cat = BTreeMap::new();
         let mut exact = CategoryStats::default();
-        exact.record(Some(0), Some(1), 50); // ci top1=100%, strict top1=0%
+        exact.record(Some(0), Some(1), &keys(&[50])); // ci top1=100%, strict top1=0%
         let mut simple = CategoryStats::default();
-        simple.record(Some(0), Some(0), 60);
+        simple.record(Some(0), Some(0), &keys(&[60]));
         let mut phonetic = CategoryStats::default();
-        phonetic.record(Some(2), Some(2), 70);
+        phonetic.record(Some(2), Some(2), &keys(&[70]));
         let mut overall = CategoryStats::default();
-        overall.record(Some(0), Some(1), 50);
-        overall.record(Some(0), Some(0), 60);
-        overall.record(Some(2), Some(2), 70);
+        overall.record(Some(0), Some(1), &keys(&[50]));
+        overall.record(Some(0), Some(0), &keys(&[60]));
+        overall.record(Some(2), Some(2), &keys(&[70]));
         overall.finalize();
 
         by_cat.insert(Category::Exact, exact);

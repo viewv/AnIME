@@ -1,4 +1,4 @@
-//! 评测执行器与统计指标：同时统计忽略大小写与大小写严格 Top-1/3/5 及微秒分位延迟。
+//! 评测执行器与统计指标：同时统计忽略大小写与大小写严格 Top-1/3/5 及单键 / 单样本微秒分位延迟。
 
 use std::collections::BTreeMap;
 use std::time::Instant;
@@ -31,11 +31,38 @@ pub struct CategoryStats {
     pub strict_top1: usize,
     pub strict_top3: usize,
     pub strict_top5: usize,
-    pub latencies_us: Vec<u128>,
+    /// 每一次 `handle_key` 的同步 L1+L2 耗时，门禁口径（`eval-schema.md` §3）。
+    pub key_latencies_us: Vec<u128>,
+    /// 预编辑不超过 [`MAX_KEY_PREEDIT_CHARS`] 字符时的单键最大耗时。
+    pub key_max_us: u128,
+    /// 单样本首键到末键累计耗时，随输入长度线性增长，仅作参考不作门禁。
+    pub sample_total_us: Vec<u128>,
+}
+
+/// 单键最大值门禁只覆盖该长度以内的预编辑，对应 `core-api.md` §5 的 `<= 80` 字符约定。
+pub const MAX_KEY_PREEDIT_CHARS: usize = 80;
+
+/// 一条样本逐键回放的计时结果。
+#[derive(Debug, Default, Clone)]
+pub struct SampleTiming {
+    pub key_us: Vec<u128>,
+    /// 预编辑 `<= MAX_KEY_PREEDIT_CHARS` 字符的按键中的最大耗时。
+    pub key_max_us: u128,
+}
+
+impl SampleTiming {
+    pub fn total_us(&self) -> u128 {
+        self.key_us.iter().sum()
+    }
 }
 
 impl CategoryStats {
-    pub fn record(&mut self, ci_rank: Option<usize>, cs_rank: Option<usize>, latency_us: u128) {
+    pub fn record(
+        &mut self,
+        ci_rank: Option<usize>,
+        cs_rank: Option<usize>,
+        timing: &SampleTiming,
+    ) {
         self.total += 1;
         if let Some(idx) = ci_rank {
             if idx == 0 {
@@ -59,11 +86,14 @@ impl CategoryStats {
                 self.strict_top5 += 1;
             }
         }
-        self.latencies_us.push(latency_us);
+        self.key_latencies_us.extend_from_slice(&timing.key_us);
+        self.key_max_us = self.key_max_us.max(timing.key_max_us);
+        self.sample_total_us.push(timing.total_us());
     }
 
     pub fn finalize(&mut self) {
-        self.latencies_us.sort_unstable();
+        self.key_latencies_us.sort_unstable();
+        self.sample_total_us.sort_unstable();
     }
 
     pub fn pct(hits: usize, total: usize) -> f64 {
@@ -98,23 +128,36 @@ impl CategoryStats {
         Self::pct(self.strict_top5, self.total)
     }
 
-    pub fn percentile_us(&self, p: usize) -> u128 {
-        if self.latencies_us.is_empty() {
+    fn sorted_percentile(values: &[u128], p: usize) -> u128 {
+        if values.is_empty() {
             return 0;
         }
-        let mut sorted = self.latencies_us.clone();
+        if values.is_sorted() {
+            return percentile_from_slice(values, p);
+        }
+        let mut sorted = values.to_vec();
         sorted.sort_unstable();
-        let n = sorted.len();
-        let idx = ((n * p).div_ceil(100)).saturating_sub(1).min(n - 1);
-        sorted[idx]
+        percentile_from_slice(&sorted, p)
     }
 
-    pub fn p50_us(&self) -> u128 {
-        self.percentile_us(50)
+    pub fn key_p50_us(&self) -> u128 {
+        Self::sorted_percentile(&self.key_latencies_us, 50)
     }
 
-    pub fn p99_us(&self) -> u128 {
-        self.percentile_us(99)
+    pub fn key_p99_us(&self) -> u128 {
+        Self::sorted_percentile(&self.key_latencies_us, 99)
+    }
+
+    pub fn key_max_us(&self) -> u128 {
+        self.key_max_us
+    }
+
+    pub fn sample_p50_us(&self) -> u128 {
+        Self::sorted_percentile(&self.sample_total_us, 50)
+    }
+
+    pub fn sample_p99_us(&self) -> u128 {
+        Self::sorted_percentile(&self.sample_total_us, 99)
     }
 }
 
@@ -193,7 +236,10 @@ where
         session.reset();
         session.set_context(row.context.clone(), "");
 
-        let start = Instant::now();
+        let mut timing = SampleTiming {
+            key_us: Vec::with_capacity(row.input.len()),
+            key_max_us: 0,
+        };
         let mut last_seq = None;
         for ch in row.input.chars() {
             let key = if ch == ' ' {
@@ -201,12 +247,18 @@ where
             } else {
                 KeyInput::Char(ch)
             };
-            match session.handle_key(key) {
+            let start = Instant::now();
+            let out = session.handle_key(key);
+            let key_us = start.elapsed().as_micros();
+            match out {
                 EngineOutput::State(st) => last_seq = Some(st.seq),
                 EngineOutput::Commit(_) => last_seq = None,
             }
+            timing.key_us.push(key_us);
+            if session.preedit().chars().count() <= MAX_KEY_PREEDIT_CHARS {
+                timing.key_max_us = timing.key_max_us.max(key_us);
+            }
         }
-        let elapsed_us = start.elapsed().as_micros();
 
         if let (Some((neural, _)), Some(seq)) = (neural_for_eval, last_seq) {
             let total_chars = session.preedit().chars().count();
@@ -249,8 +301,8 @@ where
         by_cat
             .entry(row.category)
             .or_default()
-            .record(ci_rank, cs_rank, elapsed_us);
-        overall.record(ci_rank, cs_rank, elapsed_us);
+            .record(ci_rank, cs_rank, &timing);
+        overall.record(ci_rank, cs_rank, &timing);
 
         if ci_rank != Some(0) || cs_rank != Some(0) {
             failures.push(SampleFailure {
