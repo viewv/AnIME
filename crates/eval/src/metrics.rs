@@ -37,6 +37,99 @@ pub struct CategoryStats {
     pub key_max_us: u128,
     /// 单样本首键到末键累计耗时，随输入长度线性增长，仅作参考不作门禁。
     pub sample_total_us: Vec<u128>,
+    /// 打字过程交互指标累计（`eval-schema.md` §3 交互指标）。
+    pub interaction: InteractionTotals,
+}
+
+/// 逐键回放得到的单样本交互轨迹。
+#[derive(Debug, Default, Clone)]
+pub struct SampleInteraction {
+    /// 输入总键数。
+    pub keys: usize,
+    /// 期望答案首次位于 Top-1 / Top-3 时已敲键数（从 1 计）；从未进入为 `None`。
+    pub first_top1_key: Option<usize>,
+    pub first_top3_key: Option<usize>,
+    /// 期望答案进入 Top-1 后又被挤出的次数（候选跳动）。
+    pub top1_dropouts: usize,
+    /// 最终候选中的位置（0 起），未命中为 `None`。
+    pub final_rank: Option<usize>,
+}
+
+impl SampleInteraction {
+    /// 记录一次按键后的期望答案排名，`key_idx` 从 1 计。
+    pub fn observe(&mut self, key_idx: usize, rank: Option<usize>, was_top1: &mut bool) {
+        let now_top1 = rank == Some(0);
+        if now_top1 && self.first_top1_key.is_none() {
+            self.first_top1_key = Some(key_idx);
+        }
+        if rank.is_some_and(|r| r < 3) && self.first_top3_key.is_none() {
+            self.first_top3_key = Some(key_idx);
+        }
+        if *was_top1 && !now_top1 {
+            self.top1_dropouts += 1;
+        }
+        *was_top1 = now_top1;
+    }
+}
+
+/// 交互指标的类别级累计；`unranked_index` 为未命中时计入的选择序号（候选上限 + 1）。
+#[derive(Debug, Default, Clone)]
+pub struct InteractionTotals {
+    pub samples: usize,
+    pub saved_top1_sum: f64,
+    pub saved_top3_sum: f64,
+    pub dropouts_sum: usize,
+    pub lost_after_top1: usize,
+    pub select_index_sum: f64,
+}
+
+/// 未命中样本计入的选择序号：默认候选页 9 项之外（第 10 位）。
+pub const UNRANKED_SELECT_INDEX: f64 = 10.0;
+
+impl InteractionTotals {
+    pub fn add(&mut self, s: &SampleInteraction) {
+        if s.keys == 0 {
+            return;
+        }
+        let saved = |first: Option<usize>| {
+            first.map_or(0.0, |k| (s.keys - k) as f64 / s.keys as f64)
+        };
+        self.samples += 1;
+        self.saved_top1_sum += saved(s.first_top1_key);
+        self.saved_top3_sum += saved(s.first_top3_key);
+        self.dropouts_sum += s.top1_dropouts;
+        if s.first_top1_key.is_some() && s.final_rank != Some(0) {
+            self.lost_after_top1 += 1;
+        }
+        self.select_index_sum += s.final_rank.map_or(UNRANKED_SELECT_INDEX, |r| (r + 1) as f64);
+    }
+
+    fn mean(&self, v: f64) -> f64 {
+        if self.samples == 0 { 0.0 } else { v / self.samples as f64 }
+    }
+
+    /// 省键率：期望答案首次进入 Top-1 时剩余未敲键占比的均值（从未进入计 0）。
+    pub fn keys_saved_top1_pct(&self) -> f64 {
+        100.0 * self.mean(self.saved_top1_sum)
+    }
+
+    pub fn keys_saved_top3_pct(&self) -> f64 {
+        100.0 * self.mean(self.saved_top3_sum)
+    }
+
+    /// 每样本期望答案从 Top-1 被挤出的平均次数。
+    pub fn dropouts_per_sample(&self) -> f64 {
+        self.mean(self.dropouts_sum as f64)
+    }
+
+    /// 曾进入 Top-1 但最终不在 Top-1 的样本占比。
+    pub fn lost_after_top1_pct(&self) -> f64 {
+        100.0 * self.mean(self.lost_after_top1 as f64)
+    }
+
+    pub fn mean_select_index(&self) -> f64 {
+        self.mean(self.select_index_sum)
+    }
 }
 
 /// 单键最大值门禁只覆盖该长度以内的预编辑，对应 `core-api.md` §5 的 `<= 80` 字符约定。
@@ -183,6 +276,20 @@ pub struct EvalReport {
     pub l3_stats: Option<L3TimingStats>,
     /// 按 `notes` 标签分组的统计；无标签样本归入 [`UNTAGGED`]。
     pub by_tag: BTreeMap<String, CategoryStats>,
+    /// 是否在报告中输出交互指标分节（`--interactive`）。
+    pub show_interaction: bool,
+}
+
+/// Wilson 95% 置信区间（百分比），小样本下比正态近似可靠。
+pub fn wilson_ci95(hits: usize, total: usize) -> (f64, f64) {
+    if total == 0 {
+        return (0.0, 0.0);
+    }
+    let (n, p, z) = (total as f64, hits as f64 / total as f64, 1.96f64);
+    let denom = 1.0 + z * z / n;
+    let center = (p + z * z / (2.0 * n)) / denom;
+    let half = z * (p * (1.0 - p) / n + z * z / (4.0 * n * n)).sqrt() / denom;
+    (100.0 * (center - half).max(0.0), 100.0 * (center + half).min(1.0))
 }
 
 pub const UNTAGGED: &str = "untagged";
@@ -258,7 +365,9 @@ where
             key_max_us: 0,
         };
         let mut last_seq = None;
-        for ch in row.input.chars() {
+        let mut inter = SampleInteraction::default();
+        let mut was_top1 = false;
+        for (key_idx, ch) in row.input.chars().enumerate() {
             let key = if ch == ' ' {
                 KeyInput::Space
             } else {
@@ -275,7 +384,12 @@ where
             if session.preedit().chars().count() <= MAX_KEY_PREEDIT_CHARS {
                 timing.key_max_us = timing.key_max_us.max(key_us);
             }
+            // 排名检查放在计时之外，不计入单键延迟
+            let texts: Vec<&str> = session.candidates().iter().map(|c| c.text.as_str()).collect();
+            let (rank, _) = rank_against_references(&texts, &row.references);
+            inter.observe(key_idx + 1, rank, &mut was_top1);
         }
+        inter.keys = row.input.chars().count();
 
         if let (Some((neural, _)), Some(seq)) = (neural_for_eval, last_seq) {
             let total_chars = session.preedit().chars().count();
@@ -310,16 +424,23 @@ where
         let cands = session.candidates();
         let texts: Vec<&str> = cands.iter().map(|c| c.text.as_str()).collect();
         let (ci_rank, cs_rank) = rank_against_references(&texts, &row.references);
+        // 最终排名以 L3 重排后的候选为准
+        inter.final_rank = ci_rank;
 
         by_cat
             .entry(row.category)
             .or_default()
             .record(ci_rank, cs_rank, &timing);
+        by_cat.get_mut(&row.category).expect("just inserted").interaction.add(&inter);
         by_tag
             .entry(row.tag.clone().unwrap_or_else(|| UNTAGGED.to_string()))
             .or_default()
             .record(ci_rank, cs_rank, &timing);
+        if let Some(t) = by_tag.get_mut(&row.tag.clone().unwrap_or_else(|| UNTAGGED.to_string())) {
+            t.interaction.add(&inter);
+        }
         overall.record(ci_rank, cs_rank, &timing);
+        overall.interaction.add(&inter);
 
         if ci_rank != Some(0) || cs_rank != Some(0) {
             failures.push(SampleFailure {
@@ -367,5 +488,6 @@ where
         failures,
         l3_stats,
         by_tag,
+        show_interaction: false,
     }
 }

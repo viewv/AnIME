@@ -55,6 +55,12 @@ category<TAB>context<TAB>input<TAB>expected<TAB>notes
 
 > 延迟门禁**只认单键指标**，与 `core-api.md` §5 的同步路径预算一一对应。L3 延迟按单次推理调用单独统计。
 
+- **交互指标（`anime-eval --interactive`，可选，不作现有门禁）**：逐键回放时每键后检查期望答案排名（检查不计入单键延迟），按类别 / 标签 / TOTAL 输出：
+  - `keys_saved_top1_pct` / `keys_saved_top3_pct`：期望答案首次进入 Top-1 / Top-3 时剩余未敲键占全长比例的均值（从未进入计 0）；
+  - `top1_dropouts_per_sample`：期望答案进入 Top-1 后又被挤出的平均次数（候选跳动）；
+  - `lost_after_top1_pct`：曾进入 Top-1 但最终不在 Top-1 的样本占比；
+  - `mean_select_index`：最终候选中期望答案的平均 1 起序号，未命中计 10；
+  - `top1_ci95`：Top-1 的 Wilson 95% 置信区间（百分比），用于判断差异是否超出抽样误差。
 - **按标签分组**：`anime-eval --group-by-tag` 额外按 `notes` 标签（§1）输出每个标签的 `total` / `top1` / `top3` / `top5` / strict 指标；无标签样本归入 `untagged`。门禁可用 `tag:<namespace>:<tag>.<metric>` 作为目标（如 `tag:negative:clean.top1>=97`）。
 
 ### 阶段门禁参考线
