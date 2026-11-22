@@ -146,45 +146,51 @@ def derive_core_v2(rows: Iterable[Row], lex: dict[str, tuple[str, float]]) -> tu
 
 
 def extract_clauses(multiwoz_files: list[Path], lex: dict[str, tuple[str, float]]) -> list[list[str]]:
-    """抽取 4–10 词、全部为常见词典词的 USER 子句，规范大小写（句首保留原样）。"""
-    clauses: list[list[str]] = []
-    seen: set[str] = set()
+    """抽取 MultiWOZ USER 话轮中 4–10 词、全部为常见词典词的子句。"""
+    texts: list[str] = []
     for path in sorted(multiwoz_files):
         data = json.loads(path.read_text(encoding="utf-8"))
         for dlg in data if isinstance(data, list) else []:
             for turn in dlg.get("turns", []):
-                if turn.get("speaker") != "USER":
-                    continue
-                utt = str(turn.get("utterance", "")).strip()
-                for seg in [utt] + [s.strip() for s in re.split(r"[.!?,;]+", utt)]:
-                    toks = seg.strip().rstrip(".!?").split()
-                    if not (4 <= len(toks) <= 10):
-                        continue
-                    if any(not ALPHA_WORD_RE.match(t) or CAMEL_OR_ALLCAPS_RE.search(t) for t in toks):
-                        continue
-                    # 源句自带漏撇号（Im / dont）时参考答案本身就是错拼，不能作为干净参考
-                    if any(t.lower() in DROPPED_APOSTROPHE_FORMS for t in toks):
-                        continue
-                    norm: list[str] = []
-                    ok = True
-                    for i, t in enumerate(toks):
-                        hit = lex.get(t.lower())
-                        if hit is None or hit[1] < MIN_SOURCE_ZIPF:
-                            ok = False
-                            break
-                        canon = hit[0]
-                        if i == 0 and t[0].isupper():
-                            norm.append(t[0] + canon[1:] if canon.lower() == t.lower() else t)
-                        elif canon[0].isupper() or canon == "I":
-                            norm.append(canon)
-                        else:
-                            norm.append(canon)
-                    if not ok:
-                        continue
-                    key = " ".join(norm).lower()
-                    if key not in seen:
-                        seen.add(key)
-                        clauses.append(norm)
+                if turn.get("speaker") == "USER":
+                    texts.append(str(turn.get("utterance", "")).strip())
+    return clauses_from_texts(texts, lex)
+
+
+def clauses_from_texts(texts: list[str], lex: dict[str, tuple[str, float]]) -> list[list[str]]:
+    """从话轮文本抽取 4–10 词、全部为常见词典词的子句，规范大小写（句首保留原样），全局去重。"""
+    clauses: list[list[str]] = []
+    seen: set[str] = set()
+    for utt in texts:
+        for seg in [utt] + [s.strip() for s in re.split(r"[.!?,;]+", utt)]:
+            toks = seg.strip().rstrip(".!?").split()
+            if not (4 <= len(toks) <= 10):
+                continue
+            if any(not ALPHA_WORD_RE.match(t) or CAMEL_OR_ALLCAPS_RE.search(t) for t in toks):
+                continue
+            # 源句自带漏撇号（Im / dont）时参考答案本身就是错拼，不能作为干净参考
+            if any(t.lower() in DROPPED_APOSTROPHE_FORMS for t in toks):
+                continue
+            norm: list[str] = []
+            ok = True
+            for i, t in enumerate(toks):
+                hit = lex.get(t.lower())
+                if hit is None or hit[1] < MIN_SOURCE_ZIPF:
+                    ok = False
+                    break
+                canon = hit[0]
+                if i == 0 and t[0].isupper():
+                    norm.append(t[0] + canon[1:] if canon.lower() == t.lower() else t)
+                elif canon[0].isupper() or canon == "I":
+                    norm.append(canon)
+                else:
+                    norm.append(canon)
+            if not ok:
+                continue
+            key = " ".join(norm).lower()
+            if key not in seen:
+                seen.add(key)
+                clauses.append(norm)
     return clauses
 
 

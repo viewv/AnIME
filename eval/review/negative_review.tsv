@@ -82,3 +82,85 @@ I'm travelling from london liverpool street to cambridge	keep	英式拼写，引
 You have a good day too	keep	引擎误判 too->to
 Actually I'm more interested in middle eastern foods	keep	引擎误判 foods->food
 What is the price range on that one	keep	引擎误判 on->in
+The song is more better	exclude	源句语法错误
+who did they played against	exclude	源句语法错误
+Sounds like they're not doing that well	keep	引擎误判 they're->their
+I'd like it made with yellow fin tuna	keep	引擎误判 fin tuna->in tune
+find another song by radiohead with more bass	keep	引擎误判 bass->base
+I'll skip the intro so guess here we go	keep	引擎误判 intro->into
+I'd like to see that in amazon	keep	引擎误判 in->an
+Could you play me something off white rich pageant	keep	专名，引擎误判 off->of
+And in what conference are they	keep	引擎误判 are->or
+who did brighton play	keep	专名，引擎误判 brighton->brighten
+Something that has pretty good ratings on rotten tomatoes	keep	引擎误判 has->had
+What's the rotten tomatoes score for kung fu yoga	keep	专名，引擎误判 kung->king
+Who's their starting small forward	keep	引擎误判 their->there
+How about a two liter of mountain dew	keep	引擎误判 liter->letter
+And what are the ticket prices for that movie	keep	引擎误判 prices->price
+would you mind playing a similar song by Willie nelson	keep	引擎误判 playing->paying
+I'm wondering if the movie Mr	exclude	句号切分产生的残片
+And the one's that they did win	exclude	源句 one's/ones 误用
+I'm looking for a movie that is general category	exclude	源句语法错误
+How about any movies about space	keep	引擎误判 movies->moves
+do the la galaxy play today	keep	专名，引擎误判 la->law
+And who's their starting small forward	keep	引擎误判 their->there
+How many saves does Sean johnson have	keep	引擎误判 saves->slaves
+let me hear about the live by night	keep	片名，引擎误判 live->life
+Would those be available on google play	keep	引擎误判 on->in
+What are the action movies playing	keep	引擎误判 movies->moves
+I'd like for it to be directed by Steven Spielberg	keep	专名，引擎误判 Steven->Seven
+Who is the star player for the la clippers	keep	专名，引擎误判 la->law
+Who did brighton play next	keep	专名，引擎误判 brighton->brighten
+What was the first band that you said	keep	引擎误判 -> What was the first and that you said
+Are they available on hulu plus	keep	引擎误判 -> Are the available on hulu plus
+a movie that also has billy crystal in it	keep	引擎误判 -> a movie that also had billy crystal in it
+How many division titles have they won and what years	keep	引擎误判 -> How many division titles have they one and what years
+Who is the starting power forward for the la clippers	keep	引擎误判 -> Who is the starting power forward for the law clippers
+It actually says proud mary	keep	引擎误判 -> It actually say proud mary
+Who did they play last week	keep	引擎误判 -> Why did they play last week
+What are the cheapest seats at citi field	keep	引擎误判 -> What are the cheapest seats at city field
+thank you very much for your help and bye	keep	引擎误判 -> thank you very much for your help and by
+who do they play next week	keep	引擎误判 -> why do they play next week
+May be something like starring brad pitt	exclude	源句 maybe 拆写
+Who are the top goal scorers of each team	keep	引擎误判 -> Who are the top goal scores of each team
+if the movie's about people dancing around Los Angeles	keep	引擎误判 -> if the movies about people dancing around Los Angeles
+Do you have coke or Pepsi	keep	引擎误判 -> Do you have come or Pepsi
+What are the name of two pitchers on the team	exclude	源句语法错误
+Who stars in why him	keep	引擎误判 -> Who stirs in why him
+Fetch the ticket prices nearby	keep	引擎误判 -> Fetch the ticket price nearby
+Are they playing today or tonight	keep	引擎误判 -> Are they playing today are tonight
+but the top three rated movies right now	keep	引擎误判 -> but the top there rated movies right now
+Who's their starting first baseman	keep	引擎误判 -> Who's there starting first baseman
+Who stars in arrival	keep	引擎误判 -> Who stirs on arrival
+And two order of mozzarella sticks	exclude	源句语法错误
+And what's the run time	keep	引擎误判 -> And what's the fun time
+Which one's the rated the highest	exclude	源句语法错误
+That's a good beat right there	keep	引擎误判 -> That's a good boat right there
+Did the san Diego padres win their last game	keep	引擎误判 -> Did the san Diego padres when their last game
+What are my choices on that	keep	引擎误判 -> What are my choices in that
+What are the ticket prices for moonlight	keep	引擎误判 -> What are the ticket price for moonlight
+I'm looking for newest release movie in the closest theater	keep	引擎误判 -> I'm looking for newest release move in the closest theater
+How many games has west ham played so far	keep	引擎误判 -> How many games his west ham played so far
+and my team is la galaxy	keep	引擎误判 -> and my team is a galaxy
+And who did they play in their last match	keep	引擎误判 -> And why did they play in their last match
+any other movies with Dwayne johnson	keep	引擎误判 -> any other movies with Wayne johnson
+please make the booking and email me the reference number	keep	引擎误判 -> please make the booking and mail me the reference number
+Any cheap italian restaurant on the north side	keep	引擎误判 -> Any cheap italian restaurant in the north side
+and are you really here once more my dear Belinda	keep	引擎误判 -> and are you really hear once more my dear Belinda
+hey whoa let me out	keep	引擎误判 -> he who let me out
+what's going to become of me and of you	keep	引擎误判 -> what's going to become of me and if you
+they cherish it until they think twas always theirs	keep	引擎误判 -> they cherish it until they think twas always there's
+they displayed early remarkable talents	keep	引擎误判 -> they displayed really remarkable talents
+I'd like to go for a movie in this evening	exclude	源句语法错误
+Where are they in the standings right now	keep	引擎误判 -> Where are they in the standing right now
+And who did they play on last saturday	keep	引擎误判 -> And why did they play on last Saturday
+Can you help me finding a movie to watch tonight	exclude	源句语法错误
+How many years behind is the boston red sox	keep	引擎误判 -> How many years behind is the boston red socks
+What conference are the chicago bulls in	keep	引擎误判 -> What conference or the chicago bulls in
+that sound pretty good	exclude	源句主谓不一致
+How many divisions have the indians won	keep	引擎误判 -> How many divisions have the indians one
+Is manchester city playing right now	keep	引擎误判 -> As manchester city playing right now
+Who's the starting point guard from the indiana pacers	keep	引擎误判 -> Who's the starting point guard from the indiana passers
+On what service is it available	keep	引擎误判 -> In what service is it available
+I'm wondering when was their last game	keep	引擎误判 -> I'm wondering when was there last game
+Can you tell me what place crystal palace are in	keep	引擎误判 -> Can you tell me what place crystal palace or in

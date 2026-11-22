@@ -6,6 +6,8 @@
 - ood_v1：LibriSpeech LM 语料按 CRC32 确定性抽取的留出句（文学领域，非 MultiWOZ），同样包含
   干净反例、单错误与多错误样本。该文件位于 `eval/` 下，`build_ngram_kn.py` 会自动把这些句子及其
   5-gram 从 L2 训练语料中剔除；新增后必须重建 L2。
+- ood_tm2_v1：Google Taskmaster-2（CC BY 4.0）food-ordering / music / sports / movies 领域 USER 话轮，
+  日常口语任务对话（非 MultiWOZ 订酒店领域）；同样包含干净反例、单错误与多错误样本。
 - 反例复核：`--review-file` 为人工裁决表（`sentence<TAB>exclude|keep<TAB>reason`），标为 exclude 的
   源句（自身有拼写/语法错误）不进入任何集合。裁决流程：先用 `--emit-negative-candidates` 导出候选，
   以当前引擎评测，只复核引擎改动了的句子（分歧裁决），未被改动的候选直接保留。
@@ -17,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import json
 import random
 import sys
 import zlib
@@ -31,6 +34,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from build_eval_benchmark import ALPHA_WORD_RE, is_valid_sample  # noqa: E402
 from build_eval_v2 import (  # noqa: E402
     DROPPED_APOSTROPHE_FORMS,
+    clauses_from_texts,
     MIN_SOURCE_ZIPF,
     NOISE_TYPES,
     SENTENCE_NOISERS,
@@ -92,6 +96,17 @@ def librispeech_holdout_clauses(
     return out
 
 
+def taskmaster_user_texts(paths: list[Path]) -> list[str]:
+    texts: list[str] = []
+    for p in sorted(paths):
+        data = json.loads(p.read_text(encoding="utf-8"))
+        for dlg in data if isinstance(data, list) else []:
+            for utt in dlg.get("utterances", []):
+                if utt.get("speaker") == "USER":
+                    texts.append(" ".join(str(utt.get("text", "")).split()))
+    return texts
+
+
 def noise_multi(toks: list[str], rng: random.Random, lex) -> str | None:
     """同句依次施加 2–3 种不同的单错误算子（每次作用在上一步结果上）。"""
     k = rng.choice((2, 2, 3))
@@ -119,6 +134,7 @@ def build_rows(
     multi: int,
     negatives: int,
     excluded: set[str],
+    seed_tag: str = "",
 ) -> tuple[list[Row], Counter, list[str]]:
     rows: list[Row] = []
     stats: Counter = Counter()
@@ -127,8 +143,12 @@ def build_rows(
     stats["excluded_by_review"] = len(clauses) - len(usable)
 
     def take(ntype: str, quota: int, make) -> None:
-        order = list(range(len(usable)))
-        rng.shuffle(order)
+        # 按 (seed, 类型, 句子) 的 CRC32 稳定排序取样：复核剔除一句只会顺延下一句，
+        # 不会像随机洗牌那样重抽整个样本，复核才能收敛
+        order = sorted(
+            range(len(usable)),
+            key=lambda i: zlib.crc32(f"{seed_tag}:{ntype}:{' '.join(usable[i]).lower()}".encode()),
+        )
         for ci in order:
             if stats[ntype] >= quota:
                 return
@@ -183,6 +203,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--review-file", type=Path, default=REPO_ROOT / "eval/review/negative_review.tsv")
     ap.add_argument("--out-noise", type=Path, default=REPO_ROOT / "eval/benchmarks/noise_v2.tsv")
     ap.add_argument("--out-ood", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_v1.tsv")
+    ap.add_argument("--taskmaster-json", type=Path, action="append", default=[])
+    ap.add_argument("--out-ood-tm2", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_tm2_v1.tsv")
     ap.add_argument("--emit-negative-candidates", type=Path, default=None,
                     help="额外导出全部干净候选（未经复核）为评测 TSV，用于分歧裁决")
     ap.add_argument("--per-type", type=int, default=150)
@@ -200,16 +222,24 @@ def main(argv: list[str] | None = None) -> int:
     realword_vocab = load_realword_vocab(args.lexicon_tsv)
     excluded = load_review(args.review_file)
 
+    if not args.taskmaster_json:
+        args.taskmaster_json = sorted((REPO_ROOT / "data/raw").glob("taskmaster-2-*/*.json"))
     woz = extract_clauses(args.multiwoz_json, lex)
+    tm2 = clauses_from_texts(taskmaster_user_texts(args.taskmaster_json), lex)
     libri = librispeech_holdout_clauses(args.librispeech, lex)
-    print(f"source clauses: multiwoz={len(woz)} librispeech_holdout={len(libri)} review_excluded={len(excluded)}")
+    print(f"source clauses: multiwoz={len(woz)} librispeech_holdout={len(libri)} taskmaster2={len(tm2)} review_excluded={len(excluded)}")
 
     noise_rows, noise_stats, woz_cands = build_rows(
-        woz, lex, realword_vocab, random.Random(args.seed), args.per_type, args.multi, args.negatives, excluded
+        woz, lex, realword_vocab, random.Random(args.seed), args.per_type, args.multi, args.negatives, excluded,
+        seed_tag=f"{args.seed}:woz",
     )
     ood_rows, ood_stats, libri_cands = build_rows(
         libri, lex, realword_vocab, random.Random(args.seed + 1), args.ood_per_type, args.ood_multi,
-        args.ood_negatives, excluded
+        args.ood_negatives, excluded, seed_tag=f"{args.seed}:libri",
+    )
+    tm2_rows, tm2_stats, tm2_cands = build_rows(
+        tm2, lex, realword_vocab, random.Random(args.seed + 2), args.ood_per_type, args.ood_multi,
+        args.ood_negatives, excluded, seed_tag=f"{args.seed}:tm2",
     )
     header_common = f"seed={args.seed}；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核"
     write_tsv(args.out_noise, noise_rows, [
@@ -220,8 +250,14 @@ def main(argv: list[str] | None = None) -> int:
         "AnIME ood_v1：LibriSpeech LM 语料 CRC32 留出句（文学领域）；须经 build_ngram_kn.py 去泄漏后重建 L2",
         header_common,
     ])
+    if tm2_rows:
+        write_tsv(args.out_ood_tm2, tm2_rows, [
+            "AnIME ood_tm2_v1：Taskmaster-2 (Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/) USER 话轮",
+            "food-ordering / music / sports / movies 领域；仅评测，L2 构建按 eval/** 去泄漏；" + header_common,
+        ])
+        print(f"ood_tm2_v1: {len(tm2_rows)} rows {dict(sorted(tm2_stats.items()))}")
     if args.emit_negative_candidates:
-        cands = [("sentence", "", s, s, "negative:clean") for s in woz_cands + libri_cands]
+        cands = [("sentence", "", s, s, "negative:clean") for s in woz_cands + libri_cands + tm2_cands]
         write_tsv(args.emit_negative_candidates, cands, ["未复核的干净反例候选（仅用于分歧裁决，勿入库）"])
     print(f"noise_v2: {len(noise_rows)} rows {dict(sorted(noise_stats.items()))}")
     print(f"ood_v1: {len(ood_rows)} rows {dict(sorted(ood_stats.items()))}")

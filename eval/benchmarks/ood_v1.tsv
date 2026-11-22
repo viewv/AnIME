@@ -1,603 +1,603 @@
 # AnIME ood_v1：LibriSpeech LM 语料 CRC32 留出句（文学领域）；须经 build_ngram_kn.py 去泄漏后重建 L2
 # seed=20261123；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核
 # category	context	input	expected	notes
-sentence		why won't you llow it	why won't you allow it	noise:leading_drop
-sentence		not ee me again	not see me again	noise:leading_drop
-sentence		did you ever know uch a brute as that man is	did you ever know such a brute as that man is	noise:leading_drop
-sentence		that evening at dinner he was just as usual	that evening at dinner she was just as usual	noise:leading_drop
-sentence		if e had perhaps he would have thought twice before starting	if he had perhaps he would have thought twice before starting	noise:leading_drop
-sentence		he was a coward who attacked rom behind	he was a coward who attacked from behind	noise:leading_drop
-sentence		h the conqueror perhaps	ah the conqueror perhaps	noise:leading_drop
-sentence		he sighted ong and carefully and scored the outer ring	he sighted long and carefully and scored the outer ring	noise:leading_drop
-sentence		but the ent was low	but the rent was low	noise:leading_drop
-sentence		he had been liked and respected wherever he had een	he had been liked and respected wherever he had been	noise:leading_drop
-sentence		then why are you fraid of him	then why are you afraid of him	noise:leading_drop
-sentence		o man could be such a judge of tobacco and remain commonplace	no man could be such a judge of tobacco and remain commonplace	noise:leading_drop
-sentence		o my dear sir don't shake your head	no my dear sir don't shake your head	noise:leading_drop
-sentence		you till have yours	you still have yours	noise:leading_drop
-sentence		we will decide that y lot	we will decide that by lot	noise:leading_drop
-sentence		in fact everybody eems to hate it	in fact everybody seems to hate it	noise:leading_drop
-sentence		more bout clarence later	more about clarence later	noise:leading_drop
-sentence		that strikes me s being all nonsense	that strikes me as being all nonsense	noise:leading_drop
-sentence		now where does he difference come in	now where does the difference come in	noise:leading_drop
-sentence		the blow fell on the second of november eighteen forty ne	the blow fell on the second of november eighteen forty one	noise:leading_drop
-sentence		nay not so replied the rince	nay not so replied the prince	noise:leading_drop
-sentence		all the evil and he sorrow of the world	all the evil and the sorrow of the world	noise:leading_drop
-sentence		take it or you and him	take it for you and him	noise:leading_drop
-sentence		another thing i'm afraid to risk t	another thing I'm afraid to risk it	noise:leading_drop
-sentence		of all creatures man is least fitted to live n herds	of all creatures man is least fitted to live in herds	noise:leading_drop
-sentence		it kept n marking time and nothing appeared to move it	it kept on marking time and nothing appeared to move it	noise:leading_drop
-sentence		it was examined by several witnesses it as recognized	it was examined by several witnesses it was recognized	noise:leading_drop
-sentence		ah what a hame indeed to abuse these most worthy people	ah what a shame indeed to abuse these most worthy people	noise:leading_drop
-sentence		hat has changed you so toward him	what has changed you so toward him	noise:leading_drop
-sentence		but he realized now that that could not be	but she realized now that that could not be	noise:leading_drop
-sentence		the oy his boy had understood	the boy his boy had understood	noise:leading_drop
-sentence		what has that to o with anything	what has that to do with anything	noise:leading_drop
-sentence		ot to borrow jack	not to borrow jack	noise:leading_drop
-sentence		a party consisting of thirteen persons had assembled in the dining oom	a party consisting of thirteen persons had assembled in the dining room	noise:leading_drop
-sentence		and are ou logical	and are you logical	noise:leading_drop
-sentence		his thought he never quite acknowledged	this thought he never quite acknowledged	noise:leading_drop
-sentence		y call thrilled everybody	my call thrilled everybody	noise:leading_drop
-sentence		said one and cunning and ine child that	said one and cunning and fine child that	noise:leading_drop
-sentence		but t once her cheeks coloured	but at once her cheeks coloured	noise:leading_drop
-sentence		ain't yer proud n him	ain't yer proud on him	noise:leading_drop
-sentence		the present expedition was not o go so far	the present expedition was not to go so far	noise:boundary_gemination
-sentence		thank jon he hath not hy empty head	thank Jon he hath not thy empty head	noise:boundary_gemination
-sentence		she could scarcely hear her own words that old him to stop	she could scarcely hear her own words that told him to stop	noise:boundary_gemination
-sentence		we xchanged cards again and his man called a cab for me	we exchanged cards again and his man called a cab for me	noise:boundary_gemination
-sentence		the ants till excited	the ants still excited	noise:boundary_gemination
-sentence		all trace of him is lost for some ighteen months	all trace of him is lost for some eighteen months	noise:boundary_gemination
-sentence		it's pay or play money at he tape	it's pay or play money at the tape	noise:boundary_gemination
-sentence		all his delight in the publication of his new novel was pent	all his delight in the publication of his new novel was spent	noise:boundary_gemination
-sentence		these are too many questions regina nswered	these are too many questions regina answered	noise:boundary_gemination
-sentence		well ewis he said you've taken your time	well lewis he said you've taken your time	noise:boundary_gemination
-sentence		called the captain directing his peaking trumpet aloft	called the captain directing his speaking trumpet aloft	noise:boundary_gemination
-sentence		thus they are quipped for almost any emergency	thus they are equipped for almost any emergency	noise:boundary_gemination
-sentence		lime is cheap and water plenty at he canal hard by	lime is cheap and water plenty at the canal hard by	noise:boundary_gemination
-sentence		it's knowing the truth that hurts ometimes	it's knowing the truth that hurts sometimes	noise:boundary_gemination
-sentence		ain't no ne back there	ain't no one back there	noise:boundary_gemination
-sentence		it ran as follows marlowe grange league after the war ules one	it ran as follows marlowe grange league after the war rules one	noise:boundary_gemination
-sentence		but heir shouting seemed to remind him of something	but their shouting seemed to remind him of something	noise:boundary_gemination
-sentence		come inside and look at he arrangements	come inside and look at the arrangements	noise:boundary_gemination
-sentence		cried the pilot through his peaking tube	cried the pilot through his speaking tube	noise:boundary_gemination
-sentence		but his hope was a distant and chill vision	but this hope was a distant and chill vision	noise:boundary_gemination
-sentence		we follow men sure enough we get here	we follow men sure enough we get there	noise:boundary_gemination
-sentence		i've never let hem count in personal relations	I've never let them count in personal relations	noise:boundary_gemination
-sentence		this eemed as good a straw as any to clutch at	this seemed as good a straw as any to clutch at	noise:boundary_gemination
-sentence		and it is just he same way with storms	and it is just the same way with storms	noise:boundary_gemination
-sentence		the venerable serving man took the hint and eparted	the venerable serving man took the hint and departed	noise:boundary_gemination
-sentence		where are all your oosters	where are all your roosters	noise:boundary_gemination
-sentence		but he words had reference to his wife	but the words had reference to his wife	noise:boundary_gemination
-sentence		he turned with one of his udden impatient motions	he turned with one of his sudden impatient motions	noise:boundary_gemination
-sentence		we dug the grave at the nd of the garden	we dug the grave at the end of the garden	noise:boundary_gemination
-sentence		even miss conway has not begun to keep him from e yet	even miss conway has not begun to keep him from me yet	noise:boundary_gemination
-sentence		the night of danger and ark alarm was past	the night of danger and dark alarm was past	noise:boundary_gemination
-sentence		the blood of christ he blood of christ none but christ	the blood of christ the blood of christ none but christ	noise:boundary_gemination
-sentence		every one of my moves is uccessful	every one of my moves is successful	noise:boundary_gemination
-sentence		when his feet ouched the sea he let go	when his feet touched the sea he let go	noise:boundary_gemination
-sentence		charles frederick holder in big ame at sea may thirteenth	charles frederick holder in big game at sea may thirteenth	noise:boundary_gemination
-sentence		he xperienced a grim satisfaction in the boy's complaints	he experienced a grim satisfaction in the boy's complaints	noise:boundary_gemination
-sentence		he was atisfied with the past and hopeful of the future	he was satisfied with the past and hopeful of the future	noise:boundary_gemination
-sentence		talking of leeting visions ain't it about your dinner hour	talking of fleeting visions ain't it about your dinner hour	noise:boundary_gemination
+sentence		every ne of my moves is successful	every one of my moves is successful	noise:leading_drop
+sentence		uch a fearful house	such a fearful house	noise:leading_drop
+sentence		n many cases these visits produce more inconvenience than pleasure	in many cases these visits produce more inconvenience than pleasure	noise:leading_drop
+sentence		that as a good job	that was a good job	noise:leading_drop
+sentence		she helped herself to a large slice of tea ake	she helped herself to a large slice of tea cake	noise:leading_drop
+sentence		after that michel was sure of being arned of any change	after that Michel was sure of being warned of any change	noise:leading_drop
+sentence		here the oat was taken from the water and shipped to cumberland	here the boat was taken from the water and shipped to cumberland	noise:leading_drop
+sentence		not see me gain	not see me again	noise:leading_drop
+sentence		she tried to ace the situation with a smile	she tried to face the situation with a smile	noise:leading_drop
+sentence		further on some boys ad seen him still going southward	further on some boys had seen him still going southward	noise:leading_drop
+sentence		was he quick question that followed like the snap of a trigger	was the quick question that followed like the snap of a trigger	noise:leading_drop
+sentence		h denise she said are you going to geneva	ah Denise she said are you going to geneva	noise:leading_drop
+sentence		well then the day fter	well then the day after	noise:leading_drop
+sentence		he youth achieved this with austere formality	the youth achieved this with austere formality	noise:leading_drop
+sentence		this is orth coming across india to see	this is worth coming across india to see	noise:leading_drop
+sentence		said one and cunning and fine hild that	said one and cunning and fine child that	noise:leading_drop
+sentence		don't be horrid harry have you seen this week's unch	don't be horrid harry have you seen this week's punch	noise:leading_drop
+sentence		we'll try and get him o the station if we can	we'll try and get him to the station if we can	noise:leading_drop
+sentence		hen it was her turn to laugh	then it was her turn to laugh	noise:leading_drop
+sentence		you don't look very comfortable in here liu aid	you don't look very comfortable in here liu said	noise:leading_drop
+sentence		she started upward feeling with her feet for every stone tep	she started upward feeling with her feet for every stone step	noise:leading_drop
+sentence		but what akes you kiss my hand	but what makes you kiss my hand	noise:leading_drop
+sentence		the hinges yielded t last	the hinges yielded at last	noise:leading_drop
+sentence		the irst sight of his face told his story	the first sight of his face told his story	noise:leading_drop
+sentence		ave some regard for delicacy	have some regard for delicacy	noise:leading_drop
+sentence		he bowed and addressed us afterwards n our own language	he bowed and addressed us afterwards in our own language	noise:leading_drop
+sentence		at all events he isn't uch use to you	at all events he isn't much use to you	noise:leading_drop
+sentence		they're afraid of t	they're afraid of it	noise:leading_drop
+sentence		this acts exactly he same when filled only the case is soluble	this acts exactly the same when filled only the case is soluble	noise:leading_drop
+sentence		whispered maud slipping into the mpty chair	whispered Maud slipping into the empty chair	noise:leading_drop
+sentence		haven't had time to show it o them yet	haven't had time to show it to them yet	noise:leading_drop
+sentence		it might save im from marrying some mere fine lady	it might save him from marrying some mere fine lady	noise:leading_drop
+sentence		it don't seem possible n this neighborhood	it don't seem possible in this neighborhood	noise:leading_drop
+sentence		doesn't it look ike windows	doesn't it look like windows	noise:leading_drop
+sentence		she did hat she could	she did what she could	noise:leading_drop
+sentence		the boy oes not think	the boy does not think	noise:leading_drop
+sentence		one fate waits ye both	one fate awaits ye both	noise:leading_drop
+sentence		does eorge say anything against you	does george say anything against you	noise:leading_drop
+sentence		the actual work exhibited simply confirms he impression of the photographs	the actual work exhibited simply confirms the impression of the photographs	noise:leading_drop
+sentence		all this inventing this producing takes place n a pleasing lively dream	all this inventing this producing takes place in a pleasing lively dream	noise:leading_drop
+sentence		as for death e understands and he will come again	as for death he understands and he will come again	noise:boundary_gemination
+sentence		this is mister jones aid walter	this is mister jones said walter	noise:boundary_gemination
+sentence		but you must remember that his is california	but you must remember that this is california	noise:boundary_gemination
+sentence		even this mall mercy was not to be allowed much longer	even this small mercy was not to be allowed much longer	noise:boundary_gemination
+sentence		but hey obviously knew nothing at all about it	but they obviously knew nothing at all about it	noise:boundary_gemination
+sentence		so now let us get o business	so now let us get to business	noise:boundary_gemination
+sentence		other hopes may feed sentiment and be precious ometimes to aching hearts	other hopes may feed sentiment and be precious sometimes to aching hearts	noise:boundary_gemination
+sentence		what else do you object o	what else do you object to	noise:boundary_gemination
+sentence		it was ome hours before she woke	it was some hours before she woke	noise:boundary_gemination
+sentence		the father has o much that he wouldn't even speak to me	the father has so much that he wouldn't even speak to me	noise:boundary_gemination
 sentence		you are wonderful wonderful people very one of you	you are wonderful wonderful people every one of you	noise:boundary_gemination
-sentence		no you won't josiah allen o you won't	no you won't josiah allen no you won't	noise:boundary_gemination
-sentence		that's the way the old miller has gon eshe said softly	that's the way the old miller has gone she said softly	noise:space_shift
-sentence		said he intendin gsimply to carry on his joke	said he intending simply to carry on his joke	noise:space_shift
-sentence		and thu sthey parted	and thus they parted	noise:space_shift
-sentence		that one certainly was notk atie	that one certainly was not Katie	noise:space_shift
-sentence		mutua ladmiration laughed geoffrey	mutual admiration laughed Geoffrey	noise:space_shift
-sentence		she was not petite no rblond nor golden haired	she was not petite nor blond nor golden haired	noise:space_shift
-sentence		is there no loyalty left in thel and	is there no loyalty left in the land	noise:space_shift
-sentence		oh sir it is to ohorrible	oh sir it is too horrible	noise:space_shift
-sentence		is he a write rtoo	is he a writer too	noise:space_shift
-sentence		with four illustrations in color by maynar ddixon	with four illustrations in color by Maynard Dixon	noise:space_shift
-sentence		hurry up wil lyou	hurry up will you	noise:space_shift
-sentence		an dthe woods are alive with squirrels	and the woods are alive with squirrels	noise:space_shift
-sentence		her experience was wider and she had morei magination	her experience was wider and she had more imagination	noise:space_shift
-sentence		was this tooo nly a dream	was this too only a dream	noise:space_shift
-sentence		there came a time when bethw as undoubtedly of school age	there came a time when beth was undoubtedly of school age	noise:space_shift
-sentence		there ain't no paper here nor pens neither nor in kneither	there ain't no paper here nor pens neither nor ink neither	noise:space_shift
-sentence		instead he opened up a ne wline	instead he opened up a new line	noise:space_shift
-sentence		fiveg uineas a head	five guineas a head	noise:space_shift
-sentence		they had sign sand tokens for use and protection	they had signs and tokens for use and protection	noise:space_shift
-sentence		is th echild asleep	is the child asleep	noise:space_shift
-sentence		would yout ake me with you	would you take me with you	noise:space_shift
-sentence		he was sure of it when he though tabout himself	he was sure of it when he thought about himself	noise:space_shift
-sentence		in fact nothing seemed to put him out of his deliberatem anner	in fact nothing seemed to put him out of his deliberate manner	noise:space_shift
-sentence		how terrible thatw ould be	how terrible that would be	noise:space_shift
-sentence		move alongs lowly and keep a sharp lookout on our flanks	move along slowly and keep a sharp lookout on our flanks	noise:space_shift
-sentence		the othe rlooked slowly around at it and smiled	the other looked slowly around at it and smiled	noise:space_shift
-sentence		it fitted even bettert han the boots	it fitted even better than the boots	noise:space_shift
-sentence		wait be patient andy ou shall know everything	wait be patient and you shall know everything	noise:space_shift
-sentence		it was nearlyo ver	it was nearly over	noise:space_shift
-sentence		the first sight of his face told hi sstory	the first sight of his face told his story	noise:space_shift
-sentence		how's business withy ou to day eh	how's business with you to day eh	noise:space_shift
-sentence		of course said the chief he gave you some name som eaddress	of course said the chief he gave you some name some address	noise:space_shift
-sentence		i've appliedf or permission to abolish it	I've applied for permission to abolish it	noise:space_shift
-sentence		they gets worse every dayt hat they do	they gets worse every day that they do	noise:space_shift
-sentence		at all events something must be donea bout it	at all events something must be done about it	noise:space_shift
-sentence		said the marine never openingh is eyes	said the marine never opening his eyes	noise:space_shift
-sentence		oh daddy alicel aughed	oh daddy Alice laughed	noise:space_shift
-sentence		it's a lif einterest	it's a life interest	noise:space_shift
-sentence		she said oh and yo umean it	she said oh and you mean it	noise:space_shift
-sentence		when did you get backf rom york squire	when did you get back from york squire	noise:space_shift
-sentence		none flatt ered or frowned on him who was richer than the rest	none flattered or frowned on him who was richer than the rest	noise:space_extra
-sentence		dismiss the me eting said he	dismiss the meeting said he	noise:space_extra
-sentence		can seem to see em right here be fore me	can seem to see em right here before me	noise:space_extra
-sentence		if we go there to that pla ce	if we go there to that place	noise:space_extra
-sentence		i'd give you ten per cent on your mo ney sally	I'd give you ten per cent on your money sally	noise:space_extra
-sentence		she did not want people trespassing in her gard en	she did not want people trespassing in her garden	noise:space_extra
-sentence		but we had not dreamed of any ser ious attachment between them	but we had not dreamed of any serious attachment between them	noise:space_extra
-sentence		to give her a few lesso ns	to give her a few lessons	noise:space_extra
-sentence		sure thing there'll be houses thi ck like that all the way	sure thing there'll be houses thick like that all the way	noise:space_extra
-sentence		they are seeking dea th in life as best to have	they are seeking death in life as best to have	noise:space_extra
-sentence		but we can't read other people's lette rs objected georgina	but we can't read other people's letters objected Georgina	noise:space_extra
-sentence		we kept pushi ng on down the river	we kept pushing on down the river	noise:space_extra
-sentence		but it was awf ul awful	but it was awful awful	noise:space_extra
-sentence		surely she does not reflect that woman wa nts polishing	surely she does not reflect that woman wants polishing	noise:space_extra
-sentence		that's don scott com ing out with the coffee	that's don scott coming out with the coffee	noise:space_extra
-sentence		he looked by no means a wick ed or designing old man	he looked by no means a wicked or designing old man	noise:space_extra
-sentence		it would ease him and save him and all wo uld be over	it would ease him and save him and all would be over	noise:space_extra
-sentence		i'll have to make some sort of a barga in with him	I'll have to make some sort of a bargain with him	noise:space_extra
-sentence		you can give it an original tw ist	you can give it an original twist	noise:space_extra
-sentence		thank god you're back ro ger she said	thank god you're back roger she said	noise:space_extra
-sentence		he's taking you at your word ret urned the artist	he's taking you at your word returned the artist	noise:space_extra
-sentence		fo rgive me replied the other	forgive me replied the other	noise:space_extra
-sentence		extinction long dr awn out is boring she said	extinction long drawn out is boring she said	noise:space_extra
-sentence		the most vulgar things and events ex cite him	the most vulgar things and events excite him	noise:space_extra
-sentence		and he wouldn't let her have fashio nable clothes	and he wouldn't let her have fashionable clothes	noise:space_extra
-sentence		faint you fool her eyes widened with instant comprehen sion	faint you fool her eyes widened with instant comprehension	noise:space_extra
-sentence		the women all look ali ke and the men and the waiters	the women all look alike and the men and the waiters	noise:space_extra
-sentence		sh all be glad to send my corn to your mill	shall be glad to send my corn to your mill	noise:space_extra
-sentence		they are willing to incur self den ial	they are willing to incur self denial	noise:space_extra
-sentence		to think of your coming tod ay	to think of your coming today	noise:space_extra
-sentence		the fate of prints and coins is equa lly inexplicable	the fate of prints and coins is equally inexplicable	noise:space_extra
-sentence		come on let's go in that's the curt ain bell	come on let's go in that's the curtain bell	noise:space_extra
-sentence		we may be dela yed somewhat	we may be delayed somewhat	noise:space_extra
-sentence		she is very much out of he alth	she is very much out of health	noise:space_extra
-sentence		they cou ld hardly believe that they had reached satin lodge	they could hardly believe that they had reached satin lodge	noise:space_extra
-sentence		long live the li berty of the press	long live the liberty of the press	noise:space_extra
-sentence		what fatal infection had poiso ned heart and brain	what fatal infection had poisoned heart and brain	noise:space_extra
-sentence		and startl ed there was something weird about her	and startled there was something weird about her	noise:space_extra
-sentence		with whom do you exchan ge them	with whom do you exchange them	noise:space_extra
-sentence		whe re is the stomach exactly	where is the stomach exactly	noise:space_extra
-sentence		why blind one's self to the truthand call life fair	why blind one's self to the truth and call life fair	noise:space_missing
-sentence		but his courage failed himand he went out	but his courage failed him and he went out	noise:space_missing
-sentence		but has he not some newsfor us perhaps	but has he not some news for us perhaps	noise:space_missing
-sentence		letgo my horse	let go my horse	noise:space_missing
-sentence		isn't that just likea boy	isn't that just like a boy	noise:space_missing
-sentence		then too had they not promised somewhat to eachother	then too had they not promised somewhat to each other	noise:space_missing
-sentence		tell him lucien andshe touched his arm again	tell him Lucien and she touched his arm again	noise:space_missing
-sentence		yes perhaps itis	yes perhaps it is	noise:space_missing
-sentence		lily don't youremember me	lily don't you remember me	noise:space_missing
-sentence		two minutes later a man ran upto the cage	two minutes later a man ran up to the cage	noise:space_missing
-sentence		the nextday he came back with the volume of essays	the next day he came back with the volume of essays	noise:space_missing
-sentence		thesound had come from the direction of the kitchen	the sound had come from the direction of the kitchen	noise:space_missing
-sentence		she waited for a moment to see ifreggie would say more	she waited for a moment to see if Reggie would say more	noise:space_missing
-sentence		also to doctorhall minister of the presbyterian church	also to doctor hall minister of the presbyterian church	noise:space_missing
-sentence		we used to take longwalks together of a sunday afternoon	we used to take long walks together of a sunday afternoon	noise:space_missing
-sentence		the white man's spirit wasright but his method was wrong	the white man's spirit was right but his method was wrong	noise:space_missing
-sentence		thepatch of charred grass	the patch of charred grass	noise:space_missing
-sentence		it wasn't reallyyour fault chips the cub leader said generously	it wasn't really your fault chips the cub leader said generously	noise:space_missing
-sentence		reuben sharp was becoming violent with passioninflamed by brandy	reuben sharp was becoming violent with passion inflamed by brandy	noise:space_missing
-sentence		at your age lifecannot be the lost game you think it	at your age life cannot be the lost game you think it	noise:space_missing
-sentence		whatis a beach	what is a beach	noise:space_missing
-sentence		thenwhy are you afraid of him	then why are you afraid of him	noise:space_missing
-sentence		there fella breathless silence	there fell a breathless silence	noise:space_missing
-sentence		call onthe governor and then go south	call on the governor and then go south	noise:space_missing
-sentence		it's a lifeinterest	it's a life interest	noise:space_missing
-sentence		then you shouldn't look so awfullyold papa	then you shouldn't look so awfully old papa	noise:space_missing
-sentence		atfirst indeed they had no woman servant at all	at first indeed they had no woman servant at all	noise:space_missing
-sentence		some vanished inoverdrive	some vanished in overdrive	noise:space_missing
-sentence		the strike wasreceiving wide publicity	the strike was receiving wide publicity	noise:space_missing
-sentence		thewar will never start again	the war will never start again	noise:space_missing
-sentence		some of the french dishes seemed tohave puzzled the translator	some of the french dishes seemed to have puzzled the translator	noise:space_missing
-sentence		such a cleantrade said the gentleman	such a clean trade said the gentleman	noise:space_missing
-sentence		elaine read it witha gasp	elaine read it with a gasp	noise:space_missing
-sentence		to their honour be itrecorded	to their honour be it recorded	noise:space_missing
-sentence		as fine fellows as everstepped	as fine fellows as ever stepped	noise:space_missing
-sentence		just beyond this end sheimagined shadows	just beyond this end she imagined shadows	noise:space_missing
-sentence		young men of twentyfive do not do such things	young men of twenty five do not do such things	noise:space_missing
-sentence		andyou don't mind that	and you don't mind that	noise:space_missing
-sentence		he was average in everything includinghis type of character	he was average in everything including his type of character	noise:space_missing
-sentence		well daddyhe said you didn't take long to get stiff	well daddy he said you didn't take long to get stiff	noise:space_missing
-sentence		constable he said do your djty	constable he said do your duty	noise:adjacent_key
-sentence		well what was thaf then	well what was that then	noise:adjacent_key
-sentence		there cojld be no escape even while they fled he knew it	there could be no escape even while they fled he knew it	noise:adjacent_key
-sentence		let us speak of the gentiles first wnd of the jews afterwards	let us speak of the gentiles first and of the jews afterwards	noise:adjacent_key
-sentence		burst out the chkef steward	burst out the chief steward	noise:adjacent_key
-sentence		did we abklish it	did we abolish it	noise:adjacent_key
-sentence		when did you get vack from york squire	when did you get back from york squire	noise:adjacent_key
-sentence		my twelve nine thirteen fourteen is a hsap	my twelve nine thirteen fourteen is a heap	noise:adjacent_key
-sentence		this took olace at half past seven	this took place at half past seven	noise:adjacent_key
-sentence		for twenty years he had lived in loneljness	for twenty years he had lived in loneliness	noise:adjacent_key
-sentence		faint you fool her eyes widenex with instant comprehension	faint you fool her eyes widened with instant comprehension	noise:adjacent_key
-sentence		you observed my zmile	you observed my smile	noise:adjacent_key
-sentence		to a certain extent the manager of the mutual crefit was right	to a certain extent the manager of the mutual credit was right	noise:adjacent_key
-sentence		mister lee says they did nof apprehend any great danger	mister lee says they did not apprehend any great danger	noise:adjacent_key
-sentence		not enough to show shch a difference	not enough to show such a difference	noise:adjacent_key
-sentence		not to bodrow jack	not to borrow jack	noise:adjacent_key
-sentence		there it is known that the vkter has his secret	there it is known that the voter has his secret	noise:adjacent_key
-sentence		there is not a more arrogant youth in yhe town	there is not a more arrogant youth in the town	noise:adjacent_key
-sentence		and tuey cut and hack	and they cut and hack	noise:adjacent_key
-sentence		becausw the americans are the greatest of individual property owners	because the americans are the greatest of individual property owners	noise:adjacent_key
-sentence		it liffed him up in the air	it lifted him up in the air	noise:adjacent_key
-sentence		they gets worse every day that tbey do	they gets worse every day that they do	noise:adjacent_key
-sentence		the whole situation is rather contrary to etiquette don't gou think	the whole situation is rather contrary to etiquette don't you think	noise:adjacent_key
-sentence		can he oock me up for that	can he lock me up for that	noise:adjacent_key
-sentence		uudge of my happiness	judge of my happiness	noise:adjacent_key
-sentence		fear geabbed his insides	fear grabbed his insides	noise:adjacent_key
-sentence		penny scarcely knew whether to go home or to the star ofcice	penny scarcely knew whether to go home or to the star office	noise:adjacent_key
-sentence		oufside of their own limited circles they evidently cared for nothing	outside of their own limited circles they evidently cared for nothing	noise:adjacent_key
-sentence		then ahy are you afraid of him	then why are you afraid of him	noise:adjacent_key
-sentence		matilda does not skt so	matilda does not sit so	noise:adjacent_key
-sentence		fate is oppozed to us	fate is opposed to us	noise:adjacent_key
-sentence		these are too many questions regina anssered	these are too many questions regina answered	noise:adjacent_key
-sentence		the afternoon was very windy and stkrmy	the afternoon was very windy and stormy	noise:adjacent_key
-sentence		the upper part of his face seemed to vanush	the upper part of his face seemed to vanish	noise:adjacent_key
-sentence		you are happy my anyq but what is to become of me	you are happy my anya but what is to become of me	noise:adjacent_key
-sentence		for the regular wages with pne condition	for the regular wages with one condition	noise:adjacent_key
-sentence		the only pity is that it has gone tye wrong way	the only pity is that it has gone the wrong way	noise:adjacent_key
-sentence		his fisld of observation is the village	his field of observation is the village	noise:adjacent_key
-sentence		it will not be wanted in the othwr room	it will not be wanted in the other room	noise:adjacent_key
-sentence		they made his protagonist appear a negligibke quantity	they made his protagonist appear a negligible quantity	noise:adjacent_key
-context_realword	truth was to be directly read from 	hart to heart	heart to heart	noise:realword_edit heart->hart
-context_realword	you've got to make your 	min up quick	mind up quick	noise:realword_edit mind->min
-context_realword	that's my name 	hes	yes	noise:realword_edit yes->hes
-context_realword	that dear old 	clause	Claude	noise:realword_edit Claude->clause
-context_realword	the environment of 	earl christianity	early christianity	noise:realword_edit early->earl
-context_realword	said josephine pleasantly I'm astonished that there's none 	tor you	for you	noise:realword_edit for->tor
-context_realword	can he get you 	int further trouble	into further trouble	noise:realword_edit into->int
-context_realword	well but 	air take a thought	sir take a thought	noise:realword_edit sir->air
-context_realword	for a moment Hal could hardly believe 	he evidence of his eyesight	the evidence of his eyesight	noise:realword_edit the->he
-context_realword	everywhere the floor of the jungle 	wax dry as the sahara	was dry as the sahara	noise:realword_edit was->wax
-context_realword	we accordingly left the saloon 	sand ascended to the bridge	and ascended to the bridge	noise:realword_edit and->sand
-context_realword	late afternoon of the next 	say my defense mechanism was ready	day my defense mechanism was ready	noise:realword_edit day->say
-context_realword	who wants them to 	stare	starve	noise:realword_edit starve->stare
-context_realword	but it 	wax awful awful	was awful awful	noise:realword_edit was->wax
-context_realword	feldman looked 	sat his watch	at his watch	noise:realword_edit at->sat
-context_realword	being everything which now thou art be nothing which thou art 	no	not	noise:realword_edit not->no
-context_realword	he said here wife look after the lass and 	an out	ran out	noise:realword_edit ran->an
-context_realword	the art of the present day is not architecture painting 	of literature	or literature	noise:realword_edit or->of
-context_realword	didn't your aunt 	wan you to go	want you to go	noise:realword_edit want->wan
-context_realword	at once his mind 	as filled with questions	was filled with questions	noise:realword_edit was->as
-context_realword	herald grand rapids 	much herald saint joseph mo	Mich herald saint joseph mo	noise:realword_edit Mich->much
-context_realword	so that 	wax the idea	was the idea	noise:realword_edit was->wax
-context_realword	you must go 	go her and ask her to help you	to her and ask her to help you	noise:realword_edit to->go
-context_realword	said the musician giving his 	had a flourish	hand a flourish	noise:realword_edit hand->had
-context_realword	to think 	or your coming today	of your coming today	noise:realword_edit of->or
-context_realword	his quick wit grasped the situation at 	one	once	noise:realword_edit once->one
-context_realword	but you won't 	fell me	tell me	noise:realword_edit tell->fell
-context_realword	forgive me mother 	be answered seriously	he answered seriously	noise:realword_edit he->be
-context_realword	that was probably the most likely place to 	fry for	try for	noise:realword_edit try->fry
-context_realword	they could discuss 	residence in the car	residences in the car	noise:realword_edit residences->residence
-context_realword	Abe has 	bee appointed postmaster	been appointed postmaster	noise:realword_edit been->bee
-context_realword	half a crown he 	aid holding out his hand	said holding out his hand	noise:realword_edit said->aid
-context_realword	then the indians 	prepare their midday meal	prepared their midday meal	noise:realword_edit prepared->prepare
-context_realword	Du barry wished to 	ave hers	have hers	noise:realword_edit have->ave
-context_realword	all except you 	he sixth	the sixth	noise:realword_edit the->he
-context_realword	the river 	spoon appeared	soon appeared	noise:realword_edit soon->spoon
-context_realword	we who lived and loved should we not 	gave died together	have died together	noise:realword_edit have->gave
-context_realword	it's rather 	holly to meet a person in this inn	jolly to meet a person in this inn	noise:realword_edit jolly->holly
-context_realword	but as to 	ding it patiently	doing it patiently	noise:realword_edit doing->ding
-context_realword	why didn't you write to me 	ate	Kate	noise:realword_edit Kate->ate
-sentence		thats a strange knock miss gertrude	that's a strange knock miss Gertrude	noise:contraction
-sentence		there aint no doing anything with it	there ain't no doing anything with it	noise:contraction
-sentence		now ive got it cries the old man again all complete	now I've got it cries the old man again all complete	noise:contraction
-sentence		whats she looking like now	what's she looking like now	noise:contraction
-sentence		cause im afraid of him	cause I'm afraid of him	noise:contraction
-sentence		ill go and buy her one then	I'll go and buy her one then	noise:contraction
-sentence		theyre getting it all wet	they're getting it all wet	noise:contraction
-sentence		ill take a look at him jim	I'll take a look at him Jim	noise:contraction
-sentence		ive applied for permission to abolish it	I've applied for permission to abolish it	noise:contraction
-sentence		chiefly from what she didnt say	chiefly from what she didn't say	noise:contraction
-sentence		saint patricks day was last week he answered smiling	saint patrick's day was last week he answered smiling	noise:contraction
-sentence		youd have shot him you mean	you'd have shot him you mean	noise:contraction
-sentence		you know the puppet dance you dont	you know the puppet dance you don't	noise:contraction
-sentence		she doesnt look a bit like it	she doesn't look a bit like it	noise:contraction
-sentence		ill tell you in a year nan wait till then	I'll tell you in a year Nan wait till then	noise:contraction
-sentence		youll die of your own poisons if you dont look out	you'll die of your own poisons if you don't look out	noise:contraction
-sentence		one by one he laid the notes on the goose girls hand	one by one he laid the notes on the goose girl's hand	noise:contraction
-sentence		thats the next bus sir	that's the next bus sir	noise:contraction
-sentence		miles eagerly shes a a fine girl isnt she	miles eagerly she's a a fine girl isn't she	noise:contraction
-sentence		its got everything to do with you ashley broke in	it's got everything to do with you Ashley broke in	noise:contraction
-sentence		thatll be easy enough	that'll be easy enough	noise:contraction
-sentence		why dont you er run over to my tent	why don't you er run over to my tent	noise:contraction
-sentence		its government work you know	it's government work you know	noise:contraction
+sentence		there was another charge against he miserable brightly	there was another charge against the miserable brightly	noise:boundary_gemination
+sentence		here used to represent he long drawers worn underneath	here used to represent the long drawers worn underneath	noise:boundary_gemination
+sentence		herman was the last o go from them	Herman was the last to go from them	noise:boundary_gemination
+sentence		a violent remor went through him a nameless unspeakable dread	a violent tremor went through him a nameless unspeakable dread	noise:boundary_gemination
+sentence		this he had ecided to hand over to selma as pin money	this he had decided to hand over to Selma as pin money	noise:boundary_gemination
+sentence		the kid id the shooting	the kid did the shooting	noise:boundary_gemination
+sentence		but he words had reference to his wife	but the words had reference to his wife	noise:boundary_gemination
+sentence		will you look at hat mess of clouds	will you look at that mess of clouds	noise:boundary_gemination
+sentence		but jane fairfax has them both arriet	but jane fairfax has them both Harriet	noise:boundary_gemination
+sentence		all that he dying man said was water now and then	all that the dying man said was water now and then	noise:boundary_gemination
+sentence		and unlop and manners	and dunlop and manners	noise:boundary_gemination
+sentence		the vil to both sides arises in an undeveloped state of law	the evil to both sides arises in an undeveloped state of law	noise:boundary_gemination
+sentence		and now we come to the last of the letters ever eceived	and now we come to the last of the letters ever received	noise:boundary_gemination
+sentence		her letters by her own request are sent o the bank	her letters by her own request are sent to the bank	noise:boundary_gemination
+sentence		he waved away an offered ish	he waved away an offered dish	noise:boundary_gemination
+sentence		can't abide m can he	can't abide em can he	noise:boundary_gemination
+sentence		he had very little knowledge to go n	he had very little knowledge to go on	noise:boundary_gemination
+sentence		so you start o morrow	so you start to morrow	noise:boundary_gemination
+sentence		you know it grows more and more difficult to btain employment	you know it grows more and more difficult to obtain employment	noise:boundary_gemination
+sentence		you forget the trouble you cause and how you pset all calculations	you forget the trouble you cause and how you upset all calculations	noise:boundary_gemination
+sentence		not o borrow jack	not to borrow jack	noise:boundary_gemination
+sentence		they prayed to them and built emples to them	they prayed to them and built temples to them	noise:boundary_gemination
+sentence		some considerable care however must be xercised here	some considerable care however must be exercised here	noise:boundary_gemination
+sentence		with difficulty one turns the handle of the door which swings lowly	with difficulty one turns the handle of the door which swings slowly	noise:boundary_gemination
+sentence		my father has been at he table talking to me in welsh	my father has been at the table talking to me in welsh	noise:boundary_gemination
+sentence		all in good time my nephew hen everything is arranged	all in good time my nephew when everything is arranged	noise:boundary_gemination
+sentence		we took him to ur pile	we took him to our pile	noise:boundary_gemination
+sentence		the sun was near to setting but he heat was still considerable	the sun was near to setting but the heat was still considerable	noise:boundary_gemination
+sentence		in the nd there is a quarrel	in the end there is a quarrel	noise:boundary_gemination
+sentence		the hinge syielded at last	the hinges yielded at last	noise:space_shift
+sentence		she had found a friend an dsuch a friend	she had found a friend and such a friend	noise:space_shift
+sentence		his religion thend epended on himself	his religion then depended on himself	noise:space_shift
+sentence		that was why he didn't writ eagain	that was why he didn't write again	noise:space_shift
+sentence		no tyet too late	not yet too late	noise:space_shift
+sentence		asked tim with a tremor of alarm in hi svoice	asked Tim with a tremor of alarm in his voice	noise:space_shift
+sentence		they made the run to tampa in twod ays	they made the run to tampa in two days	noise:space_shift
+sentence		where is th estomach exactly	where is the stomach exactly	noise:space_shift
+sentence		it's sealed up and in the cashb ox	it's sealed up and in the cash box	noise:space_shift
+sentence		whe nshe had told him about ella	when she had told him about Ella	noise:space_shift
+sentence		cut banana thin with silverk nife and spread thick over icing	cut banana thin with silver knife and spread thick over icing	noise:space_shift
+sentence		lunc hwill be cold	lunch will be cold	noise:space_shift
+sentence		why blind one's self to the truth an dcall life fair	why blind one's self to the truth and call life fair	noise:space_shift
+sentence		fathe ryou can work	father you can work	noise:space_shift
+sentence		isn't it strange indian sshould camp in such a place	isn't it strange indians should camp in such a place	noise:space_shift
+sentence		gaining her wis hthe occasion proved to be something of an undertaking	gaining her wish the occasion proved to be something of an undertaking	noise:space_shift
+sentence		woodwor kthere was none	woodwork there was none	noise:space_shift
+sentence		whatg ood would it answer	what good would it answer	noise:space_shift
+sentence		the kid screamed as them olten metal burned his hand	the kid screamed as the molten metal burned his hand	noise:space_shift
+sentence		he tried to kill him with a stoney esterday	he tried to kill him with a stone yesterday	noise:space_shift
+sentence		buy all youc an of tourist he said	buy all you can of tourist he said	noise:space_shift
+sentence		but it wasa wful awful	but it was awful awful	noise:space_shift
+sentence		thel inden bears nothing oh yes	the linden bears nothing oh yes	noise:space_shift
+sentence		well you are young folks you ca nhave books in your hands	well you are young folks you can have books in your hands	noise:space_shift
+sentence		he echoed staring at the spot to which my fingerp ointed	he echoed staring at the spot to which my finger pointed	noise:space_shift
+sentence		dundee askede xcitement sharpening his voice	dundee asked excitement sharpening his voice	noise:space_shift
+sentence		the floor was paved with larg eflags	the floor was paved with large flags	noise:space_shift
+sentence		then too had they not promise dsomewhat to each other	then too had they not promised somewhat to each other	noise:space_shift
+sentence		flowed spontaneously form any years afterwards	flowed spontaneously for many years afterwards	noise:space_shift
+sentence		said bruce passin ghis cup for another cup of tea	said bruce passing his cup for another cup of tea	noise:space_shift
+sentence		th edate was in the month of june seventeen seventy one	the date was in the month of june seventeen seventy one	noise:space_shift
+sentence		to the watchman and the clerk sthis conduct doubtless seemed little	to the watchman and the clerks this conduct doubtless seemed little	noise:space_shift
+sentence		colonelc lifford laughed to himself	colonel clifford laughed to himself	noise:space_shift
+sentence		he straightened his bac kand she crawled into the saddle	he straightened his back and she crawled into the saddle	noise:space_shift
+sentence		allah th ecompassionate the merciful	allah the compassionate the merciful	noise:space_shift
+sentence		asked ruth as they went along the stree ttogether	asked ruth as they went along the street together	noise:space_shift
+sentence		nelli ehad been beautiful but by god	Nellie had been beautiful but by god	noise:space_shift
+sentence		that makes me feels afe	that makes me feel safe	noise:space_shift
+sentence		the american loves a goodm ixer	the american loves a good mixer	noise:space_shift
+sentence		it wasn't really your fault chips the cub leaders aid generously	it wasn't really your fault chips the cub leader said generously	noise:space_shift
+sentence		he rman was the last to go from them	Herman was the last to go from them	noise:space_extra
+sentence		come and choose a place for the bee skip to st and	come and choose a place for the bee skip to stand	noise:space_extra
+sentence		val entine rose to follow him	valentine rose to follow him	noise:space_extra
+sentence		grace crept away calling soft ly to the girls to keep down	grace crept away calling softly to the girls to keep down	noise:space_extra
+sentence		it's it's in the natu re of things	it's it's in the nature of things	noise:space_extra
+sentence		i'll take you to him rig ht away	I'll take you to him right away	noise:space_extra
+sentence		i'm only trying to do my duty and safegu ard our property	I'm only trying to do my duty and safeguard our property	noise:space_extra
+sentence		there are folks in the ho use who can tell you as much	there are folks in the house who can tell you as much	noise:space_extra
+sentence		and in the background th ere was remorse	and in the background there was remorse	noise:space_extra
+sentence		she tried to face the situation with a sm ile	she tried to face the situation with a smile	noise:space_extra
+sentence		is my arm brok en	is my arm broken	noise:space_extra
+sentence		god is against the witch doctors who do such evil thi ngs	god is against the witch doctors who do such evil things	noise:space_extra
+sentence		he shrugged his shoulders as if to dismi ss the matter	he shrugged his shoulders as if to dismiss the matter	noise:space_extra
+sentence		here his preaching was atte nded by the same notable results	here his preaching was attended by the same notable results	noise:space_extra
+sentence		and is it going to be hard to get acquain ted with me	and is it going to be hard to get acquainted with me	noise:space_extra
+sentence		she was our moth er afterwards anyway cried the young grouse	she was our mother afterwards anyway cried the young grouse	noise:space_extra
+sentence		let me go let me go coward madm an	let me go let me go coward madman	noise:space_extra
+sentence		he felt the blo od rushing to his face	he felt the blood rushing to his face	noise:space_extra
+sentence		bri ng her here she is in my room fletcher	bring her here she is in my room fletcher	noise:space_extra
+sentence		he wished the silence would prolong it self	he wished the silence would prolong itself	noise:space_extra
+sentence		but our engagement had never been quite cance lled	but our engagement had never been quite cancelled	noise:space_extra
+sentence		is it interesting stu ff	is it interesting stuff	noise:space_extra
+sentence		thy mot her is nigh	thy mother is nigh	noise:space_extra
+sentence		bef ore the fire sat faye duncan	before the fire sat Faye duncan	noise:space_extra
+sentence		would you adv ise me to sell	would you advise me to sell	noise:space_extra
+sentence		this best of men betrayed me in every po ssible way	this best of men betrayed me in every possible way	noise:space_extra
+sentence		there's blood on your ha nds	there's blood on your hands	noise:space_extra
+sentence		who keep the world both old and new in pain or pl easure	who keep the world both old and new in pain or pleasure	noise:space_extra
+sentence		suits me repl ied her brother	suits me replied her brother	noise:space_extra
+sentence		good heavens rose twas the man will iam	good heavens rose twas the man william	noise:space_extra
+sentence		maybe then skipper sammy didn't qui te know what he was sayin	maybe then skipper Sammy didn't quite know what he was sayin	noise:space_extra
+sentence		he was amu sed now little more	he was amused now little more	noise:space_extra
+sentence		oh what a nob le work the society is engaged in	oh what a noble work the society is engaged in	noise:space_extra
+sentence		it was so unlike anyth ing he had been seeing lately	it was so unlike anything he had been seeing lately	noise:space_extra
+sentence		but midd le names don't really count after all	but middle names don't really count after all	noise:space_extra
+sentence		he ca lled i'll haul it up	he called I'll haul it up	noise:space_extra
+sentence		it was part of the progra mme don't you see	it was part of the programme don't you see	noise:space_extra
+sentence		said the marine nev er opening his eyes	said the marine never opening his eyes	noise:space_extra
+sentence		well da ddy he said you didn't take long to get stiff	well daddy he said you didn't take long to get stiff	noise:space_extra
+sentence		he takes us at our word how many of us make exc uses	he takes us at our word how many of us make excuses	noise:space_extra
+sentence		the atmosphere possesses as may be readily imagined manyimportant characteristics	the atmosphere possesses as may be readily imagined many important characteristics	noise:space_missing
+sentence		she does feel strange with thisbeautiful woman	she does feel strange with this beautiful woman	noise:space_missing
+sentence		he said he could not think ofone at all	he said he could not think of one at all	noise:space_missing
+sentence		now we'll have that black devil onour hands again	now we'll have that black devil on our hands again	noise:space_missing
+sentence		beware whatyou do	beware what you do	noise:space_missing
+sentence		the worried lion looked up and roseto his feet	the worried lion looked up and rose to his feet	noise:space_missing
+sentence		for miles however no railroad wasin sight	for miles however no railroad was in sight	noise:space_missing
+sentence		not nowhe assured her	not now he assured her	noise:space_missing
+sentence		and hewent straight to the library	and he went straight to the library	noise:space_missing
+sentence		why notkill me here	why not kill me here	noise:space_missing
+sentence		she watched the steward as hemoved to and fro	she watched the steward as he moved to and fro	noise:space_missing
+sentence		i'll take a lookat him jim	I'll take a look at him Jim	noise:space_missing
+sentence		the men lookedat each other and at their captain	the men looked at each other and at their captain	noise:space_missing
+sentence		there seemed good causefor this	there seemed good cause for this	noise:space_missing
+sentence		don't crydear girl don't cry	don't cry dear girl don't cry	noise:space_missing
+sentence		because the americans are the greatest ofindividual property owners	because the americans are the greatest of individual property owners	noise:space_missing
+sentence		they mademe clear him out	they made me clear him out	noise:space_missing
+sentence		starit sounds like a thirty thousand foot cinema film	star it sounds like a thirty thousand foot cinema film	noise:space_missing
+sentence		they gets worse every daythat they do	they gets worse every day that they do	noise:space_missing
+sentence		a violent tremor went through him a nameless unspeakabledread	a violent tremor went through him a nameless unspeakable dread	noise:space_missing
+sentence		wayoff and kitty waved her hand to the right	way off and kitty waved her hand to the right	noise:space_missing
+sentence		gaining her wish the occasion proved tobe something of an undertaking	gaining her wish the occasion proved to be something of an undertaking	noise:space_missing
+sentence		policy andhealth preserving	policy and health preserving	noise:space_missing
+sentence		nohouse was near and no one seemed to be traveling	no house was near and no one seemed to be traveling	noise:space_missing
+sentence		then he closed hiseyes and found paradise	then he closed his eyes and found paradise	noise:space_missing
+sentence		he was afraid to haveher try the trough again	he was afraid to have her try the trough again	noise:space_missing
+sentence		she looked straight at themall and let them be	she looked straight at them all and let them be	noise:space_missing
+sentence		always shewas being deceived and imposed upon	always she was being deceived and imposed upon	noise:space_missing
+sentence		did yehear the firing yesterday	did ye hear the firing yesterday	noise:space_missing
+sentence		but at onceher cheeks coloured	but at once her cheeks coloured	noise:space_missing
+sentence		it's a considerablerisk said colonel walton	it's a considerable risk said colonel Walton	noise:space_missing
+sentence		the snow isgoing away at last	the snow is going away at last	noise:space_missing
+sentence		oh there was not the slightestoccasion to come to see you	oh there was not the slightest occasion to come to see you	noise:space_missing
+sentence		come andhave a chat	come and have a chat	noise:space_missing
+sentence		then things came up with the tyrannythey exercise	then things came up with the tyranny they exercise	noise:space_missing
+sentence		why won't youallow it	why won't you allow it	noise:space_missing
+sentence		ammunition has beenissued as ordered	ammunition has been issued as ordered	noise:space_missing
+sentence		he whispered somethingto her	he whispered something to her	noise:space_missing
+sentence		it's some mansionbelieve me	it's some mansion believe me	noise:space_missing
+sentence		he even asked them to send him someof the first	he even asked them to send him some of the first	noise:space_missing
+sentence		this acts exactly the same whsn filled only the case is soluble	this acts exactly the same when filled only the case is soluble	noise:adjacent_key
+sentence		but just then someone knocked at rhe outer door	but just then someone knocked at the outer door	noise:adjacent_key
+sentence		remarked one friend to anothrr	remarked one friend to another	noise:adjacent_key
+sentence		i'm only trying to do my duty and safeguafd our property	I'm only trying to do my duty and safeguard our property	noise:adjacent_key
+sentence		and now you feklows he continued you may as well turn back	and now you fellows he continued you may as well turn back	noise:adjacent_key
+sentence		he exclaimed an wipl she do it	he exclaimed an will she do it	noise:adjacent_key
+sentence		every man fell fighting and died dword in hand	every man fell fighting and died sword in hand	noise:adjacent_key
+sentence		how eloquent of wo is thag sound	how eloquent of wo is that sound	noise:adjacent_key
+sentence		as for his tears they seemed to hage dried up	as for his tears they seemed to have dried up	noise:adjacent_key
+sentence		but our best rower said the ofher	but our best rower said the other	noise:adjacent_key
+sentence		i'm a going as ykur mother knows a fishing	I'm a going as your mother knows a fishing	noise:adjacent_key
+sentence		you're always yhinking of papa now	you're always thinking of papa now	noise:adjacent_key
+sentence		you have a pretty knack he croed	you have a pretty knack he cried	noise:adjacent_key
+sentence		mediums must live thr same as other people	mediums must live the same as other people	noise:adjacent_key
+sentence		for except forpses he found no one	for except corpses he found no one	noise:adjacent_key
+sentence		why what would ylu have me to do	why what would you have me to do	noise:adjacent_key
+sentence		weol you have lived sighed winthrop	well you have lived sighed Winthrop	noise:adjacent_key
+sentence		yoir belly be filled quicker	your belly be filled quicker	noise:adjacent_key
+sentence		uncle victor knew it and he hac been afraid	uncle victor knew it and he had been afraid	noise:adjacent_key
+sentence		god is against the witch doctors who do such evil thingx	god is against the witch doctors who do such evil things	noise:adjacent_key
+sentence		then why syould god be wrath with him because he hath not	then why should god be wrath with him because he hath not	noise:adjacent_key
+sentence		they gets worse evwry day that they do	they gets worse every day that they do	noise:adjacent_key
+sentence		all in good time my nephew when everything is arrangsd	all in good time my nephew when everything is arranged	noise:adjacent_key
+sentence		at thjs sound the fairy turned red with rage	at this sound the fairy turned red with rage	noise:adjacent_key
+sentence		it was necessary to reassurw him	it was necessary to reassure him	noise:adjacent_key
+sentence		oight or darkness made no difference now	light or darkness made no difference now	noise:adjacent_key
+sentence		wepl that sounds reasonable	well that sounds reasonable	noise:adjacent_key
+sentence		my fatger has been at the table talking to me in welsh	my father has been at the table talking to me in welsh	noise:adjacent_key
+sentence		so you're gping to philadelphia said the boy	so you're going to philadelphia said the boy	noise:adjacent_key
+sentence		so you go below qnd turn in	so you go below and turn in	noise:adjacent_key
+sentence		kur only hope lies in submission	our only hope lies in submission	noise:adjacent_key
+sentence		we shall have an enormous christmas tree and looj	we shall have an enormous christmas tree and look	noise:adjacent_key
+sentence		the fate of pdints and coins is equally inexplicable	the fate of prints and coins is equally inexplicable	noise:adjacent_key
+sentence		somsthing that god makes	something that god makes	noise:adjacent_key
+sentence		these are disturbed districta	these are disturbed districts	noise:adjacent_key
+sentence		she's lucky then to gwt back at all	she's lucky then to get back at all	noise:adjacent_key
+sentence		he left his room and rab quickly downstairs	he left his room and ran quickly downstairs	noise:adjacent_key
+sentence		cora handed around slme lettuce sandwiches	cora handed around some lettuce sandwiches	noise:adjacent_key
+sentence		the enemy folloaed but too slowly to prevent their entrance	the enemy followed but too slowly to prevent their entrance	noise:adjacent_key
+sentence		international peace is an odeal	international peace is an ideal	noise:adjacent_key
+context_realword	she'll be here 	art half past six to night	at half past six to night	noise:realword_edit at->art
+context_realword	back the rascal 	tor the double	for the double	noise:realword_edit for->tor
+context_realword	while he was looking at the moon he stumbled against 	dome one	some one	noise:realword_edit some->dome
+context_realword	so he tried pulling 	rom the other end	from the other end	noise:realword_edit from->rom
+context_realword	with one hundred illustrations 	form photographs	from photographs	noise:realword_edit from->form
+context_realword	he was 	early played out	nearly played out	noise:realword_edit nearly->early
+context_realword	bring in tea the countess 	caller after him	called after him	noise:realword_edit called->caller
+context_realword	quickly he made one 	fest after another	test after another	noise:realword_edit test->fest
+context_realword	man he he made 	yup to you	up to you	noise:realword_edit up->yup
+context_realword	he read it carefully and thought a long 	awhile before he answered	while before he answered	noise:realword_edit while->awhile
+context_realword	but they could do nothing but 	pick their chops	lick their chops	noise:realword_edit lick->pick
+context_realword	Isabel we're all going 	or a bathe	for a bathe	noise:realword_edit for->or
+context_realword	elaine read it 	wit a gasp	with a gasp	noise:realword_edit with->wit
+context_realword	the first 	tying is to catch him	thing is to catch him	noise:realword_edit thing->tying
+context_realword	when doctor Hewitt 	wet at last phyllis accompanied him to the door	went at last Phyllis accompanied him to the door	noise:realword_edit went->wet
+context_realword	we'll send word by john 	hat we've been here	that we've been here	noise:realword_edit that->hat
+context_realword	if so 	awe must find it	we must find it	noise:realword_edit we->awe
+context_realword	augustus had declared that 	be intended to dine out	he intended to dine out	noise:realword_edit he->be
+context_realword	at last he 	dis expecting to find her gone	did expecting to find her gone	noise:realword_edit did->dis
+context_realword	because it 	look so funny so damned funny	looks so funny so damned funny	noise:realword_edit looks->look
+context_realword	but their shouting seemed to remind 	hum of something	him of something	noise:realword_edit him->hum
+context_realword	presently the strand found 	he opening it sought	the opening it sought	noise:realword_edit the->he
+context_realword	she thought that his brain had 	give way	given way	noise:realword_edit given->give
+context_realword	wait till you 	ate stronger	are stronger	noise:realword_edit are->ate
+context_realword	no said he only into 	he woods opposite his house	the woods opposite his house	noise:realword_edit the->he
+context_realword	don't give 	he a chance any reason	her a chance any reason	noise:realword_edit her->he
+context_realword	didn't know where they 	sent	went	noise:realword_edit went->sent
+context_realword	your hand 	you arm	your arm	noise:realword_edit your->you
+context_realword	let us 	forge our prison	forget our prison	noise:realword_edit forget->forge
+context_realword	the count kissed 	kit as he set it there	it as he set it there	noise:realword_edit it->kit
+context_realword	I'd take the children out to drive every day for one 	thin	thing	noise:realword_edit thing->thin
+context_realword	the pain 	wax excruciating	was excruciating	noise:realword_edit was->wax
+context_realword	and a 	wore of advice yes	word of advice yes	noise:realword_edit word->wore
+context_realword	they stood silently as two men 	passes them on the road	passed them on the road	noise:realword_edit passed->passes
+context_realword	it's government work you 	now	know	noise:realword_edit know->now
+context_realword	she hoped he did not 	min onions	mind onions	noise:realword_edit mind->min
+context_realword	you must learn 	go trust me eddie	to trust me Eddie	noise:realword_edit to->go
+context_realword	that'll be 	east enough	easy enough	noise:realword_edit easy->east
+context_realword	there's nothing else you could have done all this 	tie	time	noise:realword_edit time->tie
+context_realword	what the hell's wrong with 	heir watchman	their watchman	noise:realword_edit their->heir
+sentence		up on the hill saint johns road	up on the hill saint john's road	noise:contraction
+sentence		its a good thing there are no robbers	it's a good thing there are no robbers	noise:contraction
 sentence		oh derek its too awful	oh Derek it's too awful	noise:contraction
-sentence		a spring like day isnt it	a spring like day isn't it	noise:contraction
-sentence		and youre jest the right woman	and you're jest the right woman	noise:contraction
-sentence		its some peoples luck	it's some people's luck	noise:contraction
-sentence		whats the injury doctor	what's the injury doctor	noise:contraction
-sentence		well arent you going to get me out of here	well aren't you going to get me out of here	noise:contraction
-sentence		then lets go tell grandpa urged bunny once more	then let's go tell grandpa urged bunny once more	noise:contraction
+sentence		its government work you know	it's government work you know	noise:contraction
+sentence		across the way was a coopers shop	across the way was a cooper's shop	noise:contraction
+sentence		you havent been fair with me	you haven't been fair with me	noise:contraction
+sentence		but theres something to like in nearly everybody	but there's something to like in nearly everybody	noise:contraction
+sentence		ive got the key answered wade	I've got the key answered wade	noise:contraction
+sentence		ill take a look at him jim	I'll take a look at him Jim	noise:contraction
+sentence		ive seen george since he came	I've seen george since he came	noise:contraction
+sentence		it cant be helped and you are very kind	it can't be helped and you are very kind	noise:contraction
+sentence		if you will have it and wont listen to reason you must	if you will have it and won't listen to reason you must	noise:contraction
+sentence		its pay or play money at the tape	it's pay or play money at the tape	noise:contraction
 sentence		youve killed my psyche	you've killed my psyche	noise:contraction
-sentence		theres the bridge still says johnnie	there's the bridge still says johnnie	noise:contraction
-sentence		we wont argue about that sir	we won't argue about that sir	noise:contraction
-sentence		come on lets go in thats the curtain bell	come on let's go in that's the curtain bell	noise:contraction
-sentence		hell never do it again	he'll never do it again	noise:contraction
-sentence		he couldnt tell where he took the packing case then	he couldn't tell where he took the packing case then	noise:contraction
-sentence		but youre not oriental or at least not much	but you're not oriental or at least not much	noise:contraction
-sentence		theyre trying said hal	they're trying said Hal	noise:contraction
-sentence		marion cant you prevent anthony from being frivolous	Marion can't you prevent anthony from being frivolous	noise:contraction
-sentence		well threaten to leave if he doesnt turn them out	we'll threaten to leave if he doesn't turn them out	noise:contraction
-sentence		andrews ooked aft er him	andrews looked after him	noise:multi
-sentence		her experience waswider and sheh ad more imagination	her experience was wider and she had more imagination	noise:multi
-sentence		these constitute largely a mobile migratory andisturbing unskilled wage earning class	these constitute largely a mobile migratory and disturbing unskilled wage earning class	noise:multi
-sentence		his quick wi tgrasped the situation at once	his quick wit grasped the situation at once	noise:multi
-sentence		ann edid ot turn	anne did not turn	noise:multi
-sentence		thecaptain dispatc hed an orderly	the captain dispatched an orderly	noise:multi
-sentence		tbey seem never to sing but when hey are bothered	they seem never to sing but when they are bothered	noise:multi
-sentence		why can he ot leave me here in pe ace	why can he not leave me here in peace	noise:multi
-sentence		tje nvironment of earl ychristianity	the environment of early christianity	noise:multi
-sentence		the windand ther ain	the wind and the rain	noise:multi
-sentence		there it s known that the voter has hi ssecret	there it is known that the voter has his secret	noise:multi
-sentence		hall we returnfo the other room	shall we return to the other room	noise:multi
-sentence		he observedhere xpress ion of tenderness and suffering	he observed her expression of tenderness and suffering	noise:multi
-sentence		the look in hiseyes hads oftened	the look in his eyes had softened	noise:multi
-sentence		thd antsstill excited	the ants still excited	noise:multi
-sentence		wecan fix it of ourse there's always a way	we can fix it of course there's always a way	noise:multi
-sentence		the bl zme ot england's	the blame not england's	noise:multi
-sentence		he turned ands at down near o dorothy	he turned and sat down near to Dorothy	noise:multi
-sentence		there's not a family historyin the kinhdom she hasn't by heart	there's not a family history in the kingdom she hasn't by heart	noise:multi
-sentence		all the vil and the sorrow of the wprld	all the evil and the sorrow of the world	noise:multi
-sentence		bef ore lincoln loved her she had a sad experiencewith another man	before lincoln loved her she had a sad experience with another man	noise:multi
-sentence		you ac talo quiet and you look gree nish	you act all quiet and you look greenish	noise:multi
-sentence		no they've ot her there and they meanto keep her	no they've got her there and they mean to keep her	noise:multi
-sentence		he spen tthe remainder of his life in is native district	he spent the remainder of his life in his native district	noise:multi
-sentence		when is thos going tostop	when is this going to stop	noise:multi
-sentence		isabel we're llg oing fora bathe	Isabel we're all going for a bathe	noise:multi
-sentence		but o day these conditions are in most instances chang ed	but to day these conditions are in most instances changed	noise:multi
-sentence		the resul twas n acquit tal	the result was an acquittal	noise:multi
-sentence		he cake wazgiven	the cake was given	noise:multi
-sentence		thin gs need a goo ddeal of fixing p	things need a good deal of fixing up	noise:multi
-sentence		it's always one mored rink eith me	it's always one more drink with me	noise:multi
-sentence		it don't seem possible nthis neighborhood	it don't seem possible in this neighborhood	noise:multi
-sentence		too many yo ung women mistakea habit for a grandp assion	too many young women mistake a habit for a grand passion	noise:multi
-sentence		i'm killed enti relys aid peggy	I'm killed entirely said Peggy	noise:multi
-sentence		half a mile or so to thd eastward the battle wa sloud	half a mile or so to the eastward the battle was loud	noise:multi
-sentence		it had never occurred to him before hat she migh tknow	it had never occurred to him before that she might know	noise:multi
-sentence		th evehicle stopped here	the vehicle stopped there	noise:multi
-sentence		suppose some reporter got the story andpri nted it	suppose some reporter got the story and printed it	noise:multi
-sentence		masters say jones whata reyou wearing on your feet	masters say jones what are you wearing on your feet	noise:multi
-sentence		thenight was ag ain restless and so was the day	the night was again restless and so was the day	noise:multi
-sentence		s he going to do my exam righthere	is he going to do my exam right here	noise:multi
-sentence		buth ow wo uld you define it	but how would you define it	noise:multi
-sentence		tye voices you hear rethose of pigeons	the voices you hear are those of pigeons	noise:multi
-sentence		was t upthis way you found tha tsheep	was it up this way you found that sheep	noise:multi
-sentence		nowaround his turn and	now around this turn and	noise:multi
-sentence		butw hat was he to o with it	but what was he to do with it	noise:multi
-sentence		thewinterw as an unsatisfactory one for madeleine altogether	the winter was an unsatisfactory one for Madeleine altogether	noise:multi
-sentence		consider changed to a croti cshould be ever so	consider changed to a critic should be ever so	noise:multi
-sentence		paidmartyrdom pais by whom	paid martyrdom paid by whom	noise:multi
-sentence		tjer pe was wet	the rope was wet	noise:multi
-sentence		hada ny one hea rd the gun	had any one heard the gun	noise:multi
-sentence		he ai dpinching her chin	he said pinching her chin	noise:multi
-sentence		da nremained silrnt for a moment a little ashamed of his outburst	Dan remained silent for a moment a little ashamed of his outburst	noise:multi
-sentence		he was of imposingp resen ce	he was of imposing presence	noise:multi
-sentence		no thing ver ymuch e said	nothing very much he said	noise:multi
-sentence		we've no gr ounds or that belief	we've no grounds for that belief	noise:multi
-sentence		said bruce passkng his cup for an other cup of tea	said bruce passing his cup for another cup of tea	noise:multi
-sentence		bout two hundred thousand not counting th ereserves	about two hundred thousand not counting the reserves	noise:multi
-sentence		then he tu rner in and slept	then he turned in and slept	noise:multi
-sentence		our legislationf avou rsdivorce our social customs don't	our legislation favours divorce our social customs don't	noise:multi
-sentence		the cry wasr aised inone of the narrow streets runaway horse	the cry was raised in one of the narrow streets runaway horse	noise:multi
-sentence		then the rzdar told hat happened	then the radar told what happened	noise:multi
-sentence		it is nobleandg reat	it is noble and great	noise:multi
-sentence		it was from love to godand to martha nd mary	it was from love to god and to martha and mary	noise:multi
-sentence		nobody ca nteust it	nobody can trust it	noise:multi
-sentence		though she bit hert ongue at tje elf betrayal	though she bit her tongue at the self betrayal	noise:multi
-sentence		you people make me tir ed interrupged octor jack	you people make me tired interrupted doctor jack	noise:multi
-sentence		well the san a fe jest now	well the santa fe jest now	noise:multi
-sentence		souou bar women	so you bar women	noise:multi
-sentence		most wlmen that most women would jump at he chancehazel interrupted	most women that most women would jump at the chance hazel interrupted	noise:multi
-sentence		he came to see me justb ecore court convened	he came to see me just before court convened	noise:multi
-sentence		it wa stime or them to start	it was time for them to start	noise:multi
-sentence		cried theman ith shinung eyes	cried the man with shining eyes	noise:multi
-sentence		the process was thesimplest in the wor ld	the process was the simplest in the world	noise:multi
-sentence		thisr oom opened into the arger one in which was allan meredith	this room opened into the larger one in which was Allan meredith	noise:multi
-sentence		she was right according to some sge was madaccording to others	she was right according to some she was mad according to others	noise:multi
-sentence		this palaceis n excavated ruin	this palace is an excavated ruin	noise:multi
-sentence		some of youshall be en	some of you shall be men	noise:multi
-sentence		notmany yards away was the side lawn of the hot el	not many yards away was the side lawn of the hotel	noise:multi
-sentence		said he intendingsi mply to carry on hisj oke	said he intending simply to carry on his joke	noise:multi
-sentence		do you wish me to interest myself on your behalf	do you wish me to interest myself on your behalf	negative:clean
-sentence		there lay the chewed and battered fragments of his beloved eagle	there lay the chewed and battered fragments of his beloved eagle	negative:clean
-sentence		but you don't forget to eat your breakfast	but you don't forget to eat your breakfast	negative:clean
-sentence		during those weeks david's face became thin and drawn	during those weeks david's face became thin and drawn	negative:clean
-sentence		drink nothing but what has passed through the filter	drink nothing but what has passed through the filter	negative:clean
-sentence		as for victor he was more or less indifferent	as for victor he was more or less indifferent	negative:clean
-sentence		things on his desk show that a hasty search has been made	things on his desk show that a hasty search has been made	negative:clean
-sentence		he wound up another bucket	he wound up another bucket	negative:clean
-sentence		they would offer slaves	they would offer slaves	negative:clean
-sentence		it was your money we started on	it was your money we started on	negative:clean
-sentence		it doesn't say what is in them	it doesn't say what is in them	negative:clean
-sentence		the director was enthusiastic about it as well	the director was enthusiastic about it as well	negative:clean
-sentence		the atom is very much alive	the atom is very much alive	negative:clean
-sentence		nicholas has betrayed my secret	nicholas has betrayed my secret	negative:clean
-sentence		he took note of her dress	he took note of her dress	negative:clean
-sentence		she had loved them	she had loved them	negative:clean
-sentence		we shall have an enormous christmas tree and look	we shall have an enormous christmas tree and look	negative:clean
-sentence		your majesty must decide what to do	your majesty must decide what to do	negative:clean
-sentence		it is not a land which may be described	it is not a land which may be described	negative:clean
-sentence		don't want to hold me back do you	don't want to hold me back do you	negative:clean
-sentence		I'll wait and enjoy the surprise	I'll wait and enjoy the surprise	negative:clean
-sentence		Fred was taking her into kent to see his people	Fred was taking her into kent to see his people	negative:clean
-sentence		no but that's no matter	no but that's no matter	negative:clean
-sentence		and this was chance	and this was chance	negative:clean
-sentence		he stumbled a little as he walked	he stumbled a little as he walked	negative:clean
-sentence		it's nice of you but perhaps not correct	it's nice of you but perhaps not correct	negative:clean
-sentence		if he gets off with a ten per cent	if he gets off with a ten per cent	negative:clean
-sentence		judging from your behavior you have found it without our help	judging from your behavior you have found it without our help	negative:clean
-sentence		but there was no sound from above	but there was no sound from above	negative:clean
-sentence		in common with many others she needed mental spectacles at times	in common with many others she needed mental spectacles at times	negative:clean
-sentence		but you have disappointed me rose	but you have disappointed me rose	negative:clean
-sentence		as soon as the secret was told Marco left	as soon as the secret was told Marco left	negative:clean
-sentence		you cannot be rid of me	you cannot be rid of me	negative:clean
-sentence		sir rupert above all men	sir rupert above all men	negative:clean
-sentence		whispered Maud slipping into the empty chair	whispered Maud slipping into the empty chair	negative:clean
-sentence		you've got to make your mind up quick	you've got to make your mind up quick	negative:clean
-sentence		perhaps you have met him	perhaps you have met him	negative:clean
-sentence		you told me not to come early	you told me not to come early	negative:clean
-sentence		trust a servant for keeping things up to the mark	trust a servant for keeping things up to the mark	negative:clean
-sentence		waiting for us to make a break across the clearing	waiting for us to make a break across the clearing	negative:clean
-sentence		what is it anthony	what is it anthony	negative:clean
-sentence		but has he not some news for us perhaps	but has he not some news for us perhaps	negative:clean
-sentence		the boy his boy had understood	the boy his boy had understood	negative:clean
-sentence		loud enough to be heard distinctly	loud enough to be heard distinctly	negative:clean
-sentence		we can win without cannon said white lightning with dignity	we can win without cannon said white lightning with dignity	negative:clean
-sentence		she had found a friend and such a friend	she had found a friend and such a friend	negative:clean
+sentence		roberts heart beat hard once more	Robert's heart beat hard once more	noise:contraction
+sentence		you also know what theyre saying stewart	you also know what they're saying Stewart	noise:contraction
+sentence		take me to this ladys home	take me to this lady's home	noise:contraction
+sentence		then sister agatha took marys hand and ran to the carriage	then sister Agatha took mary's hand and ran to the carriage	noise:contraction
+sentence		toms blood ran cold	tom's blood ran cold	noise:contraction
+sentence		no you wont josiah allen no you wont	no you won't josiah allen no you won't	noise:contraction
+sentence		fourteen and a half if youll take it in trade	fourteen and a half if you'll take it in trade	noise:contraction
+sentence		and if its a love letter	and if it's a love letter	noise:contraction
+sentence		im killed entirely said peggy	I'm killed entirely said Peggy	noise:contraction
+sentence		another days sun was shining on the bride	another day's sun was shining on the bride	noise:contraction
+sentence		id take the children out to drive every day for one thing	I'd take the children out to drive every day for one thing	noise:contraction
+sentence		youve guessed of course that im a married man	you've guessed of course that I'm a married man	noise:contraction
+sentence		our legislation favours divorce our social customs dont	our legislation favours divorce our social customs don't	noise:contraction
+sentence		thats why were so good to you people	that's why we're so good to you people	noise:contraction
+sentence		you dont want anything in my way neighbour	you don't want anything in my way neighbour	noise:contraction
+sentence		stick around thats all	stick around that's all	noise:contraction
+sentence		theres no sort of war on here	there's no sort of war on here	noise:contraction
+sentence		its neither one thing nor another	it's neither one thing nor another	noise:contraction
+sentence		shes gone out in all her best clothes	she's gone out in all her best clothes	noise:contraction
+sentence		whered you learn all this	where'd you learn all this	noise:contraction
+sentence		didnt know where they went	didn't know where they went	noise:contraction
+sentence		dear me bill why youre in luck	dear me bill why you're in luck	noise:contraction
+sentence		well lets see now anders began	well let's see now anders began	noise:contraction
+sentence		theyre goin to live on a farm	they're goin to live on a farm	noise:contraction
+sentence		im afraid hes quite made up his mind not to return	I'm afraid he's quite made up his mind not to return	noise:contraction
+sentence		dont let em in here	don't let em in here	noise:contraction
+sentence		ay i'll show him shws aid al oud	ay I'll show him she said aloud	noise:multi
+sentence		the family referredi tto him	the family referred it to him	noise:multi
+sentence		he could not understandt he loud cry which the gover nor had cried	he could not understand the loud cry which the governor had cried	noise:multi
+sentence		this ought o be a lesson to grave rob bers	this ought to be a lesson to grave robbers	noise:multi
+sentence		your eye are glitte ring	your eyes are glittering	noise:multi
+sentence		at alo events something must be done about it	at all events something must be done about it	noise:multi
+sentence		he hadne ver forgotten	he had never forgotten	noise:multi
+sentence		yes it wa so nly one	yes it was only one	noise:multi
+sentence		yes we mustrepliedh er aunt	yes we must replied her aunt	noise:multi
+sentence		that's o befound out mister garrison	that's to be found out mister garrison	noise:multi
+sentence		he ysth ave discovered something extraordinary	he must have discovered something extraordinary	noise:multi
+sentence		his fie ld of observation is thev illage	his field of observation is the village	noise:multi
+sentence		lawless power co yld do that anywhere	lawless power could do that anywhere	noise:multi
+sentence		and areyku really here once more my dear belinda	and are you really here once more my dear Belinda	noise:multi
+sentence		but she could not sit still nor stand st ill ither	but she could not sit still nor stand still either	noise:multi
+sentence		that's cominghe co ntinued	that's coming he continued	noise:multi
+sentence		du barryw ish ed to have hers	Du barry wished to have hers	noise:multi
+sentence		there wasno foice ave heaven's	there was no voice save heaven's	noise:multi
+sentence		he's a self made man and thi nks everyone shouldsucceed	he's a self made man and thinks everyone should succeed	noise:multi
+sentence		it was vety neatly done	it was very neatly done	noise:multi
+sentence		there is not a mlre arrogant youth n the town	there is not a more arrogant youth in the town	noise:multi
+sentence		an we not continue in ear nest what we began in jest	can we not continue in earnest what we began in jest	noise:multi
+sentence		one's imagination is inclined to ru nriotin venice	one's imagination is inclined to run riot in venice	noise:multi
+sentence		the peasantstoo had stopped oek	the peasants too had stopped work	noise:multi
+sentence		are tou awa ke singer	are you awake singer	noise:multi
+sentence		said he ith a comic dmile	said he with a comic smile	noise:multi
+sentence		ntil then my lovenan	until then my love Nan	noise:multi
+sentence		will you ask her if she is willong tos ee me	will you ask her if she is willing to see me	noise:multi
+sentence		well butsi rtake a thought	well but sir take a thought	noise:multi
+sentence		ther eare stran ge happenings aboard this hip	there are strange happenings aboard this ship	noise:multi
+sentence		bute veryone knows that it wasto my advantage	but everyone knows that it was to my advantage	noise:multi
+sentence		the sea kee ps her own secrsts	the sea keeps her own secrets	noise:multi
+sentence		and they cutsnd hack	and they cut and hack	noise:multi
+sentence		we will de cid ethat by lot	we will decide that by lot	noise:multi
+sentence		usually death wouldr esult in ficteen minu tes	usually death would result in fifteen minutes	noise:multi
+sentence		so you don't want o sell those shares mis ter	so you don't want to sell those shares mister	noise:multi
+sentence		at length came a pilgrim thenu nknown o fame	at length came a pilgrim then unknown to fame	noise:multi
+sentence		roge rasked with afwinkle	roger asked with a twinkle	noise:multi
+sentence		dismiss hi smessenger lord ing	dismiss his messenger lord king	noise:multi
+sentence		leave itto ou probably	leave it to you probably	noise:multi
+sentence		ammunition has bes nissued as ordered	ammunition has been issued as ordered	noise:multi
+sentence		when did thatcome ab out	when did that come about	noise:multi
+sentence		this onew as exactly the colpur of app le blossoms	this one was exactly the colour of apple blossoms	noise:multi
+sentence		even missconway has not be gun to keep him from me yet	even miss conway has not begun to keep him from me yet	noise:multi
+sentence		your purpose is don ewellthis is our thing	your purpose is done well this is our thing	noise:multi
+sentence		on a card she had written a ew ords of thanks	on a card she had written a few words of thanks	noise:multi
+sentence		it was nice eating scotch brogh and how good itwas	it was nice eating scotch broth and how good it was	noise:multi
+sentence		why what wo uld yoi have me to do	why what would you have me to do	noise:multi
+sentence		but we must both be getting un derw au	but we must both be getting under way	noise:multi
+sentence		you ave a pretty knack he cri ed	you have a pretty knack he cried	noise:multi
+sentence		he hoped that if it was the end they would go oge ther	he hoped that if it was the end they would go together	noise:multi
+sentence		we can win without cannon ssi dwhite lightning with dignity	we can win without cannon said white lightning with dignity	noise:multi
+sentence		she tried to facw the situatio nwith a smile	she tried to face the situation with a smile	noise:multi
+sentence		there could be no escape even wh ile they fledhe knew it	there could be no escape even while they fled he knew it	noise:multi
+sentence		in th emorning looking intoeach other's faces they read their fate	in the morning looking into each other's faces they read their fate	noise:multi
+sentence		hatbe you run away for	what be you run away for	noise:multi
+sentence		howe loquentof o is that sound	how eloquent of wo is that sound	noise:multi
+sentence		move alo ng slowly and keep a shar plookout on our flanms	move along slowly and keep a sharp lookout on our flanks	noise:multi
+sentence		cease thy endless quotations fromscriptjre	cease thy endless quotations from scripture	noise:multi
+sentence		did he hrea ten you	did he threaten you	noise:multi
+sentence		the excavation in which e stood wasn early forty feet quare	the excavation in which he stood was nearly forty feet square	noise:multi
+sentence		the re is nopost to london to day	there is no post to london to day	noise:multi
+sentence		the world will geta ong without us while we rest in peace	the world will get along without us while we rest in peace	noise:multi
+sentence		but jwne fairfax has them bot hharriet	but jane fairfax has them both Harriet	noise:multi
+sentence		while there's lifr there's hoperemember	while there's life there's hope remember	noise:multi
+sentence		de swell that's che ap	des well that's cheap	noise:multi
+sentence		it as nkt of himselfhe thought at all	it was not of himself he thought at all	noise:multi
+sentence		what did she knoa of thatgracious spirit	what did she know of that gracious spirit	noise:multi
+sentence		everybodycan sh out amen	everybody can shout amen	noise:multi
+sentence		t was your mon ey we started on	it was your money we started on	noise:multi
+sentence		johnniesaw that she did notc omprehend the situation	johnnie saw that she did not comprehend the situation	noise:multi
+sentence		som eday ou may ot	some day you may not	noise:multi
+sentence		whis pere dmaud slipping into the mpty chair	whispered Maud slipping into the empty chair	noise:multi
+sentence		our only hope liexin submis sion	our only hope lies in submission	noise:multi
+sentence		in this are narrow vaults n eabove the other	in this are narrow vaults one above the other	noise:multi
+sentence		nodoubt he was one of the veryb est men in jerusalem	no doubt he was one of the very best men in jerusalem	noise:multi
+sentence		sometimes he liked thie kind ofspeech	sometimes he liked this kind of speech	noise:multi
+sentence		it wasn ecexsary to reassure him	it was necessary to reassure him	noise:multi
+sentence		but not aft er th efashion of wine	but not after the fashion of swine	noise:multi
+sentence		but we can't read other people's letters onjected georgi na	but we can't read other people's letters objected Georgina	noise:multi
+sentence		but his courage failed him and he went out	but his courage failed him and he went out	negative:clean
+sentence		he was said to be small and exceedingly youthful in appearance	he was said to be small and exceedingly youthful in appearance	negative:clean
+sentence		it might save him from marrying some mere fine lady	it might save him from marrying some mere fine lady	negative:clean
+sentence		twenty three dollars a term	twenty three dollars a term	negative:clean
+sentence		the new home it is satisfactory	the new home it is satisfactory	negative:clean
+sentence		here's the king nay stay	here's the king nay stay	negative:clean
+sentence		it's some mansion believe me	it's some mansion believe me	negative:clean
+sentence		and thus they parted	and thus they parted	negative:clean
+sentence		it's different shooting germans	it's different shooting germans	negative:clean
+sentence		she had turned away from fabulous wealth	she had turned away from fabulous wealth	negative:clean
+sentence		he was absent for half an hour	he was absent for half an hour	negative:clean
+sentence		it is no use he said glancing up	it is no use he said glancing up	negative:clean
+sentence		asked Donald suddenly changing the topic	asked Donald suddenly changing the topic	negative:clean
+sentence		ain't no one back there	ain't no one back there	negative:clean
+sentence		and are you really here once more my dear Belinda	and are you really here once more my dear Belinda	negative:clean
+sentence		they had already regained possession of their guns	they had already regained possession of their guns	negative:clean
+sentence		well that's not at all clever he thought coming to himself	well that's not at all clever he thought coming to himself	negative:clean
+sentence		she taught the sixth form herself	she taught the sixth form herself	negative:clean
 sentence		they then in despair chose a healthy young man	they then in despair chose a healthy young man	negative:clean
-sentence		a linen draper eh	a linen draper eh	negative:clean
-sentence		it is about love	it is about love	negative:clean
-sentence		our ghost isn't a thief	our ghost isn't a thief	negative:clean
-sentence		quickly he made one test after another	quickly he made one test after another	negative:clean
-sentence		you never introduced me	you never introduced me	negative:clean
-sentence		you know what happened to him don't you	you know what happened to him don't you	negative:clean
-sentence		the prince was already before the mirror	the prince was already before the mirror	negative:clean
-sentence		she had to learn self control and she hated to control herself	she had to learn self control and she hated to control herself	negative:clean
-sentence		and how many are you going to love afterwards	and how many are you going to love afterwards	negative:clean
-sentence		let me learn more of that	let me learn more of that	negative:clean
-sentence		he cast at Jim a glance of something like envy	he cast at Jim a glance of something like envy	negative:clean
-sentence		they listen together for a moment	they listen together for a moment	negative:clean
-sentence		it is as much mine as it is hers	it is as much mine as it is hers	negative:clean
-sentence		don't like it all the same	don't like it all the same	negative:clean
-sentence		when you thought of him you thought of jehovah	when you thought of him you thought of jehovah	negative:clean
-sentence		oh there was not the slightest occasion to come to see you	oh there was not the slightest occasion to come to see you	negative:clean
-sentence		stealing a plane in story books is quite simple of course	stealing a plane in story books is quite simple of course	negative:clean
-sentence		taking no notice she proceeded to dry her hands	taking no notice she proceeded to dry her hands	negative:clean
-sentence		this is such a moment	this is such a moment	negative:clean
-sentence		august fourteenth eighteen thirty eight no	august fourteenth eighteen thirty eight no	negative:clean
-sentence		so you don't want to sell those shares mister	so you don't want to sell those shares mister	negative:clean
-sentence		lady he said what I've poured in jest drink in earnest	lady he said what I've poured in jest drink in earnest	negative:clean
-sentence		she hoped he did not mind onions	she hoped he did not mind onions	negative:clean
-sentence		how about a little peg as the colonel says	how about a little peg as the colonel says	negative:clean
-sentence		it was so unlike anything he had been seeing lately	it was so unlike anything he had been seeing lately	negative:clean
-sentence		the man never made a declaration to you my dear Bella	the man never made a declaration to you my dear Bella	negative:clean
-sentence		bliss however you interpret it is a pleasurable emotion	bliss however you interpret it is a pleasurable emotion	negative:clean
-sentence		john well then what is it	john well then what is it	negative:clean
-sentence		they are dear lovers sure enough	they are dear lovers sure enough	negative:clean
-sentence		but she could not sit still nor stand still either	but she could not sit still nor stand still either	negative:clean
-sentence		the women talked little on the trip to white lodge	the women talked little on the trip to white lodge	negative:clean
-sentence		a young man in his position has no business to be idle	a young man in his position has no business to be idle	negative:clean
-sentence		then he hesitated and was silent at a loss	then he hesitated and was silent at a loss	negative:clean
-sentence		you must perk up for the wedding	you must perk up for the wedding	negative:clean
-sentence		we'll send word by john that we've been here	we'll send word by john that we've been here	negative:clean
-sentence		you have conquered she said with deep feeling	you have conquered she said with deep feeling	negative:clean
-sentence		they are radiant in their happiness	they are radiant in their happiness	negative:clean
-sentence		and he paid off his old grudge against muhammad before he left	and he paid off his old grudge against muhammad before he left	negative:clean
-sentence		what has been done is done	what has been done is done	negative:clean
-sentence		blows the wind to the city or from it	blows the wind to the city or from it	negative:clean
-sentence		but he would not but put him in the jail	but he would not but put him in the jail	negative:clean
-sentence		he glanced round for approval of this sentiment	he glanced round for approval of this sentiment	negative:clean
-sentence		the town was in an up roar	the town was in an up roar	negative:clean
-sentence		you are no use for anything	you are no use for anything	negative:clean
-sentence		who keep the world both old and new in pain or pleasure	who keep the world both old and new in pain or pleasure	negative:clean
-sentence		in a work of such magnitude errors occasionally occur	in a work of such magnitude errors occasionally occur	negative:clean
-sentence		shall we have time to go and hear them	shall we have time to go and hear them	negative:clean
-sentence		have you not received greatness of heart received courage received fortitude	have you not received greatness of heart received courage received fortitude	negative:clean
-sentence		he cleared his throat and gave Malone a set of directions	he cleared his throat and gave Malone a set of directions	negative:clean
-sentence		in many cases these visits produce more inconvenience than pleasure	in many cases these visits produce more inconvenience than pleasure	negative:clean
-sentence		this poor dear who's never had anything	this poor dear who's never had anything	negative:clean
-sentence		he struck his palm with his hairy fist	he struck his palm with his hairy fist	negative:clean
-sentence		each one by himself with no one to comfort him	each one by himself with no one to comfort him	negative:clean
-sentence		now who would kill him I'd like to know	now who would kill him I'd like to know	negative:clean
-sentence		Myra laid her beautiful head against his shoulder	Myra laid her beautiful head against his shoulder	negative:clean
-sentence		but with this difference	but with this difference	negative:clean
-sentence		it kept on marking time and nothing appeared to move it	it kept on marking time and nothing appeared to move it	negative:clean
-sentence		cleared up business affairs there then went to palm beach for vacation	cleared up business affairs there then went to palm beach for vacation	negative:clean
-sentence		december eleventh eighteen ninety	december eleventh eighteen ninety	negative:clean
-sentence		miles come and speak to him	miles come and speak to him	negative:clean
-sentence		his quick wit grasped the situation at once	his quick wit grasped the situation at once	negative:clean
-sentence		morgan said sol crossing his legs the other way for relief	morgan said sol crossing his legs the other way for relief	negative:clean
-sentence		if it's right or if it's wrong it's for you to decide	if it's right or if it's wrong it's for you to decide	negative:clean
-sentence		we start for london to night	we start for london to night	negative:clean
-sentence		sidney had awakened now	sidney had awakened now	negative:clean
-sentence		but don't you think god had something to do with it	but don't you think god had something to do with it	negative:clean
-sentence		the manor house was in good condition though not of great size	the manor house was in good condition though not of great size	negative:clean
-sentence		old fellow I'll see you this fall when we play carlisle again	old fellow I'll see you this fall when we play carlisle again	negative:clean
-sentence		but how would you define it	but how would you define it	negative:clean
-sentence		nothing nothing at all he said quickly	nothing nothing at all he said quickly	negative:clean
-sentence		my men we'll win or fall	my men we'll win or fall	negative:clean
-sentence		truth was to be directly read from heart to heart	truth was to be directly read from heart to heart	negative:clean
-sentence		after a moment she said maybe you'll take me somewhere to night	after a moment she said maybe you'll take me somewhere to night	negative:clean
-sentence		her experience was wider and she had more imagination	her experience was wider and she had more imagination	negative:clean
-sentence		my dear leave it leave it	my dear leave it leave it	negative:clean
-sentence		yes as black as the enemy himself	yes as black as the enemy himself	negative:clean
-sentence		he did not reason or argue with himself	he did not reason or argue with himself	negative:clean
-sentence		thus they are equipped for almost any emergency	thus they are equipped for almost any emergency	negative:clean
-sentence		eighteen eleven see page thirty nine	eighteen eleven see page thirty nine	negative:clean
-sentence		we used to take long walks together of a sunday afternoon	we used to take long walks together of a sunday afternoon	negative:clean
-sentence		the cake was given	the cake was given	negative:clean
-sentence		then he discovered that his lip was swollen	then he discovered that his lip was swollen	negative:clean
-sentence		suppose you should fall in love with somebody else	suppose you should fall in love with somebody else	negative:clean
-sentence		writing in my book madame	writing in my book madame	negative:clean
-sentence		Robert's heart beat hard once more	Robert's heart beat hard once more	negative:clean
-sentence		once in the dark maze of tunnels identification was difficult	once in the dark maze of tunnels identification was difficult	negative:clean
-sentence		and the author bowed entirely satisfied	and the author bowed entirely satisfied	negative:clean
-sentence		don't tell me that you are in earnest	don't tell me that you are in earnest	negative:clean
-sentence		the enemy followed but too slowly to prevent their entrance	the enemy followed but too slowly to prevent their entrance	negative:clean
-sentence		at least it won't be after you're gone	at least it won't be after you're gone	negative:clean
-sentence		it is well that you have touched on the theme yourself	it is well that you have touched on the theme yourself	negative:clean
-sentence		five guineas a head	five guineas a head	negative:clean
-sentence		force command is inside merlin	force command is inside merlin	negative:clean
-sentence		look along it between the white posts as far as you can	look along it between the white posts as far as you can	negative:clean
-sentence		once more and it was but a breath upon the breeze	once more and it was but a breath upon the breeze	negative:clean
-sentence		what a sight meets my eyes	what a sight meets my eyes	negative:clean
-sentence		Bernardo see it stalks away now what does that mean	Bernardo see it stalks away now what does that mean	negative:clean
-sentence		why had she thrilled at the alien voice of another throat	why had she thrilled at the alien voice of another throat	negative:clean
-sentence		now besides being a great hunter he was a great warrior too	now besides being a great hunter he was a great warrior too	negative:clean
+sentence		there is n't anything to see	there is n't anything to see	negative:clean
+sentence		asked bill sitting up very suddenly	asked bill sitting up very suddenly	negative:clean
+sentence		with difficulty one turns the handle of the door which swings slowly	with difficulty one turns the handle of the door which swings slowly	negative:clean
+sentence		hey whoa let me out	hey whoa let me out	negative:clean
+sentence		what's going to become of me and of you	what's going to become of me and of you	negative:clean
+sentence		tell me about it said white pigeon	tell me about it said white pigeon	negative:clean
+sentence		but her face did not brighten she did not smile	but her face did not brighten she did not smile	negative:clean
+sentence		frances ward talked to her	frances ward talked to her	negative:clean
+sentence		you like white wine don't you	you like white wine don't you	negative:clean
 sentence		not just the nose	not just the nose	negative:clean
-sentence		all this was natural	all this was natural	negative:clean
-sentence		even parliament omitted to sit	even parliament omitted to sit	negative:clean
-sentence		this done she pulled up the window with a jerk	this done she pulled up the window with a jerk	negative:clean
-sentence		but with a cadet captain it was different	but with a cadet captain it was different	negative:clean
-sentence		it is number seven	it is number seven	negative:clean
-sentence		perhaps something quite terrible	perhaps something quite terrible	negative:clean
-sentence		she opened the book mechanically and turned over the pages	she opened the book mechanically and turned over the pages	negative:clean
-sentence		man is animal but he ain't all animal	man is animal but he ain't all animal	negative:clean
-sentence		but you won't tell me	but you won't tell me	negative:clean
-sentence		to be plain who and what are you	to be plain who and what are you	negative:clean
-sentence		masters say jones what are you wearing on your feet	masters say jones what are you wearing on your feet	negative:clean
-sentence		then you must lower me with the rope	then you must lower me with the rope	negative:clean
-sentence		how he would have spent those precious precious moments	how he would have spent those precious precious moments	negative:clean
-sentence		not that it's any matter to anybody	not that it's any matter to anybody	negative:clean
-sentence		no answer came for a few moments	no answer came for a few moments	negative:clean
-sentence		you make me tremble when you look like that	you make me tremble when you look like that	negative:clean
-sentence		I've been right through four times	I've been right through four times	negative:clean
-sentence		two hundred of indian meal for each they said	two hundred of indian meal for each they said	negative:clean
-sentence		what is he doing at your table	what is he doing at your table	negative:clean
-sentence		demanded frank not yet guessing what was likely to detain his friend	demanded frank not yet guessing what was likely to detain his friend	negative:clean
-sentence		truthful george must have been a deadly bore	truthful george must have been a deadly bore	negative:clean
-sentence		one of them told him that what he saw was the town	one of them told him that what he saw was the town	negative:clean
-sentence		he isn't sure of himself	he isn't sure of himself	negative:clean
-sentence		the times have come to be very bad Lotta	the times have come to be very bad Lotta	negative:clean
-sentence		are you not in arms against my country	are you not in arms against my country	negative:clean
-sentence		international peace is an ideal	international peace is an ideal	negative:clean
+sentence		somebody shall be made to pay for this	somebody shall be made to pay for this	negative:clean
+sentence		let us see will your highness stay in town	let us see will your highness stay in town	negative:clean
+sentence		her mother nodded at him	her mother nodded at him	negative:clean
+sentence		drop it now or people will be watching us	drop it now or people will be watching us	negative:clean
+sentence		I'm a little knocked up with the journey	I'm a little knocked up with the journey	negative:clean
+sentence		thus was it with me then	thus was it with me then	negative:clean
+sentence		I'm sorry but that's how it is	I'm sorry but that's how it is	negative:clean
+sentence		half a crown he said holding out his hand	half a crown he said holding out his hand	negative:clean
+sentence		the governor's wife has come	the governor's wife has come	negative:clean
+sentence		nothing the other said had changed him	nothing the other said had changed him	negative:clean
+sentence		thus they are equipped for almost any emergency	thus they are equipped for almost any emergency	negative:clean
+sentence		had not he so lived	had not he so lived	negative:clean
+sentence		that's the way one learns	that's the way one learns	negative:clean
+sentence		this movement is for a faction not for a people	this movement is for a faction not for a people	negative:clean
+sentence		shall we return to the other room	shall we return to the other room	negative:clean
+sentence		the narrow restraint of the flute brings out this quality of song	the narrow restraint of the flute brings out this quality of song	negative:clean
+sentence		sickness prevailed to a great extent	sickness prevailed to a great extent	negative:clean
+sentence		got a railroad of his own	got a railroad of his own	negative:clean
+sentence		she had often thought that her uncle regretted his rejection of philip	she had often thought that her uncle regretted his rejection of philip	negative:clean
+sentence		don't give her a chance any reason	don't give her a chance any reason	negative:clean
+sentence		oh may be I've found all that will tell of it	oh may be I've found all that will tell of it	negative:clean
+sentence		they had no clock	they had no clock	negative:clean
+sentence		Edith grew very pale	Edith grew very pale	negative:clean
+sentence		it is my mania	it is my mania	negative:clean
 sentence		they found the high chair turned on top of the baby	they found the high chair turned on top of the baby	negative:clean
-sentence		if she should ask about the sermon	if she should ask about the sermon	negative:clean
-sentence		about two o'clock or so I'll shoot three times	about two o'clock or so I'll shoot three times	negative:clean
-sentence		she folded her arms in a serene attitude of determination	she folded her arms in a serene attitude of determination	negative:clean
-sentence		there's a master for you	there's a master for you	negative:clean
-sentence		all of which made the dean's wife uneasy	all of which made the dean's wife uneasy	negative:clean
+sentence		there was no more doubt now	there was no more doubt now	negative:clean
+sentence		Isabel we're all going for a bathe	Isabel we're all going for a bathe	negative:clean
+sentence		during those weeks david's face became thin and drawn	during those weeks david's face became thin and drawn	negative:clean
+sentence		this one was exactly the colour of apple blossoms	this one was exactly the colour of apple blossoms	negative:clean
+sentence		ah Denise she said are you going to geneva	ah Denise she said are you going to geneva	negative:clean
+sentence		the whole of the extra pay had been swallowed up	the whole of the extra pay had been swallowed up	negative:clean
+sentence		ask him to come up please	ask him to come up please	negative:clean
+sentence		exclaimed peter increasing his speed	exclaimed peter increasing his speed	negative:clean
+sentence		to whom will they have recourse	to whom will they have recourse	negative:clean
+sentence		the blood of christ the blood of christ none but christ	the blood of christ the blood of christ none but christ	negative:clean
+sentence		so he was to be released from the army physically unfit	so he was to be released from the army physically unfit	negative:clean
+sentence		the asteroid had for some time been under observation by the lookout	the asteroid had for some time been under observation by the lookout	negative:clean
+sentence		but you don't know what steamer it is	but you don't know what steamer it is	negative:clean
+sentence		god is against the witch doctors who do such evil things	god is against the witch doctors who do such evil things	negative:clean
+sentence		new york the industrial publication company	new york the industrial publication company	negative:clean
+sentence		a choking sensation had seized the youth	a choking sensation had seized the youth	negative:clean
+sentence		he told me this was not saint Quentin night	he told me this was not saint Quentin night	negative:clean
+sentence		very much indeed echoed sarah	very much indeed echoed sarah	negative:clean
+sentence		the first sight of his face told his story	the first sight of his face told his story	negative:clean
+sentence		like a remembered dream familiar things come back to me	like a remembered dream familiar things come back to me	negative:clean
+sentence		all his wealth has come to him in the past six years	all his wealth has come to him in the past six years	negative:clean
+sentence		there was the slate roof and the broken window of glass	there was the slate roof and the broken window of glass	negative:clean
+sentence		will you carry these to your wife	will you carry these to your wife	negative:clean
+sentence		a party consisting of thirteen persons had assembled in the dining room	a party consisting of thirteen persons had assembled in the dining room	negative:clean
+sentence		the excavation in which he stood was nearly forty feet square	the excavation in which he stood was nearly forty feet square	negative:clean
+sentence		father you can work	father you can work	negative:clean
+sentence		did he give you a holiday	did he give you a holiday	negative:clean
+sentence		nobody knows what he has owned until he has lost it	nobody knows what he has owned until he has lost it	negative:clean
+sentence		paid martyrdom paid by whom	paid martyrdom paid by whom	negative:clean
+sentence		hold your fire men	hold your fire men	negative:clean
+sentence		he had felt this before about women	he had felt this before about women	negative:clean
+sentence		and the marriage is valid	and the marriage is valid	negative:clean
+sentence		exclaimed he seizing his white hair with both hands	exclaimed he seizing his white hair with both hands	negative:clean
+sentence		yes perhaps it is	yes perhaps it is	negative:clean
+sentence		I'm only trying to do my duty and safeguard our property	I'm only trying to do my duty and safeguard our property	negative:clean
+sentence		it was very neatly done	it was very neatly done	negative:clean
+sentence		policy and health preserving	policy and health preserving	negative:clean
+sentence		we shall see something then but	we shall see something then but	negative:clean
+sentence		there's just a nice bit of swell running but no more	there's just a nice bit of swell running but no more	negative:clean
+sentence		and he had obeyed the command	and he had obeyed the command	negative:clean
+sentence		have you lost hope of the ultimate success of our cause	have you lost hope of the ultimate success of our cause	negative:clean
+sentence		but this was his last effort	but this was his last effort	negative:clean
+sentence		we dug the grave at the end of the garden	we dug the grave at the end of the garden	negative:clean
+sentence		here we are Myra he said nurse is with me	here we are Myra he said nurse is with me	negative:clean
+sentence		there's more ways to skin a cat than one	there's more ways to skin a cat than one	negative:clean
 sentence		you are happy my anya but what is to become of me	you are happy my anya but what is to become of me	negative:clean
-sentence		the station keeper glanced up briefly	the station keeper glanced up briefly	negative:clean
-sentence		Marion can't you prevent anthony from being frivolous	Marion can't you prevent anthony from being frivolous	negative:clean
-sentence		the poet has a sensitive soul	the poet has a sensitive soul	negative:clean
-sentence		the tall man started forward with a stride	the tall man started forward with a stride	negative:clean
-sentence		we must he made her sit down	we must he made her sit down	negative:clean
-sentence		you still have yours	you still have yours	negative:clean
-sentence		nothing else was talked about in the neighboring cottages	nothing else was talked about in the neighboring cottages	negative:clean
-sentence		his religion then depended on himself	his religion then depended on himself	negative:clean
-sentence		they had made no fire for fear their enemies might see it	they had made no fire for fear their enemies might see it	negative:clean
-sentence		but it is you who have saved mine miss Farley	but it is you who have saved mine miss Farley	negative:clean
-sentence		a few days after caesar arrived at rome	a few days after caesar arrived at rome	negative:clean
-sentence		yes if he knew that ah	yes if he knew that ah	negative:clean
-sentence		so far not even your star knows it	so far not even your star knows it	negative:clean
-sentence		he said to him plainly	he said to him plainly	negative:clean
-sentence		the attendants out there	the attendants out there	negative:clean
-sentence		you know what commissions are	you know what commissions are	negative:clean
-sentence		they saw they would have to continue their journey throughout the night	they saw they would have to continue their journey throughout the night	negative:clean
-sentence		not exactly my young man	not exactly my young man	negative:clean
-sentence		he spent the remainder of his life in his native district	he spent the remainder of his life in his native district	negative:clean
-sentence		to her delight they opened readily to a turn of the knob	to her delight they opened readily to a turn of the knob	negative:clean
+sentence		striving is the word for it bruce snapped	striving is the word for it bruce snapped	negative:clean
+sentence		address to the american troops before the battle of long island	address to the american troops before the battle of long island	negative:clean
+sentence		it is not a land which may be described	it is not a land which may be described	negative:clean
+sentence		a linen draper eh	a linen draper eh	negative:clean
+sentence		then the man in the pulpit begins to preach	then the man in the pulpit begins to preach	negative:clean
+sentence		well what are you interested in	well what are you interested in	negative:clean
+sentence		come and have a chat	come and have a chat	negative:clean
+sentence		she bathed the hot face with water and alcohol	she bathed the hot face with water and alcohol	negative:clean
+sentence		but the words had reference to his wife	but the words had reference to his wife	negative:clean
+sentence		dear me bill why you're in luck	dear me bill why you're in luck	negative:clean
+sentence		you've no right to say that	you've no right to say that	negative:clean
+sentence		but our best rower said the other	but our best rower said the other	negative:clean
+sentence		well let's see now anders began	well let's see now anders began	negative:clean
+sentence		to day it was the winter gulls	to day it was the winter gulls	negative:clean
+sentence		but we had not dreamed of any serious attachment between them	but we had not dreamed of any serious attachment between them	negative:clean
+sentence		he glanced round for approval of this sentiment	he glanced round for approval of this sentiment	negative:clean
+sentence		don't be horrid harry have you seen this week's punch	don't be horrid harry have you seen this week's punch	negative:clean
+sentence		it would ease him and save him and all would be over	it would ease him and save him and all would be over	negative:clean
+sentence		that might easily sound like a hollow phrase	that might easily sound like a hollow phrase	negative:clean
+sentence		this is not a chapter on missionary health	this is not a chapter on missionary health	negative:clean
+sentence		it was a good thing he didn't eat it wasn't it	it was a good thing he didn't eat it wasn't it	negative:clean
+sentence		present you with your christmas gifts now smiled Miriam	present you with your christmas gifts now smiled Miriam	negative:clean
+sentence		the sergeant turned once more to newton mills	the sergeant turned once more to newton mills	negative:clean
+sentence		what chickens are you counting now	what chickens are you counting now	negative:clean
+sentence		said he intending simply to carry on his joke	said he intending simply to carry on his joke	negative:clean
+sentence		yes sharply exclaimed mister foster we must have them come	yes sharply exclaimed mister foster we must have them come	negative:clean
+sentence		everybody else in the hotel would be asleep	everybody else in the hotel would be asleep	negative:clean
+sentence		you act like a fool with your resolutions	you act like a fool with your resolutions	negative:clean
+sentence		to say nothing of ladies	to say nothing of ladies	negative:clean
+sentence		she started at the sound of her name	she started at the sound of her name	negative:clean
+sentence		he must be getting mighty hungry by now	he must be getting mighty hungry by now	negative:clean
+sentence		there was no voice save heaven's	there was no voice save heaven's	negative:clean
+sentence		sidney had awakened now	sidney had awakened now	negative:clean
+sentence		we note with gratification the many signs of family affection around us	we note with gratification the many signs of family affection around us	negative:clean
+sentence		he tried to turn the conversation but this time he failed	he tried to turn the conversation but this time he failed	negative:clean
+sentence		the general waits lieutenant interrupted the orderly	the general waits lieutenant interrupted the orderly	negative:clean
+sentence		they're trying said Hal	they're trying said Hal	negative:clean
+sentence		she could feel them tremble	she could feel them tremble	negative:clean
+sentence		she was quietly confident that they would find the ore	she was quietly confident that they would find the ore	negative:clean
+sentence		you forget the trouble you cause and how you upset all calculations	you forget the trouble you cause and how you upset all calculations	negative:clean
+sentence		the young man was remarkably young	the young man was remarkably young	negative:clean
+sentence		would you take me with you	would you take me with you	negative:clean
+sentence		this thought he never quite acknowledged	this thought he never quite acknowledged	negative:clean
+sentence		so it is not so very unfair is it	so it is not so very unfair is it	negative:clean
+sentence		the young gentleman is my son philip	the young gentleman is my son philip	negative:clean
+sentence		then why are you afraid of him	then why are you afraid of him	negative:clean
+sentence		they cherish it until they think twas always theirs	they cherish it until they think twas always theirs	negative:clean
+sentence		our only hope lies in submission	our only hope lies in submission	negative:clean
+sentence		dundee asked excitement sharpening his voice	dundee asked excitement sharpening his voice	negative:clean
+sentence		all behind had changed	all behind had changed	negative:clean
+sentence		it's a judgment on me she says	it's a judgment on me she says	negative:clean
+sentence		it was necessary to reassure him	it was necessary to reassure him	negative:clean
+sentence		she was not fully dressed then	she was not fully dressed then	negative:clean
+sentence		the tent is as easily set up as taken down	the tent is as easily set up as taken down	negative:clean
+sentence		but uncle Jed was evidently very tired of trying to accommodate	but uncle Jed was evidently very tired of trying to accommodate	negative:clean
+sentence		was heart there or was the girl merely pleased with her power	was heart there or was the girl merely pleased with her power	negative:clean
+sentence		at last came the end of the second spell	at last came the end of the second spell	negative:clean
+sentence		thomas will you arrange my cushion	thomas will you arrange my cushion	negative:clean
+sentence		this took place at half past seven	this took place at half past seven	negative:clean
+sentence		sir rupert above all men	sir rupert above all men	negative:clean
+sentence		but the question is what are we to work towards	but the question is what are we to work towards	negative:clean
+sentence		don't like it all the same	don't like it all the same	negative:clean
+sentence		why not kill me here	why not kill me here	negative:clean
+sentence		she leaned on it whichever it was	she leaned on it whichever it was	negative:clean
+sentence		the spectators had suddenly lost all confidence	the spectators had suddenly lost all confidence	negative:clean
+sentence		how eloquent of wo is that sound	how eloquent of wo is that sound	negative:clean
+sentence		my call thrilled everybody	my call thrilled everybody	negative:clean
+sentence		hadley he said how long have you known the baron	hadley he said how long have you known the baron	negative:clean
+sentence		he felt the blood rushing to his face	he felt the blood rushing to his face	negative:clean
+sentence		he must go and look at him	he must go and look at him	negative:clean
+sentence		is this the fact	is this the fact	negative:clean
+sentence		they displayed early remarkable talents	they displayed early remarkable talents	negative:clean
+sentence		oh yes it makes a difference	oh yes it makes a difference	negative:clean
+sentence		it's only fit for ghosts	it's only fit for ghosts	negative:clean
+sentence		the tide is coming in mother	the tide is coming in mother	negative:clean
+sentence		move along slowly and keep a sharp lookout on our flanks	move along slowly and keep a sharp lookout on our flanks	negative:clean
+sentence		what do you mean by our smuggling	what do you mean by our smuggling	negative:clean
+sentence		that precious pair of rogues forged it	that precious pair of rogues forged it	negative:clean
+sentence		my arms feel a foot longer than they did	my arms feel a foot longer than they did	negative:clean
+sentence		there could be no escape even while they fled he knew it	there could be no escape even while they fled he knew it	negative:clean
+sentence		he was amused now little more	he was amused now little more	negative:clean
+sentence		why what would you have me to do	why what would you have me to do	negative:clean
+sentence		you have a pretty knack he cried	you have a pretty knack he cried	negative:clean
+sentence		you are mad he said	you are mad he said	negative:clean
+sentence		somebody turned up the light	somebody turned up the light	negative:clean
+sentence		oh yes she ought after all	oh yes she ought after all	negative:clean
+sentence		everybody can shout amen	everybody can shout amen	negative:clean
+sentence		there's blood on your hands	there's blood on your hands	negative:clean
+sentence		ou ay sae ye tell me	ou ay sae ye tell me	negative:clean
+sentence		Kemp flashed around at her	Kemp flashed around at her	negative:clean
+sentence		nor you with me	nor you with me	negative:clean
+sentence		there are strange happenings aboard this ship	there are strange happenings aboard this ship	negative:clean
+sentence		would you advise me to sell	would you advise me to sell	negative:clean
+sentence		yes there goes a tree	yes there goes a tree	negative:clean
+sentence		made a wild dash for the stable	made a wild dash for the stable	negative:clean
+sentence		a few words that then passed between them puzzled jill	a few words that then passed between them puzzled jill	negative:clean
+sentence		but do they really represent anything of value	but do they really represent anything of value	negative:clean
+sentence		he perceived smith and myself immediately	he perceived smith and myself immediately	negative:clean
+sentence		not enough to show such a difference	not enough to show such a difference	negative:clean
+sentence		but I'm afraid it's different with mister	but I'm afraid it's different with mister	negative:clean

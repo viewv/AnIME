@@ -234,6 +234,43 @@ sources:
     build_script: "scripts/data_pipeline/build_ngram_kn.py"
     notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
 
+  - id: taskmaster-2-food-ordering
+    status: ready
+    description: "Google Taskmaster-2（2020）food-ordering 领域两人口语任务对话（Byrne et al., Google LLC）"
+    source_url: "https://raw.githubusercontent.com/google-research-datasets/Taskmaster/d92cb6af3005f1dc09c39e75e7daf4a04905e00b/TM-2-2020/data/food-ordering.json"
+    version: "TM-2-2020-d92cb6af"
+    license: "CC-BY-4.0"
+    sha256: "0a042e566a816a5d0abebe6f7e8cfd6abaa89729ffc42f433d327df7342b12f8"
+    build_script: "scripts/data_pipeline/build_eval_v3.py"
+    notes: "仅用于跨领域评测集 eval/benchmarks/ood_tm2_v1.tsv（USER 话轮）；不进入训练，L2 构建按 eval/** 去泄漏。署名：Taskmaster-2 by Bill Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/"
+  - id: taskmaster-2-music
+    status: ready
+    description: "Google Taskmaster-2（2020）music 领域两人口语任务对话（Byrne et al., Google LLC）"
+    source_url: "https://raw.githubusercontent.com/google-research-datasets/Taskmaster/d92cb6af3005f1dc09c39e75e7daf4a04905e00b/TM-2-2020/data/music.json"
+    version: "TM-2-2020-d92cb6af"
+    license: "CC-BY-4.0"
+    sha256: "e5db60d6576fa010bef87a70a8b371d293d48cde8524c1d3ed7c3022f079d95d"
+    build_script: "scripts/data_pipeline/build_eval_v3.py"
+    notes: "仅用于跨领域评测集 eval/benchmarks/ood_tm2_v1.tsv（USER 话轮）；不进入训练，L2 构建按 eval/** 去泄漏。署名：Taskmaster-2 by Bill Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/"
+  - id: taskmaster-2-sports
+    status: ready
+    description: "Google Taskmaster-2（2020）sports 领域两人口语任务对话（Byrne et al., Google LLC）"
+    source_url: "https://raw.githubusercontent.com/google-research-datasets/Taskmaster/d92cb6af3005f1dc09c39e75e7daf4a04905e00b/TM-2-2020/data/sports.json"
+    version: "TM-2-2020-d92cb6af"
+    license: "CC-BY-4.0"
+    sha256: "8191531bfa5a8426b1508c396ab9886a19c7c620b443c436ec10d8d4708d0eac"
+    build_script: "scripts/data_pipeline/build_eval_v3.py"
+    notes: "仅用于跨领域评测集 eval/benchmarks/ood_tm2_v1.tsv（USER 话轮）；不进入训练，L2 构建按 eval/** 去泄漏。署名：Taskmaster-2 by Bill Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/"
+  - id: taskmaster-2-movies
+    status: ready
+    description: "Google Taskmaster-2（2020）movies 领域两人口语任务对话（Byrne et al., Google LLC）"
+    source_url: "https://raw.githubusercontent.com/google-research-datasets/Taskmaster/d92cb6af3005f1dc09c39e75e7daf4a04905e00b/TM-2-2020/data/movies.json"
+    version: "TM-2-2020-d92cb6af"
+    license: "CC-BY-4.0"
+    sha256: "6f67c9a1f04abc111186e5bcfbe3050be01d0737fd6422901402715bc1f3dd0d"
+    build_script: "scripts/data_pipeline/build_eval_v3.py"
+    notes: "仅用于跨领域评测集 eval/benchmarks/ood_tm2_v1.tsv（USER 话轮）；不进入训练，L2 构建按 eval/** 去泄漏。署名：Taskmaster-2 by Bill Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/"
+
   - id: ngram-corpus
     status: ready
     description: "OpenSLR 11 LibriSpeech 规范化英文语言模型语料（源自 Public Domain Project Gutenberg 书库），统计 2-gram 与 3-gram 概率表（ANIMENGR）"
