@@ -20,6 +20,16 @@ pub const DEFAULT_DYNAMIC_BASE_ZIPF: f32 = 4.2;
 /// 用户高频词从 SQLite `user_words.freq` 映射到的 Zipf 上限。
 pub const DEFAULT_DYNAMIC_MAX_ZIPF: f32 = 7.2;
 
+/// 打字学习的词形累计确认到该次数才晋升进 L1 动态词典（显式 `upsert_dynamic_word` 不受限）。
+///
+/// 原因注释：单次上屏常是手滑（Shift 粘连的 `SO`、`colabd` 这类错拼经 Enter 原串直出），若零门槛入库会
+/// 立刻以 Zipf 4.2 参与召回并污染候选；而真正的新词（`kubectl`、`Claude`）用户会反复输入，第二次即可晋升。
+pub const MIN_DYNAMIC_PROMOTE_FREQ: u32 = 2;
+
+/// 预热历史 `user.db` 时，主词典小写词频 >= 该值（log10，约 Zipf 5.0）的极常见词，其 TitleCase 变体按句首
+/// 大写折叠为小写：旧版本在空输入框首词不做句首归一化，`When` / `And` / `So` 以首字母大写形式被大量记录。
+const LEGACY_TITLECASE_FOLD_MIN_LOG_FREQ: f32 = -4.0;
+
 /// 将 Task 03 `user_words.freq`（累计确认次数）对数平滑映射为 Zipf 词频。
 ///
 /// 原因注释：使用 `log2(freq)` 平滑增长，使第 1 次学会的新词具备基础可召回权重（4.2），
@@ -79,8 +89,24 @@ struct DynamicEntry {
     word: String,
     freq: u32,
     zipf: f32,
+    /// 显式 API 写入的热词，不受晋升门槛约束。
+    pinned: bool,
 }
 
+impl DynamicEntry {
+    fn promoted(&self) -> bool {
+        self.pinned || self.freq >= MIN_DYNAMIC_PROMOTE_FREQ
+    }
+}
+
+/// 首字母大写、其余字母全小写（`When`、`Linux`），区别于全大写 `SO` 与混写 `macOS`。
+fn is_titlecase(word: &str) -> bool {
+    let mut letters = word.chars().filter(|c| c.is_ascii_alphabetic());
+    letters.next().is_some_and(|c| c.is_ascii_uppercase())
+        && word.chars().filter(|c| c.is_ascii_alphabetic()).skip(1).all(|c| c.is_ascii_lowercase())
+}
+
+/// 动态层以**精确词形**为 key：`so` / `SO`、`linux` / `Linux` 各自独立计频与晋升，互不覆盖。
 #[derive(Debug, Default)]
 struct DynamicState {
     entries: HashMap<String, DynamicEntry>,
@@ -227,38 +253,36 @@ impl LayeredLexicon {
         entries: &mut HashMap<String, DynamicEntry>,
         word: &str,
         freq_increment: u32,
+        fold_legacy_titlecase: bool,
     ) -> bool {
         let trimmed = word.trim();
         if trimmed.is_empty() || trimmed.chars().any(char::is_whitespace) || freq_increment == 0 {
             return false;
         }
-        let key = trimmed.to_ascii_lowercase();
-        let has_internal_upper = trimmed.chars().skip(1).any(|c| c.is_ascii_uppercase());
-        // 原因注释：用户在句首上屏普通词（如 "Now" / "So" / "The"）时会被句首自动大写规则转为首字母大写并记入 user.db；
-        // 若主词典已收录该词为纯小写普通词汇且无词内大写（非 TypeScript/iPhone 等），动态层必须以纯小写归档，
-        // 避免将普通词误标记为专有名词导致句中敲 "now" 恒变成大写 "Now"。
-        let canonical = if base.has_lowercase_canonical(&key) && !has_internal_upper {
-            key.clone()
+        // 运行期学习接收的已是引擎句首归一化后的文本，按精确词形记录；只有历史数据预热才折叠极常见词的句首大写
+        let canonical = if fold_legacy_titlecase
+            && is_titlecase(trimmed)
+            && base
+                .lowercase_canonical_log_freq(&trimmed.to_ascii_lowercase())
+                .is_some_and(|lf| lf >= LEGACY_TITLECASE_FOLD_MIN_LOG_FREQ)
+        {
+            trimmed.to_ascii_lowercase()
         } else {
             trimmed.to_string()
         };
-        let canonical_has_upper = canonical.bytes().any(|b| b.is_ascii_uppercase());
-        match entries.get_mut(&key) {
+        match entries.get_mut(&canonical) {
             Some(entry) => {
                 entry.freq = entry.freq.saturating_add(freq_increment);
                 entry.zipf = entry.zipf.max(user_freq_to_zipf(entry.freq));
-                // 仅当原词为纯小写而新词确实属于带大小写特征的专名/混写词时升级规范词形
-                if !entry.word.bytes().any(|b| b.is_ascii_uppercase()) && canonical_has_upper {
-                    entry.word = canonical;
-                }
             }
             None => {
                 entries.insert(
-                    key,
+                    canonical.clone(),
                     DynamicEntry {
                         word: canonical,
                         freq: freq_increment,
                         zipf: user_freq_to_zipf(freq_increment),
+                        pinned: false,
                     },
                 );
             }
@@ -274,7 +298,7 @@ impl LayeredLexicon {
         }
         let mut guard = self.dynamic.write().unwrap_or_else(|e| e.into_inner());
         let changed =
-            Self::apply_learn_locked(&self.base, &mut guard.entries, trimmed, freq_increment);
+            Self::apply_learn_locked(&self.base, &mut guard.entries, trimmed, freq_increment, false);
         if changed {
             guard.dirty = true;
         }
@@ -288,21 +312,21 @@ impl LayeredLexicon {
             return false;
         }
         let clamped_zipf = zipf.clamp(0.0, 9.0);
-        let key = trimmed.to_ascii_lowercase();
         let mut guard = self.dynamic.write().unwrap_or_else(|e| e.into_inner());
-        match guard.entries.get_mut(&key) {
+        match guard.entries.get_mut(trimmed) {
             Some(entry) => {
-                entry.word = trimmed.to_string();
                 entry.zipf = clamped_zipf;
                 entry.freq = entry.freq.max(1);
+                entry.pinned = true;
             }
             None => {
                 guard.entries.insert(
-                    key,
+                    trimmed.to_string(),
                     DynamicEntry {
                         word: trimmed.to_string(),
                         freq: 1,
                         zipf: clamped_zipf,
+                        pinned: true,
                     },
                 );
             }
@@ -321,7 +345,7 @@ impl LayeredLexicon {
         let mut accepted = 0usize;
         for (word, freq) in entries {
             let owned = word.into();
-            if Self::apply_learn_locked(&self.base, &mut guard.entries, &owned, freq) {
+            if Self::apply_learn_locked(&self.base, &mut guard.entries, &owned, freq, true) {
                 accepted += 1;
             }
         }
@@ -338,7 +362,9 @@ impl LayeredLexicon {
             return false;
         }
         let mut guard = self.dynamic.write().unwrap_or_else(|e| e.into_inner());
-        let removed = guard.entries.remove(&key).is_some();
+        let before = guard.entries.len();
+        guard.entries.retain(|w, _| w.to_ascii_lowercase() != key);
+        let removed = guard.entries.len() != before;
         if removed {
             if guard.entries.is_empty() {
                 guard.cached = None;
@@ -358,12 +384,15 @@ impl LayeredLexicon {
         guard.dirty = false;
     }
 
+    /// 已晋升进 L1 的动态词条数（未达门槛、仅在观察中的词形不计入）。
     pub fn dynamic_word_count(&self) -> usize {
         self.dynamic
             .read()
             .unwrap_or_else(|e| e.into_inner())
             .entries
-            .len()
+            .values()
+            .filter(|e| e.promoted())
+            .count()
     }
 
     /// 导出当前动态热词快照（按 `zipf` 降序、词形字典序升序排列）。
@@ -372,6 +401,7 @@ impl LayeredLexicon {
         let mut list: Vec<(String, f32)> = guard
             .entries
             .values()
+            .filter(|e| e.promoted())
             .map(|e| (e.word.clone(), e.zipf))
             .collect();
         list.sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
@@ -402,7 +432,8 @@ impl LayeredLexicon {
             .read()
             .unwrap_or_else(|e| e.into_inner())
             .entries
-            .contains_key(lower)
+            .values()
+            .any(|e| e.promoted() && e.word.eq_ignore_ascii_case(lower))
     }
 
     fn query_dynamic(
@@ -417,9 +448,12 @@ impl LayeredLexicon {
                 return Vec::new();
             }
             if !guard.dirty {
-                if let Some(lex) = guard.cached.as_ref() {
-                    return lex.query_layer(raw, opts, false, suppress_heavy_fuzzy);
-                }
+                // 仅有未晋升观察词时 cached 为 None：直接返回空，避免每次按键都抢写锁重建
+                return guard
+                    .cached
+                    .as_ref()
+                    .map(|lex| lex.query_layer(raw, opts, false, suppress_heavy_fuzzy))
+                    .unwrap_or_default();
             }
         }
 
@@ -431,11 +465,14 @@ impl LayeredLexicon {
             return Vec::new();
         }
         if guard.dirty || guard.cached.is_none() {
-            let rebuilt = Lexicon::from_word_zipfs(
-                guard.entries.values().map(|e| (e.word.as_str(), e.zipf)),
-                Vec::new(),
-            );
-            guard.cached = Some(rebuilt);
+            let promoted: Vec<(&str, f32)> = guard
+                .entries
+                .values()
+                .filter(|e| e.promoted())
+                .map(|e| (e.word.as_str(), e.zipf))
+                .collect();
+            let rebuilt = (!promoted.is_empty()).then(|| Lexicon::from_word_zipfs(promoted, Vec::new()));
+            guard.cached = rebuilt;
             guard.dirty = false;
         }
         guard
@@ -450,7 +487,8 @@ impl LayeredLexicon {
         cand: LexiconCandidate,
         prefer_incoming_on_tie: bool,
     ) {
-        let key = cand.word.to_ascii_lowercase();
+        // 按精确文本去重：`Linux` 与 `linux`、`macOS` 与 `macos` 作为两个候选共存，由用户或上下文选择
+        let key = cand.word.clone();
         match best.get_mut(&key) {
             Some(existing) => {
                 let replace = if (cand.score - existing.score).abs() <= 1e-5 {
@@ -483,12 +521,10 @@ impl LexiconProvider for LayeredLexicon {
             return Vec::new();
         }
 
-        let has_dynamic = !self
-            .dynamic
-            .read()
-            .unwrap_or_else(|e| e.into_inner())
-            .entries
-            .is_empty();
+        let has_dynamic = {
+            let guard = self.dynamic.read().unwrap_or_else(|e| e.into_inner());
+            guard.cached.is_some() || (guard.dirty && guard.entries.values().any(DynamicEntry::promoted))
+        };
         // 零额外开销快路径：当未挂载扩展且尚无动态热词时直接透传主词典
         if self.extensions.is_empty() && !has_dynamic {
             return self.base.query(raw, opts);
@@ -512,8 +548,18 @@ impl LexiconProvider for LayeredLexicon {
         }
 
         if has_dynamic {
+            // 全小写输入且主层已有同形小写词（`linux` / `apple`）时，用户未按 Shift，小写词形保持首位，
+            // 习得的大小写变体（`Linux` / `Apple`）紧随其后可选，而不是反客为主
+            let base_lower_exact = (trimmed == needle)
+                .then(|| best.get(trimmed).filter(|c| c.kind == LexiconMatchKind::Exact).map(|c| c.score))
+                .flatten();
             for mut cand in self.query_dynamic(raw, opts, any_layer_exact) {
                 cand.score += self.dynamic_score_bias;
+                if let Some(base_score) = base_lower_exact {
+                    if cand.word != trimmed && cand.word.eq_ignore_ascii_case(trimmed) {
+                        cand.score = cand.score.min(base_score - 0.01);
+                    }
+                }
                 Self::merge_candidate(&mut best, cand, true);
             }
         }

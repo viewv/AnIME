@@ -444,6 +444,41 @@ mod tests {
     }
 
     #[test]
+    fn sqlite_user_db_counts_exact_casing_forms_without_renaming_rows() {
+        let (_guard, db_path) = make_temp_db_path("exact_forms");
+        {
+            let store = UserStore::open_sqlite(&db_path).expect("open sqlite user.db");
+            let lm = NgramLanguageModel::with_user_store(store);
+            for _ in 0..3 {
+                lm.learn_commit("", "so", false);
+            }
+            // 一次 Shift 粘连的 SO 不得吞并 so 的频次，也不得把 so 行改名
+            lm.learn_commit("", "SO", false);
+            lm.learn_commit("", "Linux", false);
+            lm.learn_commit("", "linux", false);
+            lm.flush_user_db();
+            let us = lm.user_store();
+            assert_eq!(us.exact_word_freq("so"), 3);
+            assert_eq!(us.exact_word_freq("SO"), 1);
+            // L2 个性化加成大小写不敏感汇总
+            assert_eq!(us.word_freq("so"), 4);
+            assert_eq!(us.word_freq("LINUX"), 2);
+        }
+        let reopened = UserStore::open_sqlite(&db_path).expect("reopen sqlite user.db");
+        let mut snap = reopened.snapshot_user_words();
+        snap.sort();
+        assert_eq!(
+            snap,
+            vec![
+                ("Linux".to_string(), 1),
+                ("SO".to_string(), 1),
+                ("linux".to_string(), 1),
+                ("so".to_string(), 3),
+            ]
+        );
+    }
+
+    #[test]
     fn oov_floor_and_unseen_bigram_cap_prevent_probability_inversion() {
         // 构造真实场景的缩影：<unk> 总质量很高 (-2.1)，而 "tomorrow" 为 -5.2，
         // 同时高频词 "the" 出度 >= 4 且已观测二元 ("the", "form") = -3.3，未观测的 "from" unigram 为 -2.3

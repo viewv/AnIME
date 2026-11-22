@@ -227,13 +227,12 @@ impl Lexicon {
         self.exact_by_lower.contains_key(lower)
     }
 
-    /// 若主词典已收录该词且规范词形为纯小写普通高频/中频词汇（`log_freq >= -5.2`，即 Zipf >= 2.8，
-    /// 排除长尾罕见小写词条），返回 `true`。
+    /// 主词典中该小写词形作为纯小写普通词条时的对数词频；专名 / 混写词条或未收录返回 `None`。
     #[inline]
-    pub(crate) fn has_lowercase_canonical(&self, lower: &str) -> bool {
-        self.exact_by_lower.get(lower).is_some_and(|&id| {
+    pub(crate) fn lowercase_canonical_log_freq(&self, lower: &str) -> Option<f32> {
+        self.exact_by_lower.get(lower).and_then(|&id| {
             let slot = &self.words[id as usize];
-            !slot.is_proper_or_mixed && slot.log_freq >= -5.2
+            (!slot.is_proper_or_mixed).then_some(slot.log_freq)
         })
     }
 

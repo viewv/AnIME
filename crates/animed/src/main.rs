@@ -572,11 +572,16 @@ mod tests {
             }
         }
         let _ = send_recv(&mut client1, &mut reader1, r#"{"type":"reset","seq":20}"#);
-        for (seq, ch) in "Hyprland".chars().enumerate() {
-            let msg = format!(r#"{{"type":"key","seq":{},"key":"char","text":"{ch}"}}"#, 30 + seq);
-            let _ = send_recv(&mut client1, &mut reader1, &msg);
+        // 新词需上屏两次才晋升进 L1 动态层（单次手滑不入库），这里模拟用户两次 Enter 直出 Hyprland
+        for round in 0..2u64 {
+            let base = 30 + round * 200;
+            for (seq, ch) in "Hyprland".chars().enumerate() {
+                let msg = format!(r#"{{"type":"key","seq":{},"key":"char","text":"{ch}"}}"#, base + seq as u64);
+                let _ = send_recv(&mut client1, &mut reader1, &msg);
+            }
+            let enter = format!(r#"{{"type":"key","seq":{},"key":"enter"}}"#, base + 10);
+            let _ = send_recv(&mut client1, &mut reader1, &enter);
         }
-        let _ = send_recv(&mut client1, &mut reader1, r#"{"type":"key","seq":40,"key":"enter"}"#);
 
         writeln!(client1, r#"{{"type":"privacy","enabled":true}}"#).unwrap();
         for (seq, ch) in "SecretToken".chars().enumerate() {
@@ -611,7 +616,7 @@ mod tests {
         // 验证重启持久化状态：Hyprland 写入 user.db，SecretToken 绝未写入
         drop(resources);
         let reopened = UserStore::open_sqlite(&db_path).expect("reopen user.db");
-        assert_eq!(reopened.word_freq("Hyprland"), 1);
+        assert_eq!(reopened.word_freq("Hyprland"), 2);
         assert_eq!(reopened.word_freq("SecretToken"), 0);
     }
 

@@ -366,8 +366,9 @@ where
                                     (IpcResponse::State(st), job)
                                 }
                                 EngineOutput::Commit(cm) => {
+                                    let learned = guard.take_last_learned_text();
                                     if !privacy && cm.delete_before == 0 {
-                                        teach_lexicon_commit(&resources.lexicon, &cm.text);
+                                        teach_lexicon_commit(&resources.lexicon, learned.as_deref().unwrap_or(&cm.text));
                                     }
                                     (IpcResponse::Commit(cm), None)
                                 }
@@ -393,8 +394,9 @@ where
                                     ),
                                 }
                             } else if let Some(cm) = guard.select_with_seq(seq, index) {
+                                let learned = guard.take_last_learned_text();
                                 if !privacy && cm.delete_before == 0 {
-                                    teach_lexicon_commit(&resources.lexicon, &cm.text);
+                                    teach_lexicon_commit(&resources.lexicon, learned.as_deref().unwrap_or(&cm.text));
                                 }
                                 IpcResponse::Commit(cm)
                             } else {

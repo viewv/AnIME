@@ -51,6 +51,8 @@ pub struct EngineSession<L, N, M> {
     neighbor_cache: HashMap<String, Vec<LexiconCandidate>>,
     slot_cache: HashMap<(String, bool), (Vec<LatticeSlot>, Vec<LexiconCandidate>)>,
     exact_probe_cache: HashMap<String, Option<f32>>,
+    /// 最近一次上屏实际写入个人学习库的（句首归一化后）文本，供宿主用同一文本同步 L1 动态层。
+    last_learned_text: Option<String>,
 }
 
 impl<L, N, M> EngineSession<L, N, M>
@@ -76,6 +78,7 @@ where
             neighbor_cache: HashMap::with_capacity(16),
             slot_cache: HashMap::with_capacity(32),
             exact_probe_cache: HashMap::with_capacity(64),
+            last_learned_text: None,
         }
     }
 
@@ -188,12 +191,12 @@ where
                     self.last_auto_space = false;
                     EngineOutput::State(self.current_state(true))
                 } else {
+                    let learn_text = self.normalize_commit_for_learning(&self.preedit.clone());
                     let raw = std::mem::take(&mut self.preedit);
                     self.candidates.clear();
                     self.token_lex_cache.clear();
                     self.last_auto_space = false;
-                    self.ngram
-                        .learn_commit(&self.context.before, &raw, self.privacy);
+                    self.learn(&learn_text);
                     append_context_before(&mut self.context.before, &raw, false);
                     EngineOutput::Commit(CommitAction {
                         seq: self.seq,
@@ -445,8 +448,7 @@ where
                 .unwrap_or_else(|| self.preedit.clone());
             let base = chosen.trim_end_matches(' ');
             let learn_text = self.normalize_commit_for_learning(base);
-            self.ngram
-                .learn_commit(&self.context.before, &learn_text, self.privacy);
+            self.learn(&learn_text);
 
             let mut commit_text = String::with_capacity(base.len() + ch.len_utf8());
             commit_text.push_str(base);
@@ -503,8 +505,7 @@ where
         let remaining = remaining.trim_start_matches(' ').to_string();
 
         let learn_text = self.normalize_commit_for_learning(&cand.text);
-        self.ngram
-            .learn_commit(&self.context.before, &learn_text, self.privacy);
+        self.learn(&learn_text);
 
         let add_space =
             self.config.smart_spacing && cand.trailing_space && remaining.is_empty();
@@ -863,16 +864,25 @@ where
     /// 若当前处于句首自动大写上下文（且用户原始输入首字符并非大写），
     /// 在写入 `user.db` 学习前将句首第一个词还原为词典原始大小写（如 "Now" -> "now"），
     /// 同时保留真正的专有名词与第一人称（如 "I"、"Monday"）。
+    fn learn(&mut self, learn_text: &str) {
+        self.ngram
+            .learn_commit(&self.context.before, learn_text, self.privacy);
+        self.last_learned_text = (!self.privacy).then(|| learn_text.to_string());
+    }
+
+    /// 取走最近一次上屏用于学习的文本（隐私模式下为 `None`）；宿主据此同步 L1 动态热词层，
+    /// 保证 L1 与 `user.db` 学到的是同一份句首归一化结果，而非原始上屏文本。
+    pub fn take_last_learned_text(&mut self) -> Option<String> {
+        self.last_learned_text.take()
+    }
+
     fn normalize_commit_for_learning(&self, text: &str) -> String {
-        if !context_starts_sentence(&self.context.before) {
-            return text.to_string();
-        }
-        if self
-            .preedit
-            .chars()
-            .next()
-            .is_some_and(|c| c.is_ascii_uppercase())
-        {
+        // 原因注释：句首（输入框起始或句末标点后）的首字母大写只是排版惯例，不是专名证据——
+        // 无论是引擎自动大写还是用户手动按 Shift（本机 user.db 中 `When` / `And` / `What` 大量来自后者），
+        // 只要该词在主词典中规范为小写，就以小写学习；`I`、`Monday` 等规范大写词不受影响。
+        let at_sentence_start =
+            self.context.before.trim().is_empty() || context_starts_sentence(&self.context.before);
+        if !at_sentence_start {
             return text.to_string();
         }
         let first_word = text
@@ -1963,6 +1973,35 @@ mod tests {
             EngineOutput::State(st) => assert!(st.passthrough),
             other => panic!("expected passthrough State for '.' after digit 6, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn sentence_start_capitals_are_learned_lowercase_including_empty_field() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![("when", 6.4), ("is", 7.2), ("it", 7.3), ("i", 7.0), ("I", 7.0), ("Monday", 5.0), ("linux", 4.0)],
+            Vec::new(),
+        );
+        let mut sess = EngineSession::new(lex, NgramLanguageModel::empty(), NoopNeuralModel);
+        let enter = |sess: &mut EngineSession<_, _, _>, s: &str| {
+            for ch in s.chars() {
+                let _ = sess.handle_key(if ch == ' ' { KeyInput::Space } else { KeyInput::Char(ch) });
+            }
+            let _ = sess.handle_key(KeyInput::Enter);
+            sess.take_last_learned_text()
+        };
+        // 空输入框首词：用户手动按 Shift 的 When 仍按小写学习
+        assert_eq!(enter(&mut sess, "When").as_deref(), Some("when"));
+        assert_eq!(sess.ngram().user_store().exact_word_freq("when"), 1);
+        assert_eq!(sess.ngram().user_store().exact_word_freq("When"), 0);
+        // 句中（上文非句首）保留用户大小写
+        sess.set_context("I installed ", "");
+        assert_eq!(enter(&mut sess, "Linux").as_deref(), Some("Linux"));
+        // 规范大写词（Monday）在句首也不折叠
+        sess.set_context("", "");
+        assert_eq!(enter(&mut sess, "Monday").as_deref(), Some("Monday"));
+        // 隐私模式不导出学习文本
+        sess.set_privacy(true);
+        assert_eq!(enter(&mut sess, "When"), None);
     }
 
     #[test]
