@@ -25,6 +25,7 @@ import build_eval_v2  # noqa: E402
 import build_eval_v3  # noqa: E402
 import replay_local_log  # noqa: E402
 import build_ngram_kn  # noqa: E402
+import build_oasst_text  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
 import build_ngram  # noqa: E402
@@ -733,6 +734,40 @@ class TestReplayLocalLog(unittest.TestCase):
             rc = replay_local_log.main([str(log), "--out", str(REPO_ROOT / "eval/local.tsv"), "--convert-only"])
             self.assertEqual(rc, 2)
             self.assertFalse((REPO_ROOT / "eval/local.tsv").exists())
+
+
+class TestOasstText(unittest.TestCase):
+    def test_clean_markdown_strips_code_links_and_marks(self):
+        text = (
+            "## How to **fix** it\n"
+            "Run `pip install x` then see [the docs](https://example.com/a).\n"
+            "```python\nprint('hi')\n```\n"
+            "| a | b |\n"
+            "- First step: visit https://foo.bar now\n"
+            "1. Second _step_"
+        )
+        self.assertEqual(
+            build_oasst_text.clean_markdown(text),
+            ["How to fix it", "Run then see the docs.", "First step: visit now", "Second step"],
+        )
+
+    def test_keep_message_filters_language_review_and_flags(self):
+        ok = {"lang": "en", "deleted": False, "synthetic": False, "review_result": True, "role": "prompter"}
+        self.assertTrue(build_oasst_text.keep_message(ok))
+        for k, v in [("lang", "es"), ("deleted", True), ("synthetic", True), ("review_result", False), ("role", "x")]:
+            self.assertFalse(build_oasst_text.keep_message({**ok, k: v}))
+
+    def test_convert_writes_role_files(self):
+        msgs = [
+            {"lang": "en", "deleted": False, "synthetic": False, "review_result": True, "role": "prompter", "text": "hi there"},
+            {"lang": "en", "deleted": False, "synthetic": False, "review_result": True, "role": "assistant", "text": "```x```"},
+            {"lang": "de", "deleted": False, "synthetic": False, "review_result": True, "role": "assistant", "text": "hallo"},
+        ]
+        with tempfile.TemporaryDirectory() as td:
+            stats = build_oasst_text.convert((json.dumps(m) for m in msgs), Path(td))
+            self.assertEqual((Path(td) / "oasst1_prompter.txt").read_text(encoding="utf-8"), "hi there\n")
+            self.assertEqual((Path(td) / "oasst1_assistant.txt").read_text(encoding="utf-8"), "")
+            self.assertEqual((stats["prompter_words"], stats["messages"]), (2, 3))
 
 
 if __name__ == "__main__":

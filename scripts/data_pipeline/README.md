@@ -63,7 +63,10 @@ python3 scripts/data_pipeline/build_ngram_kn.py \
   --dialogue-glob 'data/raw/multiwoz-2.2-train-*/dialogues_*.json' \
   --dialogue-glob 'data/raw/multiwoz-2.2-dev-*/dialogues_*.json' \
   --dialogue-repeat 20 \
+  --weighted-text data/compiled/corpus/oasst1_assistant.txt:30 \
+  --weighted-text data/compiled/corpus/oasst1_prompter.txt:100 \
   --out data/compiled/ngram.animengr.bin --stats data/compiled/ngram_stats.json
+#    oasst1 文本需先转换：python3 scripts/data_pipeline/build_oasst_text.py（输出 data/compiled/corpus/）
 
 # 7b. 旧版加一平滑构建器（仅小规模测试 / ARPA 导入）。注意 LibriSpeech 语料按字母序排序，
 #     --max-lines 截断会只保留以 A 开头的句子，严禁用于产出正式 L2

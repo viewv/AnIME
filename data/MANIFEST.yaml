@@ -271,6 +271,16 @@ sources:
     build_script: "scripts/data_pipeline/build_eval_v3.py"
     notes: "仅用于跨领域评测集 eval/benchmarks/ood_tm2_v1.tsv（USER 话轮）；不进入训练，L2 构建按 eval/** 去泄漏。署名：Taskmaster-2 by Bill Byrne et al., Google LLC, CC BY 4.0 https://creativecommons.org/licenses/by/4.0/"
 
+  - id: oasst1
+    status: ready
+    description: "OpenAssistant Conversations oasst1（2023-04-12 ready 消息，志愿者手写问答，取英文）"
+    source_url: "https://huggingface.co/datasets/OpenAssistant/oasst1/resolve/fdf72ae0827c1cda404aff25b6603abec9e3399b/2023-04-12_oasst_ready.messages.jsonl.gz"
+    version: "hf-fdf72ae0"
+    license: "Apache-2.0"
+    sha256: "286a6e9a5a413b3272ae9c0b5a20d327983dea1c24342ae28cb244a6da65185c"
+    build_script: "scripts/data_pipeline/build_oasst_text.py"
+    notes: "仅用于 L2 训练（日常 / 技术书面语）；过滤 lang=en、未删除、非合成、review_result=true，去除代码块 / 内联代码 / URL / Markdown 标记，prompter 与 assistant 分文件按权重喂入；构建时按 eval/** 整句与 5-gram 去泄漏。署名：OpenAssistant Conversations (Köpf et al., 2023)"
+
   - id: ngram-corpus
     status: ready
     description: "OpenSLR 11 LibriSpeech 规范化英文语言模型语料（源自 Public Domain Project Gutenberg 书库），统计 2-gram 与 3-gram 概率表（ANIMENGR）"
