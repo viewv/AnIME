@@ -25,7 +25,7 @@
 - **Task 09（整句模式 L1 召回重构，`.agents/tasks/task-09-sentence-recall.md`，叠加在 Task 08 之上）**：闭合 token 放开短词编辑与漏首字母、真词按键近邻候选，空格作为可出错字符的区间词格（统一 `segment_runon`）。
 - **Task 10（评测 v3，`.agents/tasks/task-10-eval-v3.md`，叠加在 Task 09 之上）**：打字过程交互指标、复核反例集、多错误噪声集 `noise_v2`、跨领域留出集与本机打字记录回放；日常/技术领域语料需用户批准下载。
 - **Task 11（L2 语料扩展，`.agents/tasks/task-11-l2-corpus-expansion.md`）**：许可合规的日常与技术领域语料调研与接入。
-- **Task 12（开发者风格评测集 `ood_dev_v1`，`.agents/tasks/task-12-ood-dev-eval.md`）**：oasst1 按对话树留出的现代 / 技术英文提问，含 `negative:novel` 新词保护指标；LibriSpeech 文学集 `ood_v1` 降级为仅参考，不作门禁。
+- **Task 13（开发者风格评测集 `ood_dev_v1`，`.agents/tasks/task-13-ood-dev-eval.md`）**：oasst1 按对话树留出的现代 / 技术英文提问，含 `negative:novel` 新词保护指标；LibriSpeech 文学集 `ood_v1` 降级为仅参考，不作门禁。
 - **可挂载领域词典**：技术 / 开源专名词库作为独立可挂载词典层（复用 L1 分层词典），不并入基础词库。
 - **Task 07（端侧小模型蒸馏与重排微调，`.agents/tasks/task-07-neural-distillation.md`）**：使用公开语料、合成物理键盘/读音/连打噪声、L1+L2 词格难负例与 `SmolLM2-1.7B` 教师软标签，微调/蒸馏输入法专用的 `SmolLM2-135M / 360M` GGUF 模型，将整句与真词消歧准确率推向 `1.7B` 水平。
 - 在不改动 Rust 核心的前提下实现 `frontends/macos/`（macOS IMKit `IMKInputController`）。

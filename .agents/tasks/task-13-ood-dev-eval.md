@@ -1,12 +1,12 @@
 ---
-task_id: "task-12-ood-dev-eval"
+task_id: "task-13-ood-dev-eval"
 worktree: "../wt-anime-ood-dev"
 allowed_paths:
   - "eval/**"
   - "scripts/data_pipeline/**"
   - "data/MANIFEST.yaml"
   - ".agents/contracts/eval-schema.md"
-  - ".agents/tasks/task-12-ood-dev-eval.md"
+  - ".agents/tasks/task-13-ood-dev-eval.md"
   - "ROADMAP.md"
 forbidden_paths:
   - ".agents/contracts/core-api.md"
@@ -17,7 +17,7 @@ forbidden_paths:
 read_only_context:
   - ".agents/contracts/eval-schema.md"
   - ".agents/contracts/data-format.md"
-acceptance_cmd: "make check && make test && make eval && make verify-infra && ./scripts/verify-boundaries.sh .agents/tasks/task-12-ood-dev-eval.md"
+acceptance_cmd: "make check && make test && make eval && make verify-infra && ./scripts/verify-boundaries.sh .agents/tasks/task-13-ood-dev-eval.md"
 ---
 
 ## Objective (目标)
