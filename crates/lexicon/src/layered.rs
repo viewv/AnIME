@@ -223,6 +223,7 @@ impl LayeredLexicon {
     }
 
     fn apply_learn_locked(
+        base: &Lexicon,
         entries: &mut HashMap<String, DynamicEntry>,
         word: &str,
         freq_increment: u32,
@@ -232,21 +233,30 @@ impl LayeredLexicon {
             return false;
         }
         let key = trimmed.to_ascii_lowercase();
-        let trimmed_has_upper = trimmed.bytes().any(|b| b.is_ascii_uppercase());
+        let has_internal_upper = trimmed.chars().skip(1).any(|c| c.is_ascii_uppercase());
+        // 原因注释：用户在句首上屏普通词（如 "Now" / "So" / "The"）时会被句首自动大写规则转为首字母大写并记入 user.db；
+        // 若主词典已收录该词为纯小写普通词汇且无词内大写（非 TypeScript/iPhone 等），动态层必须以纯小写归档，
+        // 避免将普通词误标记为专有名词导致句中敲 "now" 恒变成大写 "Now"。
+        let canonical = if base.has_lowercase_canonical(&key) && !has_internal_upper {
+            key.clone()
+        } else {
+            trimmed.to_string()
+        };
+        let canonical_has_upper = canonical.bytes().any(|b| b.is_ascii_uppercase());
         match entries.get_mut(&key) {
             Some(entry) => {
                 entry.freq = entry.freq.saturating_add(freq_increment);
                 entry.zipf = entry.zipf.max(user_freq_to_zipf(entry.freq));
-                // 仅当原词为纯小写而新词带大小写特征时升级规范词形，保留专有名词/缩写习惯
-                if !entry.word.bytes().any(|b| b.is_ascii_uppercase()) && trimmed_has_upper {
-                    entry.word = trimmed.to_string();
+                // 仅当原词为纯小写而新词确实属于带大小写特征的专名/混写词时升级规范词形
+                if !entry.word.bytes().any(|b| b.is_ascii_uppercase()) && canonical_has_upper {
+                    entry.word = canonical;
                 }
             }
             None => {
                 entries.insert(
                     key,
                     DynamicEntry {
-                        word: trimmed.to_string(),
+                        word: canonical,
                         freq: freq_increment,
                         zipf: user_freq_to_zipf(freq_increment),
                     },
@@ -263,7 +273,8 @@ impl LayeredLexicon {
             return false;
         }
         let mut guard = self.dynamic.write().unwrap_or_else(|e| e.into_inner());
-        let changed = Self::apply_learn_locked(&mut guard.entries, trimmed, freq_increment);
+        let changed =
+            Self::apply_learn_locked(&self.base, &mut guard.entries, trimmed, freq_increment);
         if changed {
             guard.dirty = true;
         }
@@ -310,7 +321,7 @@ impl LayeredLexicon {
         let mut accepted = 0usize;
         for (word, freq) in entries {
             let owned = word.into();
-            if Self::apply_learn_locked(&mut guard.entries, &owned, freq) {
+            if Self::apply_learn_locked(&self.base, &mut guard.entries, &owned, freq) {
                 accepted += 1;
             }
         }

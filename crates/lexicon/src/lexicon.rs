@@ -217,6 +217,14 @@ impl Lexicon {
         self.exact_by_lower.contains_key(lower)
     }
 
+    /// 若主词典已收录该词且规范词形为纯小写（普通词汇，非专有名词/缩写），返回 `true`。
+    #[inline]
+    pub(crate) fn has_lowercase_canonical(&self, lower: &str) -> bool {
+        self.exact_by_lower
+            .get(lower)
+            .is_some_and(|&id| !self.words[id as usize].is_proper_or_mixed)
+    }
+
     fn insert_candidate(
         best: &mut HashMap<String, LexiconCandidate>,
         cand: LexiconCandidate,

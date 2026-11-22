@@ -581,6 +581,11 @@ mod tests {
         assert!(layered.upsert_dynamic_word("ziglang", 6.1));
         assert_eq!(layered.query("ziglang", &opts)[0].word, "ziglang");
 
+        // 句首自动大写上屏过的普通词（如主词典已有的 "apple" -> "Apple"）不应在句中小写输入时强制变成大写
+        assert!(layered.learn_word("Apple", 10));
+        assert_eq!(layered.query("apple", &opts)[0].word, "apple");
+        assert_eq!(layered.query("Apple", &opts)[0].word, "Apple");
+
         assert!(layered.remove_dynamic_word("Hyprland"));
         assert!(!layered.remove_dynamic_word("Hyprland"));
         assert!(!layered
