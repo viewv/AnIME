@@ -1,0 +1,84 @@
+# AnIME 干净反例复核裁决表（分歧裁决：仅复核被当前引擎改动的候选；未改动候选默认保留）
+# sentence<TAB>decision(exclude|keep)<TAB>reason
+# exclude = 源句自身有拼写/语法错误或非自然片段，不能作为"干净输入"；keep = 源句正确，引擎改动属真实误判
+We'll be starving after a our long trip	exclude	源句错误（an hour）
+thanks you a lot	exclude	源句语法错误
+could you tell me he postcode and the entrance fee	exclude	源句漏字（the）
+what is it's star rating and postcode	exclude	源句 it's/its 误用
+but pick it picket	exclude	非自然语料片段
+will for god's love will	exclude	非自然转写片段
+naw I'm good thanks	exclude	非标准拼写（task-08 复核）
+Do they have internet and what is there address	exclude	源句 there/their 误用（task-08 复核）
+But the information you gave me helps alot	exclude	源句 alot（task-08 复核）
+Thanks for you assistance	exclude	源句 you/your（task-09 复核）
+Could you give me it's departure time	exclude	源句 it's/its 误用（task-08 复核）
+I'd actually prefer to stay on the west side	keep	引擎误判 on->in
+meh doesn't really matter	keep	引擎误判 meh->men
+London liverpool st to cambridge	keep	用户有意缩写 st
+Are there any that meet my criteria in the south	keep	引擎误判 meet->meets
+I'm looking for information on cambridge university botanic gardens	keep	引擎误判 on->in
+but don't you think god had something to do with it	keep	引擎误判 had->has
+they're becoming a perfect nuisance	keep	引擎误判 they're->their
+with his finer sensibility he had been able to see deeper	keep	引擎误判 finer->fine
+it was nine when they reached the gloria	keep	专名小写，引擎误判
+she wishes that there should be no shadow on your first meeting	keep	引擎误判 wishes->wished
+now I've got it cries the old man again all complete	keep	引擎误判 cries->cried
+there was the slate roof and the broken window of glass	keep	引擎误判 window->windows
+how are sarah and her mother to pay that	keep	引擎误判 are->or
+it's sealed up and in the cash box	keep	引擎误判 it's->its
+enemy robot ship coming straight ahead corridor two	keep	引擎误判 two->to
+the hotel type and it's postcode	exclude	源句 it's/its 误用
+Okay how about and expensive one instead	exclude	源句 and/an 误用
+you are welcome ABD have a great day	exclude	源句错拼 ABD
+and what it's star rating is please	exclude	源句 it's/its 误用
+What attractions do they offer there	keep	引擎误判 there->their
+Any luck on the taxi	keep	引擎误判 on->in
+I'm looking for a hotel on the east side	keep	引擎误判 on->in
+and a restaurant on the south side	keep	引擎误判 on->in
+Is there a street address or landmark to locate them	keep	引擎误判 address->dress
+Not rice house or charlie Chan	keep	店名，引擎误判 Not->No
+do you wish me to interest myself on your behalf	keep	引擎误判 on->in
+he cast at Jim a glance of something like envy	keep	引擎误判 Jim->Him
+but she could not sit still nor stand still either	keep	引擎误判 nor->or
+my men we'll win or fall	keep	引擎误判 we'll->will
+writing in my book madame	keep	引擎误判 madame->madam
+How about a italian restaurant located in the centre	exclude	源句 a/an 误用
+Not really on the area	exclude	源句介词错误（in the area）
+Thank for your help	exclude	源句语法错误
+The are does not matter	exclude	源句漏字（area）
+What are the price ranges for those	keep	引擎误判 ranges->range
+how about indian food on the east side	keep	引擎误判 on->in
+I'll be travelling on wednesday	keep	英式拼写，引擎误改为美式
+I'm looking to book a train too	keep	引擎误判 too->to
+So long as they're expensive	keep	引擎误判 they're->their
+Can you tell me what area they are in	keep	引擎误判 area->are
+It's just me traveling	keep	美式拼写，引擎误改为英式
+car type and contact number would be helpful too please	keep	引擎误判 too->to
+What is the other option available	keep	引擎误判 option->options
+Does the express by holiday inn have free parking	keep	店名，引擎误判 inn->in
+do you know what area in the city they're located	keep	引擎误判 they're->their
+Specifically there address and what type of attraction is it	exclude	源句 there/their 误用
+advice me on another booking duration	exclude	源句 advice/advise 误用
+and if you can tell me it's entrance fee	exclude	源句 it's/its 误用
+What is there address	exclude	源句 there/their 误用
+but please confirm their address again and their postcode	keep	引擎误判 address->dress
+as long as internet and parking are free	keep	引擎误判 are->or
+Are there any good vegetarian restaurants in the centre	keep	引擎误判 restaurants->restaurant
+Can we try three nights	keep	引擎误判 three->there
+A upscale hotel please	exclude	源句 a/an 误用
+Thanks for you help	exclude	源句 you/your 误用
+thank you for you help	exclude	源句 you/your 误用
+Monday departing from london liverpool st	keep	用户有意缩写 st
+Good day to you also bye	keep	引擎误判 bye->by
+I'll be heading out to king's lynn on sunday	keep	地名撇号，引擎误删
+What is the address for your suggested restaurant varsity	keep	引擎误判 your->you
+advice me please of a better duration	exclude	源句 advice/advise 误用
+I'm looking for a restaurant that serves swedish food	keep	引擎误判 serves->serve
+Great what is the entrance fee too	keep	引擎误判 too->to
+A park or swimming on the east side	keep	引擎误判 on->in
+what are my three choices before we make a reservation	keep	引擎误判 choices->choice
+This train works for me	keep	引擎误判 works->work
+I'm travelling from london liverpool street to cambridge	keep	英式拼写，引擎误改为美式
+You have a good day too	keep	引擎误判 too->to
+Actually I'm more interested in middle eastern foods	keep	引擎误判 foods->food
+What is the price range on that one	keep	引擎误判 on->in

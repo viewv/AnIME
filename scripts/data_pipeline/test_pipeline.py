@@ -22,6 +22,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 import build_eval_benchmark  # noqa: E402
 import build_eval_v2  # noqa: E402
+import build_eval_v3  # noqa: E402
 import build_ngram_kn  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
@@ -670,6 +671,42 @@ class TestNgramKnOrchestrator(unittest.TestCase):
             out = Path(td) / "turns.txt"
             self.assertEqual(build_ngram_kn.extract_dialogue_text([js], out), 2)
             self.assertEqual(out.read_text(encoding="utf-8"), "I need a taxi.\nWhere to?\n")
+
+
+class TestEvalV3Builder(unittest.TestCase):
+    def test_review_file_excludes_only_exclude_decisions(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "review.tsv"
+            p.write_text("# header\nThanks You A lot\texclude\tsrc error\nfine here\tkeep\tengine\n", encoding="utf-8")
+            self.assertEqual(build_eval_v3.load_review(p), {"thanks you a lot"})
+            self.assertEqual(build_eval_v3.load_review(Path(td) / "missing.tsv"), set())
+
+    def test_multi_noise_applies_at_least_two_errors(self):
+        lex = {w: (w, 5.0) for w in "i want to go home now please".split()}
+        toks = "i want to go home now please".split()
+        for seed in range(20):
+            out = build_eval_v3.noise_multi(toks, random.Random(seed), lex)
+            if out is None:
+                continue
+            self.assertNotEqual(out, " ".join(toks))
+            self.assertEqual(out, out.lower())
+
+    def test_librispeech_holdout_is_deterministic_and_full_scan(self):
+        lex = {w: (w, 5.0) for w in "the cat sat on a mat dog ran far away".split()}
+        lines = ["THE CAT SAT ON A MAT", "THE DOG RAN FAR AWAY", "A CAT RAN", "ZZZ QQQ WWW EEE"] * 50
+        lines += [f"THE CAT SAT ON A MAT {'DOG ' * (i % 3)}".strip() for i in range(300)]
+        with tempfile.TemporaryDirectory() as td:
+            gz = Path(td) / "c.txt.gz"
+            with gzip.open(gz, "wt", encoding="utf-8") as f:
+                f.write("\n".join(lines) + "\n")
+            a = build_eval_v3.librispeech_holdout_clauses(gz, lex, bucket=100_000)
+            b = build_eval_v3.librispeech_holdout_clauses(gz, lex, bucket=100_000)
+            self.assertEqual(a, b)
+            # bucket=100000 取全部；非词典词句与 < 4 词句被过滤，重复句去重
+            self.assertIn(["the", "cat", "sat", "on", "a", "mat"], a)
+            self.assertTrue(all(len(c) >= 4 for c in a))
+            self.assertEqual(len(a), len({" ".join(c) for c in a}))
+            self.assertEqual(build_eval_v3.librispeech_holdout_clauses(gz, lex, bucket=0), [])
 
 
 if __name__ == "__main__":

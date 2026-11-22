@@ -242,7 +242,7 @@ sources:
     license: "Public Domain"
     sha256: "927d47656638c2ca93566640e56bcbeb2aa4ca237b8490fe1eff7d6e610a53c7"
     build_script: "scripts/data_pipeline/build_ngram_kn.py"
-    notes: "全量 4041 万行经 build_ngram_kn.py（Rust anime-ngram-build：插值修正 Kneser-Ney + 计数剪枝 + eval/** 整句与 5-gram 去泄漏）编译为 ANIMENGR v1。注意源文件按字母序排序，截断前 N 行会严重偏向以 A 开头的句子；旧 build_ngram.py --max-lines 仅保留作小规模测试"
+    notes: "全量 4041 万行经 build_ngram_kn.py（Rust anime-ngram-build：插值修正 Kneser-Ney + 计数剪枝 + eval/** 整句与 5-gram 去泄漏）编译为 ANIMENGR v1。注意源文件按字母序排序，截断前 N 行会严重偏向以 A 开头的句子；旧 build_ngram.py --max-lines 仅保留作小规模测试；build_eval_v3.py 按 CRC32 桶（约万分之四）抽取的留出句构成 eval/benchmarks/ood_v1.tsv（仅评测），L2 构建时经 eval/** 去泄漏自动剔除"
 
   - id: smollm2-360m-q4_k_m
     status: ready
