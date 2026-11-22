@@ -517,7 +517,7 @@ where
                 });
             }
 
-            expand_slot_confusables(tok, &mut slot_cands, has_prev_word_ctx);
+            expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, has_prev_word_ctx);
             slot_cands.sort_by(|a, b| {
                 b.lex_score
                     .total_cmp(&a.lex_score)
@@ -584,7 +584,7 @@ where
                         lex_score: -50.0,
                     });
                 }
-                expand_slot_confusables(tok, &mut slot_cands, true);
+                expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true);
                 // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
                 slot_cands.sort_by(|a, b| {
                     b.lex_score

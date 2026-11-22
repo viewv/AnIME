@@ -517,4 +517,8 @@ impl LexiconProvider for LayeredLexicon {
         out.truncate(opts.limit);
         out
     }
+
+    fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<crate::ConfusableCandidate> {
+        self.base.contextual_confusables(raw, limit)
+    }
 }

@@ -3,10 +3,12 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use crate::confusable_index::{ConfusableCandidate, ConfusableSourceEntry, RealWordConfusableIndex};
 use crate::contractions::{apply_input_casing, lookup_contraction};
 use crate::format::{
-    LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord, load_animelex_file,
-    load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv, zipf_to_log_freq,
+    ENTRY_FLAG_FROM_SCOWL, LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord,
+    load_animelex_file, load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv,
+    zipf_to_log_freq,
 };
 use crate::keyboard::{APOSTROPHE_SKIP_COST, weighted_damerau_levenshtein};
 use crate::phonetic::PhoneticIndex;
@@ -48,6 +50,7 @@ pub struct Lexicon {
     phonetic: PhoneticIndex,
     misspellings: HashMap<String, Vec<MisspellTarget>>,
     exact_by_lower: HashMap<String, u32>,
+    confusables: RealWordConfusableIndex,
 }
 
 impl Lexicon {
@@ -112,6 +115,8 @@ impl Lexicon {
         });
 
         let mut words: Vec<WordSlot> = Vec::with_capacity(data.words.len());
+        let mut raw_phonetics: Vec<String> = Vec::with_capacity(data.words.len());
+        let mut raw_from_scowl: Vec<bool> = Vec::with_capacity(data.words.len());
         let mut exact_by_lower: HashMap<String, u32> = HashMap::with_capacity(data.words.len());
 
         for entry in data.words {
@@ -125,6 +130,8 @@ impl Lexicon {
             }
             let word_id = words.len() as u32;
             let is_proper_or_mixed = trimmed.bytes().any(|b| b.is_ascii_uppercase());
+            let from_scowl =
+                entry.entry_flags == 0 || (entry.entry_flags & ENTRY_FLAG_FROM_SCOWL) != 0;
             exact_by_lower.insert(lower.clone(), word_id);
             words.push(WordSlot {
                 word: trimmed.to_string(),
@@ -132,6 +139,8 @@ impl Lexicon {
                 log_freq: zipf_to_log_freq(entry.zipf),
                 is_proper_or_mixed,
             });
+            raw_phonetics.push(entry.phonetic);
+            raw_from_scowl.push(from_scowl);
         }
 
         let log_freqs: Vec<f32> = words.iter().map(|w| w.log_freq).collect();
@@ -164,12 +173,30 @@ impl Lexicon {
             }
         }
 
+        let confusables = {
+            let sources: Vec<ConfusableSourceEntry<'_>> = words
+                .iter()
+                .enumerate()
+                .map(|(id, w)| ConfusableSourceEntry {
+                    word_id: id as u32,
+                    word: w.word.as_str(),
+                    lower: w.lower.as_str(),
+                    log_freq: w.log_freq,
+                    is_proper_or_mixed: w.is_proper_or_mixed,
+                    from_scowl: raw_from_scowl[id],
+                    phonetic: raw_phonetics[id].as_str(),
+                })
+                .collect();
+            RealWordConfusableIndex::build(&sources)
+        };
+
         Self {
             words,
             trie,
             phonetic,
             misspellings,
             exact_by_lower,
+            confusables,
         }
     }
 
@@ -484,10 +511,57 @@ impl Lexicon {
         out.truncate(opts.limit);
         out
     }
+
+    /// O(1) 离线数据驱动上下文易混真词检索：直接查询构建期固化的同音/近音/撇号缩写与拼写近邻静态图。
+    pub fn query_contextual_confusables(
+        &self,
+        raw: &str,
+        limit: usize,
+    ) -> Vec<ConfusableCandidate> {
+        let needle = raw.trim().to_ascii_lowercase();
+        if needle.len() < 2 || limit == 0 {
+            return Vec::new();
+        }
+        let Some(&base_id) = self.exact_by_lower.get(&needle) else {
+            return Vec::new();
+        };
+
+        let base_log_freq = self.words[base_id as usize].log_freq;
+        let mut out: Vec<ConfusableCandidate> = self
+            .confusables
+            .edges_for(base_id)
+            .iter()
+            .filter(|edge| edge.target_id != base_id)
+            .map(|edge| {
+                let slot = &self.words[edge.target_id as usize];
+                ConfusableCandidate {
+                    word: slot.word.clone(),
+                    log_freq: slot.log_freq,
+                    relative_penalty: edge.relative_penalty,
+                }
+            })
+            .collect();
+
+        out.sort_by(|a, b| {
+            let gap_a = (base_log_freq - a.log_freq).clamp(-0.2, 2.5) * 0.25;
+            let gap_b = (base_log_freq - b.log_freq).clamp(-0.2, 2.5) * 0.25;
+            let sa = -(a.relative_penalty + gap_a);
+            let sb = -(b.relative_penalty + gap_b);
+            sb.total_cmp(&sa)
+                .then_with(|| b.log_freq.total_cmp(&a.log_freq))
+                .then_with(|| a.word.cmp(&b.word))
+        });
+        out.truncate(limit);
+        out
+    }
 }
 
 impl LexiconProvider for Lexicon {
     fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
         self.query_layer(raw, opts, true, false)
+    }
+
+    fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<ConfusableCandidate> {
+        self.query_contextual_confusables(raw, limit)
     }
 }

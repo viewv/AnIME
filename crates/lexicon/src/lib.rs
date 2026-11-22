@@ -1,6 +1,7 @@
 //! L1 英文词法与纠错内核：紧凑前缀树、QWERTY 物理键距矩阵、加权模糊束搜索、
 //! Double Metaphone 读音倒排、缩写/大小写恢复、`ANIMELEX` v1 加载器与三层可扩展词典。
 
+pub mod confusable_index;
 pub mod contractions;
 pub mod format;
 pub mod keyboard;
@@ -11,6 +12,7 @@ pub mod trie;
 
 use anime_protocol::CandidateKind;
 
+pub use crate::confusable_index::ConfusableCandidate;
 pub use crate::format::{
     ANIMELEX_MAGIC, ANIMELEX_VERSION, DEFAULT_EXTENSION_ZIPF, ENTRY_FLAG_CAPITALIZED,
     ENTRY_FLAG_CONTRACTION, ENTRY_FLAG_FROM_SCOWL, FLAG_CASE_PRESERVED, FLAG_COMPACT_QUANTIZED,
@@ -73,6 +75,11 @@ impl Default for QueryOptions {
 
 pub trait LexiconProvider: Send + Sync {
     fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate>;
+
+    /// 返回数据驱动的上下文易混真词候选（CMUdict 同音/近音 + 自动撇号缩写 + QWERTY 低代价邻键近邻）。
+    fn contextual_confusables(&self, _raw: &str, _limit: usize) -> Vec<ConfusableCandidate> {
+        Vec::new()
+    }
 }
 
 /// Phase 0 最小只读词表桩：仅做精确与前缀匹配，用于验证引擎主链路与测试基线。
