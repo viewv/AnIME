@@ -442,4 +442,70 @@ mod tests {
         let snap = reopened.snapshot_user_words();
         assert_eq!(snap, vec![("Kubernetes".to_string(), 2)]);
     }
+
+    #[test]
+    fn oov_floor_and_unseen_bigram_cap_prevent_probability_inversion() {
+        // 构造真实场景的缩影：<unk> 总质量很高 (-2.1)，而 "tomorrow" 为 -5.2，
+        // 同时高频词 "the" 出度 >= 4 且已观测二元 ("the", "form") = -3.3，未观测的 "from" unigram 为 -2.3
+        let data = NgramData {
+            flags: 0,
+            vocab: vec![
+                SPECIAL_UNK.into(),
+                SPECIAL_BOS.into(),
+                SPECIAL_EOS.into(),
+                "the".into(),
+                "from".into(),
+                "form".into(),
+                "tomorrow".into(),
+                "cat".into(),
+                "dog".into(),
+                "book".into(),
+            ],
+            unigrams: vec![
+                UnigramRecord { word_id: 0, log10_p: -2.1, backoff: -0.4 },
+                UnigramRecord { word_id: 1, log10_p: -1.3, backoff: -0.4 },
+                UnigramRecord { word_id: 2, log10_p: -1.3, backoff: -0.4 },
+                UnigramRecord { word_id: 3, log10_p: -1.3, backoff: -0.4 },
+                UnigramRecord { word_id: 4, log10_p: -2.3, backoff: -0.4 },
+                UnigramRecord { word_id: 5, log10_p: -3.7, backoff: -0.4 },
+                UnigramRecord { word_id: 6, log10_p: -5.2, backoff: -0.4 },
+                UnigramRecord { word_id: 7, log10_p: -3.5, backoff: -0.4 },
+                UnigramRecord { word_id: 8, log10_p: -3.6, backoff: -0.4 },
+                UnigramRecord { word_id: 9, log10_p: -3.4, backoff: -0.4 },
+            ],
+            bigrams: vec![
+                BigramRecord { w1: 3, w2: 5, log10_p: -3.3, backoff: -0.4 }, // (the, form)
+                BigramRecord { w1: 3, w2: 7, log10_p: -2.9, backoff: -0.4 }, // (the, cat)
+                BigramRecord { w1: 3, w2: 8, log10_p: -3.1, backoff: -0.4 }, // (the, dog)
+                BigramRecord { w1: 3, w2: 9, log10_p: -4.2, backoff: -0.4 }, // (the, book) -> min = -4.2
+            ],
+            trigrams: Vec::new(),
+        };
+
+        let lm = NgramLanguageModel::from_data(data, UserStore::in_memory());
+
+        // 1. OOV 词 ("tomorrow's") 不得借高 <unk> 质量反超真实低频词 ("tomorrow")
+        let oov_slots = vec![
+            LatticeSlot {
+                raw_token: "the".into(),
+                start_char: 0,
+                end_char: 3,
+                candidates: vec![SlotCandidate { word: "the".into(), lex_score: 5.0 }],
+            },
+            LatticeSlot {
+                raw_token: "tomorow".into(),
+                start_char: 4,
+                end_char: 11,
+                candidates: vec![
+                    SlotCandidate { word: "tomorrow's".into(), lex_score: -4.8 },
+                    SlotCandidate { word: "tomorrow".into(), lex_score: -5.0 },
+                ],
+            },
+        ];
+        let oov_out = lm.decode_lattice("", &oov_slots, 2);
+        assert_eq!(oov_out[0].text, "the tomorrow");
+
+        // 2. 高频前缀 "the" 后未见二元 "from" 封顶压低，确保已见 ("the", "form") 在上下文得分显著胜出
+        assert!(lm.score_in_context("the ", "form") > lm.score_in_context("the ", "from") + 1.4);
+    }
 }

@@ -26,6 +26,9 @@ pub(crate) struct StaticNgramTable {
     unk_id: u32,
     bos_id: u32,
     eos_id: u32,
+    oov_word_log10_p: f32,
+    min_bi_lp_by_w1: Vec<f32>,
+    bi_out_degree: Vec<u32>,
     unigrams: Vec<(f32, f32)>,
     bigrams: Vec<(u64, f32, f32)>,
     trigrams: Vec<(u32, u32, u32, f32)>,
@@ -33,7 +36,8 @@ pub(crate) struct StaticNgramTable {
 
 impl StaticNgramTable {
     pub(crate) fn from_data(data: NgramData) -> Self {
-        let mut vocab_to_id = HashMap::with_capacity(data.vocab.len());
+        let vocab_len = data.vocab.len();
+        let mut vocab_to_id = HashMap::with_capacity(vocab_len);
         for (idx, tok) in data.vocab.iter().enumerate() {
             vocab_to_id.insert(tok.to_ascii_lowercase(), idx as u32);
         }
@@ -41,12 +45,29 @@ impl StaticNgramTable {
         let bos_id = vocab_to_id.get(SPECIAL_BOS).copied().unwrap_or(u32::MAX);
         let eos_id = vocab_to_id.get(SPECIAL_EOS).copied().unwrap_or(u32::MAX);
 
-        let mut unigrams = vec![(DEFAULT_UNK_LOG10_P, DEFAULT_BACKOFF_LOG10); data.vocab.len()];
+        let mut unigrams = vec![(DEFAULT_UNK_LOG10_P, DEFAULT_BACKOFF_LOG10); vocab_len];
         for u in data.unigrams {
             if (u.word_id as usize) < unigrams.len() {
                 unigrams[u.word_id as usize] = (u.log10_p, u.backoff);
             }
         }
+
+        // 原因注释：`ANIMENGR` 的 `<unk>` 统计所有低频生僻词总质量（例如 -2.12），远高于真实具体词汇；
+        // 解码评估单个未登录词时必须采用严格低于真实长尾词的 OOV 下界，防止未登录噪声反超正常英文词。
+        let min_real_uni_lp = unigrams
+            .iter()
+            .enumerate()
+            .filter(|&(idx, _)| {
+                let id = idx as u32;
+                id != unk_id && id != bos_id && id != eos_id
+            })
+            .map(|(_, &(lp, _))| lp)
+            .fold(f32::INFINITY, f32::min);
+        let oov_word_log10_p = if min_real_uni_lp.is_finite() {
+            (min_real_uni_lp - 0.8).min(-6.8)
+        } else {
+            -6.8
+        };
 
         let mut bigrams: Vec<(u64, f32, f32)> = data
             .bigrams
@@ -55,6 +76,18 @@ impl StaticNgramTable {
             .collect();
         bigrams.sort_unstable_by_key(|item| item.0);
         bigrams.dedup_by_key(|item| item.0);
+
+        let mut bi_out_degree = vec![0u32; vocab_len];
+        let mut min_bi_lp_by_w1 = vec![0.0_f32; vocab_len];
+        for &(key, lp, _) in &bigrams {
+            let w1 = (key >> 32) as usize;
+            if w1 < vocab_len {
+                if bi_out_degree[w1] == 0 || lp < min_bi_lp_by_w1[w1] {
+                    min_bi_lp_by_w1[w1] = lp;
+                }
+                bi_out_degree[w1] = bi_out_degree[w1].saturating_add(1);
+            }
+        }
 
         let mut trigrams: Vec<(u32, u32, u32, f32)> = data
             .trigrams
@@ -69,6 +102,9 @@ impl StaticNgramTable {
             unk_id,
             bos_id,
             eos_id,
+            oov_word_log10_p,
+            min_bi_lp_by_w1,
+            bi_out_degree,
             unigrams,
             bigrams,
             trigrams,
@@ -76,20 +112,20 @@ impl StaticNgramTable {
     }
 
     #[inline]
-    pub(crate) fn id_for(&self, token_lower: &str) -> u32 {
+    fn lookup_known_id(&self, token_lower: &str) -> Option<u32> {
+        if token_lower == SPECIAL_UNK {
+            return None;
+        }
         if token_lower == SPECIAL_BOS {
-            return self.bos_id;
+            return (self.bos_id != u32::MAX).then_some(self.bos_id);
         }
         if token_lower == SPECIAL_EOS {
-            return self.eos_id;
-        }
-        if token_lower == SPECIAL_UNK {
-            return self.unk_id;
+            return (self.eos_id != u32::MAX).then_some(self.eos_id);
         }
         self.vocab_to_id
             .get(token_lower)
             .copied()
-            .unwrap_or(self.unk_id)
+            .filter(|&id| id != self.unk_id)
     }
 
     #[inline]
@@ -97,7 +133,7 @@ impl StaticNgramTable {
         self.unigrams
             .get(wid as usize)
             .copied()
-            .unwrap_or((DEFAULT_UNK_LOG10_P, DEFAULT_BACKOFF_LOG10))
+            .unwrap_or((self.oov_word_log10_p, DEFAULT_BACKOFF_LOG10))
     }
 
     #[inline]
@@ -125,21 +161,35 @@ impl StaticNgramTable {
     }
 
     pub(crate) fn log10_unigram(&self, word_lower: &str) -> f32 {
-        self.unigram_by_id(self.id_for(word_lower)).0
+        match self.lookup_known_id(word_lower) {
+            Some(wid) => self.unigram_by_id(wid).0,
+            None => self.oov_word_log10_p,
+        }
     }
 
     pub(crate) fn log10_bigram(&self, prev1_lower: Option<&str>, word_lower: &str) -> f32 {
         let Some(p1) = prev1_lower else {
             return self.log10_unigram(word_lower);
         };
-        let id1 = self.id_for(p1);
-        let id2 = self.id_for(word_lower);
+        let Some(id2) = self.lookup_known_id(word_lower) else {
+            return DEFAULT_BACKOFF_LOG10 + self.oov_word_log10_p;
+        };
+        let Some(id1) = self.lookup_known_id(p1) else {
+            return DEFAULT_BACKOFF_LOG10 + self.unigram_by_id(id2).0;
+        };
         if let Some((lp, _)) = self.lookup_bigram_id(id1, id2) {
             return lp;
         }
         let (_, bo1) = self.unigram_by_id(id1);
         let (lp2, _) = self.unigram_by_id(id2);
-        bo1 + lp2
+        let mut backed = bo1 + lp2;
+        // 原因注释：由于构建期按 min_bigram 裁剪，高频前缀（出度>=4）未命中的二元组合在实际语料中必然低于其已见最小条件概率；
+        // 对其回退上限封顶，防止如 "the from" 凭借高 unigram 概率反压语料已观测到的 "the form"。
+        let idx1 = id1 as usize;
+        if self.bi_out_degree.get(idx1).copied().unwrap_or(0) >= 4 {
+            backed = backed.min(self.min_bi_lp_by_w1[idx1] - 0.15);
+        }
+        backed
     }
 
     pub(crate) fn log10_trigram(
@@ -151,9 +201,13 @@ impl StaticNgramTable {
         let (Some(p2), Some(p1)) = (prev2_lower, prev1_lower) else {
             return self.log10_bigram(prev1_lower, word_lower);
         };
-        let id1 = self.id_for(p2);
-        let id2 = self.id_for(p1);
-        let id3 = self.id_for(word_lower);
+        let (Some(id1), Some(id2), Some(id3)) = (
+            self.lookup_known_id(p2),
+            self.lookup_known_id(p1),
+            self.lookup_known_id(word_lower),
+        ) else {
+            return self.log10_bigram(Some(p1), word_lower);
+        };
         if let Some(lp) = self.lookup_trigram_id(id1, id2, id3) {
             return lp;
         }

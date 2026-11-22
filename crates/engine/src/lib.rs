@@ -3,7 +3,9 @@
 
 mod confusables;
 
-use anime_lexicon::{LexiconProvider, QueryOptions};
+use std::collections::HashMap;
+
+use anime_lexicon::{LexiconCandidate, LexiconProvider, QueryOptions};
 use anime_lm_neural::{NeuralCandidate, NeuralSentenceModel};
 use anime_lm_ngram::{LatticeSlot, NgramModel, SlotCandidate};
 use anime_protocol::{
@@ -13,6 +15,7 @@ use anime_protocol::{
 use crate::confusables::expand_slot_confusables;
 
 const MAX_CONTEXT_BEFORE_CHARS: usize = 256;
+const MAX_TOKEN_LEX_CACHE: usize = 64;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EngineOutput {
@@ -32,6 +35,9 @@ pub struct EngineSession<L, N, M> {
     seq: u64,
     revision: u32,
     last_auto_space: bool,
+    // 在单次预编辑组合内按完整词槽缓存 L1 结果：多词输入时前序未变词槽无需每击重算 400 us 模糊束搜索，
+    // 兼顾退格回退命中，并在配置变更、重置或提交选词后立即清空。
+    token_lex_cache: HashMap<String, Vec<LexiconCandidate>>,
 }
 
 impl<L, N, M> EngineSession<L, N, M>
@@ -53,6 +59,7 @@ where
             seq: 0,
             revision: 0,
             last_auto_space: false,
+            token_lex_cache: HashMap::with_capacity(16),
         }
     }
 
@@ -63,6 +70,7 @@ where
     pub fn set_config(&mut self, config: EngineConfig) {
         self.config = config;
         self.revision = 0;
+        self.token_lex_cache.clear();
         self.recompute_candidates();
     }
 
@@ -129,6 +137,7 @@ where
         self.revision = 0;
         self.preedit.clear();
         self.candidates.clear();
+        self.token_lex_cache.clear();
         self.last_auto_space = false;
         self.current_state(false)
     }
@@ -162,6 +171,7 @@ where
                 } else {
                     let raw = std::mem::take(&mut self.preedit);
                     self.candidates.clear();
+                    self.token_lex_cache.clear();
                     self.last_auto_space = false;
                     self.ngram
                         .learn_commit(&self.context.before, &raw, self.privacy);
@@ -181,6 +191,7 @@ where
                 } else {
                     self.preedit.clear();
                     self.candidates.clear();
+                    self.token_lex_cache.clear();
                     self.last_auto_space = false;
                     EngineOutput::State(self.current_state(false))
                 }
@@ -394,6 +405,7 @@ where
 
         self.last_auto_space = add_space;
         self.preedit = remaining.clone();
+        self.token_lex_cache.clear();
         self.recompute_candidates();
 
         EngineOutput::Commit(CommitAction {
@@ -415,6 +427,18 @@ where
             passthrough,
             final_l3: passthrough || self.preedit.is_empty() || !self.is_l3_pending(),
         }
+    }
+
+    fn query_lexicon_cached(&mut self, token: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
+        if let Some(cached) = self.token_lex_cache.get(token) {
+            return cached.clone();
+        }
+        let hits = self.lexicon.query(token, opts);
+        if self.token_lex_cache.len() >= MAX_TOKEN_LEX_CACHE {
+            self.token_lex_cache.clear();
+        }
+        self.token_lex_cache.insert(token.to_string(), hits.clone());
+        hits
     }
 
     fn recompute_candidates(&mut self) {
@@ -440,7 +464,7 @@ where
 
         if tokens.len() == 1 {
             let (tok, _, _) = &tokens[0];
-            let lex_hits = self.lexicon.query(tok, &opts);
+            let lex_hits = self.query_lexicon_cached(tok, &opts);
             let mut kind_by_lower: Vec<(String, CandidateKind)> = Vec::with_capacity(lex_hits.len());
             let mut slot_cands: Vec<SlotCandidate> = Vec::with_capacity(lex_hits.len() + 4);
             for hit in lex_hits {
@@ -486,8 +510,12 @@ where
                 .sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
         } else {
             let mut slots = Vec::with_capacity(tokens.len());
-            for (tok, start_char, end_char) in &tokens {
-                let hits = self.lexicon.query(tok, &opts);
+            let mut first_hits: Vec<LexiconCandidate> = Vec::new();
+            for (slot_idx, (tok, start_char, end_char)) in tokens.iter().enumerate() {
+                let hits = self.query_lexicon_cached(tok, &opts);
+                if slot_idx == 0 {
+                    first_hits = hits.iter().take(2).cloned().collect();
+                }
                 let mut slot_cands: Vec<SlotCandidate> = hits
                     .into_iter()
                     .map(|h| SlotCandidate {
@@ -537,11 +565,8 @@ where
             }
 
             // 同时保留首个词条的部分选词候选，便于用户只确认句首词
-            let (first_tok, _, first_end) = &tokens[0];
-            for hit in self
-                .lexicon
-                .query(first_tok, &QueryOptions { limit: 2, ..opts })
-            {
+            let (_, _, first_end) = &tokens[0];
+            for hit in first_hits {
                 let text = if sentence_start {
                     capitalize_first_ascii(&hit.word)
                 } else {

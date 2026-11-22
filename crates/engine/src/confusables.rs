@@ -53,6 +53,7 @@ const SHORTHAND_PAIRS: &[(&str, &str)] = &[
     ("hw", "how"),
     ("r", "are"),
     ("u", "you"),
+    ("yu", "you"),
     ("ur", "your"),
     ("pls", "please"),
     ("thx", "thanks"),
