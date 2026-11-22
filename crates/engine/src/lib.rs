@@ -319,23 +319,37 @@ where
         } else {
             max_total.saturating_sub(1)
         };
-        // 保留前排主候选的同时，为非空 `✦` 续写预留最多 2 个槽位，防止大量 L1 前缀补全把续写完全截断。
-        let cont_reserve = if continuation_cands.is_empty() || slot_budget < 3 {
+        // 保留第 1 位主候选不变，将最多 2 条 `✦` 续写前置到第 2–3 位，确保在 5 项竖排分页模式下也能在第 1 页直接可见。
+        let cont_take = if continuation_cands.is_empty() || slot_budget < 2 {
             0
         } else {
             continuation_cands
                 .len()
                 .min(2)
-                .min(slot_budget.saturating_sub(2))
+                .min(slot_budget.saturating_sub(1))
         };
-        let primary_cap = slot_budget.saturating_sub(cont_reserve);
+        let primary_cap = slot_budget.saturating_sub(cont_take);
         if primary.len() > primary_cap {
             primary.truncate(primary_cap);
         }
 
-        self.candidates = primary;
-        self.candidates.extend(continuation_cands);
-        self.candidates.extend(partial);
+        let mut merged =
+            Vec::with_capacity(primary.len() + continuation_cands.len() + partial.len());
+        let mut primary_iter = primary.into_iter();
+        if let Some(top1) = primary_iter.next() {
+            merged.push(top1);
+        }
+        let mut cont_iter = continuation_cands.into_iter();
+        for _ in 0..cont_take {
+            if let Some(c) = cont_iter.next() {
+                merged.push(c);
+            }
+        }
+        merged.extend(primary_iter);
+        merged.extend(cont_iter);
+        merged.extend(partial);
+
+        self.candidates = merged;
         self.ensure_raw_and_limit(total_chars);
 
         Some(self.snapshot_state(false, true))
@@ -1239,6 +1253,10 @@ mod tests {
         assert!(pushed.final_l3);
         assert_eq!(pushed.candidates.len(), sess.config().max_candidates);
         assert_eq!(pushed.candidates[0].text, "for");
+        assert_eq!(pushed.candidates[1].text, "for your");
+        assert_eq!(pushed.candidates[1].kind, CandidateKind::Continuation);
+        assert_eq!(pushed.candidates[2].text, "for the");
+        assert_eq!(pushed.candidates[2].kind, CandidateKind::Continuation);
         let conts: Vec<&str> = pushed
             .candidates
             .iter()
