@@ -4,6 +4,13 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 
+[features]
+default = []
+llama = ["anime-lm-neural/llama"]
+vulkan = ["anime-lm-neural/llama-vulkan"]
+metal = ["anime-lm-neural/llama-metal"]
+cuda = ["anime-lm-neural/llama-cuda"]
+
 [dependencies]
 anime-protocol = { path = "../protocol" }
 anime-lexicon = { path = "../lexicon" }

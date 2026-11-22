@@ -272,7 +272,12 @@ where
             }
             if let Some(nr) = reranked
                 .iter()
-                .find(|r| !r.is_continuation && r.text.eq_ignore_ascii_case(&c.text))
+                .find(|r| !r.is_continuation && r.text == c.text)
+                .or_else(|| {
+                    reranked
+                        .iter()
+                        .find(|r| !r.is_continuation && r.text.eq_ignore_ascii_case(&c.text))
+                })
             {
                 c.score += nr.score;
             }
@@ -304,6 +309,29 @@ where
             });
         }
         continuation_cands.sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
+
+        let max_total = self.config.max_candidates;
+        let has_raw_in_primary = primary
+            .iter()
+            .any(|c| c.text == self.preedit && c.consumed_chars == total_chars);
+        let slot_budget = if has_raw_in_primary {
+            max_total
+        } else {
+            max_total.saturating_sub(1)
+        };
+        // 保留前排主候选的同时，为非空 `✦` 续写预留最多 2 个槽位，防止大量 L1 前缀补全把续写完全截断。
+        let cont_reserve = if continuation_cands.is_empty() || slot_budget < 3 {
+            0
+        } else {
+            continuation_cands
+                .len()
+                .min(2)
+                .min(slot_budget.saturating_sub(2))
+        };
+        let primary_cap = slot_budget.saturating_sub(cont_reserve);
+        if primary.len() > primary_cap {
+            primary.truncate(primary_cap);
+        }
 
         self.candidates = primary;
         self.candidates.extend(continuation_cands);
@@ -1053,5 +1081,174 @@ mod tests {
             .candidates
             .iter()
             .any(|c| c.kind == CandidateKind::Raw && c.text == "t"));
+    }
+
+    #[test]
+    fn neural_rerank_reorders_candidates_and_appends_unique_continuations() {
+        struct MockNeural;
+        impl NeuralSentenceModel for MockNeural {
+            fn backend_name(&self) -> &'static str {
+                "mock-l3"
+            }
+            fn rerank_sentences(&self, _: &str, _: &str, _: &[String]) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+            fn predict_continuations(&self, _: &str, _: &str, _: usize) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+        }
+
+        let lex = Lexicon::from_word_zipfs(vec![("from", 7.0), ("form", 5.5)], Vec::new());
+        let mut sess = EngineSession::new(lex, NoopNgramModel, MockNeural);
+        sess.set_context("Thank you for your ", "");
+
+        let mut last = None;
+        for (idx, ch) in ['f', 'r', 'o', 'm'].into_iter().enumerate() {
+            if let EngineOutput::State(st) =
+                sess.handle_key_with_seq((idx + 1) as u64, KeyInput::Char(ch))
+            {
+                last = Some(st);
+            }
+        }
+        let st = last.expect("state after 'from'");
+        assert_eq!(st.revision, 0);
+        assert!(!st.final_l3);
+        assert_eq!(st.candidates[0].text, "from");
+
+        // Rerank boosts "form" over "from", appends unique "✦" continuation, and keeps raw text.
+        let pushed = sess
+            .apply_neural_rerank(
+                st.seq,
+                &[
+                    NeuralCandidate {
+                        text: "form".into(),
+                        score: 12.0,
+                        is_continuation: false,
+                    },
+                    NeuralCandidate {
+                        text: "from".into(),
+                        score: -2.0,
+                        is_continuation: false,
+                    },
+                ],
+                &[
+                    NeuralCandidate {
+                        text: "form".into(),
+                        score: -0.5,
+                        is_continuation: true,
+                    },
+                    NeuralCandidate {
+                        text: "form submission".into(),
+                        score: -1.0,
+                        is_continuation: true,
+                    },
+                    NeuralCandidate {
+                        text: "FORM SUBMISSION".into(),
+                        score: -1.2,
+                        is_continuation: true,
+                    },
+                ],
+            )
+            .expect("apply neural rerank");
+
+        assert_eq!(pushed.revision, 1);
+        assert!(pushed.final_l3);
+        assert_eq!(pushed.candidates[0].text, "form");
+        assert!(pushed.candidates.iter().any(|c| c.text == "from"));
+        let conts: Vec<&Candidate> = pushed
+            .candidates
+            .iter()
+            .filter(|c| c.kind == CandidateKind::Continuation)
+            .collect();
+        assert_eq!(conts.len(), 1);
+        assert_eq!(conts[0].text, "form submission");
+        assert_eq!(conts[0].comment.as_deref(), Some("✦"));
+    }
+
+    #[test]
+    fn neural_rerank_reserves_slots_for_continuations_when_primary_full() {
+        struct MockNeural;
+        impl NeuralSentenceModel for MockNeural {
+            fn backend_name(&self) -> &'static str {
+                "mock-l3"
+            }
+            fn rerank_sentences(&self, _: &str, _: &str, _: &[String]) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+            fn predict_continuations(&self, _: &str, _: &str, _: usize) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+        }
+
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("for", 7.0),
+                ("form", 6.2),
+                ("from", 6.1),
+                ("force", 5.8),
+                ("forest", 5.6),
+                ("forget", 5.5),
+                ("former", 5.4),
+                ("forward", 5.3),
+                ("fortune", 5.2),
+                ("foreign", 5.1),
+            ],
+            Vec::new(),
+        );
+        let mut sess = EngineSession::new(lex, NoopNgramModel, MockNeural);
+        sess.set_context("Thank you ", "");
+
+        let mut last = None;
+        for (idx, ch) in ['f', 'o', 'r', ' '].into_iter().enumerate() {
+            let key = if ch == ' ' {
+                KeyInput::Space
+            } else {
+                KeyInput::Char(ch)
+            };
+            if let EngineOutput::State(st) = sess.handle_key_with_seq((idx + 1) as u64, key) {
+                last = Some(st);
+            }
+        }
+        let st = last.expect("state for 'for '");
+        assert_eq!(st.candidates.len(), sess.config().max_candidates);
+
+        let pushed = sess
+            .apply_neural_rerank(
+                st.seq,
+                &[],
+                &[
+                    NeuralCandidate {
+                        text: "for your".into(),
+                        score: -0.6,
+                        is_continuation: true,
+                    },
+                    NeuralCandidate {
+                        text: "for the".into(),
+                        score: -0.9,
+                        is_continuation: true,
+                    },
+                    NeuralCandidate {
+                        text: "for this".into(),
+                        score: -1.4,
+                        is_continuation: true,
+                    },
+                ],
+            )
+            .expect("apply continuations");
+
+        assert!(pushed.final_l3);
+        assert_eq!(pushed.candidates.len(), sess.config().max_candidates);
+        assert_eq!(pushed.candidates[0].text, "for");
+        let conts: Vec<&str> = pushed
+            .candidates
+            .iter()
+            .filter(|c| c.kind == CandidateKind::Continuation && c.comment.as_deref() == Some("✦"))
+            .map(|c| c.text.as_str())
+            .collect();
+        assert_eq!(conts, vec!["for your", "for the"]);
+        assert_eq!(
+            pushed.candidates.last().map(|c| c.kind),
+            Some(CandidateKind::Raw)
+        );
     }
 }

@@ -60,6 +60,7 @@ pub struct SharedResources {
     pub neural: Arc<dyn NeuralSentenceModel>,
     pub version: String,
     pub transport_cap: &'static str,
+    pub l3_debounce_ms: u64,
 }
 
 impl SharedResources {
@@ -207,9 +208,10 @@ where
 
     let cb_session = Arc::clone(&session);
     let cb_writer = Arc::clone(&writer);
-    let scheduler = L3Scheduler::new(
+    let scheduler = L3Scheduler::with_debounce(
         SharedNeural(Arc::clone(&resources.neural)),
         Arc::clone(&latest_seq),
+        Duration::from_millis(resources.l3_debounce_ms),
         move |seq, reranked, continuations| {
             let maybe_state = {
                 let mut guard = cb_session.lock().unwrap_or_else(|e| e.into_inner());
@@ -321,6 +323,7 @@ where
                             match guard.handle_key_with_seq(seq, key) {
                                 EngineOutput::State(st) => {
                                     let job = if !st.final_l3 {
+                                        let total_chars = st.preedit.chars().count();
                                         Some(L3Job {
                                             seq: st.seq,
                                             context_before: guard.context().before.clone(),
@@ -328,6 +331,14 @@ where
                                             candidate_texts: st
                                                 .candidates
                                                 .iter()
+                                                .filter(|c| {
+                                                    c.consumed_chars == total_chars
+                                                        && !matches!(
+                                                            c.kind,
+                                                            anime_protocol::CandidateKind::Raw
+                                                                | anime_protocol::CandidateKind::Continuation
+                                                        )
+                                                })
                                                 .map(|c| c.text.clone())
                                                 .collect(),
                                             max_continuations: guard

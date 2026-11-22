@@ -65,6 +65,22 @@ pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures
         }
     }
 
+    if let Some(ref l3) = report.l3_stats {
+        let _ = writeln!(
+            out,
+            "\nL3 Neural Summary: backend={}, model={}, gpu_offload={}, device={}, warmup={}ms, calls={}, p50={}us, p99={}us, mean={}us",
+            l3.backend,
+            l3.model_name,
+            l3.gpu_offload_active,
+            l3.device_summary,
+            l3.warmup_ms,
+            l3.calls,
+            l3.p50_us,
+            l3.p99_us,
+            l3.mean_us
+        );
+    }
+
     if max_failures > 0 && !report.failures.is_empty() {
         let shown = report.failures.len().min(max_failures);
         let _ = writeln!(
@@ -161,6 +177,23 @@ pub fn render_markdown(
                 if check.passed { "PASS" } else { "FAIL" }
             );
         }
+    }
+
+    if let Some(ref l3) = report.l3_stats {
+        let _ = writeln!(out, "\n## L3 Neural Summary\n");
+        let _ = writeln!(
+            out,
+            "- Backend: `{}` (`gpu_offload`: `{}`, device: `{}`)\n- Model: `{}` (`warmup`: `{} ms`)\n- Inference calls: `{}` (`p50`: `{} us`, `p99`: `{} us`, `mean`: `{} us`)",
+            l3.backend,
+            l3.gpu_offload_active,
+            md_escape(&l3.device_summary),
+            md_escape(&l3.model_name),
+            l3.warmup_ms,
+            l3.calls,
+            l3.p50_us,
+            l3.p99_us,
+            l3.mean_us
+        );
     }
 
     if max_failures > 0 && !report.failures.is_empty() {
@@ -311,7 +344,22 @@ pub fn render_json(report: &EvalReport, gate: Option<&GateSummary>, max_failures
         }
         out.push('\n');
     }
-    out.push_str("  ]\n");
+    out.push_str("  ]");
+    if let Some(ref l3) = report.l3_stats {
+        out.push_str(",\n  \"l3\": {\n");
+        let _ = writeln!(out, "    \"backend\": {},", json_str(&l3.backend));
+        let _ = writeln!(out, "    \"model_name\": {},", json_str(&l3.model_name));
+        let _ = writeln!(out, "    \"gpu_offload_active\": {},", l3.gpu_offload_active);
+        let _ = writeln!(out, "    \"device_summary\": {},", json_str(&l3.device_summary));
+        let _ = writeln!(out, "    \"warmup_ms\": {},", l3.warmup_ms);
+        let _ = writeln!(out, "    \"calls\": {},", l3.calls);
+        let _ = writeln!(out, "    \"p50_us\": {},", l3.p50_us);
+        let _ = writeln!(out, "    \"p99_us\": {},", l3.p99_us);
+        let _ = writeln!(out, "    \"mean_us\": {}", l3.mean_us);
+        out.push_str("  }\n");
+    } else {
+        out.push('\n');
+    }
     out.push_str("}\n");
     out
 }

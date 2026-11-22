@@ -3,11 +3,11 @@
 use std::collections::BTreeMap;
 use std::time::Instant;
 
-use anime_engine::EngineSession;
+use anime_engine::{EngineOutput, EngineSession};
 use anime_lexicon::{LexiconProvider, StaticWordList};
-use anime_lm_neural::{NeuralSentenceModel, NoopNeuralModel};
+use anime_lm_neural::{NeuralRuntimeInfo, NeuralSentenceModel, NoopNeuralModel};
 use anime_lm_ngram::{NgramModel, NoopNgramModel};
-use anime_protocol::KeyInput;
+use anime_protocol::{CandidateKind, KeyInput};
 
 use crate::tsv::{Category, EvalRow};
 
@@ -118,23 +118,48 @@ impl CategoryStats {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct L3TimingStats {
+    pub backend: String,
+    pub model_name: String,
+    pub gpu_offload_active: bool,
+    pub device_summary: String,
+    pub warmup_ms: u64,
+    pub calls: usize,
+    pub p50_us: u128,
+    pub p99_us: u128,
+    pub mean_us: u128,
+}
+
 #[derive(Debug, Clone)]
 pub struct EvalReport {
     pub dataset: String,
     pub by_cat: BTreeMap<Category, CategoryStats>,
     pub overall: CategoryStats,
     pub failures: Vec<SampleFailure>,
+    pub l3_stats: Option<L3TimingStats>,
 }
 
+fn percentile_from_slice(sorted: &[u128], p: usize) -> u128 {
+    if sorted.is_empty() {
+        return 0;
+    }
+    let n = sorted.len();
+    let idx = ((n * p).div_ceil(100)).saturating_sub(1).min(n - 1);
+    sorted[idx]
+}
+
+#[allow(dead_code)]
 pub fn run_eval(dataset: &str, rows: &[EvalRow]) -> EvalReport {
     let mut session = EngineSession::new(
         StaticWordList::smoke_default(),
         NoopNgramModel,
         NoopNeuralModel,
     );
-    run_eval_with_session(dataset, rows, &mut session)
+    run_eval_with_neural(dataset, rows, &mut session, None)
 }
 
+#[allow(dead_code)]
 pub fn run_eval_with_session<L, N, M>(
     dataset: &str,
     rows: &[EvalRow],
@@ -145,24 +170,72 @@ where
     N: NgramModel,
     M: NeuralSentenceModel,
 {
+    run_eval_with_neural(dataset, rows, session, None)
+}
+
+pub fn run_eval_with_neural<L, N, M>(
+    dataset: &str,
+    rows: &[EvalRow],
+    session: &mut EngineSession<L, N, M>,
+    neural_for_eval: Option<(&dyn NeuralSentenceModel, &NeuralRuntimeInfo)>,
+) -> EvalReport
+where
+    L: LexiconProvider,
+    N: NgramModel,
+    M: NeuralSentenceModel,
+{
     let mut by_cat: BTreeMap<Category, CategoryStats> = BTreeMap::new();
     let mut overall = CategoryStats::default();
     let mut failures = Vec::new();
+    let mut l3_latencies_us: Vec<u128> = Vec::new();
 
     for row in rows {
         session.reset();
         session.set_context(row.context.clone(), "");
 
         let start = Instant::now();
+        let mut last_seq = None;
         for ch in row.input.chars() {
             let key = if ch == ' ' {
                 KeyInput::Space
             } else {
                 KeyInput::Char(ch)
             };
-            let _ = session.handle_key(key);
+            match session.handle_key(key) {
+                EngineOutput::State(st) => last_seq = Some(st.seq),
+                EngineOutput::Commit(_) => last_seq = None,
+            }
         }
         let elapsed_us = start.elapsed().as_micros();
+
+        if let (Some((neural, _)), Some(seq)) = (neural_for_eval, last_seq) {
+            let total_chars = session.preedit().chars().count();
+            if total_chars > 0 {
+                let cand_texts: Vec<String> = session
+                    .candidates()
+                    .iter()
+                    .filter(|c| {
+                        c.consumed_chars == total_chars
+                            && !matches!(c.kind, CandidateKind::Raw | CandidateKind::Continuation)
+                    })
+                    .map(|c| c.text.clone())
+                    .collect();
+                if cand_texts.len() >= 2 {
+                    let has_context = !row.context.trim().is_empty();
+                    let has_multi_word = cand_texts.iter().any(|c| c.trim().contains(' '));
+                    let l3_start = Instant::now();
+                    let reranked =
+                        neural.rerank_sentences(&row.context, session.preedit(), &cand_texts);
+                    let l3_us = l3_start.elapsed().as_micros();
+                    if has_context || has_multi_word || !reranked.is_empty() {
+                        l3_latencies_us.push(l3_us);
+                    }
+                    if !reranked.is_empty() {
+                        let _ = session.apply_neural_rerank(seq, &reranked, &[]);
+                    }
+                }
+            }
+        }
 
         let expected_exact = row.expected.trim();
         let expected_lower = expected_exact.to_ascii_lowercase();
@@ -197,10 +270,32 @@ where
     }
     overall.finalize();
 
+    let l3_stats = neural_for_eval.map(|(_, info)| {
+        l3_latencies_us.sort_unstable();
+        let calls = l3_latencies_us.len();
+        let mean_us = if calls == 0 {
+            0
+        } else {
+            l3_latencies_us.iter().copied().sum::<u128>() / (calls as u128)
+        };
+        L3TimingStats {
+            backend: info.backend_name.to_string(),
+            model_name: info.model_name.clone(),
+            gpu_offload_active: info.gpu_offload_active,
+            device_summary: info.device_summary.clone(),
+            warmup_ms: info.warmup_ms,
+            calls,
+            p50_us: percentile_from_slice(&l3_latencies_us, 50),
+            p99_us: percentile_from_slice(&l3_latencies_us, 99),
+            mean_us,
+        }
+    });
+
     EvalReport {
         dataset: dataset.to_string(),
         by_cat,
         overall,
         failures,
+        l3_stats,
     }
 }

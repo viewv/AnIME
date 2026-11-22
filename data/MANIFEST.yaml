@@ -71,3 +71,23 @@ sources:
     sha256: "927d47656638c2ca93566640e56bcbeb2aa4ca237b8490fe1eff7d6e610a53c7"
     build_script: "scripts/data_pipeline/build_ngram.py"
     notes: "支持流式读取 .txt.gz 语料或 .arpa.gz 语言模型并编译为 ANIMENGR v1 二进制表"
+
+  - id: smollm2-360m-q4_k_m
+    status: ready
+    description: "HuggingFaceTB/SmolLM2-360M Base Q4_K_M GGUF（362M 参数 LLaMA 系 Decoder-only 小模型，L3 英文重排与续写主验证模型）"
+    source_url: "https://huggingface.co/QuantFactory/SmolLM2-360M-GGUF/resolve/main/SmolLM2-360M.Q4_K_M.gguf"
+    version: "SmolLM2-360M-Q4_K_M"
+    license: "Apache-2.0"
+    sha256: "be3035f2b21abe1038dbb1b9212791353715020bbc71265bde00da129ec320e6"
+    build_script: "scripts/data_pipeline/fetch_models.py"
+    notes: "Apache-2.0 开源基座模型，通过 llama.cpp Vulkan GPU 后端进行前缀 KV-Cache 复用打分与续写预测"
+
+  - id: smollm2-135m-q4_k_m
+    status: ready
+    description: "HuggingFaceTB/SmolLM2-135M Base Q4_K_M GGUF（135M 参数超轻量速度对比模型）"
+    source_url: "https://huggingface.co/ggml-org/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M-Q4_K_M.gguf"
+    version: "SmolLM2-135M-Q4_K_M"
+    license: "Apache-2.0"
+    sha256: "e3131339bf4e8065265593d4fd8f7bb7ff2d3abff1edb5618aa1197b89cad9f5"
+    build_script: "scripts/data_pipeline/fetch_models.py"
+    notes: "ggml-org 官方转换 Apache-2.0 GGUF，用于在相同 Radeon 780M Vulkan 环境下对比 135M 与 360M 的延迟与准确率"

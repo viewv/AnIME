@@ -11,11 +11,11 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use anime_lexicon::{LayeredLexicon, Lexicon, LexiconError};
-use anime_lm_neural::{NeuralSentenceModel, NoopNeuralModel};
+use anime_lm_neural::{NeuralModelConfig, NeuralSentenceModel, NoopNeuralModel};
 use anime_lm_ngram::{NgramLanguageModel, UserStore};
 use anime_protocol::PROTOCOL_VERSION;
 
-use crate::paths::{RuntimePaths, discover_runtime_paths};
+use crate::paths::{RuntimePaths, discover_runtime_paths_with_model};
 use crate::server::{SharedResources, StreamExit, serve_ndjson_stream};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -31,6 +31,10 @@ struct CliArgs {
     action: CliAction,
     socket_override: Option<PathBuf>,
     data_dir_override: Option<PathBuf>,
+    model_override: Option<PathBuf>,
+    gpu_layers: u32,
+    l3_debounce_ms: u64,
+    disable_neural: bool,
 }
 
 fn parse_cli_args<I>(args: I) -> Result<CliArgs, String>
@@ -40,6 +44,16 @@ where
     let mut action = CliAction::Daemon;
     let mut socket_override = None;
     let mut data_dir_override = None;
+    let mut model_override = None;
+    let mut gpu_layers = std::env::var("ANIME_GPU_LAYERS")
+        .ok()
+        .and_then(|v| v.parse::<u32>().ok())
+        .unwrap_or(999);
+    let mut l3_debounce_ms = std::env::var("ANIME_L3_DEBOUNCE_MS")
+        .ok()
+        .and_then(|v| v.parse::<u64>().ok())
+        .unwrap_or(20);
+    let mut disable_neural = false;
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
@@ -47,6 +61,7 @@ where
             "--version" | "-V" => action = CliAction::Version,
             "--help" | "-h" => action = CliAction::Help,
             "--stdio" => action = CliAction::Stdio,
+            "--no-neural" => disable_neural = true,
             "--socket" => {
                 let val = iter
                     .next()
@@ -59,6 +74,28 @@ where
                     .ok_or_else(|| "--data-dir requires a directory argument".to_string())?;
                 data_dir_override = Some(PathBuf::from(val));
             }
+            "--model" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--model requires a GGUF path argument".to_string())?;
+                model_override = Some(PathBuf::from(val));
+            }
+            "--gpu-layers" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--gpu-layers requires a numeric argument".to_string())?;
+                gpu_layers = val
+                    .parse::<u32>()
+                    .map_err(|_| format!("invalid --gpu-layers value '{val}'"))?;
+            }
+            "--l3-debounce-ms" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--l3-debounce-ms requires a numeric argument".to_string())?;
+                l3_debounce_ms = val
+                    .parse::<u64>()
+                    .map_err(|_| format!("invalid --l3-debounce-ms value '{val}'"))?;
+            }
             other => return Err(format!("unknown argument '{other}'")),
         }
     }
@@ -67,6 +104,10 @@ where
         action,
         socket_override,
         data_dir_override,
+        model_override,
+        gpu_layers,
+        l3_debounce_ms,
+        disable_neural,
     })
 }
 
@@ -107,7 +148,14 @@ fn build_fallback_lexicon() -> Lexicon {
     )
 }
 
-fn load_resources(paths: &RuntimePaths, transport_cap: &'static str) -> Arc<SharedResources> {
+fn load_resources(
+    paths: &RuntimePaths,
+    transport_cap: &'static str,
+    explicit_model: bool,
+    gpu_layers: u32,
+    l3_debounce_ms: u64,
+    disable_neural: bool,
+) -> Arc<SharedResources> {
     let base_lex = match &paths.lexicon_path {
         Some(path) => match Lexicon::from_animelex_file(path) {
             Ok(lex) => lex,
@@ -170,13 +218,46 @@ fn load_resources(paths: &RuntimePaths, transport_cap: &'static str) -> Arc<Shar
         eprintln!("animed: preloaded {preloaded} learned words into L1 dynamic layer");
     }
 
-    let neural: Arc<dyn NeuralSentenceModel> = Arc::new(NoopNeuralModel);
+    let neural: Arc<dyn NeuralSentenceModel> = if disable_neural {
+        Arc::new(NoopNeuralModel)
+    } else if let Some(ref model_path) = paths.neural_model_path {
+        if !cfg!(feature = "llama") && !explicit_model {
+            // 默认无 `llama` 特性编译时静默使用 Noop，以免未传 `--model` 的本地 smoke 测试变慢或报冗余警告
+            Arc::new(NoopNeuralModel)
+        } else {
+            let mut ncfg = NeuralModelConfig::with_model_path(model_path);
+            ncfg.n_gpu_layers = gpu_layers;
+            match anime_lm_neural::load_neural_model(ncfg) {
+                Ok((model, info)) => {
+                    eprintln!(
+                        "animed: loaded L3 neural model '{}' (backend={}, gpu_offload={}, device={}, warmup={}ms)",
+                        info.model_name,
+                        info.backend_name,
+                        info.gpu_offload_active,
+                        info.device_summary,
+                        info.warmup_ms
+                    );
+                    model
+                }
+                Err(err) => {
+                    eprintln!(
+                        "animed warning: failed loading L3 neural model '{}': {err}; falling back to NoopNeuralModel",
+                        model_path.display()
+                    );
+                    Arc::new(NoopNeuralModel)
+                }
+            }
+        }
+    } else {
+        Arc::new(NoopNeuralModel)
+    };
     Arc::new(SharedResources {
         lexicon: Arc::new(layered),
         ngram: Arc::new(ngram),
         neural,
         version: VERSION.to_string(),
         transport_cap,
+        l3_debounce_ms,
     })
 }
 
@@ -192,7 +273,7 @@ fn print_help() {
     println!(
         "animed {VERSION} (protocol v{PROTOCOL_VERSION})\n\
          Usage:\n\
-         \tanimed [--stdio] [--socket <path>] [--data-dir <dir>]\n\
+         \tanimed [--stdio] [--socket <path>] [--data-dir <dir>] [--model <gguf>] [--gpu-layers <n>] [--l3-debounce-ms <ms>] [--no-neural]\n\
          \tanimed --version | --help"
     );
 }
@@ -206,6 +287,9 @@ fn main() {
         }
     };
 
+    let explicit_model = cli.model_override.is_some()
+        || std::env::var_os("ANIME_NEURAL_MODEL").is_some_and(|v| !v.is_empty());
+
     match cli.action {
         CliAction::Version => {
             println!("animed {VERSION} (protocol v{PROTOCOL_VERSION})");
@@ -214,24 +298,40 @@ fn main() {
             print_help();
         }
         CliAction::Stdio => {
-            let paths = discover_runtime_paths(
+            let paths = discover_runtime_paths_with_model(
                 cli.socket_override.as_deref(),
                 cli.data_dir_override.as_deref(),
+                cli.model_override.as_deref(),
             );
-            let resources = load_resources(&paths, "stdio");
+            let resources = load_resources(
+                &paths,
+                "stdio",
+                explicit_model,
+                cli.gpu_layers,
+                cli.l3_debounce_ms,
+                cli.disable_neural,
+            );
             if let Err(err) = run_stdio(resources) {
                 eprintln!("animed stdio error: {err}");
                 std::process::exit(1);
             }
         }
         CliAction::Daemon => {
-            let paths = discover_runtime_paths(
+            let paths = discover_runtime_paths_with_model(
                 cli.socket_override.as_deref(),
                 cli.data_dir_override.as_deref(),
+                cli.model_override.as_deref(),
             );
             #[cfg(unix)]
             {
-                let resources = load_resources(&paths, "unix-socket");
+                let resources = load_resources(
+                    &paths,
+                    "unix-socket",
+                    explicit_model,
+                    cli.gpu_layers,
+                    cli.l3_debounce_ms,
+                    cli.disable_neural,
+                );
                 let stop_flag = Arc::new(AtomicBool::new(false));
                 eprintln!(
                     "animed {VERSION} listening on '{}' (data_dir='{}')",
@@ -294,6 +394,7 @@ mod tests {
             neural: Arc::new(NoopNeuralModel),
             version: VERSION.to_string(),
             transport_cap,
+            l3_debounce_ms: 0,
         })
     }
 
@@ -414,6 +515,7 @@ mod tests {
             neural: Arc::new(NoopNeuralModel),
             version: VERSION.to_string(),
             transport_cap: "unix-socket",
+            l3_debounce_ms: 0,
         });
         let stop_flag = Arc::new(AtomicBool::new(false));
 
@@ -557,6 +659,7 @@ mod tests {
             neural: Arc::new(DelayedMockNeural),
             version: VERSION.to_string(),
             transport_cap: "unix-socket",
+            l3_debounce_ms: 0,
         });
 
         let (mut client_stream, server_stream) = UnixStream::pair().expect("unix stream pair");

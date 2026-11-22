@@ -10,12 +10,73 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use std::process;
+use std::sync::Arc;
 
+use anime_engine::EngineSession;
+use anime_lexicon::{
+    LayeredLexicon, Lexicon, LexiconCandidate, LexiconProvider, QueryOptions, StaticWordList,
+};
+use anime_lm_neural::{NeuralModelConfig, NeuralRuntimeInfo, NeuralSentenceModel, NoopNeuralModel, load_neural_model};
+use anime_lm_ngram::{NgramLanguageModel, NgramModel, NoopNgramModel, UserStore};
 use cli::{OutputFormat, parse_args, usage_text};
 use gate::{evaluate_gates, parse_gate_spec};
-use metrics::run_eval;
+use metrics::{run_eval_with_neural};
 use report::{render_json, render_markdown, render_text};
 use tsv::parse_tsv;
+
+enum EvalLexicon {
+    Smoke(StaticWordList),
+    Compiled(LayeredLexicon),
+}
+
+impl LexiconProvider for EvalLexicon {
+    fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
+        match self {
+            Self::Smoke(s) => s.query(raw, opts),
+            Self::Compiled(l) => l.query(raw, opts),
+        }
+    }
+}
+
+enum EvalNgram {
+    Noop(NoopNgramModel),
+    Static(NgramLanguageModel),
+}
+
+impl NgramModel for EvalNgram {
+    fn score_word(&self, prev_word: Option<&str>, word: &str) -> f32 {
+        match self {
+            Self::Noop(n) => n.score_word(prev_word, word),
+            Self::Static(n) => n.score_word(prev_word, word),
+        }
+    }
+
+    fn score_in_context(&self, context_before: &str, word: &str) -> f32 {
+        match self {
+            Self::Noop(n) => n.score_in_context(context_before, word),
+            Self::Static(n) => n.score_in_context(context_before, word),
+        }
+    }
+
+    fn decode_lattice(
+        &self,
+        context_before: &str,
+        slots: &[anime_lm_ngram::LatticeSlot],
+        limit: usize,
+    ) -> Vec<anime_lm_ngram::DecodedSentence> {
+        match self {
+            Self::Noop(n) => n.decode_lattice(context_before, slots, limit),
+            Self::Static(n) => n.decode_lattice(context_before, slots, limit),
+        }
+    }
+
+    fn learn_commit(&self, context_before: &str, committed_text: &str, privacy: bool) {
+        match self {
+            Self::Noop(n) => n.learn_commit(context_before, committed_text, privacy),
+            Self::Static(n) => n.learn_commit(context_before, committed_text, privacy),
+        }
+    }
+}
 
 fn write_output_file(path: &str, content: &str) -> Result<(), String> {
     let target = Path::new(path);
@@ -61,19 +122,68 @@ fn main() {
         }
     };
 
-    let rows = match parse_tsv(&content) {
+    let mut rows = match parse_tsv(&content) {
         Ok(r) => r,
         Err(err) => {
             eprintln!("invalid eval TSV '{}': {err}", args.tsv_path);
             process::exit(1);
         }
     };
+    if let Some(limit) = args.max_samples {
+        rows.truncate(limit);
+    }
     if rows.is_empty() {
         eprintln!("no eval cases found in '{}'", args.tsv_path);
         process::exit(1);
     }
 
-    let report = run_eval(&args.tsv_path, &rows);
+    let lex = match &args.lexicon_path {
+        Some(path) => match Lexicon::from_animelex_file(Path::new(path)) {
+            Ok(lex) => EvalLexicon::Compiled(LayeredLexicon::new(lex)),
+            Err(err) => {
+                eprintln!("failed loading lexicon '{path}': {err}");
+                process::exit(1);
+            }
+        },
+        None => EvalLexicon::Smoke(StaticWordList::smoke_default()),
+    };
+
+    let ngram = match &args.ngram_path {
+        Some(path) => match anime_lm_ngram::load_animengr_file(Path::new(path)) {
+            Ok(data) => EvalNgram::Static(NgramLanguageModel::from_data(data, UserStore::in_memory())),
+            Err(err) => {
+                eprintln!("failed loading n-gram '{path}': {err}");
+                process::exit(1);
+            }
+        },
+        None => EvalNgram::Noop(NoopNgramModel),
+    };
+
+    let loaded_neural: Option<(Arc<dyn NeuralSentenceModel>, NeuralRuntimeInfo)> =
+        if let Some(ref model_path) = args.model_path {
+            let mut ncfg = NeuralModelConfig::with_model_path(model_path);
+            ncfg.n_gpu_layers = args.gpu_layers;
+            if let Some(w) = args.rerank_weight {
+                ncfg.rerank_weight = w;
+            }
+            match load_neural_model(ncfg) {
+                Ok(pair) => Some(pair),
+                Err(err) => {
+                    eprintln!("failed loading L3 GGUF model '{model_path}': {err}");
+                    process::exit(1);
+                }
+            }
+        } else {
+            None
+        };
+
+    // Eval 流程由 `run_eval_with_neural` 在同线程显式测算 L3 rerank 耗时并写入报告，
+    // 因此 session 内置 `NoopNeuralModel` 不受 L3 调度影响，避免重复推理。
+    let mut session = EngineSession::new(lex, ngram, NoopNeuralModel);
+    let neural_ref = loaded_neural
+        .as_ref()
+        .map(|(m, info)| (m.as_ref(), info));
+    let report = run_eval_with_neural(&args.tsv_path, &rows, &mut session, neural_ref);
     let gate_summary = if gate_rules.is_empty() {
         None
     } else {
@@ -277,6 +387,7 @@ context_realword\tgo \tform here\tfrom here\tcontext
             by_cat,
             overall,
             failures: Vec::new(),
+            l3_stats: None,
         };
 
         let p1_rules = parse_gate_spec("phase1", false).expect("phase1");
@@ -338,6 +449,18 @@ context_realword\tgo \tform here\tfrom here\tcontext
             "--strict-gate",
             "--show-failures",
             "12",
+            "--lexicon",
+            "data/compiled/lexicon.animelex.bin",
+            "--ngram",
+            "data/compiled/ngram.animengr.bin",
+            "--model",
+            "data/compiled/models/SmolLM2-135M-Q4_K_M.gguf",
+            "--gpu-layers",
+            "0",
+            "--rerank-weight",
+            "2.0",
+            "--max-samples",
+            "50",
         ])
         .expect("parse valid cli");
 
@@ -348,8 +471,24 @@ context_realword\tgo \tform here\tfrom here\tcontext
         assert_eq!(args.gates, vec!["phase1", "sentence.top3>=80"]);
         assert!(args.strict_gate);
         assert_eq!(args.show_failures, 12);
+        assert_eq!(
+            args.lexicon_path.as_deref(),
+            Some("data/compiled/lexicon.animelex.bin")
+        );
+        assert_eq!(
+            args.ngram_path.as_deref(),
+            Some("data/compiled/ngram.animengr.bin")
+        );
+        assert_eq!(
+            args.model_path.as_deref(),
+            Some("data/compiled/models/SmolLM2-135M-Q4_K_M.gguf")
+        );
+        assert_eq!(args.gpu_layers, 0);
+        assert_eq!(args.rerank_weight, Some(2.0));
+        assert_eq!(args.max_samples, Some(50));
 
         assert!(parse_args(["--format", "xml"]).is_err());
+        assert!(parse_args(["--gpu-layers", "abc"]).is_err());
         assert!(parse_args(["a.tsv", "b.tsv"]).is_err());
     }
 }

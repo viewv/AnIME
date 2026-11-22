@@ -6,6 +6,7 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread::{self, JoinHandle};
+use std::time::{Duration, Instant};
 
 use anime_lm_neural::{NeuralCandidate, NeuralSentenceModel};
 
@@ -31,7 +32,21 @@ pub struct L3Scheduler {
 }
 
 impl L3Scheduler {
+    #[allow(dead_code)]
     pub fn new<N, F>(neural: N, latest_seq: Arc<AtomicU64>, on_complete: F) -> Self
+    where
+        N: NeuralSentenceModel + 'static,
+        F: Fn(u64, Vec<NeuralCandidate>, Vec<NeuralCandidate>) + Send + Sync + 'static,
+    {
+        Self::with_debounce(neural, latest_seq, Duration::ZERO, on_complete)
+    }
+
+    pub fn with_debounce<N, F>(
+        neural: N,
+        latest_seq: Arc<AtomicU64>,
+        debounce: Duration,
+        on_complete: F,
+    ) -> Self
     where
         N: NeuralSentenceModel + 'static,
         F: Fn(u64, Vec<NeuralCandidate>, Vec<NeuralCandidate>) + Send + Sync + 'static,
@@ -43,7 +58,7 @@ impl L3Scheduler {
         let worker = thread::Builder::new()
             .name("anime-l3-worker".to_string())
             .spawn(move || loop {
-                let job = {
+                let mut job = {
                     let (lock, cv) = &*worker_slot;
                     let mut guard = lock.lock().unwrap_or_else(|e| e.into_inner());
                     while guard.job.is_none() && !guard.stop {
@@ -54,6 +69,43 @@ impl L3Scheduler {
                     }
                     guard.job.take()
                 };
+
+                // 轻去抖以合并连续高速键入，但句末空格直接绕过去抖以第一时间触发续写预测
+                while !debounce.is_zero() {
+                    let Some(ref cur) = job else {
+                        break;
+                    };
+                    if cur.preedit.ends_with(' ') {
+                        break;
+                    }
+                    let deadline = Instant::now() + debounce;
+                    let (lock, cv) = &*worker_slot;
+                    let mut guard = lock.lock().unwrap_or_else(|e| e.into_inner());
+                    let mut superseded = false;
+                    while !guard.stop && guard.job.is_none() {
+                        let now = Instant::now();
+                        if now >= deadline {
+                            break;
+                        }
+                        let (next_guard, wait_res) = cv
+                            .wait_timeout(guard, deadline - now)
+                            .unwrap_or_else(|e| e.into_inner());
+                        guard = next_guard;
+                        if guard.stop || guard.job.is_some() || wait_res.timed_out() {
+                            break;
+                        }
+                    }
+                    if guard.stop {
+                        return;
+                    }
+                    if let Some(newer) = guard.job.take() {
+                        job = Some(newer);
+                        superseded = true;
+                    }
+                    if !superseded {
+                        break;
+                    }
+                }
 
                 let Some(job) = job else {
                     continue;
@@ -120,5 +172,74 @@ impl Drop for L3Scheduler {
         if let Some(handle) = self.worker.take() {
             let _ = handle.join();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::atomic::AtomicUsize;
+
+    struct CountingNeural(Arc<AtomicUsize>);
+    impl NeuralSentenceModel for CountingNeural {
+        fn backend_name(&self) -> &'static str {
+            "counting-mock"
+        }
+        fn rerank_sentences(&self, _: &str, _: &str, _: &[String]) -> Vec<NeuralCandidate> {
+            self.0.fetch_add(1, Ordering::Relaxed);
+            Vec::new()
+        }
+        fn predict_continuations(&self, _: &str, _: &str, _: usize) -> Vec<NeuralCandidate> {
+            Vec::new()
+        }
+    }
+
+    #[test]
+    fn debounce_coalesces_burst_and_space_bypasses() {
+        let calls = Arc::new(AtomicUsize::new(0));
+        let latest = Arc::new(AtomicU64::new(0));
+        let completed = Arc::new(Mutex::new(Vec::<u64>::new()));
+        let completed_cb = Arc::clone(&completed);
+
+        let sched = L3Scheduler::with_debounce(
+            CountingNeural(Arc::clone(&calls)),
+            Arc::clone(&latest),
+            Duration::from_millis(60),
+            move |seq, _, _| {
+                completed_cb.lock().unwrap().push(seq);
+            },
+        );
+
+        for seq in 1..=4 {
+            sched.update_latest_seq(seq);
+            sched.submit(L3Job {
+                seq,
+                context_before: String::new(),
+                preedit: "tes".to_string(),
+                candidate_texts: vec!["test".to_string()],
+                max_continuations: 1,
+            });
+            thread::sleep(Duration::from_millis(5));
+        }
+
+        thread::sleep(Duration::from_millis(140));
+        assert_eq!(calls.load(Ordering::Relaxed), 1);
+        assert_eq!(*completed.lock().unwrap(), vec![4]);
+
+        // 词尾带空格立即触发、不再等待 debounce
+        sched.update_latest_seq(5);
+        let t0 = Instant::now();
+        sched.submit(L3Job {
+            seq: 5,
+            context_before: String::new(),
+            preedit: "for ".to_string(),
+            candidate_texts: vec!["for".to_string()],
+            max_continuations: 1,
+        });
+        while completed.lock().unwrap().len() < 2 && t0.elapsed() < Duration::from_millis(50) {
+            thread::sleep(Duration::from_millis(2));
+        }
+        assert!(t0.elapsed() < Duration::from_millis(50));
+        assert_eq!(*completed.lock().unwrap(), vec![4, 5]);
     }
 }

@@ -1,4 +1,4 @@
-.PHONY: check test engine addon eval verify-infra clean
+.PHONY: check test engine engine-llama engine-vulkan addon eval verify-infra clean
 
 SHELL := /usr/bin/env bash
 NPROC := $(shell nproc 2>/dev/null || echo 4)
@@ -11,6 +11,12 @@ test:
 
 engine:
 	cargo build --release -p animed
+
+engine-llama:
+	cargo build --release -p animed --features llama
+
+engine-vulkan:
+	cargo build --release -p animed --features vulkan
 
 addon:
 	cmake -S frontends/fcitx5 -B frontends/fcitx5/build

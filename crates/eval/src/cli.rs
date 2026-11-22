@@ -20,7 +20,7 @@ impl OutputFormat {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CliArgs {
     pub tsv_path: String,
     pub format: OutputFormat,
@@ -29,6 +29,12 @@ pub struct CliArgs {
     pub gates: Vec<String>,
     pub strict_gate: bool,
     pub show_failures: usize,
+    pub lexicon_path: Option<String>,
+    pub ngram_path: Option<String>,
+    pub model_path: Option<String>,
+    pub gpu_layers: u32,
+    pub rerank_weight: Option<f32>,
+    pub max_samples: Option<usize>,
     pub help: bool,
 }
 
@@ -42,6 +48,12 @@ impl Default for CliArgs {
             gates: Vec::new(),
             strict_gate: false,
             show_failures: 0,
+            lexicon_path: None,
+            ngram_path: None,
+            model_path: None,
+            gpu_layers: 999,
+            rerank_weight: None,
+            max_samples: None,
             help: false,
         }
     }
@@ -57,6 +69,12 @@ Options:
   --gate <PRESET|RULE>      Gate rule (phase0|phase1|phase2 or <target>.<metric>>=|<=>val; repeatable)
   --strict-gate             Use strict case-sensitive accuracy metrics for gate rules
   --show-failures <N>       Include up to N sample misses in output (default: 0)
+  --lexicon <PATH>          Load compiled .animelex.bin lexicon asset
+  --ngram <PATH>            Load compiled .animengr.bin n-gram asset
+  --model <PATH>            Load L3 GGUF model for neural reranking benchmark
+  --gpu-layers <N>          GPU layers for L3 offload (default: 999; 0 = force CPU)
+  --rerank-weight <F32>     Override L3 rerank fusion weight (default: library default)
+  --max-samples <N>         Evaluate at most N rows from TSV
   -h, --help                Show this help message"
 }
 
@@ -107,6 +125,50 @@ where
                 cfg.show_failures = val
                     .parse::<usize>()
                     .map_err(|_| format!("invalid --show-failures integer '{val}'"))?;
+            }
+            "--lexicon" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--lexicon requires a path".to_string())?;
+                cfg.lexicon_path = Some(val);
+            }
+            "--ngram" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--ngram requires a path".to_string())?;
+                cfg.ngram_path = Some(val);
+            }
+            "--model" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--model requires a path".to_string())?;
+                cfg.model_path = Some(val);
+            }
+            "--gpu-layers" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--gpu-layers requires a number".to_string())?;
+                cfg.gpu_layers = val
+                    .parse::<u32>()
+                    .map_err(|_| format!("invalid --gpu-layers integer '{val}'"))?;
+            }
+            "--rerank-weight" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--rerank-weight requires a float".to_string())?;
+                cfg.rerank_weight = Some(
+                    val.parse::<f32>()
+                        .map_err(|_| format!("invalid --rerank-weight float '{val}'"))?,
+                );
+            }
+            "--max-samples" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--max-samples requires a number".to_string())?;
+                cfg.max_samples = Some(
+                    val.parse::<usize>()
+                        .map_err(|_| format!("invalid --max-samples integer '{val}'"))?,
+                );
             }
             other if other.starts_with('-') => {
                 return Err(format!("unknown option '{other}'"));
