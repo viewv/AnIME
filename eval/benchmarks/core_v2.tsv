@@ -1,0 +1,1378 @@
+# AnIME core_v2：由冻结的 core_v1 经 scripts/data_pipeline/build_eval_v2.py 派生（勿手改）
+# prefix 剔除输入本身即词典词的歧义样本；prefix/typo_prefix 参考扩展为同词元屈折变体（|| 分隔）
+# category	context	input	expected	notes
+exact		the	the	Most frequent English determiner
+exact		and	and	High-frequency conjunction
+exact		apple	apple	Common concrete noun
+exact		algorithm	algorithm	Core CS vocabulary
+exact		kubernetes	kubernetes	Modern cloud-native term
+exact		typescript	typescript	Modern programming language name
+exact		wayland	wayland	Linux display protocol name
+exact		beautiful	beautiful	Frequent adjective with long prefix
+exact		definitely	definitely	Frequently confused spelling entered correctly
+exact		receive	receive	Correct ie-after-c spelling
+exact		separate	separate	Correct a-vs-e spelling
+exact		accommodation	accommodation	Double-c double-m word entered accurately
+exact		necessary	necessary	Single-c double-s word entered accurately
+exact		environment	environment	Correct silent-n cluster
+exact		restaurant	restaurant	Correct au cluster
+exact		pneumonia	pneumonia	Silent initial p entered accurately
+exact		psychology	psychology	Silent initial p entered accurately
+exact		knowledge	knowledge	Silent k and dg entered accurately
+exact		through	through	Silent gh cluster
+exact		though	though	Distinguished from through and thought
+exact		thought	thought	Distinguished from though
+exact		their	their	Possessive determiner without context
+exact		there	there	Adverb without context
+exact		from	from	Short preposition must not drift to form
+exact		form	form	Valid short word must not drift to from
+exact		quiet	quiet	Valid word near quite
+exact		quite	quite	Valid word near quiet
+exact		affect	affect	Valid verb near effect
+exact		effect	effect	Valid noun near affect
+exact		loose	loose	Valid adjective near lose
+exact		lose	lose	Valid verb near loose
+exact		weather	weather	Valid noun near whether
+exact		whether	whether	Valid conjunction near weather
+exact		desert	desert	Valid word near dessert
+exact		dessert	dessert	Valid word near desert
+exact		don't	don't	Exact apostrophe contraction
+exact		can't	can't	Exact apostrophe contraction
+exact		won't	won't	Exact apostrophe contraction
+exact		I'm	I'm	Exact capitalized contraction
+exact		I've	I've	Exact capitalized contraction
+exact		I	I	Capitalized first-person pronoun
+exact		Monday	Monday	Weekday proper noun
+exact		Wednesday	Wednesday	Weekday proper noun with silent d
+exact		English	English	Language proper noun
+exact		Linux	Linux	OS proper noun
+exact		database	database	Compound technical noun
+exact		authentication	authentication	Long security term
+exact		configuration	configuration	Long system term
+exact		concurrency	concurrency	Systems programming noun
+exact		architecture	architecture	Design and engineering noun
+exact		thanks	thanks	lexicon-stratified: high-freq lexicon word
+exact		fans	fans	lexicon-stratified: high-freq lexicon word
+exact		hell	hell	lexicon-stratified: high-freq lexicon word
+exact		late	late	lexicon-stratified: high-freq lexicon word
+exact		face	face	lexicon-stratified: high-freq lexicon word
+exact		south	south	lexicon-stratified: high-freq lexicon word
+exact		program	program	lexicon-stratified: high-freq lexicon word
+exact		TV	TV	lexicon-stratified: high-freq lexicon word
+exact		difference	difference	lexicon-stratified: high-freq lexicon word
+exact		green	green	lexicon-stratified: high-freq lexicon word
+exact		oil	oil	lexicon-stratified: high-freq lexicon word
+exact		control	control	lexicon-stratified: high-freq lexicon word
+exact		song	song	lexicon-stratified: high-freq lexicon word
+exact		position	position	lexicon-stratified: high-freq lexicon word
+exact		west	west	lexicon-stratified: high-freq lexicon word
+exact		us	us	lexicon-stratified: high-freq lexicon word
+exact		we	we	lexicon-stratified: high-freq lexicon word
+exact		released	released	lexicon-stratified: high-freq lexicon word
+exact		keep	keep	lexicon-stratified: high-freq lexicon word
+exact		forward	forward	lexicon-stratified: high-freq lexicon word
+exact		know	know	lexicon-stratified: high-freq lexicon word
+exact		has	has	lexicon-stratified: high-freq lexicon word
+exact		come	come	lexicon-stratified: high-freq lexicon word
+exact		food	food	lexicon-stratified: high-freq lexicon word
+exact		department	department	lexicon-stratified: high-freq lexicon word
+exact		space	space	lexicon-stratified: high-freq lexicon word
+exact		free	free	lexicon-stratified: high-freq lexicon word
+exact		left	left	lexicon-stratified: high-freq lexicon word
+exact		go	go	lexicon-stratified: high-freq lexicon word
+exact		time	time	lexicon-stratified: high-freq lexicon word
+exact		foreign	foreign	lexicon-stratified: high-freq lexicon word
+exact		easy	easy	lexicon-stratified: high-freq lexicon word
+exact		then	then	lexicon-stratified: high-freq lexicon word
+exact		cause	cause	lexicon-stratified: high-freq lexicon word
+exact		sent	sent	lexicon-stratified: high-freq lexicon word
+exact		picture	picture	lexicon-stratified: high-freq lexicon word
+exact		sort	sort	lexicon-stratified: high-freq lexicon word
+exact		add	add	lexicon-stratified: high-freq lexicon word
+exact		view	view	lexicon-stratified: high-freq lexicon word
+exact		dead	dead	lexicon-stratified: high-freq lexicon word
+exact		hour	hour	lexicon-stratified: high-freq lexicon word
+exact		ready	ready	lexicon-stratified: high-freq lexicon word
+exact		field	field	lexicon-stratified: high-freq lexicon word
+exact		because	because	lexicon-stratified: high-freq lexicon word
+exact		list	list	lexicon-stratified: high-freq lexicon word
+exact		health	health	lexicon-stratified: high-freq lexicon word
+exact		too	too	lexicon-stratified: high-freq lexicon word
+exact		long	long	lexicon-stratified: high-freq lexicon word
+exact		speak	speak	lexicon-stratified: high-freq lexicon word
+exact		pain	pain	lexicon-stratified: high-freq lexicon word
+exact		available	available	lexicon-stratified: high-freq lexicon word
+exact		least	least	lexicon-stratified: high-freq lexicon word
+exact		almost	almost	lexicon-stratified: high-freq lexicon word
+exact		what's	what's	lexicon-stratified: high-freq lexicon word
+exact		union	union	lexicon-stratified: high-freq lexicon word
+exact		ever	ever	lexicon-stratified: high-freq lexicon word
+exact		original	original	lexicon-stratified: high-freq lexicon word
+exact		few	few	lexicon-stratified: high-freq lexicon word
+exact		buy	buy	lexicon-stratified: high-freq lexicon word
+exact		other	other	lexicon-stratified: high-freq lexicon word
+exact		alone	alone	lexicon-stratified: high-freq lexicon word
+exact		playing	playing	lexicon-stratified: high-freq lexicon word
+exact		various	various	lexicon-stratified: high-freq lexicon word
+exact		july	july	lexicon-stratified: high-freq lexicon word
+exact		two	two	lexicon-stratified: high-freq lexicon word
+exact		sense	sense	lexicon-stratified: high-freq lexicon word
+exact		actually	actually	lexicon-stratified: high-freq lexicon word
+exact		part	part	lexicon-stratified: high-freq lexicon word
+exact		second	second	lexicon-stratified: high-freq lexicon word
+exact		thinking	thinking	lexicon-stratified: high-freq lexicon word
+exact		stand	stand	lexicon-stratified: high-freq lexicon word
+exact		however	however	lexicon-stratified: high-freq lexicon word
+exact		normal	normal	lexicon-stratified: high-freq lexicon word
+exact		line	line	lexicon-stratified: high-freq lexicon word
+exact		father	father	lexicon-stratified: high-freq lexicon word
+exact		rest	rest	lexicon-stratified: high-freq lexicon word
+exact		hours	hours	lexicon-stratified: high-freq lexicon word
+exact		miles	miles	lexicon-stratified: high-freq lexicon word
+exact		doesn't	doesn't	lexicon-stratified: high-freq lexicon word
+exact		rather	rather	lexicon-stratified: high-freq lexicon word
+exact		red	red	lexicon-stratified: high-freq lexicon word
+exact		last	last	lexicon-stratified: high-freq lexicon word
+exact		study	study	lexicon-stratified: high-freq lexicon word
+exact		weeks	weeks	lexicon-stratified: high-freq lexicon word
+exact		players	players	lexicon-stratified: high-freq lexicon word
+exact		UK	UK	lexicon-stratified: high-freq lexicon word
+exact		money	money	lexicon-stratified: high-freq lexicon word
+exact		house	house	lexicon-stratified: high-freq lexicon word
+exact		published	published	lexicon-stratified: high-freq lexicon word
+exact		getting	getting	lexicon-stratified: high-freq lexicon word
+exact		price	price	lexicon-stratified: high-freq lexicon word
+exact		over	over	lexicon-stratified: high-freq lexicon word
+exact		current	current	lexicon-stratified: high-freq lexicon word
+exact		director	director	lexicon-stratified: high-freq lexicon word
+exact		minutes	minutes	lexicon-stratified: high-freq lexicon word
+exact		september	september	lexicon-stratified: high-freq lexicon word
+exact		hey	hey	lexicon-stratified: high-freq lexicon word
+exact		practice	practice	lexicon-stratified: high-freq lexicon word
+exact		issues	issues	lexicon-stratified: high-freq lexicon word
+exact		via	via	lexicon-stratified: high-freq lexicon word
+exact		while	while	lexicon-stratified: high-freq lexicon word
+exact		away	away	lexicon-stratified: high-freq lexicon word
+exact		takes	takes	lexicon-stratified: high-freq lexicon word
+exact		mine	mine	lexicon-stratified: high-freq lexicon word
+exact		enough	enough	lexicon-stratified: high-freq lexicon word
+exact		given	given	lexicon-stratified: high-freq lexicon word
+exact		test	test	lexicon-stratified: high-freq lexicon word
+exact		event	event	lexicon-stratified: high-freq lexicon word
+exact		shit	shit	lexicon-stratified: high-freq lexicon word
+exact		upon	upon	lexicon-stratified: high-freq lexicon word
+exact		movie	movie	lexicon-stratified: high-freq lexicon word
+exact		ones	ones	lexicon-stratified: high-freq lexicon word
+exact		questions	questions	lexicon-stratified: high-freq lexicon word
+exact		return	return	lexicon-stratified: high-freq lexicon word
+exact		wife	wife	lexicon-stratified: high-freq lexicon word
+exact		access	access	lexicon-stratified: high-freq lexicon word
+exact		university	university	lexicon-stratified: high-freq lexicon word
+exact		daughter	daughter	lexicon-stratified: high-freq lexicon word
+exact		hair	hair	lexicon-stratified: high-freq lexicon word
+exact		eye	eye	lexicon-stratified: high-freq lexicon word
+exact		words	words	lexicon-stratified: high-freq lexicon word
+exact		added	added	lexicon-stratified: high-freq lexicon word
+exact		king	king	lexicon-stratified: high-freq lexicon word
+exact		man	man	lexicon-stratified: high-freq lexicon word
+exact		super	super	lexicon-stratified: high-freq lexicon word
+exact		past	past	lexicon-stratified: high-freq lexicon word
+exact		OK	OK	lexicon-stratified: high-freq lexicon word
+exact		little	little	lexicon-stratified: high-freq lexicon word
+exact		worth	worth	lexicon-stratified: high-freq lexicon word
+exact		example	example	lexicon-stratified: high-freq lexicon word
+exact		specific	specific	lexicon-stratified: high-freq lexicon word
+exact		means	means	lexicon-stratified: high-freq lexicon word
+exact		look	look	lexicon-stratified: high-freq lexicon word
+exact		india	india	lexicon-stratified: high-freq lexicon word
+exact		currently	currently	lexicon-stratified: high-freq lexicon word
+exact		four	four	lexicon-stratified: high-freq lexicon word
+exact		points	points	lexicon-stratified: high-freq lexicon word
+exact		likely	likely	lexicon-stratified: high-freq lexicon word
+exact		silver	silver	lexicon-stratified: mid-freq lexicon word
+exact		enhancement	enhancement	lexicon-stratified: mid-freq lexicon word
+exact		sussex	sussex	lexicon-stratified: mid-freq lexicon word
+exact		premiership	premiership	lexicon-stratified: mid-freq lexicon word
+exact		tapes	tapes	lexicon-stratified: mid-freq lexicon word
+exact		augmented	augmented	lexicon-stratified: mid-freq lexicon word
+exact		manufacturing	manufacturing	lexicon-stratified: mid-freq lexicon word
+exact		disappointing	disappointing	lexicon-stratified: mid-freq lexicon word
+exact		excluded	excluded	lexicon-stratified: mid-freq lexicon word
+exact		warriors	warriors	lexicon-stratified: mid-freq lexicon word
+exact		dress	dress	lexicon-stratified: mid-freq lexicon word
+exact		increased	increased	lexicon-stratified: mid-freq lexicon word
+prefix		algor	algorithm || algorithms	Algorithm prefix
+prefix		beautif	beautiful	Beautiful prefix
+prefix		kubern	kubernetes	Kubernetes modern term prefix
+prefix		typescr	typescript	TypeScript prefix
+prefix		authentica	authentication	Authentication long prefix
+prefix		configur	configuration || configurations	Configuration prefix
+prefix		environm	environment || environments	Environment prefix
+prefix		definitel	definitely	Definitely long prefix
+prefix		definitio	definition || definitions	Definition prefix
+prefix		implemen	implement || implemented || implementing || implements	Implement prefix
+prefix		communica	communication || communications	Communication prefix
+prefix		applicat	application || applications	Application prefix
+prefix		performan	performance || performances	Performance prefix
+prefix		architectu	architecture || architectures	Architecture prefix
+prefix		concurren	concurrency	Concurrency prefix
+prefix		asynchron	asynchronous	Asynchronous prefix
+prefix		bibliogra	bibliography || bibliographies	Bibliography prefix
+prefix		calculat	calculate || calculated || calculating || calculates	Calculate prefix
+prefix		celebrat	celebrate || celebrated || celebrating || celebrates	Celebrate prefix
+prefix		comprehens	comprehensive	Comprehensive prefix
+prefix		considera	consideration || considerations	Consideration prefix
+prefix		convenien	convenient	Convenient prefix
+prefix		descripti	description || descriptions	Description prefix
+prefix		developm	development || developments	Development prefix
+prefix		differen	different	Different prefix
+prefix		documen	document || documents || documented || documenting	Document prefix
+prefix		educatio	education || educations	Education prefix
+prefix		effectiv	effective	Effective prefix
+prefix		experien	experience || experienced || experiences || experiencing	Experience prefix
+prefix		experime	experiment || experiments || experimenting || experimented	Experiment prefix
+prefix		extraord	extraordinary	Extraordinary prefix
+prefix		governm	government || governments	Government prefix
+prefix		immediat	immediately	Immediately prefix
+prefix		importan	important	Important prefix
+prefix		independ	independent || independents	Independent prefix
+prefix		informat	information	Information prefix
+prefix		intellig	intelligence || intelligences	Intelligence prefix
+prefix		knowledg	knowledge	Knowledge prefix
+prefix		langua	language || languages	Language strict prefix
+prefix		necessar	necessary || necessaries	Necessary prefix
+prefix		opportun	opportunity || opportunities	Opportunity prefix
+prefix		organiza	organization || organizations	Organization prefix
+prefix		particul	particular || particulars	Particular prefix
+prefix		philosop	philosophy || philosophies	Philosophy prefix
+prefix		programm	programming || programme || programmes || programmed	Programming prefix
+prefix		recommen	recommend || recommended || recommends || recommending	Recommend prefix
+prefix		restaura	restaurant || restaurants	Restaurant prefix
+prefix		technolo	technology || technologies	Technology prefix
+prefix		understa	understand || understanding || understands	Understand prefix
+prefix		vocabula	vocabulary || vocabularies	Vocabulary prefix
+prefix		conceptio	conceptions || conception	lexicon-unambiguous-prefix (margin=2.00)
+prefix		grandsta	grandstand || grandstanding || grandstands	lexicon-unambiguous-prefix (margin=2.00)
+prefix		washr	washroom || washrooms	lexicon-unambiguous-prefix (margin=2.00)
+prefix		soloi	soloist || soloists	lexicon-unambiguous-prefix (margin=2.00)
+prefix		miscarriag	miscarriages || miscarriage	lexicon-unambiguous-prefix (margin=2.00)
+prefix		professi	professional || professionals	lexicon-unambiguous-prefix (margin=0.81)
+prefix		sterli	sterling	lexicon-unambiguous-prefix (margin=2.00)
+prefix		unaffe	unaffected	lexicon-unambiguous-prefix (margin=2.00)
+prefix		schooli	schooling	lexicon-unambiguous-prefix (margin=2.00)
+prefix		overv	overview || overviews	lexicon-unambiguous-prefix (margin=2.00)
+prefix		roadst	roadster	lexicon-unambiguous-prefix (margin=2.00)
+prefix		dialo	dialogue || dialogues	lexicon-unambiguous-prefix (margin=1.07)
+prefix		sapie	sapiens	lexicon-unambiguous-prefix (margin=2.00)
+prefix		swast	swastika || swastikas	lexicon-unambiguous-prefix (margin=2.00)
+prefix		circum	circumstances || circumstance	lexicon-unambiguous-prefix (margin=0.93)
+prefix		umbi	umbilical	lexicon-unambiguous-prefix (margin=2.00)
+prefix		preclu	preclude || precluded || precludes || precluding	lexicon-unambiguous-prefix (margin=2.00)
+prefix		matthi	matthias	lexicon-unambiguous-prefix (margin=2.00)
+prefix		dissertati	dissertation || dissertations	lexicon-unambiguous-prefix (margin=2.00)
+prefix		poopi	pooping	lexicon-unambiguous-prefix (margin=2.00)
+prefix		reminde	reminders || reminder	lexicon-unambiguous-prefix (margin=2.00)
+prefix		tasmani	tasmanian	lexicon-unambiguous-prefix (margin=2.00)
+prefix		causati	causation	lexicon-unambiguous-prefix (margin=2.00)
+prefix		cuten	cuteness	lexicon-unambiguous-prefix (margin=2.00)
+prefix		inundat	inundated	lexicon-unambiguous-prefix (margin=2.00)
+prefix		exclama	exclamation || exclamations	lexicon-unambiguous-prefix (margin=2.00)
+prefix		acum	acumen	lexicon-unambiguous-prefix (margin=2.00)
+prefix		gladst	gladstone	lexicon-unambiguous-prefix (margin=2.00)
+prefix		hiri	hiring	lexicon-unambiguous-prefix (margin=2.00)
+prefix		heartac	heartache || heartaches	lexicon-unambiguous-prefix (margin=2.00)
+prefix		aversi	aversion	lexicon-unambiguous-prefix (margin=2.00)
+prefix		unexplai	unexplained	lexicon-unambiguous-prefix (margin=2.00)
+prefix		nutshe	nutshell	lexicon-unambiguous-prefix (margin=2.00)
+prefix		valuab	valuable || valuables	lexicon-unambiguous-prefix (margin=1.41)
+prefix		bion	bionic || bionics	lexicon-unambiguous-prefix (margin=2.00)
+prefix		disabilit	disabilities || disability	lexicon-unambiguous-prefix (margin=2.00)
+prefix		televis	television || televisions	lexicon-unambiguous-prefix (margin=1.26)
+prefix		aquat	aquatic || aquatics	lexicon-unambiguous-prefix (margin=2.00)
+prefix		flicke	flickering || flicker || flickered || flickers	lexicon-unambiguous-prefix (margin=2.00)
+prefix		remembran	remembrance || remembrances	lexicon-unambiguous-prefix (margin=2.00)
+prefix		penu	penultimate	lexicon-unambiguous-prefix (margin=2.00)
+prefix		resuscitat	resuscitation	lexicon-unambiguous-prefix (margin=2.00)
+prefix		engul	engulfed || engulf || engulfing || engulfs	lexicon-unambiguous-prefix (margin=2.00)
+prefix		agai	against	lexicon-unambiguous-prefix (margin=2.00)
+prefix		cosmeti	cosmetics || cosmetic	lexicon-unambiguous-prefix (margin=2.00)
+prefix		manifo	manifold || manifolds	lexicon-unambiguous-prefix (margin=2.00)
+prefix		unforgiva	unforgivable	lexicon-unambiguous-prefix (margin=2.00)
+prefix		embraci	embracing	lexicon-unambiguous-prefix (margin=2.00)
+prefix		solvi	solving	lexicon-unambiguous-prefix (margin=2.00)
+prefix		hostiliti	hostilities	lexicon-unambiguous-prefix (margin=2.00)
+prefix		pennsyl	pennsylvania	lexicon-unambiguous-prefix (margin=2.00)
+prefix		critte	critters || critter	lexicon-unambiguous-prefix (margin=2.00)
+prefix		mald	maldives	lexicon-unambiguous-prefix (margin=2.00)
+prefix		grievi	grieving	lexicon-unambiguous-prefix (margin=2.00)
+prefix		masteri	mastering	lexicon-unambiguous-prefix (margin=2.00)
+prefix		pola	poland	lexicon-unambiguous-prefix (margin=0.94)
+prefix		forst	forster	lexicon-unambiguous-prefix (margin=2.00)
+prefix		wirel	wireless	lexicon-unambiguous-prefix (margin=2.00)
+prefix		pendul	pendulum || pendulums	lexicon-unambiguous-prefix (margin=2.00)
+prefix		juxtapos	juxtaposition || juxtapositions	lexicon-unambiguous-prefix (margin=2.00)
+prefix		huddersf	huddersfield	lexicon-unambiguous-prefix (margin=2.00)
+prefix		midn	midnight	lexicon-unambiguous-prefix (margin=2.00)
+prefix		unevent	uneventful	lexicon-unambiguous-prefix (margin=2.00)
+prefix		thesau	thesaurus	lexicon-unambiguous-prefix (margin=2.00)
+prefix		informa	information	lexicon-unambiguous-prefix (margin=1.82)
+prefix		empirica	empirically	lexicon-unambiguous-prefix (margin=2.00)
+prefix		indoc	indoctrination	lexicon-unambiguous-prefix (margin=2.00)
+prefix		befor	beforehand	lexicon-unambiguous-prefix (margin=2.00)
+prefix		squis	squishy	lexicon-unambiguous-prefix (margin=2.00)
+prefix		monten	montenegro	lexicon-unambiguous-prefix (margin=2.00)
+prefix		cracki	cracking	lexicon-unambiguous-prefix (margin=2.00)
+prefix		usabili	usability	lexicon-unambiguous-prefix (margin=2.00)
+prefix		irreplacea	irreplaceable	lexicon-unambiguous-prefix (margin=2.00)
+prefix		likew	likewise	lexicon-unambiguous-prefix (margin=2.00)
+prefix		amste	amsterdam	lexicon-unambiguous-prefix (margin=2.00)
+prefix		noctu	nocturnal	lexicon-unambiguous-prefix (margin=2.00)
+prefix		leew	leeway	lexicon-unambiguous-prefix (margin=2.00)
+prefix		metamor	metamorphosis	lexicon-unambiguous-prefix (margin=2.00)
+prefix		legislatu	legislature || legislatures	lexicon-unambiguous-prefix (margin=0.91)
+prefix		sectari	sectarian	lexicon-unambiguous-prefix (margin=2.00)
+prefix		boardr	boardroom || boardrooms	lexicon-unambiguous-prefix (margin=2.00)
+prefix		dehydrogen	dehydrogenase	lexicon-unambiguous-prefix (margin=2.00)
+prefix		phenoty	phenotype || phenotypes	lexicon-unambiguous-prefix (margin=2.00)
+prefix		lukewa	lukewarm	lexicon-unambiguous-prefix (margin=2.00)
+prefix		underpr	underprivileged	lexicon-unambiguous-prefix (margin=2.00)
+prefix		restarti	restarting	lexicon-unambiguous-prefix (margin=2.00)
+prefix		guberna	gubernatorial	lexicon-unambiguous-prefix (margin=2.00)
+prefix		vulc	vulcan	lexicon-unambiguous-prefix (margin=2.00)
+prefix		protectio	protections || protection	lexicon-unambiguous-prefix (margin=0.80)
+prefix		transi	transition || transitions || transitioning || transitioned	lexicon-unambiguous-prefix (margin=0.82)
+prefix		pomegra	pomegranate || pomegranates	lexicon-unambiguous-prefix (margin=2.00)
+prefix		venerati	veneration	lexicon-unambiguous-prefix (margin=2.00)
+prefix		interna	international || internationals	lexicon-unambiguous-prefix (margin=1.41)
+prefix		darw	darwin	lexicon-unambiguous-prefix (margin=2.00)
+prefix		raspberri	raspberries	lexicon-unambiguous-prefix (margin=2.00)
+prefix		reconnais	reconnaissance	lexicon-unambiguous-prefix (margin=2.00)
+prefix		thursd	thursday || thursdays	lexicon-unambiguous-prefix (margin=1.35)
+prefix		unope	unopened	lexicon-unambiguous-prefix (margin=2.00)
+prefix		stonewa	stonewall || stonewalling || stonewalled	lexicon-unambiguous-prefix (margin=2.00)
+prefix		shipbuildi	shipbuilding	lexicon-unambiguous-prefix (margin=2.00)
+prefix		basq	basque || basques	lexicon-unambiguous-prefix (margin=2.00)
+prefix		nonpro	nonprofit || nonprofits	lexicon-unambiguous-prefix (margin=0.84)
+prefix		ostensib	ostensibly	lexicon-unambiguous-prefix (margin=2.00)
+prefix		distraug	distraught	lexicon-unambiguous-prefix (margin=2.00)
+prefix		presl	presley	lexicon-unambiguous-prefix (margin=2.00)
+prefix		osca	oscars || oscar	lexicon-unambiguous-prefix (margin=2.00)
+prefix		claiman	claimants || claimant	lexicon-unambiguous-prefix (margin=2.00)
+prefix		milliseco	milliseconds || millisecond	lexicon-unambiguous-prefix (margin=2.00)
+prefix		referend	referendum || referendums	lexicon-unambiguous-prefix (margin=1.10)
+prefix		deceptiv	deceptively	lexicon-unambiguous-prefix (margin=2.00)
+prefix		instabi	instability || instabilities	lexicon-unambiguous-prefix (margin=2.00)
+prefix		wormho	wormhole || wormholes	lexicon-unambiguous-prefix (margin=2.00)
+prefix		belitt	belittle || belittling || belittled || belittles	lexicon-unambiguous-prefix (margin=2.00)
+prefix		paedia	paediatric || paediatrics	lexicon-unambiguous-prefix (margin=2.00)
+prefix		politene	politeness	lexicon-unambiguous-prefix (margin=2.00)
+prefix		prerogati	prerogative || prerogatives	lexicon-unambiguous-prefix (margin=2.00)
+prefix		thursda	thursdays || thursday	lexicon-unambiguous-prefix (margin=2.00)
+prefix		painkill	painkillers || painkiller	lexicon-unambiguous-prefix (margin=2.00)
+prefix		rudi	rudimentary	lexicon-unambiguous-prefix (margin=2.00)
+prefix		homema	homemade	lexicon-unambiguous-prefix (margin=1.01)
+prefix		variabi	variability	lexicon-unambiguous-prefix (margin=2.00)
+prefix		grappli	grappling	lexicon-unambiguous-prefix (margin=2.00)
+prefix		swarmi	swarming	lexicon-unambiguous-prefix (margin=2.00)
+prefix		thist	thistle || thistles	lexicon-unambiguous-prefix (margin=2.00)
+prefix		equil	equilibrium	lexicon-unambiguous-prefix (margin=2.00)
+typo_simple		teh	the	Adjacent transposition e-h
+typo_simple		adn	and	Adjacent transposition d-n
+typo_simple		taht	that	Transposition a-h
+typo_simple		wiht	with	Transposition h-t
+typo_simple		hte	the	Early transposition h-t
+typo_simple		appie	apple	Adjacent-key substitution l->i
+typo_simple		aple	apple	Single omission of double p
+typo_simple		appple	apple	Accidental triple p insertion
+typo_simple		recieve	receive	Classic ie/ei transposition
+typo_simple		langauge	language	Adjacent vowel transposition a-u
+typo_simple		becuase	because	Adjacent transposition u-a
+typo_simple		freind	friend	Adjacent transposition e-i
+typo_simple		beleive	believe	Adjacent transposition i-e
+typo_simple		seperate	separate	Single vowel substitution a->e
+typo_simple		occured	occurred	Omitted double r
+typo_simple		untill	until	Extra trailing l insertion
+typo_simple		tommorow	tomorrow	Wrong double m instead of r
+typo_simple		tomorow	tomorrow	Single omission of double r
+typo_simple		goverment	government	Silent n omission
+typo_simple		enviroment	environment	Silent n omission
+typo_simple		neccessary	necessary	Extra c insertion
+typo_simple		necesary	necessary	Single s omission
+typo_simple		succesful	successful	Single s omission
+typo_simple		accomodate	accommodate	Single m omission
+typo_simple		commited	committed	Single t omission
+typo_simple		begining	beginning	Single n omission
+typo_simple		adress	address	Single d omission
+typo_simple		buisness	business	Transposition s-i
+typo_simple		calender	calendar	Suffix vowel substitution a->e
+typo_simple		catagory	category	Medial vowel substitution e->a
+typo_simple		changable	changeable	Silent e omission
+typo_simple		collegue	colleague	Silent a omission
+typo_simple		concious	conscious	Silent s omission
+typo_simple		curiousity	curiosity	Extra u insertion
+typo_simple		disapoint	disappoint	Single p omission
+typo_simple		embarass	embarrass	Single r omission
+typo_simple		existance	existence	Suffix vowel substitution e->a
+typo_simple		foriegn	foreign	Transposition e-i
+typo_simple		fourty	forty	Extra u insertion
+typo_simple		grammer	grammar	Suffix vowel substitution a->e
+typo_simple		happend	happened	Omitted e in past suffix
+typo_simple		immediatly	immediately	Silent e omission
+typo_simple		independant	independent	Suffix vowel substitution e->a
+typo_simple		knowlege	knowledge	Omitted d before ge
+typo_simple		libary	library	Omitted first r
+typo_simple		mispell	misspell	Omitted double s
+typo_simple		noticable	noticeable	Omitted e before able
+typo_simple		ocassion	occasion	Wrong double s instead of c
+typo_simple		posession	possession	Omitted first double s
+typo_simple		preffered	preferred	Wrong double f instead of r
+typo_simple		publically	publicly	Extra al syllable insertion
+typo_simple		refered	referred	Omitted double r
+typo_simple		religous	religious	Omitted i before ous
+typo_simple		similiar	similar	Extra i insertion
+typo_simple		truely	truly	Extra e insertion
+typo_simple		wether	whether	Omitted silent h
+typo_simple		writting	writing	Extra t insertion
+typo_simple		helo	hello	Single l omission
+typo_simple		wrld	world	Single o omission
+typo_simple		compuetr	computer	Transposition t-e
+typo_simple		regidstered	registered	open-wordlist:crate-ci-typos
+typo_simple		obyect	object	open-wordlist:crate-ci-typos
+typo_simple		isntallation	installation	open-wordlist:crate-ci-typos
+typo_simple		calues	values	open-wordlist:crate-ci-typos
+typo_simple		conotrol	control	open-wordlist:crate-ci-typos
+typo_simple		represenatation	representation	open-wordlist:crate-ci-typos
+typo_simple		structred	structured	open-wordlist:crate-ci-typos
+typo_simple		ocne	once	open-wordlist:crate-ci-typos
+typo_simple		reapeat	repeat	open-wordlist:crate-ci-typos
+typo_simple		pioneeer	pioneer	open-wordlist:crate-ci-typos
+typo_simple		normaly	normally	open-wordlist:crate-ci-typos
+typo_simple		theier	their	open-wordlist:crate-ci-typos
+typo_simple		gettings	getting	open-wordlist:crate-ci-typos
+typo_simple		optoin	option	open-wordlist:crate-ci-typos
+typo_simple		indepenently	independently	open-wordlist:crate-ci-typos
+typo_simple		alrady	already	open-wordlist:crate-ci-typos
+typo_simple		automatcially	automatically	open-wordlist:crate-ci-typos
+typo_simple		furthurmore	furthermore	open-wordlist:crate-ci-typos
+typo_simple		distnguish	distinguish	open-wordlist:crate-ci-typos
+typo_simple		tabel	table	open-wordlist:crate-ci-typos
+typo_simple		originnally	originally	open-wordlist:crate-ci-typos
+typo_simple		occrring	occurring	open-wordlist:crate-ci-typos
+typo_simple		billbaord	billboard	open-wordlist:crate-ci-typos
+typo_simple		folow	follow	open-wordlist:crate-ci-typos
+typo_simple		conferance	conference	open-wordlist:crate-ci-typos
+typo_simple		respresents	represents	open-wordlist:crate-ci-typos
+typo_simple		favortie	favorite	open-wordlist:crate-ci-typos
+typo_simple		packges	packages	open-wordlist:crate-ci-typos
+typo_simple		entreprenurs	entrepreneurs	open-wordlist:crate-ci-typos
+typo_simple		patroits	patriots	open-wordlist:crate-ci-typos
+typo_simple		incerase	increase	open-wordlist:crate-ci-typos
+typo_simple		counsil	counsel	open-wordlist:crate-ci-typos
+typo_simple		amonst	amongst	open-wordlist:crate-ci-typos
+typo_simple		strucutre	structure	open-wordlist:crate-ci-typos
+typo_simple		directon	direction	open-wordlist:crate-ci-typos
+typo_simple		bounaary	boundary	open-wordlist:crate-ci-typos
+typo_simple		decreas	decrease	open-wordlist:crate-ci-typos
+typo_simple		aroung	around	open-wordlist:crate-ci-typos
+typo_simple		firsrt	first	open-wordlist:crate-ci-typos
+typo_simple		establising	establishing	open-wordlist:crate-ci-typos
+typo_simple		naturual	natural	open-wordlist:crate-ci-typos
+typo_simple		demonstartion	demonstration	open-wordlist:crate-ci-typos
+typo_simple		neighber	neighbor	open-wordlist:crate-ci-typos
+typo_simple		andd	and	open-wordlist:crate-ci-typos
+typo_simple		concecutive	consecutive	open-wordlist:crate-ci-typos
+typo_simple		indiated	indicated	open-wordlist:crate-ci-typos
+typo_simple		controvery	controversy	open-wordlist:crate-ci-typos
+typo_simple		shwo	show	open-wordlist:crate-ci-typos
+typo_simple		sprecial	special	open-wordlist:crate-ci-typos
+typo_simple		expeption	exception	open-wordlist:crate-ci-typos
+typo_simple		buiders	builders	open-wordlist:crate-ci-typos
+typo_simple		actial	actual	open-wordlist:crate-ci-typos
+typo_simple		assembeld	assembled	open-wordlist:crate-ci-typos
+typo_simple		propaganada	propaganda	open-wordlist:crate-ci-typos
+typo_simple		dedecated	dedicated	open-wordlist:crate-ci-typos
+typo_simple		direktly	directly	open-wordlist:crate-ci-typos
+typo_simple		infrastrcuture	infrastructure	open-wordlist:crate-ci-typos
+typo_simple		follews	follows	open-wordlist:crate-ci-typos
+typo_simple		beuatifully	beautifully	open-wordlist:crate-ci-typos
+typo_simple		contorl	control	open-wordlist:crate-ci-typos
+typo_simple		cloesd	closed	open-wordlist:crate-ci-typos
+typo_simple		accuratly	accurately	open-wordlist:crate-ci-typos
+typo_simple		reperesentation	representation	open-wordlist:crate-ci-typos
+typo_simple		documentacion	documentation	open-wordlist:crate-ci-typos
+typo_simple		potentailly	potentially	open-wordlist:crate-ci-typos
+typo_simple		appology	apology	open-wordlist:crate-ci-typos
+typo_simple		permssion	permission	open-wordlist:crate-ci-typos
+typo_simple		commuications	communications	open-wordlist:crate-ci-typos
+typo_simple		fitlers	filters	open-wordlist:crate-ci-typos
+typo_simple		speecified	specified	open-wordlist:crate-ci-typos
+typo_simple		prepated	prepared	open-wordlist:crate-ci-typos
+typo_simple		requierements	requirements	open-wordlist:crate-ci-typos
+typo_simple		creditted	credited	open-wordlist:crate-ci-typos
+typo_simple		surpport	support	open-wordlist:crate-ci-typos
+typo_simple		recors	records	open-wordlist:crate-ci-typos
+typo_simple		neesd	needs	open-wordlist:crate-ci-typos
+typo_simple		terrorisim	terrorism	open-wordlist:crate-ci-typos
+typo_simple		copmilation	compilation	open-wordlist:crate-ci-typos
+typo_simple		unexpeected	unexpected	open-wordlist:crate-ci-typos
+typo_simple		activisit	activist	open-wordlist:crate-ci-typos
+typo_simple		unknwn	unknown	open-wordlist:crate-ci-typos
+typo_simple		withint	within	open-wordlist:crate-ci-typos
+typo_simple		referernce	reference	open-wordlist:crate-ci-typos
+typo_simple		exciption	exception	open-wordlist:crate-ci-typos
+typo_simple		agred	agreed	open-wordlist:crate-ci-typos
+typo_simple		descibed	described	open-wordlist:crate-ci-typos
+typo_simple		gorgous	gorgeous	open-wordlist:crate-ci-typos
+typo_simple		qualitying	qualifying	open-wordlist:crate-ci-typos
+typo_simple		repet	repeat	open-wordlist:crate-ci-typos
+typo_simple		versins	versions	open-wordlist:crate-ci-typos
+typo_simple		conjuntion	conjunction	open-wordlist:crate-ci-typos
+typo_simple		elemnents	elements	open-wordlist:crate-ci-typos
+typo_simple		fucntions	functions	open-wordlist:crate-ci-typos
+typo_simple		demostration	demonstration	open-wordlist:crate-ci-typos
+typo_simple		componemt	component	open-wordlist:crate-ci-typos
+typo_simple		findn	find	open-wordlist:crate-ci-typos
+typo_simple		eescription	description	open-wordlist:crate-ci-typos
+typo_simple		describtions	descriptions	open-wordlist:crate-ci-typos
+typo_simple		intendet	intended	open-wordlist:crate-ci-typos
+typo_simple		peaples	peoples	open-wordlist:crate-ci-typos
+typo_simple		inmense	immense	open-wordlist:crate-ci-typos
+typo_simple		srings	strings	open-wordlist:crate-ci-typos
+typo_simple		imprisonent	imprisonment	open-wordlist:crate-ci-typos
+typo_simple		freinds	friends	open-wordlist:crate-ci-typos
+typo_simple		delaring	declaring	open-wordlist:crate-ci-typos
+typo_simple		appraent	apparent	open-wordlist:crate-ci-typos
+typo_simple		beigin	begin	open-wordlist:crate-ci-typos
+typo_simple		caled	called	open-wordlist:crate-ci-typos
+typo_simple		serivces	services	open-wordlist:crate-ci-typos
+typo_simple		neighrorhood	neighborhood	open-wordlist:crate-ci-typos
+typo_simple		availeable	available	open-wordlist:crate-ci-typos
+typo_simple		opeates	operates	open-wordlist:crate-ci-typos
+typo_simple		meida	media	open-wordlist:crate-ci-typos
+typo_simple		simulatneously	simultaneously	open-wordlist:crate-ci-typos
+typo_simple		temperaturas	temperatures	open-wordlist:crate-ci-typos
+typo_simple		assignmentv	assignment	open-wordlist:crate-ci-typos
+typo_simple		construc	construct	open-wordlist:crate-ci-typos
+typo_simple		wheigh	weigh	open-wordlist:crate-ci-typos
+typo_simple		countriy	country	open-wordlist:crate-ci-typos
+typo_simple		shfit	shift	open-wordlist:crate-ci-typos
+typo_simple		resonably	reasonably	open-wordlist:crate-ci-typos
+typo_simple		rehabilitaion	rehabilitation	open-wordlist:crate-ci-typos
+typo_simple		attaached	attached	open-wordlist:crate-ci-typos
+typo_simple		aviaiton	aviation	open-wordlist:crate-ci-typos
+typo_simple		absolue	absolute	open-wordlist:crate-ci-typos
+typo_simple		analystes	analysts	open-wordlist:crate-ci-typos
+typo_simple		recuiting	recruiting	open-wordlist:crate-ci-typos
+typo_simple		divisons	divisions	open-wordlist:crate-ci-typos
+typo_simple		modifued	modified	open-wordlist:crate-ci-typos
+typo_simple		pakage	package	open-wordlist:crate-ci-typos
+typo_simple		certitication	certification	open-wordlist:crate-ci-typos
+typo_simple		trasparency	transparency	open-wordlist:crate-ci-typos
+typo_simple		equivelent	equivalent	open-wordlist:crate-ci-typos
+typo_simple		gloabl	global	open-wordlist:crate-ci-typos
+typo_simple		inport	import	open-wordlist:crate-ci-typos
+typo_simple		comparizon	comparison	open-wordlist:crate-ci-typos
+typo_simple		stirngs	strings	open-wordlist:crate-ci-typos
+typo_simple		extration	extraction	open-wordlist:crate-ci-typos
+typo_simple		revoultionary	revolutionary	open-wordlist:crate-ci-typos
+typo_simple		excitment	excitement	open-wordlist:crate-ci-typos
+typo_prefix		beutif	beautiful	Early a omission + truncated prefix
+typo_prefix		enviorn	environment || environments	Early r-o transposition + truncated prefix
+typo_prefix		reciev	receive || received || receiving || receives	Early ei transposition + truncated prefix
+typo_prefix		definat	definitely	Early i->a substitution + truncated prefix
+typo_prefix		conifg	configuration || configurations	Early f-i transposition + truncated prefix
+typo_prefix		algoritm	algorithm || algorithms	Omitted h + short prefix
+typo_prefix		asynchorn	asynchronous	Early r-o transposition + truncated prefix
+typo_prefix		kubrenet	kubernetes	Early r-e transposition + truncated prefix
+typo_prefix		authntic	authentication	Omitted e + truncated prefix
+typo_prefix		comunnic	communication || communications	Wrong double n / single m + truncated
+typo_prefix		aproxim	approximately	Single p omission + truncated prefix
+typo_prefix		architc	architecture || architectures	Omitted e + truncated prefix
+typo_prefix		beleiv	believe || believed || believes || believing	Transposition i-e + truncated
+typo_prefix		bginni	beginning || begin || begins || beginnings	Omitted e + truncated prefix
+typo_prefix		bussin	business || businesses	Double s + truncated
+typo_prefix		caland	calendar || calendars	Wrong second a + truncated
+typo_prefix		catago	category || categories	Wrong vowel + truncated
+typo_prefix		changab	changeable	Omitted e + truncated
+typo_prefix		commite	committed || commit || committing || commits	Single t + truncated
+typo_prefix		consciu	conscious	Transposed o-u + truncated
+typo_prefix		convein	convenient	Transposed i-e + truncated prefix
+typo_prefix		cuoris	curiosity || curiosities	Transposition u-r + truncated
+typo_prefix		devlopm	development || developments	Omitted e + truncated
+typo_prefix		diferen	different	Single f + truncated
+typo_prefix		disapoi	disappoint || disappointed || disappointing || disappoints	Single p + truncated
+typo_prefix		documnt	document || documents || documented || documenting	Omitted e + truncated
+typo_prefix		edcuat	education || educations	Transposed u-c + truncated prefix
+typo_prefix		embaras	embarrass || embarrassing || embarrassed || embarrasses	Single r + truncated
+typo_prefix		exisanc	existence || existences	Omitted t + a substitution + truncated
+typo_prefix		expeirm	experiment || experiments || experimenting || experimented	Transposed r-i + truncated prefix
+typo_prefix		extrord	extraordinary	Omitted a + truncated
+typo_prefix		forieg	foreign	Transposition e-i + truncated
+typo_prefix		goverm	government || governments	Omitted rn + truncated
+typo_prefix		imediat	immediately	Single m + truncated
+typo_prefix		indepnd	independent || independents	Omitted e + truncated prefix
+typo_prefix		infroma	information	Transposed o-r + truncated prefix
+typo_prefix		intelig	intelligence || intelligences	Single l + truncated
+typo_prefix		interst	interesting || interest || interested || interests	Omitted e + truncated
+typo_prefix		intrena	international || internationals	Transposed e-r + truncated
+typo_prefix		knwoled	knowledge	Transposed o-w + truncated prefix
+typo_prefix		langaug	language || languages	Transposed a-u + truncated
+typo_prefix		neccess	necessary || necessaries	Double c + truncated
+typo_prefix		oportun	opportunity || opportunities	Single p + truncated
+typo_prefix		orgniza	organization || organizations	Omitted a + truncated
+typo_prefix		particlu	particular || particulars	Transposed l-u + truncated
+typo_prefix		perfomr	performance || performances	Omitted r + transposed m-r + truncated
+typo_prefix		philsop	philosophy || philosophies	Omitted o + truncated prefix
+typo_prefix		progrmm	programming || program || programs || programme || programmes || programmed	Omitted a + truncated
+typo_prefix		recomnd	recommend || recommended || recommends || recommending	Omitted me + truncated prefix
+typo_prefix		restran	restaurant || restaurants	Omitted au + truncated
+typo_prefix		techonl	technology || technologies	Transposed o-n + truncated prefix
+typo_prefix		typscri	typescript	Omitted e + truncated
+typo_prefix		copou	compound || compounds || compounded || compounding	lexicon-synth: early-omission + truncated prefix
+typo_prefix		protio	portions || portion	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		conrli	conflicts || conflict || conflicting || conflicted	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		caclula	calculations || calculation	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		busune	businessmen	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		dfeamat	defamation	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		staiton	stationery	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		coalti	coalition || coalitions	lexicon-synth: early-omission + truncated prefix
+typo_prefix		psoiti	positive || positives	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		arroan	arrogance	lexicon-synth: early-omission + truncated prefix
+typo_prefix		lecies	leicester	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		reonva	renovation || renovations	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		incoi	incoming || income || incomes	lexicon-synth: early-omission + truncated prefix
+typo_prefix		goomi	grooming || groom || groomed || grooms	lexicon-synth: early-omission + truncated prefix
+typo_prefix		reoair	repaired || repair || repairs || repairing	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		occudren	occurrence || occurrences	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		pattrr	patterns || pattern || patterned || patterning	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		mounme	monument || monuments	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		execri	exercise || exercises || exercising || exercised	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		tweti	tweeting || tweet || tweeted || tweets	lexicon-synth: early-omission + truncated prefix
+typo_prefix		restfo	restroom || restrooms	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		mutac	mustache || mustaches	lexicon-synth: early-omission + truncated prefix
+typo_prefix		conati	contained || contains || contain || containing	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		attifud	attitudes || attitude	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		outosurc	outsourcing || outsourced || outsource	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		entrta	entertained || entertaining || entertain || entertains	lexicon-synth: early-omission + truncated prefix
+typo_prefix		deefrr	deferred || defer || deferring || defers	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		supprt	supporter || supporters	lexicon-synth: early-omission + truncated prefix
+typo_prefix		csmet	cosmetic || cosmetics	lexicon-synth: early-omission + truncated prefix
+typo_prefix		adjkin	adjoining	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		eavlua	evaluate || evaluated || evaluating || evaluates	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		vnaish	vanished || vanish || vanishing || vanishes	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		advca	advocacy	lexicon-synth: early-omission + truncated prefix
+typo_prefix		cpoenh	copenhagen	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		embdoime	embodiment || embodiments	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		indkcati	indication || indications	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		espensi	expensive	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		snsel	senseless	lexicon-synth: early-omission + truncated prefix
+typo_prefix		jruisd	jurisdiction || jurisdictions	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		detsro	destroying || destroyed || destroy || destroys	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		rewult	resulted || results || result || resulting	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		holia	holidays || holiday || holidaying	lexicon-synth: early-omission + truncated prefix
+typo_prefix		farbica	fabrication || fabrications	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		contm	contemporary || contemporaries	lexicon-synth: early-omission + truncated prefix
+typo_prefix		postio	positions || position || positioned || positioning	lexicon-synth: early-omission + truncated prefix
+typo_prefix		sndwic	sandwiches || sandwich || sandwiched	lexicon-synth: early-omission + truncated prefix
+typo_prefix		rquest	requested || request || requests || requesting	lexicon-synth: early-omission + truncated prefix
+typo_prefix		infamma	inflammatory	lexicon-synth: early-omission + truncated prefix
+typo_prefix		cumlin	culminating || culminated || culminates || culminate	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		staurd	saturday || saturdays	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		roalti	royalties || royalty	lexicon-synth: early-omission + truncated prefix
+typo_prefix		wqstewa	wastewater	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		teemin	terminals || terminal	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		dseigne	designers || designer	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		eevrgr	evergreen || evergreens	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		sppli	supplied || supply || supplies || supplying	lexicon-synth: early-omission + truncated prefix
+typo_prefix		dnagero	dangerously	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		rididulo	ridiculously	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		sujflo	sunflower || sunflowers	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		reosna	resonance || resonances	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		vbrati	vibrating || vibrate || vibrates || vibrated	lexicon-synth: early-omission + truncated prefix
+typo_prefix		eleavt	elevated || elevate || elevating || elevates	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		happwni	happening || happened || happen || happens || happenings	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		locmdo	lockdown	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		prasi	praising || praise || praised || praises	lexicon-synth: early-omission + truncated prefix
+typo_prefix		bouda	boundary || boundaries	lexicon-synth: early-omission + truncated prefix
+typo_prefix		repoti	reporting || report || reported || reports	lexicon-synth: early-omission + truncated prefix
+typo_prefix		tnazan	tanzania	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		itelle	intellect || intellects	lexicon-synth: early-omission + truncated prefix
+typo_prefix		twachi	teachings || teaching	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		raliz	realizing || realize || realized || realizes	lexicon-synth: early-omission + truncated prefix
+typo_prefix		grehad	grenades || grenade	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		prdouci	producing || produced || produce || produces	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		consd	considerations || consideration	lexicon-synth: early-omission + truncated prefix
+typo_prefix		vioeln	violence	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		phwrmace	pharmaceuticals || pharmaceutical	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		rputa	reputable	lexicon-synth: early-omission + truncated prefix
+typo_prefix		incicat	indicator || indicators	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		airfoe	airfield || airfields	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		oppprtu	opportunity || opportunities	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		prooty	prototype || prototypes || prototyping	lexicon-synth: early-omission + truncated prefix
+typo_prefix		pnuishi	punishing || punished || punish || punishes	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		seente	seventeen	lexicon-synth: early-omission + truncated prefix
+typo_prefix		imrov	improvement || improvements	lexicon-synth: early-omission + truncated prefix
+typo_prefix		babrad	barbados	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		dgesti	digestion	lexicon-synth: early-omission + truncated prefix
+typo_prefix		simhla	simulate || simulated || simulating || simulates	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		colapsi	collapsing || collapse || collapsed || collapses	lexicon-synth: early-omission + truncated prefix
+typo_prefix		smeli	smelling || smell || smells || smelled	lexicon-synth: early-omission + truncated prefix
+typo_prefix		ekecti	election || elections	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		stargl	startled || startling || startle || startles	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		logiet	logistics || logistic	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		consitue	constituents || constituent	lexicon-synth: early-omission + truncated prefix
+typo_prefix		comunis	communists || communist	lexicon-synth: early-omission + truncated prefix
+typo_prefix		relxaati	relaxation	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		stepye	stephens || stephen	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		bnglade	bangladesh	lexicon-synth: early-omission + truncated prefix
+typo_prefix		trwffi	trafficking	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		foreg	foreigner || foreigners	lexicon-synth: early-omission + truncated prefix
+typo_prefix		tramsit	transitions || transition || transitioning || transitioned	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		vareit	varieties || variety	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		gnera	generates || generated || generate || generating	lexicon-synth: early-omission + truncated prefix
+typo_prefix		proejc	projector || projectors	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		indieno	indigenous	lexicon-synth: early-omission + truncated prefix
+typo_prefix		expolr	explorer || explorers	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		grzduat	graduating || graduate || graduated || graduates	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		opiio	opinions || opinion	lexicon-synth: early-omission + truncated prefix
+typo_prefix		hegihte	heightened || heighten || heightening || heightens	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		exceut	executed || execute || executing || executes	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		isnigh	insightful	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		finterp	fingerprint || fingerprints || fingerprinting || fingerprinted	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		catrei	catering || cater || catered || caters	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		potecti	protection || protections	lexicon-synth: early-omission + truncated prefix
+typo_prefix		moorcycl	motorcycles || motorcycle || motorcycling	lexicon-synth: early-omission + truncated prefix
+typo_prefix		dyplic	duplicate || duplicated || duplicates || duplicating	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		misslu	missouri	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		hsita	hesitant	lexicon-synth: early-omission + truncated prefix
+typo_prefix		spioli	spilling || spill || spilled || spills	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		upnrotect	unprotected	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		inevstigat	investigating || investigate || investigated || investigates	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		dotcora	doctorate || doctorates	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		watev	whatever	lexicon-synth: early-omission + truncated prefix
+typo_prefix		foral	formally	lexicon-synth: early-omission + truncated prefix
+typo_prefix		nrwcast	newcastle	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		illio	illinois	lexicon-synth: early-omission + truncated prefix
+typo_prefix		exlcud	excluded || excluding || exclude || excludes	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		aderti	advertiser || advertisers	lexicon-synth: early-omission + truncated prefix
+typo_prefix		vraian	variance || variances	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		assses	assessments || assessment	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		swtch	switching || switch || switched || switches	lexicon-synth: early-omission + truncated prefix
+typo_prefix		conprehe	comprehend || comprehending || comprehended || comprehends	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		confrssi	confessions || confession	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		ehxausti	exhausting || exhausted || exhaust || exhausts	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		magnjfic	magnificent	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		suprehero	superheroes || superhero	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		skpipi	skipping || skip || skipped || skips	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		vicfori	victorious	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		strkii	striking || strike || strikes	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		penjsylvan	pennsylvania	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		panrhe	panthers || panther	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		blznke	blankets || blanket || blanketed || blanketing	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		gaepl	gameplay	lexicon-synth: early-omission + truncated prefix
+typo_prefix		cnotra	contrasting || contrast || contrasts || contrasted	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		itaia	italians || italian	lexicon-synth: early-omission + truncated prefix
+typo_prefix		muatti	mutations || mutation	lexicon-synth: early-transposition + truncated prefix
+typo_prefix		forvivi	forgiving || forgive || forgives	lexicon-synth: early-qwerty-sub + truncated prefix
+typo_prefix		prcipit	precipitation	lexicon-synth: early-omission + truncated prefix
+typo_prefix		colnoi	colonial || colonials	lexicon-synth: early-transposition + truncated prefix
+typo_phonetic		numonia	pneumonia	Silent initial p + phonetic eu->u
+typo_phonetic		sikology	psychology	Silent initial p + ch->k
+typo_phonetic		sycology	psychology	Silent initial p + ch->c
+typo_phonetic		nolege	knowledge	Silent k + dge->ge
+typo_phonetic		nolidge	knowledge	Silent k + phonetic vowel shift
+typo_phonetic		rythm	rhythm	Silent first h omitted
+typo_phonetic		rithm	rhythm	Phonetic y->i + silent h omitted
+typo_phonetic		wendsday	Wednesday	Phonetic spoken form of Wednesday
+typo_phonetic		wensday	Wednesday	Spoken drop of d + nes
+typo_phonetic		colnel	colonel	Silent o omitted in colonel
+typo_phonetic		kurnel	colonel	Phonetic r sound for colonel
+typo_phonetic		sutle	subtle	Silent b omitted
+typo_phonetic		reseet	receipt	Silent p + ei->ee phonetic
+typo_phonetic		resiet	receipt	Silent p + ei->ie
+typo_phonetic		fisics	physics	ph->f and y->i
+typo_phonetic		fiziks	physics	ph->f + s->z + cs->ks
+typo_phonetic		filosofy	philosophy	ph->f twice
+typo_phonetic		farmacy	pharmacy	ph->f initial
+typo_phonetic		fantom	phantom	ph->f initial
+typo_phonetic		enuf	enough	Phonetic ough->uf
+typo_phonetic		laff	laugh	Phonetic augh->aff
+typo_phonetic		tuff	tough	Phonetic ough->uff
+typo_phonetic		thru	through	Phonetic ough->u
+typo_phonetic		tho	though	Phonetic ough->o
+typo_phonetic		definately	definitely	Very common phonetic i->a
+typo_phonetic		definatly	definitely	Phonetic i->a + silent e drop
+typo_phonetic		restrant	restaurant	Multi-edit silent au drop
+typo_phonetic		restarant	restaurant	Omitted u + vowel shift
+typo_phonetic		burocracy	bureaucracy	Phonetic eau->o
+typo_phonetic		bureucracy	bureaucracy	Omitted a in eau
+typo_phonetic		questionaire	questionnaire	Single n phonetic spelling
+typo_phonetic		entreprenur	entrepreneur	Phonetic eur->ur
+typo_phonetic		entrepeneur	entrepreneur	Omitted second r
+typo_phonetic		conshus	conscious	Phonetic sci->sh
+typo_phonetic		conshusness	consciousness	Phonetic sci->sh
+typo_phonetic		lutenant	lieutenant	Phonetic ieu->u
+typo_phonetic		skedule	schedule	Phonetic sch->sk
+typo_phonetic		shedule	schedule	British phonetic sch->sh
+typo_phonetic		cemetary	cemetery	Phonetic suffix e->a
+typo_phonetic		camoflage	camouflage	Phonetic ou->o
+typo_phonetic		catastrofy	catastrophe	Phonetic phe->fy
+typo_phonetic		katastrofe	catastrophe	c->k + ph->f
+typo_phonetic		kronology	chronology	chr->kr phonetic
+typo_phonetic		akademia	academia	c->k phonetic
+typo_phonetic		akward	awkward	Silent w drop
+typo_phonetic		awsum	awesome	Phonetic e->u + silent e drop
+typo_phonetic		bizzar	bizarre	Phonetic double z + drop e
+typo_phonetic		calander	calendar	Phonetic ar->er
+typo_phonetic		dilema	dilemma	Single m phonetic
+typo_phonetic		farenheit	Fahrenheit	Silent h drop
+typo_phonetic		florescent	fluorescent	Silent u drop
+typo_phonetic		garantee	guarantee	Silent u drop
+typo_phonetic		gaurd	guard	Phonetic ua->au
+typo_phonetic		hygene	hygiene	Phonetic ie->e
+typo_phonetic		jealus	jealous	Omitted o in ou
+typo_phonetic		mischevious	mischievous	Phonetic ie/io shift
+typo_phonetic		nawty	naughty	Phonetic augh->aw
+typo_phonetic		okasion	occasion	cc->k phonetic
+typo_phonetic		perswade	persuade	su->sw phonetic
+typo_phonetic		priviledge	privilege	Phonetic d insertion before g
+typo_phonetic		quew	queue	Phonetic ueue->ew
+typo_phonetic		rehersal	rehearsal	Omitted a in ea
+typo_phonetic		scisors	scissors	Silent c/s drop
+typo_phonetic		sieze	seize	ei/ie phonetic swap
+typo_phonetic		soverign	sovereign	Omitted e in ei
+typo_phonetic		stomack	stomach	ch->ck phonetic
+typo_phonetic		vacum	vacuum	Single u phonetic
+typo_phonetic		expement	experiment	open-wordlist:crate-ci-typos
+typo_phonetic		deminsion	dimension	open-wordlist:crate-ci-typos
+typo_phonetic		operativos	operations	open-wordlist:crate-ci-typos
+typo_phonetic		subsribe	subscribe	open-wordlist:crate-ci-typos
+typo_phonetic		maintenenace	maintenance	open-wordlist:crate-ci-typos
+typo_phonetic		golbaly	globally	open-wordlist:crate-ci-typos
+typo_phonetic		abondened	abandoned	open-wordlist:crate-ci-typos
+typo_phonetic		governmently	governmental	open-wordlist:crate-ci-typos
+typo_phonetic		paramenets	parameters	open-wordlist:crate-ci-typos
+typo_phonetic		garantuee	guarantee	open-wordlist:crate-ci-typos
+typo_phonetic		introduceres	introduces	open-wordlist:crate-ci-typos
+typo_phonetic		extensis	extensions	open-wordlist:crate-ci-typos
+typo_phonetic		demonstras	demonstrates	open-wordlist:crate-ci-typos
+typo_phonetic		synethic	synthetic	open-wordlist:crate-ci-typos
+typo_phonetic		experesed	expressed	open-wordlist:crate-ci-typos
+typo_phonetic		signinged	signing	open-wordlist:crate-ci-typos
+typo_phonetic		interpretating	interpretation	open-wordlist:crate-ci-typos
+typo_phonetic		experimanetel	experimental	open-wordlist:crate-ci-typos
+typo_phonetic		spefiififed	specified	open-wordlist:crate-ci-typos
+typo_phonetic		actitivies	activities	open-wordlist:crate-ci-typos
+typo_phonetic		compition	competition	open-wordlist:crate-ci-typos
+typo_phonetic		accomdation	accommodation	open-wordlist:crate-ci-typos
+typo_phonetic		neighbeurhoors	neighbours	open-wordlist:crate-ci-typos
+typo_phonetic		jurny	journey	open-wordlist:crate-ci-typos
+typo_phonetic		folliwiong	following	open-wordlist:crate-ci-typos
+typo_phonetic		sensititivy	sensitivity	open-wordlist:crate-ci-typos
+typo_phonetic		langhts	lengths	open-wordlist:crate-ci-typos
+typo_phonetic		counpounds	compounds	open-wordlist:crate-ci-typos
+typo_phonetic		vechile	vehicle	open-wordlist:crate-ci-typos
+typo_phonetic		transito	transition	open-wordlist:crate-ci-typos
+typo_phonetic		indepdendet	independent	open-wordlist:crate-ci-typos
+typo_phonetic		implemementation	implementation	open-wordlist:crate-ci-typos
+typo_phonetic		tempororarily	temporarily	open-wordlist:crate-ci-typos
+typo_phonetic		spript	script	open-wordlist:crate-ci-typos
+typo_phonetic		cahgned	changed	open-wordlist:crate-ci-typos
+typo_phonetic		receveing	receiving	open-wordlist:crate-ci-typos
+typo_phonetic		championchips	championship	open-wordlist:crate-ci-typos
+typo_phonetic		chekd	checked	open-wordlist:crate-ci-typos
+typo_phonetic		averageadi	averaged	open-wordlist:crate-ci-typos
+typo_phonetic		folwoinwg	following	open-wordlist:crate-ci-typos
+typo_phonetic		irreverant	irrelevant	open-wordlist:crate-ci-typos
+typo_phonetic		algorthyms	algorithms	open-wordlist:crate-ci-typos
+typo_phonetic		collaspe	collapse	open-wordlist:crate-ci-typos
+typo_phonetic		supersition	supervision	open-wordlist:crate-ci-typos
+typo_phonetic		follin	following	open-wordlist:crate-ci-typos
+typo_phonetic		diferrent	different	open-wordlist:crate-ci-typos
+typo_phonetic		neighbethoods	neighborhoods	open-wordlist:crate-ci-typos
+typo_phonetic		temproay	temporary	open-wordlist:crate-ci-typos
+typo_phonetic		opartor	operator	open-wordlist:crate-ci-typos
+typo_phonetic		complianed	compliance	open-wordlist:crate-ci-typos
+typo_phonetic		discusssion	discussions	open-wordlist:crate-ci-typos
+typo_phonetic		approbiate	appropriate	open-wordlist:crate-ci-typos
+typo_phonetic		equavilent	equivalent	open-wordlist:crate-ci-typos
+typo_phonetic		flechter	fletcher	open-wordlist:crate-ci-typos
+typo_phonetic		developmentwise	developments	open-wordlist:crate-ci-typos
+typo_phonetic		confidenciality	confidential	open-wordlist:crate-ci-typos
+typo_phonetic		interesant	interest	open-wordlist:crate-ci-typos
+typo_phonetic		temporali	temporarily	open-wordlist:crate-ci-typos
+typo_phonetic		expementel	experimental	open-wordlist:crate-ci-typos
+typo_phonetic		interepeted	interpreted	open-wordlist:crate-ci-typos
+typo_phonetic		emotionella	emotionally	open-wordlist:crate-ci-typos
+typo_phonetic		aparant	apparent	open-wordlist:crate-ci-typos
+typo_phonetic		negotiotate	negotiate	open-wordlist:crate-ci-typos
+typo_phonetic		economisch	economic	open-wordlist:crate-ci-typos
+typo_phonetic		practicianers	practitioners	open-wordlist:crate-ci-typos
+typo_phonetic		follwoiong	following	open-wordlist:crate-ci-typos
+typo_phonetic		compitable	compatible	open-wordlist:crate-ci-typos
+typo_phonetic		wraapp	wrap	open-wordlist:crate-ci-typos
+typo_phonetic		incorpore	incorporate	open-wordlist:crate-ci-typos
+typo_phonetic		impelentation	implementation	open-wordlist:crate-ci-typos
+typo_phonetic		accompagned	accompanied	open-wordlist:crate-ci-typos
+typo_phonetic		follewinwg	following	open-wordlist:crate-ci-typos
+typo_phonetic		fandation	foundation	open-wordlist:crate-ci-typos
+typo_phonetic		imedialy	immediately	open-wordlist:crate-ci-typos
+typo_phonetic		unitility	utility	open-wordlist:crate-ci-typos
+typo_phonetic		politiikan	politician	open-wordlist:crate-ci-typos
+typo_phonetic		cellabrate	celebrate	open-wordlist:crate-ci-typos
+typo_phonetic		passionant	passionate	open-wordlist:crate-ci-typos
+typo_phonetic		resultion	resolution	open-wordlist:crate-ci-typos
+typo_phonetic		absoutly	absolutely	open-wordlist:crate-ci-typos
+typo_phonetic		myselves	myself	open-wordlist:crate-ci-typos
+typo_phonetic		instituttet	institute	open-wordlist:crate-ci-typos
+typo_phonetic		commmiting	committing	open-wordlist:crate-ci-typos
+typo_phonetic		tournmanets	tournaments	open-wordlist:crate-ci-typos
+typo_phonetic		assupmtion	assumptions	open-wordlist:crate-ci-typos
+typo_phonetic		glimspe	glimpse	open-wordlist:crate-ci-typos
+typo_phonetic		particpiate	participated	open-wordlist:crate-ci-typos
+typo_phonetic		unfortunetly	unfortunately	open-wordlist:crate-ci-typos
+typo_phonetic		profesions	profession	open-wordlist:crate-ci-typos
+typo_phonetic		resorece	resource	open-wordlist:crate-ci-typos
+typo_phonetic		negotatiate	negotiate	open-wordlist:crate-ci-typos
+typo_phonetic		otherviese	otherwise	open-wordlist:crate-ci-typos
+typo_phonetic		generaterated	generated	open-wordlist:crate-ci-typos
+typo_phonetic		simialir	similar	open-wordlist:crate-ci-typos
+typo_phonetic		momement	moment	open-wordlist:crate-ci-typos
+typo_phonetic		gerenated	generated	open-wordlist:crate-ci-typos
+typo_phonetic		transparancey	transparency	open-wordlist:crate-ci-typos
+typo_phonetic		referecences	references	open-wordlist:crate-ci-typos
+typo_phonetic		transperant	transparent	open-wordlist:crate-ci-typos
+typo_phonetic		availabal	available	open-wordlist:crate-ci-typos
+typo_phonetic		requeried	required	open-wordlist:crate-ci-typos
+typo_phonetic		refferr	refer	open-wordlist:crate-ci-typos
+typo_phonetic		mechananism	mechanism	open-wordlist:crate-ci-typos
+typo_phonetic		indicidated	indicated	open-wordlist:crate-ci-typos
+typo_phonetic		beacsue	because	open-wordlist:crate-ci-typos
+typo_phonetic		inproovment	improvement	open-wordlist:crate-ci-typos
+typo_phonetic		remaing	remaining	open-wordlist:crate-ci-typos
+typo_phonetic		influens	influences	open-wordlist:crate-ci-typos
+typo_phonetic		propetrys	properties	open-wordlist:crate-ci-typos
+typo_phonetic		appreteate	appreciate	open-wordlist:crate-ci-typos
+typo_phonetic		decribes	describes	open-wordlist:crate-ci-typos
+typo_phonetic		devastanti	devastating	open-wordlist:crate-ci-typos
+typo_phonetic		simulatanously	simultaneously	open-wordlist:crate-ci-typos
+typo_phonetic		meanigfull	meaningful	open-wordlist:crate-ci-typos
+typo_phonetic		inadequet	inadequate	open-wordlist:crate-ci-typos
+typo_phonetic		aditionaly	additionally	open-wordlist:crate-ci-typos
+typo_phonetic		pharmasutically	pharmaceutical	open-wordlist:crate-ci-typos
+typo_phonetic		appares	appears	open-wordlist:crate-ci-typos
+typo_phonetic		excerise	exercise	open-wordlist:crate-ci-typos
+typo_phonetic		elmenet	element	open-wordlist:crate-ci-typos
+typo_phonetic		unnessecary	unnecessary	open-wordlist:crate-ci-typos
+typo_phonetic		monotir	monitor	open-wordlist:crate-ci-typos
+typo_phonetic		referncences	references	open-wordlist:crate-ci-typos
+typo_phonetic		immedially	immediately	open-wordlist:crate-ci-typos
+typo_phonetic		neighbourhoors	neighbours	open-wordlist:crate-ci-typos
+typo_phonetic		perfomanse	performance	open-wordlist:crate-ci-typos
+typo_phonetic		lectureres	lectures	open-wordlist:crate-ci-typos
+typo_phonetic		thouroghly	thoroughly	open-wordlist:crate-ci-typos
+typo_phonetic		nominativo	nomination	open-wordlist:crate-ci-typos
+typo_phonetic		automacially	automatically	open-wordlist:crate-ci-typos
+typo_phonetic		disgns	designs	open-wordlist:crate-ci-typos
+typo_phonetic		infite	infinite	open-wordlist:crate-ci-typos
+typo_phonetic		strategisch	strategic	open-wordlist:crate-ci-typos
+context_realword	go 	form here	from here	Verb 'go' strongly prefers 'from here' over 'form here'
+context_realword	come 	form London	from London	Verb 'come' prefers 'from'
+context_realword	a letter 	form my friend	from my friend	Noun phrase expects preposition 'from'
+context_realword	fill out the 	from	form	Phrase 'fill out the' expects 'form'
+context_realword	in 	their	their	Keep possessive 'their' before implied noun phrase
+context_realword	over 	their	there	Locative 'over' strongly prefers 'there'
+context_realword	put it over 	their	there	Locative 'put it over' prefers 'there'
+context_realword	they lost 	there keys	their keys	Possessive context prefers 'their keys'
+context_realword	I think 	there coming	they're coming	Clause expects contraction 'they're'
+context_realword	Thank you for 	yur	your	Preposition + possessive pronoun 'your'
+context_realword	I hope 	your happy	you're happy	Adjective predicate prefers 'you're happy'
+context_realword	please check 	youre email	your email	Noun 'email' expects possessive 'your'
+context_realword	the cat licked 	it's paw	its paw	Possessive determiner 'its paw'
+context_realword	I think 	its raining	it's raining	Participle expects contraction 'it's raining'
+context_realword	I want 	too go	to go	Infinitive marker prefers 'to go'
+context_realword	me 	to	too	Short reply 'me too' prefers 'too'
+context_realword	more expensive 	then before	than before	Comparative expects 'than before'
+context_realword	and 	than we left	then we left	Temporal sequence expects 'then we left'
+context_realword	it will 	effect the plan	affect the plan	Modal 'will' + object expects verb 'affect'
+context_realword	a positive 	affect	effect	Article + adjective expects noun 'effect'
+context_realword	I gladly 	except the offer	accept the offer	Subject + verb expects 'accept'
+context_realword	everyone 	accept him	except him	Exclusion preposition expects 'except'
+context_realword	do not 	loose focus	lose focus	Verb phrase expects 'lose focus'
+context_realword	a very 	lose screw	loose screw	Adjective before noun expects 'loose'
+context_realword	depends on 	weather it rains	whether it rains	Clause expects conjunction 'whether'
+context_realword	check the 	whether forecast	weather forecast	Noun phrase expects 'weather forecast'
+context_realword	the school 	principle	principal	Phrase 'the school' expects 'principal'
+context_realword	a core 	principal	principle	Phrase 'a core' expects 'principle'
+context_realword	please keep 	quite	quiet	Verb 'keep' expects adjective 'quiet'
+context_realword	it is 	quiet good	quite good	Adverb modifying adjective expects 'quite'
+context_realword	dry Sahara 	dessert	desert	Geographic context expects 'desert'
+context_realword	sweet chocolate 	desert	dessert	Food context expects 'dessert'
+context_realword	can you 	here me	hear me	Verb + object expects 'hear me'
+context_realword	wait right 	hear	here	Adverbial expects 'here'
+context_realword	do you 	no him	know him	Auxiliary + subject expects verb 'know'
+context_realword	there is 	know way	no way	Existential negation expects 'no way'
+context_realword	you are 	write about it	right about it	Copula expects adjective 'right'
+context_realword	please 	right a note	write a note	Imperative + object expects verb 'write'
+context_realword	they 	where happy	were happy	Past plural expects verb 'were'
+context_realword	do you know 	were it is	where it is	Relative adverb expects 'where'
+context_realword	I like to 	where coats	wear coats	Infinitive + clothing expects 'wear'
+context_realword	turn 	of the light	off the light	Phrasal verb 'turn off' expects 'off'
+context_realword	a cup 	off coffee	of coffee	Partitive expects 'of coffee'
+context_realword	apples 	an oranges	and oranges	Conjunction expects 'and'
+context_realword	eat 	and apple	an apple	Singular vowel-initial noun expects 'an'
+context_realword	at the 	end off the day	end of the day	Idiom expects 'of'
+context_realword	Hello. 	this is great	This is great	Sentence-start capitalization after period + space
+context_realword	Why? 	because it works	Because it works	Sentence-start capitalization after question mark + space
+context_realword	Great! 	let us start	Let us start	Sentence-start capitalization after exclamation + space
+context_realword	Done. 	the build passed	The build passed	Sentence-start capitalization after period + space
+context_realword	see you 	tomorow morning	tomorrow morning	Context collocates 'tomorrow morning'
+context_realword	Do they have 	and entrance	an entrance	multiwoz-2.2: natural real-word confusion
+context_realword	I'll need 	too have	to have	multiwoz-2.2: natural real-word confusion
+context_realword	You have a good day 	to	too	multiwoz-2.2: natural real-word confusion
+context_realword	I'd also like 	too try	to try	multiwoz-2.2: natural real-word confusion
+context_realword	What is 	there contact	their contact	multiwoz-2.2: natural real-word confusion
+context_realword	I'm thinking I'd like 	and expensive	an expensive	multiwoz-2.2: natural real-word confusion
+context_realword	No booking 	write now	right now	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you for the booking 	an contact	and contact	multiwoz-2.2: natural real-word confusion
+context_realword	give me the star rating 	an phone	and phone	multiwoz-2.2: natural real-word confusion
+context_realword	If there are 	know hotels	no hotels	multiwoz-2.2: natural real-word confusion
+context_realword	There are seven 	off us	of us	multiwoz-2.2: natural real-word confusion
+context_realword	train ID 	an travel	and travel	multiwoz-2.2: natural real-word confusion
+context_realword	Can you make a suggestion 	an provide	and provide	multiwoz-2.2: natural real-word confusion
+context_realword	a table for the six 	off us	of us	multiwoz-2.2: natural real-word confusion
+context_realword	I'm coming 	too Cambridge	to Cambridge	multiwoz-2.2: natural real-word confusion
+context_realword	What type 	off attraction	of attraction	multiwoz-2.2: natural real-word confusion
+context_realword	Thanks for 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	travel time 	an departure	and departure	multiwoz-2.2: natural real-word confusion
+context_realword	Find me 	and expensive	an expensive	multiwoz-2.2: natural real-word confusion
+context_realword	I'd like for it 	too be	to be	multiwoz-2.2: natural real-word confusion
+context_realword	you help me with places 	too go	to go	multiwoz-2.2: natural real-word confusion
+context_realword	Can you please look for 	and Italian	an Italian	multiwoz-2.2: natural real-word confusion
+context_realword	Can you find a theater 	too go	to go	multiwoz-2.2: natural real-word confusion
+context_realword	I'd like 	too find	to find	multiwoz-2.2: natural real-word confusion
+context_realword	Or another type 	off entertainment	of entertainment	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you so much for 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	for a train that goes 	too cambridge	to cambridge	multiwoz-2.2: natural real-word confusion
+context_realword	What is the address 	an entrance	and entrance	multiwoz-2.2: natural real-word confusion
+context_realword	could you provide me with 	there address	their address	multiwoz-2.2: natural real-word confusion
+context_realword	How long does it take 	too get	to get	multiwoz-2.2: natural real-word confusion
+context_realword	I'm not ready 	too book	to book	multiwoz-2.2: natural real-word confusion
+context_realword	Can you choose one 	an get	and get	multiwoz-2.2: natural real-word confusion
+context_realword	I'll be leaving 	form Cambridge	from Cambridge	multiwoz-2.2: natural real-word confusion
+context_realword	No thank you for all 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you very much for 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	there any African restaurants outside 	off the	of the	multiwoz-2.2: natural real-word confusion
+context_realword	a particular restaurant we want 	too try	to try	multiwoz-2.2: natural real-word confusion
+context_realword	What part 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	also looking for a train 	form cambridge	from cambridge	multiwoz-2.2: natural real-word confusion
+context_realword	I'll be leaving 	form leicester	from leicester	multiwoz-2.2: natural real-word confusion
+context_realword	sorry for all 	off the	of the	multiwoz-2.2: natural real-word confusion
+context_realword	lodge a hotel or bed 	an breakfast	and breakfast	multiwoz-2.2: natural real-word confusion
+context_realword	one for the same group 	off people	of people	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you for all 	off your	of your	multiwoz-2.2: natural real-word confusion
+context_realword	help me with a place 	too stay	to stay	multiwoz-2.2: natural real-word confusion
+context_realword	What is the rating 	off this	of this	multiwoz-2.2: natural real-word confusion
+context_realword	attraction type 	an an	and an	multiwoz-2.2: natural real-word confusion
+context_realword	boats on the east side 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	Can you recommend one 	an give	and give	multiwoz-2.2: natural real-word confusion
+context_realword	interested in booking a taxi 	to	too	multiwoz-2.2: natural real-word confusion
+context_realword	Is there 	and admission	an admission	multiwoz-2.2: natural real-word confusion
+context_realword	What type 	off car	of car	multiwoz-2.2: natural real-word confusion
+context_realword	What is the cost 	too get	to get	multiwoz-2.2: natural real-word confusion
+context_realword	Is there a type 	off cinema	of cinema	multiwoz-2.2: natural real-word confusion
+context_realword	For the same group 	off people	of people	multiwoz-2.2: natural real-word confusion
+context_realword	somewhere with both free WiFi 	an parking	and parking	multiwoz-2.2: natural real-word confusion
+context_realword	Okay what about any type 	off theatre	of theatre	multiwoz-2.2: natural real-word confusion
+context_realword	Something on the east side 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	Japanese restaurants in the centre 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	do you have on Saturday 	form Kings	from Kings	multiwoz-2.2: natural real-word confusion
+context_realword	Yes it needs 	too be	to be	multiwoz-2.2: natural real-word confusion
+context_realword	We will be staying 	their starting	there starting	multiwoz-2.2: natural real-word confusion
+context_realword	also like the phone number 	to	too	multiwoz-2.2: natural real-word confusion
+context_realword	can you give me 	there phone	their phone	multiwoz-2.2: natural real-word confusion
+context_realword	Does one 	off them	of them	multiwoz-2.2: natural real-word confusion
+context_realword	What kind 	off hotel	of hotel	multiwoz-2.2: natural real-word confusion
+context_realword	a group 	off eight	of eight	multiwoz-2.2: natural real-word confusion
+context_realword	give me 	there phone	their phone	multiwoz-2.2: natural real-word confusion
+context_realword	I'll be going 	too restaurant	to restaurant	multiwoz-2.2: natural real-word confusion
+context_realword	thanks for all 	off your	of your	multiwoz-2.2: natural real-word confusion
+context_realword	I'd like 	too leave	to leave	multiwoz-2.2: natural real-word confusion
+context_realword	tell me what the area 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	I'm also looking for 	and Indian	an Indian	multiwoz-2.2: natural real-word confusion
+context_realword	I'm coming in 	form the	from the	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you for all 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	carolina bed 	an breakfast	and breakfast	multiwoz-2.2: natural real-word confusion
+context_realword	some type 	off boat	of boat	multiwoz-2.2: natural real-word confusion
+context_realword	particularly some type 	off an	of an	multiwoz-2.2: natural real-word confusion
+context_realword	I'm also looking for 	and expensive	an expensive	multiwoz-2.2: natural real-word confusion
+context_realword	Anything in the centre 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	you tell me what area 	its in	it's in	multiwoz-2.2: natural real-word confusion
+context_realword	What is the address 	an phone	and phone	multiwoz-2.2: natural real-word confusion
+context_realword	thank you for 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	I'm willing 	too pay	to pay	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you so much 	an bye	and bye	multiwoz-2.2: natural real-word confusion
+context_realword	and phone number 	off one	of one	multiwoz-2.2: natural real-word confusion
+context_realword	Is that in the center 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	looking for some entertainment close 	too the	to the	multiwoz-2.2: natural real-word confusion
+context_realword	can you recommend one 	an give	and give	multiwoz-2.2: natural real-word confusion
+context_realword	Looking forward 	too it	to it	multiwoz-2.2: natural real-word confusion
+context_realword	should be in the centre 	an serve	and serve	multiwoz-2.2: natural real-word confusion
+context_realword	What is the price 	an travel	and travel	multiwoz-2.2: natural real-word confusion
+context_realword	you give me the name 	off the	of the	multiwoz-2.2: natural real-word confusion
+context_realword	Contact number 	an car	and car	multiwoz-2.2: natural real-word confusion
+context_realword	you send me the address 	off the	of the	multiwoz-2.2: natural real-word confusion
+context_realword	I'd like it 	too be	to be	multiwoz-2.2: natural real-word confusion
+context_realword	Same group 	off people	of people	multiwoz-2.2: natural real-word confusion
+context_realword	it will be me 	an a	and a	multiwoz-2.2: natural real-word confusion
+context_realword	Let me 	no the	know the	multiwoz-2.2: natural real-word confusion
+context_realword	so the closest one 	too that	to that	multiwoz-2.2: natural real-word confusion
+context_realword	and we should be done 	hear	here	multiwoz-2.2: natural real-word confusion
+context_realword	Is there 	and Indian	an Indian	multiwoz-2.2: natural real-word confusion
+context_realword	I'd like 	too go	to go	multiwoz-2.2: natural real-word confusion
+context_realword	Give me the arrival time 	an price	and price	multiwoz-2.2: natural real-word confusion
+context_realword	Could you recommend 	and expensive	an expensive	multiwoz-2.2: natural real-word confusion
+context_realword	for the same number 	off people	of people	multiwoz-2.2: natural real-word confusion
+context_realword	turkish food in the centre 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	I'm leaving 	form London	from London	multiwoz-2.2: natural real-word confusion
+context_realword	We're looking for a place 	too stay	to stay	multiwoz-2.2: natural real-word confusion
+context_realword	What kind 	off options	of options	multiwoz-2.2: natural real-word confusion
+context_realword	I'm going 	too holy	to holy	multiwoz-2.2: natural real-word confusion
+context_realword	Specifically there address 	an what	and what	multiwoz-2.2: natural real-word confusion
+context_realword	What is the cost 	off admission	of admission	multiwoz-2.2: natural real-word confusion
+context_realword	help me find a park 	too visit	to visit	multiwoz-2.2: natural real-word confusion
+context_realword	It needs 	too include	to include	multiwoz-2.2: natural real-word confusion
+context_realword	thanks so much for 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	What's their address 	an phone	and phone	multiwoz-2.2: natural real-word confusion
+context_realword	What kind 	off attraction	of attraction	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you for 	you're help	your help	multiwoz-2.2: natural real-word confusion
+context_realword	what the address 	an area	and area	multiwoz-2.2: natural real-word confusion
+context_realword	do you have one 	too recommend	to recommend	multiwoz-2.2: natural real-word confusion
+context_realword	Please go ahead 	an book	and book	multiwoz-2.2: natural real-word confusion
+context_realword	How far away is it 	form the	from the	multiwoz-2.2: natural real-word confusion
+context_realword	what is 	there phone	their phone	multiwoz-2.2: natural real-word confusion
+context_realword	train id 	an the	and the	multiwoz-2.2: natural real-word confusion
+context_realword	I'd like a taxi 	too get	to get	multiwoz-2.2: natural real-word confusion
+context_realword	I'm also looking for place 	too go	to go	multiwoz-2.2: natural real-word confusion
+context_realword	What is 	it's star	its star	multiwoz-2.2: natural real-word confusion
+context_realword	recommend one 	an book	and book	multiwoz-2.2: natural real-word confusion
+context_realword	It doesn't need 	too include	to include	multiwoz-2.2: natural real-word confusion
+context_realword	that would all 	write	right	multiwoz-2.2: natural real-word confusion
+context_realword	Go ahead 	an make	and make	multiwoz-2.2: natural real-word confusion
+context_realword	you give me the address 	an phone	and phone	multiwoz-2.2: natural real-word confusion
+context_realword	car type 	an contact	and contact	multiwoz-2.2: natural real-word confusion
+context_realword	Do either 	off those	of those	multiwoz-2.2: natural real-word confusion
+context_realword	I'll be leaving 	form Birmingham	from Birmingham	multiwoz-2.2: natural real-word confusion
+context_realword	Okay what's 	there address	their address	multiwoz-2.2: natural real-word confusion
+context_realword	good ones in the centre 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	Were you able 	too book	to book	multiwoz-2.2: natural real-word confusion
+context_realword	I'll just need 	too know	to know	multiwoz-2.2: natural real-word confusion
+context_realword	Do any 	off them	of them	multiwoz-2.2: natural real-word confusion
+context_realword	In the centre 	off town	of town	multiwoz-2.2: natural real-word confusion
+context_realword	I'm leaving out 	off Leicester	of Leicester	multiwoz-2.2: natural real-word confusion
+context_realword	Get me a taxi 	too hughes	to hughes	multiwoz-2.2: natural real-word confusion
+context_realword	entrance fee 	an phone	and phone	multiwoz-2.2: natural real-word confusion
+context_realword	you reserve a table at 	you're favorite	your favorite	multiwoz-2.2: natural real-word confusion
+context_realword	Thank you very much for 	you're assistance	your assistance	multiwoz-2.2: natural real-word confusion
+context_realword	It's for 	and anniversary	an anniversary	multiwoz-2.2: natural real-word confusion
+context_realword	Could you find me 	and attraction	an attraction	multiwoz-2.2: natural real-word confusion
+sentence		i wnt to eat an appie	I want to eat an apple	Multiple typos + pronoun casing
+sentence		hw r u	how are you	Texting vowel-omission shorthand
+sentence		im going home now	I'm going home now	Contraction im -> I'm
+sentence		ive finished teh work	I've finished the work	Contraction ive + transposition teh
+sentence		ill send it tomorow	I'll send it tomorrow	Contraction ill + typo tomorow
+sentence		id like to help	I'd like to help	Contraction id -> I'd
+sentence		dont worry about it	don't worry about it	Contraction dont -> don't
+sentence		i cant beleive this	I can't believe this	Pronoun + cant + beleive
+sentence		they wont come today	they won't come today	Contraction wont -> won't
+sentence		it isnt ready yet	it isn't ready yet	Contraction isnt -> isn't
+sentence		we didnt see teh bug	we didn't see the bug	Contraction didnt + teh
+sentence		she doesnt know yet	she doesn't know yet	Contraction doesnt -> doesn't
+sentence		theyre comming soon	they're coming soon	Contraction theyre + double m typo
+sentence		youre definately right	you're definitely right	Contraction youre + phonetic definately
+sentence		thats a greta idea	that's a great idea	Contraction thats + transposition greta
+sentence		theres no need to rush	there's no need to rush	Contraction theres -> there's
+sentence		whats teh status today	what's the status today	Contraction whats + teh
+sentence		thank yu for yur help	thank you for your help	Missing vowel typos in common phrase
+sentence		please let me knw	please let me know	Missing vowel omission knw
+sentence		could yu send teh file	could you send the file	Multiple short typos
+sentence		i need some advcie	I need some advice	Transposition c-i
+sentence		lets meet at teh restrant	let's meet at the restaurant	Contraction + teh + phonetic restrant
+sentence		he went to teh libary	he went to the library	teh + dropped r
+sentence		we need a good enviornment	we need a good environment	Transposition + exact context
+sentence		check teh configuraton file	check the configuration file	Missing i in configuration
+sentence		run teh unit tests now	run the unit tests now	teh transposition in dev phrase
+sentence		deploy to kubernets cluster	deploy to kubernetes cluster	Missing e in kubernetes
+sentence		wayland input method works	wayland input method works	Clean multi-word exact phrase
+sentence		build teh rust workspace	build the rust workspace	Developer command sentence
+sentence		fix teh memory leak	fix the memory leak	Short engineering sentence
+sentence		i am writting tests	I am writing tests	Pronoun + double t typo
+sentence		please reveiw my code	please review my code	ie/ei swap in review
+sentence		this algorthm is fast	this algorithm is fast	Omitted i in algorithm
+sentence		update teh documntation	update the documentation	teh + omitted e
+sentence		verify teh sha checksum	verify the sha checksum	Simple typo in security phrase
+sentence		i have a questoin	I have a question	Transposition i-o
+sentence		can we discss this	can we discuss this	Omitted u
+sentence		it happend yestrday	it happened yesterday	Omitted e in both words
+sentence		see yu on wendsday	see you on Wednesday	yu + phonetic weekday casing
+sentence		i am free on mondy	I am free on Monday	Weekday casing + omitted a
+sentence		call me when youre fre	call me when you're free	Contraction + truncated double e
+sentence		sorry for teh delsy	sorry for the delay	Adjacent-key substitution a->s
+sentence		i will check it soon	I will check it soon	Pronoun I recovery
+sentence		keep up teh good wrk	keep up the good work	teh + omitted o
+sentence		we recived your mesage	we received your message	Two single-omission typos
+sentence		teh server is runing	the server is running	teh + single n omission
+sentence		my compuetr froze again	my computer froze again	Transposition t-e
+sentence		open teh termnal window	open the terminal window	Omitted i in terminal
+sentence		save teh file before exit	save the file before exit	teh transposition
+sentence		are yu avalable tomorrow	are you available tomorrow	yu + omitted i
+sentence		i really apreciate it	I really appreciate it	Single p phonetic typo in appreciate
+sentence		it takes a lot of effrt	it takes a lot of effort	Omitted o in effort
+sentence		the weather is beautifl	the weather is beautiful	Missing u in beautiful
+sentence		she studies sikology	she studies psychology	Phonetic silent p in sentence
+sentence		he has numonia today	he has pneumonia today	Phonetic silent p in sentence
+sentence		fisics is very intresting	physics is very interesting	Phonetic ph->f + omitted e
+sentence		do not forget teh pasword	do not forget the password	teh + single s omission
+sentence		we should refactor teh code	we should refactor the code	Developer sentence
+sentence		git commit failed agian	git commit failed again	Transposition i-a
+sentence		test suite passed cleanly	test suite passed cleanly	Exact clean sentence
+sentence		i think its a good plan	I think it's a good plan	Pronoun + contraction its->it's
+sentence		take a look at teh diff	take a look at the diff	Short dev review sentence
+sentence		waiting for yur response	waiting for your response	Short typo in email phrase
+sentence		that will be nce	that will be nice	multiwoz-2.2: conversational sentence
+sentence		we need five roos pelase	we need five rooms please	multiwoz-2.2: conversational sentence
+sentence		Do tbey have an entfance fee	Do they have an entrance fee	multiwoz-2.2: conversational sentence
+sentence		but can you giv me that phone nnumber please	but can you give me that phone number please	multiwoz-2.2: conversational sentence
+sentence		ill need to have the referance number	I'll need to have the reference number	multiwoz-2.2: conversational sentence
+sentence		Are there any thtat can accommodate that many	Are there any that can accommodate that many	multiwoz-2.2: conversational sentence
+sentence		Which of thoxe have free parking	Which of those have free parking	multiwoz-2.2: conversational sentence
+sentence		im looking for boat realated attrsctions in the west	I'm looking for boat related attractions in the west	multiwoz-2.2: conversational sentence
+sentence		No im all set	No I'm all set	multiwoz-2.2: conversational sentence
+sentence		You ahev a gopd day too	You have a good day too	multiwoz-2.2: conversational sentence
+sentence		Do you have any swimmong poils	Do you have any swimming pools	multiwoz-2.2: conversational sentence
+sentence		that should be everytihng	that should be everything	multiwoz-2.2: conversational sentence
+sentence		Expensive woul be gret	Expensive would be great	multiwoz-2.2: conversational sentence
+sentence		Could you please check agrain	Could you please check again	multiwoz-2.2: conversational sentence
+sentence		parahaps an architecture attraktion	Perhaps an architecture attraction	multiwoz-2.2: conversational sentence
+sentence		actialy dont book it just yet on second thought	Actually don't book it just yet on second thought	multiwoz-2.2: conversational sentence
+sentence		How long will that trip tkae	How long will that trip take	multiwoz-2.2: conversational sentence
+sentence		May as vell get the fyll Cambridge experience	May as well get the full Cambridge experience	multiwoz-2.2: conversational sentence
+sentence		lts bqck up a bit	Let's back up a bit	multiwoz-2.2: conversational sentence
+sentence		im all set now	I'm all set now	multiwoz-2.2: conversational sentence
+sentence		What is theier contact number	What is their contact number	multiwoz-2.2: conversational sentence
+sentence		im thiking id like an expensive resteraunt	I'm thinking I'd like an expensive restaurant	multiwoz-2.2: conversational sentence
+sentence		pelase dpnt reserve a table just yet	Please don't reserve a table just yet	multiwoz-2.2: conversational sentence
+sentence		And do they have fee parking	And do they have free parking	multiwoz-2.2: conversational sentence
+sentence		lets go with the train fiorst	Let's go with the train first	multiwoz-2.2: conversational sentence
+sentence		im not familiar witha cambrige	I'm not familiar with Cambridge	multiwoz-2.2: conversational sentence
+sentence		No bookig rigt now	No booking right now	multiwoz-2.2: conversational sentence
+sentence		Can you tdll me about thtat	Can you tell me about that	multiwoz-2.2: conversational sentence
+sentence		that train woul wrok better for me	that train would work better for me	multiwoz-2.2: conversational sentence
+sentence		Thank you for the booking and contact nnumber	Thank you for the booking and contact number	multiwoz-2.2: conversational sentence
+sentence		How amny are available	How many are available	multiwoz-2.2: conversational sentence
+sentence		im thinking in the cdntre pelase	I'm thinking in the centre please	multiwoz-2.2: conversational sentence
+sentence		onlt the best for my famiky	Only the best for my family	multiwoz-2.2: conversational sentence
+sentence		coukd you give me the pirce	Could you give me the price	multiwoz-2.2: conversational sentence
+sentence		and give me the sar rating and phoen number	and give me the star rating and phone number	multiwoz-2.2: conversational sentence
+sentence		If three are no hotels	If there are no hotels	multiwoz-2.2: conversational sentence
+sentence		id just like the adddress for now	I'd just like the address for now	multiwoz-2.2: conversational sentence
+sentence		and the saem day	and the same day	multiwoz-2.2: conversational sentence
+sentence		thdre are seven of us	There are seven of us	multiwoz-2.2: conversational sentence
+sentence		train ID and trael time	train ID and travel time	multiwoz-2.2: conversational sentence
+sentence		can you give me some basic ino on them	can you give me some basic info on them	multiwoz-2.2: conversational sentence
+sentence		im lloking for a cartain one	I'm looking for a certain one	multiwoz-2.2: conversational sentence
+sentence		Can you mkae a suggestion and privde the type	Can you make a suggestion and provide the type	multiwoz-2.2: conversational sentence
+sentence		Can you help witha a hotel ropm	Can you help with a hotel room	multiwoz-2.2: conversational sentence
+sentence		Can you help with thtat	Can you help with that	multiwoz-2.2: conversational sentence
+sentence		but coukd you qoute me a price on that	but could you quote me a price on that	multiwoz-2.2: conversational sentence
+sentence		im comming to cambrige from London Kings Cross	I'm coming to Cambridge from London Kings Cross	multiwoz-2.2: conversational sentence
+sentence		What type of attraktion is it	What type of attraction is it	multiwoz-2.2: conversational sentence
+sentence		Are tgere restaurants that serve Mediterranean food	Are there restaurants that serve Mediterranean food	multiwoz-2.2: conversational sentence
+sentence		Do tbey get a special rate	Do they get a special rate	multiwoz-2.2: conversational sentence
+sentence		What is the total teavel tome	What is the total travel time	multiwoz-2.2: conversational sentence
+sentence		Yes thtat is perfevt	Yes that is perfect	multiwoz-2.2: conversational sentence
+sentence		What is the referance number for my boojing	What is the reference number for my booking	multiwoz-2.2: conversational sentence
+sentence		Thanks for your hrlp today	Thanks for your help today	multiwoz-2.2: conversational sentence
+sentence		whch one is the best	Which one is the best	multiwoz-2.2: conversational sentence
+sentence		travel tme and departure time first	travel time and departure time first	multiwoz-2.2: conversational sentence
+sentence		Find me an expensive hotel with free parkig	Find me an expensive hotel with free parking	multiwoz-2.2: conversational sentence
+sentence		anyhwere in tpwn should be fine	Anywhere in town should be fine	multiwoz-2.2: conversational sentence
+sentence		The boooing will be for only one person	The booking will be for only one person	multiwoz-2.2: conversational sentence
+sentence		That weill be fne	That will be fine	multiwoz-2.2: conversational sentence
+sentence		Do you ahev a referance number	Do you have a reference number	multiwoz-2.2: conversational sentence
+sentence		id like for it to be epensive	I'd like for it to be expensive	multiwoz-2.2: conversational sentence
+sentence		Can you hrlp me witha places to go	Can you help me with places to go	multiwoz-2.2: conversational sentence
+sentence		you've been a gret hrlp	you've been a great help	multiwoz-2.2: conversational sentence
+sentence		No thtat is all for todya	No that is all for today	multiwoz-2.2: conversational sentence
+sentence		Can you pelase liok for an Italian food restaurant	Can you please look for an Italian food restaurant	multiwoz-2.2: conversational sentence
+sentence		Could you help me finde a hotel	Could you help me find a hotel	multiwoz-2.2: conversational sentence
+sentence		Could you just confirm that departer time	Could you just confirm that departure time	multiwoz-2.2: conversational sentence
+sentence		you ahev been oh so wondreful	you have been oh so wonderful	multiwoz-2.2: conversational sentence
+sentence		whats the arrival time for thtat train	What's the arrival time for that train	multiwoz-2.2: conversational sentence
+sentence		befire we do thtat	Before we do that	multiwoz-2.2: conversational sentence
+sentence		and whether they ahev internet	and whether they have internet	multiwoz-2.2: conversational sentence
+sentence		Just anything you would reccomend	Just anything you would recommend	multiwoz-2.2: conversational sentence
+sentence		could you finde me a train for frisday	could you find me a train for Friday	multiwoz-2.2: conversational sentence
+sentence		thtat will be all for me todya	That will be all for me today	multiwoz-2.2: conversational sentence
+sentence		id like to find a park attraktion	I'd like to find a park attraction	multiwoz-2.2: conversational sentence
+sentence		No nothing in parituclar	No nothing in particular	multiwoz-2.2: conversational sentence
+sentence		Or another tye of entertainment	Or another type of entertainment	multiwoz-2.2: conversational sentence
+sentence		hokay thak you very much	Okay thank you very much	multiwoz-2.2: conversational sentence
+sentence		Do you have anythig exensive	Do you have anything expensive	multiwoz-2.2: conversational sentence
+sentence		no place in parituclar	no place in particular	multiwoz-2.2: conversational sentence
+sentence		Thank you so much for your help todya	Thank you so much for your help today	multiwoz-2.2: conversational sentence
+sentence		Does it include free praking	Does it include free parking	multiwoz-2.2: conversational sentence
+sentence		A swimming pool sounds llike much more fun	A swimming pool sounds like much more fun	multiwoz-2.2: conversational sentence
+sentence		it should be in the town ceter	it should be in the town center	multiwoz-2.2: conversational sentence
+sentence		im looking for somethig expensive in the north	I'm looking for something expensive in the north	multiwoz-2.2: conversational sentence
+sentence		thwnk you for everything	thank you for everything	multiwoz-2.2: conversational sentence
+sentence		What is the address and entranec fee	What is the address and entrance fee	multiwoz-2.2: conversational sentence
+sentence		could you provide me with theier address	could you provide me with their address	multiwoz-2.2: conversational sentence
+sentence		Can you help me with thiis	Can you help me with this	multiwoz-2.2: conversational sentence
+sentence		How logn does it take to get there	How long does it take to get there	multiwoz-2.2: conversational sentence
+sentence		hwat is the car type for the taxi	What is the car type for the taxi	multiwoz-2.2: conversational sentence
+sentence		im not rewdy to bokk just yet	I'm not ready to book just yet	multiwoz-2.2: conversational sentence
+sentence		Any of thme woul do	Any of them would do	multiwoz-2.2: conversational sentence
+sentence		can you check on a Tuesday arraival	can you check on a Tuesday arrival	multiwoz-2.2: conversational sentence
+sentence		ill be leaging from cambrige on Friday	I'll be leaving from Cambridge on Friday	multiwoz-2.2: conversational sentence
+sentence		Can you try bookkng it	Can you try booking it	multiwoz-2.2: conversational sentence
+sentence		No tank you for all your help	No thank you for all your help	multiwoz-2.2: conversational sentence
+sentence		and price range pelase	and price range please	multiwoz-2.2: conversational sentence
+sentence		Thank you verly much for your help	Thank you very much for your help	multiwoz-2.2: conversational sentence
+sentence		How about chinense fod	How about chinese food	multiwoz-2.2: conversational sentence
+sentence		Can you reccomend any	Can you recommend any	multiwoz-2.2: conversational sentence
+sentence		ive got a parituclar resteraunt we want to try	I've got a particular restaurant we want to try	multiwoz-2.2: conversational sentence
+sentence		ill need a referance nnumber	I'll need a reference number	multiwoz-2.2: conversational sentence
+sentence		What patr of twon is that in	What part of town is that in	multiwoz-2.2: conversational sentence
+sentence		am lloking for a trian	am looking for a train	multiwoz-2.2: conversational sentence
+sentence		ahev a gret day	Have a great day	multiwoz-2.2: conversational sentence
+sentence		Any of them you reccomend woul be fine	Any of them you recommend would be fine	multiwoz-2.2: conversational sentence
+sentence		im also lloking for a train from cambrige	im also looking for a train from cambridge	multiwoz-2.2: conversational sentence
+sentence		ill be leaving from liecester on Sunday	I'll be leaving from leicester on Sunday	multiwoz-2.2: conversational sentence
+sentence		soory for all of the cofnusion	sorry for all of the confusion	multiwoz-2.2: conversational sentence
+sentence		Please finde a European restaurant in the centre	Please find a European restaurant in the centre	multiwoz-2.2: conversational sentence
+sentence		Do both hotels have fere internet	Do both hotels have free internet	multiwoz-2.2: conversational sentence
+sentence		tahnk you so much for ryour help	Thank you so much for your help	multiwoz-2.2: conversational sentence
+sentence		thakn you for the address	Thank you for the address	multiwoz-2.2: conversational sentence
+sentence		Does the driver have a phone nnumber	Does the driver have a phone number	multiwoz-2.2: conversational sentence
+sentence		Please boko one for the sane group of people	Please book one for the same group of people	multiwoz-2.2: conversational sentence
+sentence		Just an expnsive resteraunt	Just an expensive restaurant	multiwoz-2.2: conversational sentence
+sentence		Thanks for the sercive	Thanks for the service	multiwoz-2.2: conversational sentence
+sentence		It is Trinity collee	It is Trinity College	multiwoz-2.2: conversational sentence
+sentence		pelase try one in the east	Please try one in the east	multiwoz-2.2: conversational sentence
+sentence		Can you please include the referance nnumber	Can you please include the reference number	multiwoz-2.2: conversational sentence
+sentence		get me the reference nnumber pelase	get me the reference number please	multiwoz-2.2: conversational sentence
+sentence		ill try thtat out	I'll try that out	multiwoz-2.2: conversational sentence
+sentence		What a rwlief everytihng is set up now	What a relief everything is set up now	multiwoz-2.2: conversational sentence
+sentence		thtat one is perefct	that one is perfect	multiwoz-2.2: conversational sentence
+sentence		Thank you for all of your hrlp witha this	Thank you for all of your help with this	multiwoz-2.2: conversational sentence
+sentence		What is the rating of thiis hotel	What is the rating of this hotel	multiwoz-2.2: conversational sentence
+sentence		attraction type and an etnrance fee if any	attraction type and an entrance fee if any	multiwoz-2.2: conversational sentence
+sentence		Any interesting boats on the east sde of town	Any interesting boats on the east side of town	multiwoz-2.2: conversational sentence
+sentence		which arae is that	which area is that	multiwoz-2.2: conversational sentence
+sentence		What is the entrnce fee for the attractions	What is the entrance fee for the attractions	multiwoz-2.2: conversational sentence
+sentence		im also interested in booking a txi too	I'm also interested in booking a taxi too	multiwoz-2.2: conversational sentence
+sentence		How about tdain stations near liecester	How about train stations near leicester	multiwoz-2.2: conversational sentence
+sentence		No that weill be everything	No that will be everything	multiwoz-2.2: conversational sentence
+sentence		Can you tlel me when it arriveis	Can you tell me when it arrives	multiwoz-2.2: conversational sentence
+sentence		rathr tan a hotel	rather than a hotel	multiwoz-2.2: conversational sentence

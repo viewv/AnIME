@@ -2,24 +2,31 @@
 //! 延迟门禁一律按单键口径（`eval-schema.md` §3）；单样本累计耗时只出现在报告中，不可作门禁。
 
 use crate::metrics::{CategoryStats, EvalReport};
-use crate::tsv::Category;
+use crate::tsv::{Category, parse_tag};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GateTarget {
     Overall,
     Category(Category),
+    /// `notes` 分组标签，如 `negative:clean`（门禁写作 `tag:negative:clean.top1>=97`）。
+    Tag(String),
 }
 
 impl GateTarget {
-    pub fn as_str(self) -> &'static str {
+    pub fn label(&self) -> String {
         match self {
-            Self::Overall => "total",
-            Self::Category(cat) => cat.as_str(),
+            Self::Overall => "total".to_string(),
+            Self::Category(cat) => cat.as_str().to_string(),
+            Self::Tag(tag) => format!("tag:{tag}"),
         }
     }
 
     fn parse(raw: &str) -> Option<Self> {
-        match raw.trim() {
+        let raw = raw.trim();
+        if let Some(tag) = raw.strip_prefix("tag:") {
+            return parse_tag(tag).filter(|t| t == tag).map(Self::Tag);
+        }
+        match raw {
             "total" | "overall" => Some(Self::Overall),
             other => Category::parse(other).map(Self::Category),
         }
@@ -134,7 +141,7 @@ pub struct GateRule {
 
 impl GateRule {
     fn new(target: GateTarget, metric: GateMetric, op: GateOp, threshold: f64) -> Self {
-        let label = format!("{}.{}", target.as_str(), metric.as_str());
+        let label = format!("{}.{}", target.label(), metric.as_str());
         Self {
             label,
             target,
@@ -311,9 +318,10 @@ pub fn evaluate_gates(
     let mut all_passed = true;
 
     for rule in rules {
-        let stats = match rule.target {
+        let stats = match &rule.target {
             GateTarget::Overall => Some(&report.overall),
-            GateTarget::Category(cat) => report.by_cat.get(&cat),
+            GateTarget::Category(cat) => report.by_cat.get(cat),
+            GateTarget::Tag(tag) => report.by_tag.get(tag),
         };
         let result = match stats {
             Some(s) if s.total > 0 => {

@@ -6,6 +6,7 @@ from __future__ import annotations
 import gzip
 import io
 import json
+import random
 import struct
 import sys
 import tarfile
@@ -20,6 +21,8 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import build_eval_benchmark  # noqa: E402
+import build_eval_v2  # noqa: E402
+import build_ngram_kn  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
 import build_ngram  # noqa: E402
@@ -588,6 +591,85 @@ class TestEndToEndBuilders(unittest.TestCase):
             ]
             self.assertEqual(len(loc_rows), 3)
             self.assertEqual({r[0] for r in loc_rows}, {"typo_phonetic", "typo_simple", "sentence"})
+
+
+class TestEvalV2Builder(unittest.TestCase):
+    LEX = {
+        w: (w, z)
+        for w, z in [
+            ("grenade", 3.5), ("grenades", 3.0), ("this", 7.0), ("thing", 6.0),
+            ("calculate", 3.8), ("calculated", 3.6), ("calculating", 3.2), ("want", 6.0),
+            ("to", 7.4), ("go", 6.5), ("home", 5.8), ("i", 7.0), ("that", 7.0), ("hat", 4.5),
+        ]
+    }
+
+    def test_inflection_variants_require_real_stem(self):
+        self.assertEqual(build_eval_v2.inflection_variants("grenade", self.LEX), ["grenades"])
+        self.assertEqual(
+            build_eval_v2.inflection_variants("calculated", self.LEX), ["calculate", "calculating"]
+        )
+        # this 去 s 得到的 "thi" 不是词，不能展开出 thing
+        self.assertEqual(build_eval_v2.inflection_variants("this", self.LEX), [])
+
+    def test_derive_core_v2_drops_word_prefix_and_adds_refs(self):
+        rows = [
+            ("prefix", "", "this", "things", "word input"),
+            ("prefix", "", "calcul", "calculate", "x"),
+            ("typo_prefix", "", "grehad", "grenades", "y"),
+            ("sentence", "", "i wnt", "I want", "z"),
+        ]
+        out, stats = build_eval_v2.derive_core_v2(rows, self.LEX)
+        self.assertEqual(stats["prefix_dropped_input_is_word"], 1)
+        self.assertEqual(out[0][3], "calculate || calculated || calculating")
+        self.assertEqual(out[1][3], "grenades || grenade")
+        self.assertEqual(out[2], rows[3])
+
+    def test_noise_operators_inject_exactly_the_named_error(self):
+        rng = random.Random(0)
+        toks = ["I", "want", "to", "go", "home"]
+        self.assertEqual(build_eval_v2.noise_boundary_gemination(toks, rng, self.LEX), "i want o go home")
+        self.assertEqual(build_eval_v2.noise_space_missing(["want", "to"], rng, self.LEX), "wantto")
+        shifted = build_eval_v2.noise_space_shift(["want", "home"], rng, self.LEX)
+        self.assertIn(shifted, {"wan thome", "wanth ome"})
+        dropped = build_eval_v2.noise_leading_drop(["want", "to"], rng, self.LEX)
+        self.assertIn(dropped, {"ant to", "want o"})
+        self.assertEqual(build_eval_v2.noise_contraction(["I'm", "here"], rng, self.LEX), "im here")
+        self.assertIsNone(build_eval_v2.noise_contraction(["no", "apostrophe"], rng, self.LEX))
+        self.assertIn("hat", build_eval_v2.single_edits("that"))
+
+    def test_realword_sample_is_context_realword_with_tag(self):
+        rng = random.Random(1)
+        row = build_eval_v2.realword_edit_sample(["I", "think", "that", "works"], rng, {"hat"})
+        self.assertEqual(row, ("context_realword", "I think ", "hat works", "that works",
+                               "noise:realword_edit that->hat"))
+
+
+class TestNgramKnOrchestrator(unittest.TestCase):
+    def test_collects_context_and_every_reference_for_leak_filter(self):
+        with tempfile.TemporaryDirectory() as td:
+            tsv = Path(td) / "e.tsv"
+            tsv.write_text(
+                "# comment\n"
+                "typo_prefix\t\tgrenad\tgrenade || grenades\tx\n"
+                "context_realword\tgo \tform here\tfrom here\tnoise:realword_edit\n",
+                encoding="utf-8",
+            )
+            texts = build_ngram_kn.collect_eval_texts([tsv])
+            self.assertEqual(texts, ["grenade", "grenades", "go", "from here"])
+            out = Path(td) / "ex.txt"
+            self.assertEqual(build_ngram_kn.write_exclusion_file(texts + ["go"], out), 4)
+
+    def test_extracts_every_dialogue_turn_one_per_line(self):
+        with tempfile.TemporaryDirectory() as td:
+            js = Path(td) / "dialogues_001.json"
+            js.write_text(json.dumps([
+                {"turns": [{"speaker": "USER", "utterance": " I need  a taxi. "},
+                           {"speaker": "SYSTEM", "utterance": "Where to?"},
+                           {"speaker": "USER", "utterance": ""}]},
+            ]), encoding="utf-8")
+            out = Path(td) / "turns.txt"
+            self.assertEqual(build_ngram_kn.extract_dialogue_text([js], out), 2)
+            self.assertEqual(out.read_text(encoding="utf-8"), "I need a taxi.\nWhere to?\n")
 
 
 if __name__ == "__main__":

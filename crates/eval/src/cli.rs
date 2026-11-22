@@ -29,6 +29,7 @@ pub struct CliArgs {
     pub gates: Vec<String>,
     pub strict_gate: bool,
     pub show_failures: usize,
+    pub group_by_tag: bool,
     pub lexicon_path: Option<String>,
     pub ngram_path: Option<String>,
     pub model_path: Option<String>,
@@ -48,6 +49,7 @@ impl Default for CliArgs {
             gates: Vec::new(),
             strict_gate: false,
             show_failures: 0,
+            group_by_tag: false,
             lexicon_path: None,
             ngram_path: None,
             model_path: None,
@@ -68,6 +70,7 @@ Options:
   --md-out <PATH>           Write Markdown report to PATH
   --gate <PRESET|RULE>      Gate rule (phase0..phase3 or <target>.<metric>>=|<=>val; repeatable)
   --strict-gate             Use strict case-sensitive accuracy metrics for gate rules
+  --group-by-tag            Also report metrics per notes tag (e.g. noise:leading_drop, negative:clean)
   --show-failures <N>       Include up to N sample misses in output (default: 0)
   --lexicon <PATH>          Load compiled .animelex.bin lexicon asset
   --ngram <PATH>            Load compiled .animengr.bin n-gram asset
@@ -94,6 +97,7 @@ where
                 return Ok(cfg);
             }
             "--strict-gate" => cfg.strict_gate = true,
+            "--group-by-tag" => cfg.group_by_tag = true,
             "--format" => {
                 let val = iter
                     .next()
