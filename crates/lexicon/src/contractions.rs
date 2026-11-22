@@ -70,6 +70,15 @@ pub fn lookup_contraction(lower: &str) -> Option<&'static ContractionRule> {
 /// 根据用户输入的首字母大写或全大写习惯恢复候选词大小写（保留专有名词与混合大小写词形）。
 pub fn apply_input_casing(raw_trimmed: &str, canonical: &str, is_proper_or_mixed: bool) -> String {
     if is_proper_or_mixed {
+        // 用户首字母按 Shift、后续字母已明确松开（`So`、`Linux`）时，全大写词形（`SO`、`LINUX`）
+        // 与用户显式敲出的大小写矛盾，只能按 TitleCase 呈现；混写专名（`iPhone`、`macOS`）不受影响
+        if is_titlecase_input(raw_trimmed) && is_all_caps_word(canonical) {
+            let lower = canonical.to_ascii_lowercase();
+            let mut chars = lower.chars();
+            if let Some(first) = chars.next() {
+                return first.to_ascii_uppercase().to_string() + chars.as_str();
+            }
+        }
         return canonical.to_string();
     }
     let alpha_count = raw_trimmed
@@ -98,4 +107,16 @@ pub fn apply_input_casing(raw_trimmed: &str, canonical: &str, is_proper_or_mixed
         }
     }
     canonical.to_string()
+}
+
+/// 首字母大写且其后至少有一个小写字母（`So`、`Linux`）。
+fn is_titlecase_input(raw: &str) -> bool {
+    let mut letters = raw.chars().filter(|c| c.is_ascii_alphabetic());
+    letters.next().is_some_and(|c| c.is_ascii_uppercase()) && letters.any(|c| c.is_ascii_lowercase())
+}
+
+/// 至少两个字母且全部大写（`SO`、`GPU`）。
+fn is_all_caps_word(word: &str) -> bool {
+    let letters: Vec<char> = word.chars().filter(|c| c.is_ascii_alphabetic()).collect();
+    letters.len() >= 2 && letters.iter().all(|c| c.is_ascii_uppercase())
 }

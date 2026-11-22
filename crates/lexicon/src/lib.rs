@@ -588,8 +588,9 @@ mod tests {
         assert!(!layered.learn_word("valid", 0));
 
         assert!(layered.learn_word("Antigravity", 3));
+        // 精确词形独立计频：只出现过一次的 `hyprland` 仍在观察期，`Hyprland` 已达晋升门槛
         assert_eq!(
-            layered.preload_dynamic_words([("hyprland", 1), ("Hyprland", 1)]),
+            layered.preload_dynamic_words([("hyprland", 1), ("Hyprland", 3)]),
             2
         );
         assert_eq!(layered.dynamic_word_count(), 2);
@@ -636,6 +637,51 @@ mod tests {
 
         layered.clear_dynamic_words();
         assert_eq!(layered.dynamic_word_count(), 0);
+    }
+
+    #[test]
+    fn dynamic_layer_respects_typed_casing_and_keeps_dual_forms() {
+        let base = Lexicon::from_tsv_str(
+            "so\t6.52\nlinux\t3.99\nmacos\t3.02\nthe\t7.7\nwhen\t6.37\n",
+            DEFAULT_EXTENSION_ZIPF,
+        )
+        .expect("tsv");
+        let layered = LayeredLexicon::new(base);
+        let opts = QueryOptions::default();
+        let top = |raw: &str| layered.query(raw, &opts)[0].word.clone();
+        let words = |raw: &str| -> Vec<String> { layered.query(raw, &opts).into_iter().map(|c| c.word).collect() };
+
+        // 历史 user.db：一次 Shift 粘连的 SO + 大量 so / 句首 So；So 折叠进 so，SO 只出现 1 次不晋升
+        assert_eq!(layered.preload_dynamic_words([("SO", 1), ("so", 40), ("So", 15), ("When", 13)]), 4);
+        assert_eq!(top("So"), "So");
+        assert_eq!(top("so"), "so");
+        assert!(!words("So").contains(&"SO".to_string()));
+        assert_eq!(top("when"), "when");
+
+        // 即便 SO 被反复上屏晋升，TitleCase 输入也绝不被全大写覆写；只有显式全大写输入才得到 SO
+        assert!(layered.learn_word("SO", 5));
+        assert_eq!(top("So"), "So");
+        assert_eq!(top("so"), "so");
+        assert_eq!(top("SO"), "SO");
+
+        // Linux / linux 双态：一次上屏不晋升；两次后全小写输入同时给出 linux（首位）与 Linux
+        assert!(layered.learn_word("Linux", 1));
+        assert!(!words("linux").contains(&"Linux".to_string()));
+        assert!(layered.learn_word("Linux", 1));
+        let linux = words("linux");
+        assert_eq!(linux[0], "linux");
+        assert!(linux.contains(&"Linux".to_string()));
+        assert_eq!(top("Linux"), "Linux");
+
+        assert!(layered.learn_word("macOS", 2));
+        let mac = words("macos");
+        assert!(mac.contains(&"macos".to_string()) && mac.contains(&"macOS".to_string()));
+
+        // 未晋升的单次手滑错拼不进入 L1
+        assert!(layered.learn_word("colabd", 1));
+        assert!(!words("colabd").iter().any(|w| w == "colabd"));
+        assert!(layered.remove_dynamic_word("linux"));
+        assert!(!words("linux").contains(&"Linux".to_string()));
     }
 
     #[test]

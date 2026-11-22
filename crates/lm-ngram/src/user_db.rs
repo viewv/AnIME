@@ -33,16 +33,42 @@ struct UserBigramEntry {
     last_used: u64,
 }
 
+/// 原因注释：`user_words` 按**精确词形**独立计频（`so` / `So` / `SO` 互不吞并），否则一次 Shift 粘连的 `SO`
+/// 会把 `so` 的全部历史频次收归名下并改写规范词形；L2 个性化加成只关心"这个词常不常用"，
+/// 因此另维护大小写不敏感的汇总频次 `lower_freq` 供 `word_boost` / `bigram_boost` 查询。
 #[derive(Debug, Default)]
 struct UserMemory {
     words: HashMap<String, UserWordEntry>,
+    lower_freq: HashMap<String, u32>,
     bigrams: HashMap<(String, String), UserBigramEntry>,
+}
+
+impl UserMemory {
+    fn add_word(&mut self, word: &str, freq: u32, last_used: u64) {
+        match self.words.get_mut(word) {
+            Some(e) => {
+                e.freq = e.freq.saturating_add(freq);
+                e.last_used = e.last_used.max(last_used);
+            }
+            None => {
+                self.words.insert(
+                    word.to_string(),
+                    UserWordEntry {
+                        word: word.to_string(),
+                        freq,
+                        last_used,
+                    },
+                );
+            }
+        }
+        let agg = self.lower_freq.entry(word.to_ascii_lowercase()).or_insert(0);
+        *agg = agg.saturating_add(freq);
+    }
 }
 
 #[derive(Debug)]
 struct WordMutation {
     word: String,
-    renamed_from: Option<String>,
     freq_delta: u32,
     timestamp: u64,
 }
@@ -152,10 +178,10 @@ impl UserStore {
             return 0.0;
         }
         let guard = self.memory.read().unwrap_or_else(|e| e.into_inner());
-        let Some(entry) = guard.words.get(&key) else {
+        let Some(&freq) = guard.lower_freq.get(&key) else {
             return 0.0;
         };
-        (0.35 * (1.0 + entry.freq as f32).ln()).min(1.8)
+        (0.35 * (1.0 + freq as f32).ln()).min(1.8)
     }
 
     /// 查询二元搭配 `(prev_word, word)` 的个人习惯权重加成（纯内存 O(1)，上限 `2.6`）。
@@ -166,9 +192,9 @@ impl UserStore {
         }
         let guard = self.memory.read().unwrap_or_else(|e| e.into_inner());
         let uni = guard
-            .words
+            .lower_freq
             .get(&word_l)
-            .map(|e| (0.35 * (1.0 + e.freq as f32).ln()).min(1.2))
+            .map(|&f| (0.35 * (1.0 + f as f32).ln()).min(1.2))
             .unwrap_or(0.0);
         let bi = prev_word
             .map(|p| p.trim().to_ascii_lowercase())
@@ -187,8 +213,19 @@ impl UserStore {
         self.memory
             .read()
             .unwrap_or_else(|e| e.into_inner())
-            .words
+            .lower_freq
             .get(&key)
+            .copied()
+            .unwrap_or(0)
+    }
+
+    /// 精确词形（区分大小写）的累计频次，供 L1 动态层按词形独立晋升。
+    pub fn exact_word_freq(&self, word: &str) -> u32 {
+        self.memory
+            .read()
+            .unwrap_or_else(|e| e.into_inner())
+            .words
+            .get(word.trim())
             .map(|e| e.freq)
             .unwrap_or(0)
     }
@@ -208,7 +245,7 @@ impl UserStore {
             .unwrap_or(0)
     }
 
-    /// 导出全部已学词条 `(canonical_word, freq)`，供启动期注入 `LayeredLexicon::preload_dynamic_words`。
+    /// 导出全部已学词条 `(精确词形, freq)`，供启动期注入 `LayeredLexicon::preload_dynamic_words`。
     pub fn snapshot_user_words(&self) -> Vec<(String, u32)> {
         let guard = self.memory.read().unwrap_or_else(|e| e.into_inner());
         let mut out: Vec<(String, u32)> = guard
@@ -239,33 +276,9 @@ impl UserStore {
             let mut guard = self.memory.write().unwrap_or_else(|e| e.into_inner());
             for tok in tokens {
                 let lower = tok.to_ascii_lowercase();
-                let tok_has_upper = tok.bytes().any(|b| b.is_ascii_uppercase());
-                let (canonical, renamed_from) = match guard.words.get_mut(&lower) {
-                    Some(entry) => {
-                        entry.freq = entry.freq.saturating_add(1);
-                        entry.last_used = entry.last_used.max(ts);
-                        let mut old_name = None;
-                        if !entry.word.bytes().any(|b| b.is_ascii_uppercase()) && tok_has_upper {
-                            old_name = Some(entry.word.clone());
-                            entry.word = tok.clone();
-                        }
-                        (entry.word.clone(), old_name)
-                    }
-                    None => {
-                        guard.words.insert(
-                            lower.clone(),
-                            UserWordEntry {
-                                word: tok.clone(),
-                                freq: 1,
-                                last_used: ts,
-                            },
-                        );
-                        (tok.clone(), None)
-                    }
-                };
+                guard.add_word(&tok, 1, ts);
                 word_mutations.push(WordMutation {
-                    word: canonical,
-                    renamed_from,
+                    word: tok.clone(),
                     freq_delta: 1,
                     timestamp: ts,
                 });
@@ -459,27 +472,7 @@ fn load_initial_memory(path: &Path) -> Result<UserMemory, NgramError> {
         if word.is_empty() {
             continue;
         }
-        let lower = word.to_ascii_lowercase();
-        let word_has_upper = word.bytes().any(|b| b.is_ascii_uppercase());
-        match mem.words.get_mut(&lower) {
-            Some(existing) => {
-                existing.freq = existing.freq.saturating_add(freq);
-                existing.last_used = existing.last_used.max(last_used);
-                if !existing.word.bytes().any(|b| b.is_ascii_uppercase()) && word_has_upper {
-                    existing.word = word.to_string();
-                }
-            }
-            None => {
-                mem.words.insert(
-                    lower,
-                    UserWordEntry {
-                        word: word.to_string(),
-                        freq,
-                        last_used,
-                    },
-                );
-            }
-        }
+        mem.add_word(word, freq, last_used);
     }
 
     let bigrams_tsv = run_sqlite_select(
@@ -620,15 +613,7 @@ fn writer_loop(
         if !word_batch.is_empty() || !bigram_batch.is_empty() {
             let mut sql = String::from("BEGIN IMMEDIATE;\n");
             for wm in &word_batch {
-                if let Some(old_word) = &wm.renamed_from {
-                    sql.push_str("UPDATE OR IGNORE user_words SET word = ");
-                    sql.push_str(&sql_quote(&wm.word));
-                    sql.push_str(" WHERE word = ");
-                    sql.push_str(&sql_quote(old_word));
-                    sql.push_str(";\nDELETE FROM user_words WHERE word = ");
-                    sql.push_str(&sql_quote(old_word));
-                    sql.push_str(";\n");
-                }
+                // 每个精确词形独立一行累加，绝不改名或删除其他大小写变体的历史行
                 sql.push_str("INSERT INTO user_words (word, freq, last_used) VALUES (");
                 sql.push_str(&sql_quote(&wm.word));
                 sql.push_str(", ");
