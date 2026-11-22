@@ -28,12 +28,16 @@ if str(SCRIPT_DIR) not in sys.path:
 from common import ENTRY_FLAG_FROM_SCOWL  # noqa: E402
 from build_eval_benchmark import (  # noqa: E402
     ALPHA_WORD_RE,
+    APOSTROPHE_DROPS,
     CAMEL_OR_ALLCAPS_RE,
     QWERTY_NEIGHBORS,
     is_valid_sample,
 )
 
 Row = tuple[str, str, str, str, str]
+
+# APOSTROPHE_DROPS 为 "i'm" -> "im" 的映射；其值即漏撇号写法
+DROPPED_APOSTROPHE_FORMS = frozenset(APOSTROPHE_DROPS.values())
 
 NOISE_TYPES = (
     "leading_drop",
@@ -157,6 +161,9 @@ def extract_clauses(multiwoz_files: list[Path], lex: dict[str, tuple[str, float]
                     if not (4 <= len(toks) <= 10):
                         continue
                     if any(not ALPHA_WORD_RE.match(t) or CAMEL_OR_ALLCAPS_RE.search(t) for t in toks):
+                        continue
+                    # 源句自带漏撇号（Im / dont）时参考答案本身就是错拼，不能作为干净参考
+                    if any(t.lower() in DROPPED_APOSTROPHE_FORMS for t in toks):
                         continue
                     norm: list[str] = []
                     ok = True
