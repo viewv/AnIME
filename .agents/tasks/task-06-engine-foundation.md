@@ -7,12 +7,13 @@ allowed_paths:
   - "crates/lexicon/**"
   - "crates/animed/**"
   - "crates/eval/**"
+  - "frontends/fcitx5/**"
   - "data/MANIFEST.yaml"
   - "scripts/data_pipeline/**"
   - ".agents/tasks/task-06-engine-foundation.md"
 forbidden_paths:
   - ".agents/contracts/**"
-  - "frontends/**"
+  - "frontends/macos/**"
   - "crates/protocol/**"
   - "crates/lm-ngram/**"
 read_only_context:
@@ -29,7 +30,11 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
 2. **句内共享词前缀 KV 折叠**：`split_prefix_and_candidates` 自动将候选句共同词边界前缀折叠进 `shared_prefix`，在保持打分数学等价（常数前缀分差在均值中心化后精确抵消）的同时大幅降低多词候选 GPU decode 延迟。
 3. **补全易混真词与多词槽过滤排序**：在 `crates/engine` 中合并/补全常见真词混淆组（`where/were/we're/wear`、`an/and`、`of/off`、`lets/let's`、`whose/who's`），对非句尾精确命中词跳过无效前缀补全，并在 `expand_slot_confusables` 后重排序保证高优易混词不落出 Viterbi 前 10 槽。
 4. **提升 L1 `typo_prefix` 模糊前缀子树召回**：温和放宽 `CompactTrie` 模糊前缀补全节点上限与代价窗口，守住 `< 1.5 ms` p50 门禁。
-5. **Plan A 数据驱动易混真词发现（移除手写列表）**：引入开源 `BSD-2-Clause` **CMUdict** (`cmusphinx/cmudict`) 写入 `ANIMELEX` `phonetic` 字段，在 `crates/lexicon` 实现 `RealWordConfusableIndex`（CMUdict 完全同音、音节/清浊近音、自动撇号缩写、运行时 QWERTY 低代价邻键搜索 + 无 CMUdict 兜底），在 `crates/engine` 删除 40 组手写 `CONFUSABLE_GROUPS`，改用 `LexiconProvider::contextual_confusables` 与通用形态/频率排序。
+5. **Plan A 数据驱动易混真词发现（移除手写列表）**：引入开源 `BSD-2-Clause` **CMUdict** (`cmusphinx/cmudict`) 写入 `ANIMELEX` `phonetic` 字段，在 `crates/lexicon` 实现 `RealWordConfusableIndex`（CMUdict 完全同音、音节/清浊近音、自动撇号缩写、离线拼写近似对 + 无 CMUdict 兜底），在 `crates/engine` 删除 40 组手写 `CONFUSABLE_GROUPS`，改用 `LexiconProvider::contextual_confusables` 与对称频差补偿。
+6. **真机实测交互 Bug 记录与修复**：
+   - **Bug A（句中 `now` 恒变大写 `Now`）**：句首自动大写上屏（如 `"Now"`）写入 `user.db` 并预加载到 `LayeredLexicon` 动态热词层时被误当作专有名词保留首字母大写。修复：`LayeredLexicon::apply_learn_locked` 与 `EngineSession::normalize_commit_for_learning` 对主词典已收录的纯小写普通词统一按小写归档。
+   - **Bug B（组合态敲符号变 `?rdp` 符号跑到词前面）**：在 `preedit` 非空时敲击 `?` / `.` / `,` 等标点符号，前端未拦截而直接透传给 Wayland 应用，导致符号先于未落盘的 `preedit` 插入光标处。修复：组合态下敲击终止标点或可见符号时，前端 `filterAndAccept()` 并交由引擎将当前首选候选（去尾空格）与该符号合并一次性上屏（`... new rdp?`）。
+   - **Bug C（`KDE` 上屏后输入数字 `6` 再输入 `.` 导致 `6` 消失）**：`KDE ` 上屏后置位 `last_auto_space = true`，随后空闲态敲入数字 `6`（或其他非字母透传键）时前端未清除 `lastAutoSpace_`，导致紧接着敲 `.` 时错误触发智能尾空格回删（`delete_before = 1`），把刚输入的 `6` 删掉。修复：空闲态下任何非终止标点的透传按键（数字、符号、退格、方向键等）及 `set_context` 非空格结尾更新均立即清除 `last_auto_space`。
 
 ## Constraints (局部硬约束)
 - 仅改动 `allowed_paths` 内文件，保持工作区 `unsafe_code = "forbid"`，零平台专有依赖，默认 `make test` 全绿且 0 warnings。
@@ -54,6 +59,8 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
   - `crates/animed/src/main.rs`
   - `crates/animed/src/server.rs`
   - `crates/eval/src/main.rs`
+  - `frontends/fcitx5/src/anime_engine.cpp`
+  - `frontends/fcitx5/src/session_state.cpp`
   - `data/MANIFEST.yaml`
   - `scripts/data_pipeline/build_lexicon.py`
   - `.agents/tasks/task-06-engine-foundation.md`

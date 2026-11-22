@@ -79,6 +79,9 @@ where
             before: before.into(),
             after: after.into(),
         };
+        if !self.context.before.ends_with(' ') {
+            self.last_auto_space = false;
+        }
         self.revision = 0;
         self.recompute_candidates();
     }
@@ -199,6 +202,15 @@ where
             KeyInput::Digit(d) => {
                 if self.preedit.is_empty() {
                     self.last_auto_space = false;
+                    if d <= 9 {
+                        let mut ch_buf = [0u8; 4];
+                        let ch = char::from(b'0' + d);
+                        append_context_before(
+                            &mut self.context.before,
+                            ch.encode_utf8(&mut ch_buf),
+                            false,
+                        );
+                    }
                     EngineOutput::State(self.current_state(true))
                 } else if (1..=9).contains(&d) {
                     let idx = usize::from(d - 1);
@@ -391,8 +403,54 @@ where
             self.preedit.push(ch);
             self.recompute_candidates();
             EngineOutput::State(self.current_state(false))
+        } else if ch.is_ascii_graphic() {
+            // 正在组合时遇到非词内可见标点/符号（如 ? . , ! ; : / ( ) 等）：
+            // 自动将当前首选完整候选（去掉末尾空格）连同该符号按顺序一并上屏，
+            // 防止符号在前端透传时抢先插到未落盘的 preedit 前面（如 "?rdp"）。
+            if self.candidates.is_empty() {
+                self.recompute_candidates();
+            }
+            let total_chars = self.preedit.chars().count();
+            let chosen = self
+                .candidates
+                .iter()
+                .find(|c| {
+                    c.consumed_chars == total_chars
+                        && c.kind != CandidateKind::Continuation
+                        && c.kind != CandidateKind::Raw
+                })
+                .or_else(|| {
+                    self.candidates.iter().find(|c| {
+                        c.consumed_chars == total_chars && c.kind != CandidateKind::Continuation
+                    })
+                })
+                .or_else(|| self.candidates.first())
+                .map(|c| c.text.clone())
+                .unwrap_or_else(|| self.preedit.clone());
+            let base = chosen.trim_end_matches(' ');
+            let learn_text = self.normalize_commit_for_learning(base);
+            self.ngram
+                .learn_commit(&self.context.before, &learn_text, self.privacy);
+
+            let mut commit_text = String::with_capacity(base.len() + ch.len_utf8());
+            commit_text.push_str(base);
+            commit_text.push(ch);
+            append_context_before(&mut self.context.before, &commit_text, false);
+
+            self.preedit.clear();
+            self.candidates.clear();
+            self.token_lex_cache.clear();
+            self.last_auto_space = false;
+
+            EngineOutput::Commit(CommitAction {
+                seq: self.seq,
+                text: commit_text,
+                delete_before: 0,
+                remaining_preedit: String::new(),
+                candidates: Vec::new(),
+            })
         } else {
-            // 正在组合时遇到非词字符先透传给宿主应用
+            // 正在组合时遇到其他非词控制字符先透传给宿主应用
             EngineOutput::State(self.current_state(true))
         }
     }
@@ -1517,5 +1575,37 @@ mod tests {
             "expected 'where' confusable 'were' inside candidates: {:?}",
             st3.candidates
         );
+    }
+
+    #[test]
+    fn punctuation_commits_composing_preedit_in_order_and_digit_clears_auto_space() {
+        let mut sess = make_session();
+        // 1. 组合态下直接敲 '?' 应把当前首选候选 + '?' 合并顺序上屏（绝不能透传导致 "?apple"）
+        let _ = feed_text(&mut sess, "apple");
+        match sess.handle_key(KeyInput::Char('?')) {
+            EngineOutput::Commit(c) => {
+                assert_eq!(c.text, "apple?");
+                assert_eq!(c.delete_before, 0);
+                assert!(c.remaining_preedit.is_empty());
+            }
+            other => panic!("expected Commit('apple?'), got {other:?}"),
+        }
+        assert!(sess.preedit().is_empty());
+
+        // 2. 上一句以 '?' 结尾后，新句首词自动大写为 "Apple "；
+        //    随后若输入数字 '6' 再输入 '.'，绝不能触发 delete_before=1 误删 '6'
+        let _ = feed_text(&mut sess, "apple");
+        match sess.handle_key(KeyInput::Digit(1)) {
+            EngineOutput::Commit(c) => assert_eq!(c.text, "Apple "),
+            other => panic!("expected Commit('Apple '), got {other:?}"),
+        }
+        match sess.handle_key(KeyInput::Digit(6)) {
+            EngineOutput::State(st) => assert!(st.passthrough),
+            other => panic!("expected passthrough State for digit 6, got {other:?}"),
+        }
+        match sess.handle_key(KeyInput::Char('.')) {
+            EngineOutput::State(st) => assert!(st.passthrough),
+            other => panic!("expected passthrough State for '.' after digit 6, got {other:?}"),
+        }
     }
 }
