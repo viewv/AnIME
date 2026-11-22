@@ -14,13 +14,13 @@
 3. **Task 03（IPC / L2 整句与引擎核心 / `animed`）**：实现完整 NDJSON 编解码、词格 Viterbi + 2/3-gram + SQLite 个人学习、部分选词与智能标点回删、Unix Socket 常驻守护进程。
 4. **Task 04（Fcitx5 Wayland 前端）**：基于异步 Unix Socket 客户端与 `seq`/`revision` 防过期机制，接入预编辑、数字键选词、`Enter` 原串直出、`Shift` 直通、surrounding text 与隐私框保护。
 
-## Phase 2：L3 本地神经整句精排与续写预测
+## Phase 2：L3 本地神经整句精排、数据驱动底座与连打分词（当前已完成）
 
-- 为 `crates/lm-neural` 接入真实端侧小模型推理（优先验证开源 `SmolLM2-135M` Q4 或同级轻量模型，支持 CPU 与可选 GPU 加速）。
-- 基于光标前文（surrounding text）实现异步候选重排（解决 `from/form`、`their/there/they're` 等真词误拼与语境歧义）与下一词/短语续写预测（`✦` 标记），严格遵守 `seq`/`revision` 不抢键约定。
+- **Task 05（L3 神经层接入）**：为 `crates/lm-neural` 接入真实端侧小模型推理（`SmolLM2-135M / 360M` Q4_K_M GGUF，支持 CPU 与 Radeon 780M Vulkan GPU 加速），基于光标前文实现异步候选重排与下一词/短语续写预测（`✦` 标记），严格遵守 `seq`/`revision` 不抢键约定。
+- **Task 06（引擎底座修补、CMUdict 数据驱动易混词与智能连打分词）**：消除 L3 子词长度归一化偏差，实现句内共享词前缀 KV 折叠；引入开源 CMUdict 构建 100% 数据驱动易混真词索引（移除手写词表）；实现支持带错切分的智能连打分词（`segment_runon`）并修复真机交互 Bug。
 
-## Phase 3：专用模型微调、macOS IMKit 移植与公开发布
+## Phase 3：专用模型蒸馏微调、桌面自启打包、macOS IMKit 移植与公开发布
 
-- 使用公开语料与合成物理键盘打错噪声，微调/训练专用于英文输入法的 ~30M 参数轻量模型，降低内存与端侧延迟。
+- **Task 07（端侧小模型蒸馏与重排微调，`.agents/tasks/task-07-neural-distillation.md`）**：使用公开语料、合成物理键盘/读音/连打噪声、L1+L2 词格难负例与 `SmolLM2-1.7B` 教师软标签，微调/蒸馏输入法专用的 `SmolLM2-135M / 360M` GGUF 模型，将整句与真词消歧准确率推向 `1.7B` 水平。
 - 在不改动 Rust 核心的前提下实现 `frontends/macos/`（macOS IMKit `IMKInputController`）。
-- 完善设置界面、跨发行版打包与发布文档，正式公开仓库。
+- 完善 Linux 守护进程自启（`systemd --user` / 前端按需拉起）、设置界面、跨发行版打包与发布文档，正式公开仓库。
