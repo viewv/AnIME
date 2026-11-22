@@ -770,5 +770,37 @@ class TestOasstText(unittest.TestCase):
             self.assertEqual((stats["prompter_words"], stats["messages"]), (2, 3))
 
 
+class TestOodDevBuilder(unittest.TestCase):
+    LEX = {w: (w, 5.0) for w in "how can i use this image in a the you we write code for".split()}
+
+    def test_heldout_split_is_by_tree_and_deterministic(self):
+        ids = [f"tree-{i}" for i in range(2000)]
+        held = [t for t in ids if build_oasst_text.is_heldout_tree(t)]
+        self.assertEqual(held, [t for t in ids if build_oasst_text.is_heldout_tree(t)])
+        self.assertTrue(0.10 < len(held) / len(ids) < 0.20)
+
+    def test_convert_skips_heldout_trees(self):
+        held = next(f"t{i}" for i in range(1000) if build_oasst_text.is_heldout_tree(f"t{i}"))
+        kept = next(f"t{i}" for i in range(1000) if not build_oasst_text.is_heldout_tree(f"t{i}"))
+        base = {"lang": "en", "deleted": False, "synthetic": False, "review_result": True, "role": "prompter"}
+        msgs = [{**base, "message_tree_id": held, "text": "secret eval question"},
+                {**base, "message_tree_id": kept, "text": "training question"}]
+        with tempfile.TemporaryDirectory() as td:
+            stats = build_oasst_text.convert((json.dumps(m) for m in msgs), Path(td))
+            self.assertEqual((Path(td) / "oasst1_prompter.txt").read_text(encoding="utf-8"), "training question\n")
+            self.assertEqual(stats["heldout_skipped"], 1)
+
+    def test_dev_clauses_split_standard_and_novel(self):
+        std, novel = build_eval_v3.dev_clauses(
+            ["How can I use this image in numpy? Write the code for you.", "How can I use this image in a"], self.LEX
+        )
+        self.assertIn(["How", "can", "I", "use", "this", "image", "in", "a"], std)
+        self.assertIn(["How", "can", "I", "use", "this", "image", "in", "numpy"], novel)
+        self.assertTrue(all("numpy" not in c for c in std))
+        rows = build_eval_v3.build_novel_negatives(novel, 5, set(), "t")
+        self.assertTrue(rows and all(r[4] == "negative:novel" and r[2] == r[3] for r in rows))
+        self.assertEqual(build_eval_v3.build_novel_negatives(novel, 5, {" ".join(novel[0]).lower()}, "t"), rows[1:])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -25,6 +25,7 @@ category<TAB>context<TAB>input<TAB>expected<TAB>notes
 - **`notes` 标签**：若 `notes` 以 `<namespace>:<tag>` 开头（首个空白前的 token，`[a-z_]+:[a-z_]+`），该 token 作为分组标签，其余为自由文本。保留命名空间：
   - `noise:<type>`：合成真实打字噪声，`<type>` 取 `leading_drop` / `boundary_gemination` / `space_shift` / `space_extra` / `space_missing` / `adjacent_key` / `realword_edit` / `contraction`；
   - `negative:clean`：干净输入 `input == expected`，用于监控误纠率；
+  - `negative:novel`：含词典外新词（技术词、新名词、少见专名）的干净输入 `input == expected`，用于监控"不误改新词"；
   - `source:<name>`：样本来源（如 `source:multiwoz`），可选。
 
 ---

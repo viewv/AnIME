@@ -14,12 +14,23 @@ import gzip
 import json
 import re
 import sys
+import zlib
 from collections import Counter
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
 DEFAULT_IN = REPO_ROOT / "data/raw/oasst1/2023-04-12_oasst_ready.messages.jsonl.gz"
+
+# 评测留出：按对话树 CRC32 抽取约 15% 的树专供 eval/benchmarks/ood_dev_v1.tsv。按树而非按消息划分，
+# 保证同一段对话不会一半进训练、一半进评测。
+HOLDOUT_PER_1000 = 150
+
+
+def is_heldout_tree(tree_id: str) -> bool:
+    tree_id = str(tree_id or "")
+    return bool(tree_id) and zlib.crc32(tree_id.encode()) % 1000 < HOLDOUT_PER_1000
+
 
 FENCE_RE = re.compile(r"```.*?(```|\Z)", re.S)
 INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
@@ -68,6 +79,9 @@ def convert(lines, out_dir: Path) -> Counter:
             stats["messages"] += 1
             if not keep_message(m):
                 continue
+            if is_heldout_tree(m.get("message_tree_id", "")):
+                stats["heldout_skipped"] += 1
+                continue
             role = m["role"]
             paras = clean_markdown(str(m.get("text", "")))
             if not paras:
@@ -80,6 +94,17 @@ def convert(lines, out_dir: Path) -> Counter:
         for f in files.values():
             f.close()
     return stats
+
+
+def heldout_prompter_paragraphs(path: Path) -> list[str]:
+    """评测留出树中的英文用户提问段落（经与训练侧相同的过滤与 Markdown 清洗）。"""
+    out: list[str] = []
+    with gzip.open(path, "rt", encoding="utf-8") as f:
+        for raw in f:
+            m = json.loads(raw)
+            if keep_message(m) and m["role"] == "prompter" and is_heldout_tree(m.get("message_tree_id", "")):
+                out.extend(clean_markdown(str(m.get("text", ""))))
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:

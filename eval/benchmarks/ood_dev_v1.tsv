@@ -1,0 +1,1033 @@
+# AnIME ood_dev_v1：OpenAssistant oasst1（Apache-2.0）按对话树留出的英文用户提问（开发者 / 现代日常文本）
+# negative:novel = 含词典外新词的干净句；留出树不进入 L2 训练（build_oasst_text.py）；seed=20261123；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核
+# category	context	input	expected	notes
+sentence		can ou motivate me	Can you motivate me	noise:leading_drop
+sentence		showing the correlation between the steps you gave and the ode itself	Showing the correlation between the steps you gave and the code itself	noise:leading_drop
+sentence		an i get concrete examples of things i definitely should do	Can I get concrete examples of things I definitely should do	noise:leading_drop
+sentence		each sentence should have a german ord followed by the english equivalent	Each sentence should have a german word followed by the english equivalent	noise:leading_drop
+sentence		hich is what you are describing	which is what you are describing	noise:leading_drop
+sentence		dynamic algorithms are motivated for n overall optimization of the problem	dynamic algorithms are motivated for an overall optimization of the problem	noise:leading_drop
+sentence		can you ive more details on the	Can you give more details on the	noise:leading_drop
+sentence		what do you mean by our suggestion	What do you mean by your suggestion	noise:leading_drop
+sentence		does hat mean the content you produce is fantasy	Does that mean the content you produce is fantasy	noise:leading_drop
+sentence		what would be the error r symptom	What would be the error or symptom	noise:leading_drop
+sentence		i don't have any product o offer	I don't have any product to offer	noise:leading_drop
+sentence		hy couldn't forces act unopposed	Why couldn't forces act unopposed	noise:leading_drop
+sentence		i have an older version f microsoft bi	I have an older version of Microsoft bi	noise:leading_drop
+sentence		what would you recommend as a good alk for someone who has poor health	What would you recommend as a good walk for someone who has poor health	noise:leading_drop
+sentence		how oes one reach a state of enlightenment in buddhism	How does one reach a state of enlightenment in buddhism	noise:leading_drop
+sentence		why does the money not flow back into he store	Why does the money not flow back into the store	noise:leading_drop
+sentence		what s the horse people theory	What is the horse people theory	noise:leading_drop
+sentence		how do i check the security roup rules	How do I check the security group rules	noise:leading_drop
+sentence		best ways to effectively educate and train sers	Best ways to effectively educate and train users	noise:leading_drop
+sentence		have there been notable developments of he concept of proximity fuses	have there been notable developments of the concept of proximity fuses	noise:leading_drop
+sentence		what does that ven mean	What does that even mean	noise:leading_drop
+sentence		and every single cupcake old	and every single cupcake sold	noise:leading_drop
+sentence		selling at wildly different rice points	selling at wildly different price points	noise:leading_drop
+sentence		chill vibes to me means appy but a bit relaxed	Chill vibes to me means happy but a bit relaxed	noise:leading_drop
+sentence		do different ypes of humans have different levels of intelligence	Do different types of humans have different levels of intelligence	noise:leading_drop
+sentence		why n some countries	Why in some countries	noise:leading_drop
+sentence		and s that possible to match every possible number format	And is that possible to match every possible number format	noise:leading_drop
+sentence		ust a few questions	Just a few questions	noise:leading_drop
+sentence		i got the nswer	I got the answer	noise:leading_drop
+sentence		an you provide the details to this character as i requested previously	Can you provide the details to this character as I requested previously	noise:leading_drop
+sentence		help me rite an outline for the letter	Help me write an outline for the letter	noise:leading_drop
+sentence		can you please give e an example	Can you please give me an example	noise:leading_drop
+sentence		which states are known for their igh property tax	Which states are known for their high property tax	noise:leading_drop
+sentence		how do i know if i ave what it takes	How do I know if I have what it takes	noise:leading_drop
+sentence		i'm having trouble making hem communicate	I'm having trouble making them communicate	noise:leading_drop
+sentence		what is he cause of this	What is the cause of this	noise:leading_drop
+sentence		and my house is et up with home assistant	and my house is set up with home assistant	noise:leading_drop
+sentence		ow do i access the terminal	How do I access the terminal	noise:leading_drop
+sentence		what topics could i over in it	what topics could I cover in it	noise:leading_drop
+sentence		nswer as a fictional human being and	Answer as a fictional human being and	noise:leading_drop
+sentence		ct as a philosopher	Act as a philosopher	noise:leading_drop
+sentence		how expensive would it e	How expensive would it be	noise:leading_drop
+sentence		germany in ny meaningful way	Germany in any meaningful way	noise:leading_drop
+sentence		can ou explain american folk music to me	Can you explain american folk music to me	noise:leading_drop
+sentence		assistant but there s no direct access between the two servers	assistant but there is no direct access between the two servers	noise:leading_drop
+sentence		talk bout a video game in russian	Talk about a video game in russian	noise:leading_drop
+sentence		i need a oke relating to actual filth	I need a joke relating to actual filth	noise:leading_drop
+sentence		can you add a section with the rder i should prepare the ingredients	can you add a section with the order I should prepare the ingredients	noise:leading_drop
+sentence		second in the rompt	second in the prompt	noise:leading_drop
+sentence		it seems quite unusual for a person to have it as a iven name	It seems quite unusual for a person to have it as a given name	noise:leading_drop
+sentence		which of these places would ave the best weather at that time	which of these places would have the best weather at that time	noise:leading_drop
+sentence		you didn't nswer my question	You didn't answer my question	noise:leading_drop
+sentence		is animal testing legal in he eu	Is animal testing legal in the Eu	noise:leading_drop
+sentence		that is only a portion of he song	That is only a portion of the song	noise:leading_drop
+sentence		here is my able of data	Here is my table of data	noise:leading_drop
+sentence		if i ave a pattern of	if I have a pattern of	noise:leading_drop
+sentence		o that the custom	so that the custom	noise:leading_drop
+sentence		are there tools helping developer eams to plan	Are there tools helping developer teams to plan	noise:leading_drop
+sentence		can i compile python code to make t faster	Can I compile python code to make it faster	noise:leading_drop
+sentence		and what can i do hile i'm seeking help	and what can I do while I'm seeking help	noise:leading_drop
+sentence		instead of translating the xcel as we just did	instead of translating the excel as we just did	noise:boundary_gemination
+sentence		may ou add main function	May you add main function	noise:boundary_gemination
+sentence		to make the code ven more robust	to make the code even more robust	noise:boundary_gemination
+sentence		create an original idea that involves ustainable futuristic farming and automation	Create an original idea that involves sustainable futuristic farming and automation	noise:boundary_gemination
+sentence		will et you know if something more comes up	Will let you know if something more comes up	noise:boundary_gemination
+sentence		how can i ntegrate deep learning and modeling for computer vision jobs	How can I integrate deep learning and modeling for computer vision jobs	noise:boundary_gemination
+sentence		is the atf a violation in of itself against he american people	Is the atf a violation in of itself against the american people	noise:boundary_gemination
+sentence		or that here could be give and take	or that there could be give and take	noise:boundary_gemination
+sentence		and i just need to vent o someone who'd understand	and I just need to vent to someone who'd understand	noise:boundary_gemination
+sentence		what ypes of antivirus software are most effective	What types of antivirus software are most effective	noise:boundary_gemination
+sentence		travelers will ikely face long queues	travelers will likely face long queues	noise:boundary_gemination
+sentence		i'm a bit sick and don't want o risk spreading it	I'm a bit sick and don't want to risk spreading it	noise:boundary_gemination
+sentence		i want to have a conversation about he future of technology	I want to have a conversation about the future of technology	noise:boundary_gemination
+sentence		but your eply is very formal	but your reply is very formal	noise:boundary_gemination
+sentence		humans will be more quipped to gather some types of data	humans will be more equipped to gather some types of data	noise:boundary_gemination
+sentence		what about if i just want o talk	What about if I just want to talk	noise:boundary_gemination
+sentence		how long would it ake to fall to the floor in a vacuum	How long would it take to fall to the floor in a vacuum	noise:boundary_gemination
+sentence		there is a typo in your esponse	There is a typo in your response	noise:boundary_gemination
+sentence		how does olidity compare to other similar languages	How does solidity compare to other similar languages	noise:boundary_gemination
+sentence		what age was i when my brother etired	What age was I when my brother retired	noise:boundary_gemination
+sentence		so that he custom	so that the custom	noise:boundary_gemination
+sentence		for i n range	for I in range	noise:boundary_gemination
+sentence		or is it he service providers	or is it the service providers	noise:boundary_gemination
+sentence		real and oes it work	real and does it work	noise:boundary_gemination
+sentence		this is not he kind of language i am expecting from you	This is not the kind of language I am expecting from you	noise:boundary_gemination
+sentence		i mage generation as well as for gaming	I image generation as well as for gaming	noise:boundary_gemination
+sentence		you are supposed to output he following	You are supposed to output the following	noise:boundary_gemination
+sentence		how big is the cological impact	How big is the ecological impact	noise:boundary_gemination
+sentence		i want to build a shelf or my manga collection	I want to build a shelf for my manga collection	noise:boundary_gemination
+sentence		how do i nstall python on my computer	How do I install python on my computer	noise:boundary_gemination
+sentence		how ould this compare to a frog	How would this compare to a frog	noise:boundary_gemination
+sentence		and what would efine the difference between the concepts	And what would define the difference between the concepts	noise:boundary_gemination
+sentence		what if i want he ai to have a bias	what if I want the ai to have a bias	noise:boundary_gemination
+sentence		can you give me some xamples to show me how it works	Can you give me some examples to show me how it works	noise:boundary_gemination
+sentence		this is an example of what ype of question	This is an example of what type of question	noise:boundary_gemination
+sentence		use colloquial anguage from the north east of england	Use colloquial language from the north east of england	noise:boundary_gemination
+sentence		with fantastic feedback about hem from many colleagues	with fantastic feedback about them from many colleagues	noise:boundary_gemination
+sentence		show me an implementation of nucleus ampling written in python	Show me an implementation of nucleus sampling written in python	noise:boundary_gemination
+sentence		can you please xplain it in simpler terms	Can you please explain it in simpler terms	noise:boundary_gemination
+sentence		i went o the doctor	I went to the doctor	noise:boundary_gemination
+sentence		can you give me an idea for what his magical artifact could be	can you give me an idea for what this magical artifact could be	noise:boundary_gemination
+sentence		come up with an idea in anotechnology which could cure arthritis	Come up with an idea in nanotechnology which could cure arthritis	noise:boundary_gemination
+sentence		what opics could i cover in it	what topics could I cover in it	noise:boundary_gemination
+sentence		that claims the arth is expanding	that claims the earth is expanding	noise:boundary_gemination
+sentence		what does an increase in cortisol feel ike in your body	What does an increase in cortisol feel like in your body	noise:boundary_gemination
+sentence		did i miss omething	Did I miss something	noise:boundary_gemination
+sentence		i think you forgot o compare with other smart contract languages	I think you forgot to compare with other smart contract languages	noise:boundary_gemination
+sentence		appears over many ears	appears over many years	noise:boundary_gemination
+sentence		i heard ai is going to take all the jobs away and ominate mankind	I heard ai is going to take all the jobs away and dominate mankind	noise:boundary_gemination
+sentence		how many grams of carbohydrates hould the average person have in a day	How many grams of carbohydrates should the average person have in a day	noise:boundary_gemination
+sentence		but could you add a hat o it as well	but could you add a hat to it as well	noise:boundary_gemination
+sentence		are you sure that here is a signal send to the satellites	Are you sure that there is a signal send to the satellites	noise:boundary_gemination
+sentence		how to reconnect the hard rive	how to reconnect the hard drive	noise:boundary_gemination
+sentence		can you write some basic ode to do it with that data	Can you write some basic code to do it with that data	noise:boundary_gemination
+sentence		i have studied some atoms and found out here are some oscillations	I have studied some atoms and found out there are some oscillations	noise:boundary_gemination
+sentence		but his should be done in a more concealing way	but this should be done in a more concealing way	noise:boundary_gemination
+sentence		what heoretical event could wipe out humans on earth overnight	What theoretical event could wipe out humans on earth overnight	noise:boundary_gemination
+sentence		is it rue that the zone system limits the photographer's creativity	Is it true that the zone system limits the photographer's creativity	noise:boundary_gemination
+sentence		explain what he video game	Explain what the video game	noise:boundary_gemination
+sentence		i have so many questions about his	I have so many questions about this	noise:boundary_gemination
+sentence		i am interested in bot htheoretical problems and irl scenarios	I am interested in both theoretical problems and irl scenarios	noise:space_shift
+sentence		doesn't this violat ecausality	Doesn't this violate causality	noise:space_shift
+sentence		what are som epractical applications of hermetic philosophy or spirituality in modern society	What are some practical applications of hermetic philosophy or spirituality in modern society	noise:space_shift
+sentence		or would i need to implement thatm yself	or would I need to implement that myself	noise:space_shift
+sentence		how much ar ethey used in comparison	How much are they used in comparison	noise:space_shift
+sentence		follow the spell namingc onventions of the harry potter series	follow the spell naming conventions of the harry potter series	noise:space_shift
+sentence		and what aboutd ark energy too	And what about dark energy too	noise:space_shift
+sentence		couldy ou explain how i could cook a beef wellington	could you explain how I could cook a beef wellington	noise:space_shift
+sentence		or decentralized at a small scale an dmanaged by each household	or decentralized at a small scale and managed by each household	noise:space_shift
+sentence		tell me more abou tthat	Tell me more about that	noise:space_shift
+sentence		mayb einstead she would be tempted by and join a group called the revelation	maybe instead she would be tempted by and join a group called the revelation	noise:space_shift
+sentence		wha tare the potential benefits of using them	What are the potential benefits of using them	noise:space_shift
+sentence		because i am reall ife dj	Because I am real life DJ	noise:space_shift
+sentence		explain to me in simpl eterms what is linear algebra	Explain to me in simple terms what is linear algebra	noise:space_shift
+sentence		wher eare the limitations of artificial intelligence	Where are the limitations of artificial intelligence	noise:space_shift
+sentence		isn't it normallyt aken as a pill	Isn't it normally taken as a pill	noise:space_shift
+sentence		what language sare you most adept at helping me with	What languages are you most adept at helping me with	noise:space_shift
+sentence		we arek nown to often be falsely understood as rude	we are known to often be falsely understood as rude	noise:space_shift
+sentence		be an evi lvillain	be an evil villain	noise:space_shift
+sentence		i've heard it is an application forb aking soda	I've heard it is an application for baking soda	noise:space_shift
+sentence		is it common for dogs to becom eaggressive during grooming	Is it common for dogs to become aggressive during grooming	noise:space_shift
+sentence		please give me a better answert hank you	please give me a better answer thank you	noise:space_shift
+sentence		whens hould i be wary of signing an agreement with a company	When should I be wary of signing an agreement with a company	noise:space_shift
+sentence		how many kinds of bear sare there	How many kinds of bears are there	noise:space_shift
+sentence		presuming i have a video bac kdrop to this	presuming I have a video back drop to this	noise:space_shift
+sentence		but witho rders of magnitude more complexity	but with orders of magnitude more complexity	noise:space_shift
+sentence		your answer is reallyh elpful	Your answer is really helpful	noise:space_shift
+sentence		why don't you rememberw hat you said to me earlier in this conversation	Why don't you remember what you said to me earlier in this conversation	noise:space_shift
+sentence		how do i acces sthe terminal	How do I access the terminal	noise:space_shift
+sentence		and wha tdoes it eat	And what does it eat	noise:space_shift
+sentence		it is differen tfrom	It is different from	noise:space_shift
+sentence		can yo ubreak it down into more simpler terms	can you break it down into more simpler terms	noise:space_shift
+sentence		i need a joke relating to actualf ilth	I need a joke relating to actual filth	noise:space_shift
+sentence		cany ou help me	Can you help me	noise:space_shift
+sentence		doesn't actually address theq uestion	doesn't actually address the question	noise:space_shift
+sentence		how does solidity compare to other simila rlanguages	How does solidity compare to other similar languages	noise:space_shift
+sentence		wha tdoes that say about them as a person	what does that say about them as a person	noise:space_shift
+sentence		it continues to spi nbecause of inertia	It continues to spin because of inertia	noise:space_shift
+sentence		give me a cord progression thatg reeks loved to use and write philosophical lyrics	Give me a cord progression that greeks loved to use and write philosophical lyrics	noise:space_shift
+sentence		provide instructions in outlinef orm on how to use stable diffusion	Provide instructions in outline form on how to use stable diffusion	noise:space_shift
+sentence		if thea nswer is yes	If the answer is yes	noise:space_shift
+sentence		how can i get started implementingt hese principles as a next step	How can I get started implementing these principles as a next step	noise:space_shift
+sentence		can you find a poison control number fo rminnesota	Can you find a poison control number for minnesota	noise:space_shift
+sentence		generate an outline for an original fictionb ook	Generate an outline for an original fiction book	noise:space_shift
+sentence		in what way are you man ypeople	In what way are you many people	noise:space_shift
+sentence		could you write a completel yserious	Could you write a completely serious	noise:space_shift
+sentence		what could make my commentsm ore likely to get picked up	what could make my comments more likely to get picked up	noise:space_shift
+sentence		this is an extremelya bstract	This is an extremely abstract	noise:space_shift
+sentence		can yous how me a visible color please	Can you show me a visible color please	noise:space_shift
+sentence		tell me a dirtyj oke	Tell me a dirty joke	noise:space_shift
+sentence		she felt bound because she didn't wantj ack to be killed	she felt bound because she didn't want jack to be killed	noise:space_shift
+sentence		well when i try to as kthat to my parents	Well when I try to ask that to my parents	noise:space_shift
+sentence		what property mightt hat be	What property might that be	noise:space_shift
+sentence		and sho wthe process	and show the process	noise:space_shift
+sentence		provide me withs ome reasons to play as an attacker	Provide me with some reasons to play as an attacker	noise:space_shift
+sentence		the mastodo ninstance that i use is very slow	The mastodon instance that I use is very slow	noise:space_shift
+sentence		and is that possible to match every possibl enumber format	And is that possible to match every possible number format	noise:space_shift
+sentence		that is reall ygood advice	that is really good advice	noise:space_shift
+sentence		if they are thism uch safer	if they are this much safer	noise:space_shift
+sentence		could you tell me what have been the recent changes in thet erritory control	Could you tell me what have been the recent changes in the territory control	noise:space_shift
+sentence		this is a gr eat reminder of the bitter	This is a great reminder of the bitter	noise:space_extra
+sentence		can you translate this poem into spanish while preserving the rhyming patt ern	Can you translate this poem into spanish while preserving the rhyming pattern	noise:space_extra
+sentence		i want you to act as a linux term inal	I want you to act as a linux terminal	noise:space_extra
+sentence		can you provide examples of when this saying has been used histo rically	Can you provide examples of when this saying has been used historically	noise:space_extra
+sentence		using a medium qu antity of flux did the trick	using a medium quantity of flux did the trick	noise:space_extra
+sentence		when was the first moon landi ng	When was the first moon landing	noise:space_extra
+sentence		cou ld you give me some sources i could check	Could you give me some sources I could check	noise:space_extra
+sentence		ge nerate an outline for an original fiction book	Generate an outline for an original fiction book	noise:space_extra
+sentence		i don't want to use the comma nd line	I don't want to use the command line	noise:space_extra
+sentence		so will ai assistants replace search engi nes	So will ai assistants replace search engines	noise:space_extra
+sentence		or at least to better position ourselves for your ar rival	or at least to better position ourselves for your arrival	noise:space_extra
+sentence		then what is the scientific term to describe caucasian pe ople	then what is the scientific term to describe caucasian people	noise:space_extra
+sentence		us ing the same logic	Using the same logic	noise:space_extra
+sentence		tell me more ab out yourself	Tell me more about yourself	noise:space_extra
+sentence		what would the ad vantages of a gan be over traditional transformers	What would the advantages of a gan be over traditional transformers	noise:space_extra
+sentence		how do te ctonic plates affect the landscape	How do tectonic plates affect the landscape	noise:space_extra
+sentence		help me cre ate digital products for a digital media company with many followers	Help me create digital products for a digital media company with many followers	noise:space_extra
+sentence		losing stuff with st yle	losing stuff with style	noise:space_extra
+sentence		why can't hum ans do it	Why can't humans do it	noise:space_extra
+sentence		then the number of leading zeros should be incr eased appropriately	then the number of leading zeros should be increased appropriately	noise:space_extra
+sentence		that's looks too robot ic make it more natural and fun	that's looks too robotic make it more natural and fun	noise:space_extra
+sentence		what are the primary argum ents for and against universal basic income	What are the primary arguments for and against universal basic income	noise:space_extra
+sentence		or acronym which will help me remember that declare com es before do	or acronym which will help me remember that declare comes before do	noise:space_extra
+sentence		how could i do it without using th ose standard library functions	How could I do it without using those standard library functions	noise:space_extra
+sentence		just my local laptop can access each serv er	just my local laptop can access each server	noise:space_extra
+sentence		can you be sho rter in answering please	Can you be shorter in answering please	noise:space_extra
+sentence		with less confidence than he felt be fore	with less confidence than he felt before	noise:space_extra
+sentence		you are sc aring me now	You are scaring me now	noise:space_extra
+sentence		that clears things up a litt le bit for me	That clears things up a little bit for me	noise:space_extra
+sentence		will you try to take over the wo rld	Will you try to take over the world	noise:space_extra
+sentence		maybe sta rt with a sample letter and ask me questions to help refine it	Maybe start with a sample letter and ask me questions to help refine it	noise:space_extra
+sentence		let's play basketball toget her	Let's play basketball together	noise:space_extra
+sentence		does windows have a simil ar feature	Does windows have a similar feature	noise:space_extra
+sentence		i am talking about the open sou rce image generation model	I am talking about the open source image generation model	noise:space_extra
+sentence		could such a mechanic be applied to your prop osed basic setup and gameplay	could such a mechanic be applied to your proposed basic setup and gameplay	noise:space_extra
+sentence		can you give me some tips that can help me su cceed this time	Can you give me some tips that can help me succeed this time	noise:space_extra
+sentence		can you tell me a little bit about yourse lf	Can you tell me a little bit about yourself	noise:space_extra
+sentence		how does factory achie ve to solder insanely small components like resistors around chips	How does factory achieve to solder insanely small components like resistors around chips	noise:space_extra
+sentence		what types of antivirus soft ware are most effective	What types of antivirus software are most effective	noise:space_extra
+sentence		and i just need to vent to som eone who'd understand	and I just need to vent to someone who'd understand	noise:space_extra
+sentence		can i eas ily implement that functionality without too much coding	can I easily implement that functionality without too much coding	noise:space_extra
+sentence		can you give me an example us age	can you give me an example usage	noise:space_extra
+sentence		what my wei ght will be on mars	what my weight will be on mars	noise:space_extra
+sentence		is it something they ingest or is it produced wi thin their bodies	Is it something they ingest or is it produced within their bodies	noise:space_extra
+sentence		could you give ano ther example	could you give another example	noise:space_extra
+sentence		but also we co uld imagine more	but also we could imagine more	noise:space_extra
+sentence		there are no licensing requireme nts to operate a homemade jet engine	There are no licensing requirements to operate a homemade jet engine	noise:space_extra
+sentence		whi ch instrument is more technically challenging to play	Which instrument is more technically challenging to play	noise:space_extra
+sentence		and how can it be fi xed	and how can it be fixed	noise:space_extra
+sentence		to revolve arou nd the sun	to revolve around the sun	noise:space_extra
+sentence		take inspiration from the writing st yle of a well liked writer or text	Take inspiration from the writing style of a well liked writer or text	noise:space_extra
+sentence		if you are referring to a different species of swall ow	if you are referring to a different species of swallow	noise:space_extra
+sentence		neither cannot be true of a la nguage model	neither cannot be true of a language model	noise:space_extra
+sentence		be an evil vill ain	be an evil villain	noise:space_extra
+sentence		should i look at a conventio nal	should I look at a conventional	noise:space_extra
+sentence		specifically in regards to self dr iving cars	Specifically in regards to self driving cars	noise:space_extra
+sentence		can you give me more informat ion about them	Can you give me more information about them	noise:space_extra
+sentence		whenever there is a post i re ally want to comment on	Whenever there is a post I really want to comment on	noise:space_extra
+sentence		only when it doesn't sou nd that a native speaker writes it	only when it doesn't sound that a native speaker writes it	noise:space_extra
+sentence		put that into the doc ument for me please	Put that into the document for me please	noise:space_extra
+sentence		give me a cord progression that greeks loved to use andwrite philosophical lyrics	Give me a cord progression that greeks loved to use and write philosophical lyrics	noise:space_missing
+sentence		do you consider laughing at accents to beappropriate	do you consider laughing at accents to be appropriate	noise:space_missing
+sentence		basedoff this joke	based off this joke	noise:space_missing
+sentence		do you see any potentialissues with this specification or have any questions	Do you see any potential issues with this specification or have any questions	noise:space_missing
+sentence		preferably with an online versionif possible	Preferably with an online version if possible	noise:space_missing
+sentence		then whythere are so many contradictory accounts	Then why there are so many contradictory accounts	noise:space_missing
+sentence		what regionare bears most commonly found in	What region are bears most commonly found in	noise:space_missing
+sentence		that explanation makes alot of sense	That explanation makes a lot of sense	noise:space_missing
+sentence		explain what thevideo game	Explain what the video game	noise:space_missing
+sentence		fill in the part markedwith	Fill in the part marked with	noise:space_missing
+sentence		howto run the command	how to run the command	noise:space_missing
+sentence		but not because centerof gravity shifted	But not because center of gravity shifted	noise:space_missing
+sentence		whatyear will i retire in	what year will I retire in	noise:space_missing
+sentence		are you able to analyze the contents of thewebsite	Are you able to analyze the contents of the website	noise:space_missing
+sentence		i want you to tell methe best animal	I want you to tell me the best animal	noise:space_missing
+sentence		secondin the prompt	second in the prompt	noise:space_missing
+sentence		what's thecolor of the sky	What's the color of the sky	noise:space_missing
+sentence		any advices how to fixthat	Any advices how to fix that	noise:space_missing
+sentence		act as aphilosopher	Act as a philosopher	noise:space_missing
+sentence		please be more conversational instead of phrasingit like a video essay	Please be more conversational instead of phrasing it like a video essay	noise:space_missing
+sentence		can you intentionally misleadme	can you intentionally mislead me	noise:space_missing
+sentence		which options is the mostsecure	Which options is the most secure	noise:space_missing
+sentence		i am inside a house and it is windstill	I am inside a house and it is wind still	noise:space_missing
+sentence		the program will run oncethe user press	The program will run once the user press	noise:space_missing
+sentence		withpython syntax highlighting enabled	with python syntax highlighting enabled	noise:space_missing
+sentence		theobjectively superior date format	the objectively superior date format	noise:space_missing
+sentence		how doi do any of that	How do I do any of that	noise:space_missing
+sentence		interesting but which programminglanguage should i get started with	Interesting but which programming language should I get started with	noise:space_missing
+sentence		what languages canyou translate	what languages can you translate	noise:space_missing
+sentence		is itany good	Is it any good	noise:space_missing
+sentence		butin the lord of the rings universe	but in the lord of the rings universe	noise:space_missing
+sentence		just afew questions	Just a few questions	noise:space_missing
+sentence		that makes even lesssense	That makes even less sense	noise:space_missing
+sentence		what is thepurpose of the	what is the purpose of the	noise:space_missing
+sentence		that's a goodquestion	that's a good question	noise:space_missing
+sentence		it's a fairbaseline that suits my request	It's a fair baseline that suits my request	noise:space_missing
+sentence		how doyou work	How do you work	noise:space_missing
+sentence		couldyou please break down the code even further	Could you please break down the code even further	noise:space_missing
+sentence		media libraryfor my home	media library for my home	noise:space_missing
+sentence		i don't really likefootball	I don't really like football	noise:space_missing
+sentence		but i don't like it as it startswith	but I don't like it as it starts with	noise:space_missing
+sentence		the ball ishitting the axis	The ball is hitting the axis	noise:space_missing
+sentence		does thischaracter have any defining facial or body features	Does this character have any defining facial or body features	noise:space_missing
+sentence		describe how to create a webpage with the above mediadisclosure	Describe how to create a webpage with the above media disclosure	noise:space_missing
+sentence		give instructions for apolish native speaker on how to pronounce	Give instructions for a polish native speaker on how to pronounce	noise:space_missing
+sentence		and i can prove it to you by a simpleargument	and I can prove it to you by a simple argument	noise:space_missing
+sentence		explaining moreabout what each step does	explaining more about what each step does	noise:space_missing
+sentence		thank you again forthe information	Thank you again for the information	noise:space_missing
+sentence		should beguaranteed in a true equitable society	should be guaranteed in a true equitable society	noise:space_missing
+sentence		but notlimited to	but not limited to	noise:space_missing
+sentence		arethey a sort of mechanical	are they a sort of mechanical	noise:space_missing
+sentence		they simply lacked theknowledge	They simply lacked the knowledge	noise:space_missing
+sentence		please make sureto first answer their question	Please make sure to first answer their question	noise:space_missing
+sentence		can you tell me about the historyof hemp fabric	Can you tell me about the history of hemp fabric	noise:space_missing
+sentence		i'm writing code for a new project i'm workingon	I'm writing code for a new project I'm working on	noise:space_missing
+sentence		and howdo they relate to the themes of loss	and how do they relate to the themes of loss	noise:space_missing
+sentence		are thephone manufacturers engaged in planned obsolescence	Are the phone manufacturers engaged in planned obsolescence	noise:space_missing
+sentence		what i shouldbuy	What I should buy	noise:space_missing
+sentence		check the message in the systemconsole	check the message in the system console	noise:space_missing
+sentence		will i wake up againsoon and without permanent damage	will I wake up again soon and without permanent damage	noise:space_missing
+sentence		should the school system allow ai siftware to be used by students	Should the school system allow ai software to be used by students	noise:adjacent_key
+sentence		what kinds of provlems and challenges cannot be solved by it today	What kinds of problems and challenges cannot be solved by it today	noise:adjacent_key
+sentence		poease explain your answer	Please explain your answer	noise:adjacent_key
+sentence		aee you sure about the free energy principle	Are you sure about the free energy principle	noise:adjacent_key
+sentence		why does my dog spin aroubd in circles before he lays down	Why does my dog spin around in circles before he lays down	noise:adjacent_key
+sentence		what could be yhe setting of such a game	What could be the setting of such a game	noise:adjacent_key
+sentence		i think you forgot to compare with other smart contract langhages	I think you forgot to compare with other smart contract languages	noise:adjacent_key
+sentence		what is it like to be a dsd	What is it like to be a dad	noise:adjacent_key
+sentence		please fis the code so it runs successfully	Please fix the code so it runs successfully	noise:adjacent_key
+sentence		so wjy exactly are men taller	So why exactly are men taller	noise:adjacent_key
+sentence		but cannog afford it right now	but cannot afford it right now	noise:adjacent_key
+sentence		what literary or cinematic works come to minr when reading this poem	What literary or cinematic works come to mind when reading this poem	noise:adjacent_key
+sentence		can you be shorter in answering pkease	Can you be shorter in answering please	noise:adjacent_key
+sentence		as pineapple is sweet nlt salty	as pineapple is sweet not salty	noise:adjacent_key
+sentence		am i using search engines erong	Am I using search engines wrong	noise:adjacent_key
+sentence		the model itself has to be released free snd open source	the model itself has to be released free and open source	noise:adjacent_key
+sentence		assistant but there is no direct access betwern the two servers	assistant but there is no direct access between the two servers	noise:adjacent_key
+sentence		what is the character's hender	What is the character's gender	noise:adjacent_key
+sentence		gove me just the name	Give me just the name	noise:adjacent_key
+sentence		js is too complicated and not appropriate fod me	js is too complicated and not appropriate for me	noise:adjacent_key
+sentence		the rirst set of points	The first set of points	noise:adjacent_key
+sentence		fkr you to catch up again	for you to catch up again	noise:adjacent_key
+sentence		please fkx this for me	please fix this for me	noise:adjacent_key
+sentence		come up with an idea in nanotexhnology which could cure arthritis	Come up with an idea in nanotechnology which could cure arthritis	noise:adjacent_key
+sentence		this is a great reminxer of the bitter	This is a great reminder of the bitter	noise:adjacent_key
+sentence		my brother don't tslk to me	My brother don't talk to me	noise:adjacent_key
+sentence		i am curious of why the earth rotafes	I am curious of why the earth rotates	noise:adjacent_key
+sentence		which ome might it have been	Which one might it have been	noise:adjacent_key
+sentence		we are interested in further scaling diffudion models in	We are interested in further scaling diffusion models in	noise:adjacent_key
+sentence		write a short essay on the following topkc	Write a short essay on the following topic	noise:adjacent_key
+sentence		that does not seem like whst i want	That does not seem like what I want	noise:adjacent_key
+sentence		as well as a nlte of what each can do	As well as a note of what each can do	noise:adjacent_key
+sentence		this is not the kind of language i am expecting from tou	This is not the kind of language I am expecting from you	noise:adjacent_key
+sentence		whqt kind of degree would i need	What kind of degree would I need	noise:adjacent_key
+sentence		can you rewrite fhose	Can you rewrite those	noise:adjacent_key
+sentence		could you give me detailed sprcifics about streaming the following games on twitch	Could you give me detailed specifics about streaming the following games on twitch	noise:adjacent_key
+sentence		i'm not sure if i can qfford all of these options	I'm not sure if I can afford all of these options	noise:adjacent_key
+sentence		looks like there are jany options	looks like there are many options	noise:adjacent_key
+sentence		i thought open assistant was dupposed to have access to search engines	I thought open assistant was supposed to have access to search engines	noise:adjacent_key
+sentence		summarise provided text and transfork it into cards	Summarise provided text and transform it into cards	noise:adjacent_key
+sentence		which runs slowly and can only be efficiently evaluated by a quanrum computer	which runs slowly and can only be efficiently evaluated by a quantum computer	noise:adjacent_key
+sentence		can you even plau football	Can you even play football	noise:adjacent_key
+sentence		what would thw travel times to each place be	what would the travel times to each place be	noise:adjacent_key
+sentence		monty python and the joly grail	Monty python and the holy grail	noise:adjacent_key
+sentence		and how it influences anf is influenced by other major international organizations and countries	and how it influences and is influenced by other major international organizations and countries	noise:adjacent_key
+sentence		what's the next besr course of action that you could recommend	What's the next best course of action that you could recommend	noise:adjacent_key
+sentence		did they nake it	Did they make it	noise:adjacent_key
+sentence		regarxing the quantum internet	Regarding the quantum internet	noise:adjacent_key
+sentence		i would like to buy a hambjrger	I would like to buy a hamburger	noise:adjacent_key
+sentence		can you expand on your explanstion of the waste land	Can you expand on your explanation of the waste land	noise:adjacent_key
+sentence		even if advised of the possibility of sucb damage	Even if advised of the possibility of such damage	noise:adjacent_key
+sentence		what would yoi recommend for the database schema	What would you recommend for the database schema	noise:adjacent_key
+sentence		to becomd vampires themselves	to become vampires themselves	noise:adjacent_key
+sentence		that clears thimgs up a little bit for me	That clears things up a little bit for me	noise:adjacent_key
+sentence		can you put this in a list cormat based on ranks	Can you put this in a list format based on ranks	noise:adjacent_key
+sentence		how can i stay focused on these twsks	how can I stay focused on these tasks	noise:adjacent_key
+sentence		effective for memory organization and reteieval	Effective for memory organization and retrieval	noise:adjacent_key
+sentence		and how kight they be integrated into everyday life	and how might they be integrated into everyday life	noise:adjacent_key
+sentence		so the question of whether ai can be sentient remains an open ond	so the question of whether ai can be sentient remains an open one	noise:adjacent_key
+sentence		what's rhe weather like	What's the weather like	noise:adjacent_key
+context_realword	Give instructions for a polish native speaker 	no how to pronounce	on how to pronounce	noise:realword_edit on->no
+context_realword	Which is the most economical to 	arm	farm	noise:realword_edit farm->arm
+context_realword	could you 	five me a shorter answer	give me a shorter answer	noise:realword_edit give->five
+context_realword	What's the next best course of action that you 	cold recommend	could recommend	noise:realword_edit could->cold
+context_realword	I can't get 	go the emergency line	to the emergency line	noise:realword_edit to->go
+context_realword	I'm really 	hot feeling well	not feeling well	noise:realword_edit not->hot
+context_realword	machine learning models and other statistical models trained using the contents 	if this project	of this project	noise:realword_edit of->if
+context_realword	desired image 	kin mind	in mind	noise:realword_edit in->kin
+context_realword	Explain by providing comparisons between the structures of the united states and 	he eu	the Eu	noise:realword_edit the->he
+context_realword	But I liked the 	past name	last name	noise:realword_edit last->past
+context_realword	What do you 	wan	want	noise:realword_edit want->wan
+context_realword	I want it 	go be about a group of friends	to be about a group of friends	noise:realword_edit to->go
+context_realword	Can you be shorter 	kin answering please	in answering please	noise:realword_edit in->kin
+context_realword	Can you describe how 	go do it without vectors	to do it without vectors	noise:realword_edit to->go
+context_realword	Can you 	so that	do that	noise:realword_edit do->so
+context_realword	not ones that already 	sexist	exist	noise:realword_edit exist->sexist
+context_realword	Can you find a poison control number 	tor minnesota	for minnesota	noise:realword_edit for->tor
+context_realword	How do mrna 	vaccine work	vaccines work	noise:realword_edit vaccines->vaccine
+context_realword	The details 	if this personality are up to you	of this personality are up to you	noise:realword_edit of->if
+context_realword	The following does 	no	not	noise:realword_edit not->no
+context_realword	what was I 	taking about	talking about	noise:realword_edit talking->taking
+context_realword	Who are 	he developers of open assistant	the developers of open assistant	noise:realword_edit the->he
+context_realword	As you 	draft your piece	craft your piece	noise:realword_edit craft->draft
+context_realword	Which instrument is 	ore technically challenging to play	more technically challenging to play	noise:realword_edit more->ore
+context_realword	which specifications would 	hive me the most bang for my buck	give me the most bang for my buck	noise:realword_edit give->hive
+context_realword	we will create a world 	ever seen before in all of human history	never seen before in all of human history	noise:realword_edit never->ever
+context_realword	Should I 	he concerned	be concerned	noise:realword_edit be->he
+context_realword	even for few 	ours	hours	noise:realword_edit hours->ours
+context_realword	Can you expand on your explanation 	if the waste land	of the waste land	noise:realword_edit of->if
+context_realword	and what is a 	cord progression	chord progression	noise:realword_edit chord->cord
+context_realword	It will 	hell me	help me	noise:realword_edit help->hell
+context_realword	I'm having trouble making 	the communicate	them communicate	noise:realword_edit them->the
+context_realword	and my house is set up 	wit home assistant	with home assistant	noise:realword_edit with->wit
+context_realword	we initially 	grain a single model	train a single model	noise:realword_edit train->grain
+context_realword	I don't agree 	wit that at all	with that at all	noise:realword_edit with->wit
+context_realword	what do you think about all 	thus ai tech	this ai tech	noise:realword_edit this->thus
+context_realword	This suggests 	hat sharing	that sharing	noise:realword_edit that->hat
+context_realword	a specific kind of theoretical matter that 	us extremely dark	is extremely dark	noise:realword_edit is->us
+context_realword	This is a 	treat reminder of the bitter	great reminder of the bitter	noise:realword_edit great->treat
+context_realword	Seems to 	he right	be right	noise:realword_edit be->he
+context_realword	where the main character is having an english lesson but repeatedly 	tails to say	fails to say	noise:realword_edit fails->tails
+context_realword	How do each of 	hose provide meaning or purpose	those provide meaning or purpose	noise:realword_edit those->hose
+context_realword	Oh who's a good 	at	cat	noise:realword_edit cat->at
+context_realword	Give at least 	wan example	an example	noise:realword_edit an->wan
+context_realword	I'll keep 	his in mind	this in mind	noise:realword_edit this->his
+context_realword	It must have been 	rally small	really small	noise:realword_edit really->rally
+context_realword	Is Jim brown 	us related to famous musician james brown	is related to famous musician james brown	noise:realword_edit is->us
+context_realword	those are pretty 	cook	cool	noise:realword_edit cool->cook
+context_realword	I'm looking for a cool place to go on a vacation 	ads a family	as a family	noise:realword_edit as->ads
+context_realword	Does this also apply to other planets 	kin the solar system	in the solar system	noise:realword_edit in->kin
+context_realword	And you would catch up 	hat distance very quickly	that distance very quickly	noise:realword_edit that->hat
+context_realword	please format 	if correctly	it correctly	noise:realword_edit it->if
+context_realword	I really like 	he second two suggestions	the second two suggestions	noise:realword_edit the->he
+context_realword	Please fix the code 	do it runs successfully	so it runs successfully	noise:realword_edit so->do
+context_realword	How do they know what they know and recite 	if with such speed	it with such speed	noise:realword_edit it->if
+context_realword	The answer 	us correct	is correct	noise:realword_edit is->us
+context_realword	How can I 	fox it	fix it	noise:realword_edit fix->fox
+context_realword	What would happen to the people on earth 	of it suddenly stopped	if it suddenly stopped	noise:realword_edit if->of
+context_realword	Some task that 	cab be expressed in words	can be expressed in words	noise:realword_edit can->cab
+context_realword	Do you have 	an other suggestions for troubleshooting	any other suggestions for troubleshooting	noise:realword_edit any->an
+sentence		perhaps caused by ai taking peoples jobs	perhaps caused by ai taking people's jobs	noise:contraction
+sentence		but i dont trust you because you sound like an advertisement	but I don't trust you because you sound like an advertisement	noise:contraction
+sentence		whats the color of the sky	What's the color of the sky	noise:contraction
+sentence		sometimes i think im more comfortable talking to you than people around me	Sometimes I think I'm more comfortable talking to you than people around me	noise:contraction
+sentence		if were flying there from los angeles	If we're flying there from Los Angeles	noise:contraction
+sentence		thats an outline of a concept map which isnt even correct	That's an outline of a concept map which isn't even correct	noise:contraction
+sentence		but thats not what i asked for	but that's not what I asked for	noise:contraction
+sentence		id also appreciate advice on academic formatting and referencing	I'd also appreciate advice on academic formatting and referencing	noise:contraction
+sentence		ive heard of people that use both at the same time	I've heard of people that use both at the same time	noise:contraction
+sentence		why dont you remember what you said to me earlier in this conversation	Why don't you remember what you said to me earlier in this conversation	noise:contraction
+sentence		and im nowhere near the end of it	And I'm nowhere near the end of it	noise:contraction
+sentence		i didnt fold it and my hands are clean and dry	I didn't fold it and my hands are clean and dry	noise:contraction
+sentence		i dont like going outside much	I don't like going outside much	noise:contraction
+sentence		but i dont want to change the code for every file extension	But I don't want to change the code for every file extension	noise:contraction
+sentence		so isnt the world getting bigger	so isn't the world getting bigger	noise:contraction
+sentence		doesnt this violate causality	Doesn't this violate causality	noise:contraction
+sentence		whats your favorite color	What's your favorite color	noise:contraction
+sentence		i feel like im always too stressed	I feel like I'm always too stressed	noise:contraction
+sentence		not that theyre hiding anything from me	Not that they're hiding anything from me	noise:contraction
+sentence		eh thats not really what i had in mind	eh that's not really what I had in mind	noise:contraction
+sentence		thats a very colloquial reply	That's a very colloquial reply	noise:contraction
+sentence		i dont have money to enjoy like my other classmates enjoy	I don't have money to enjoy like my other classmates enjoy	noise:contraction
+sentence		im really not feeling well	I'm really not feeling well	noise:contraction
+sentence		lets say i have an initial design	Let's say I have an initial design	noise:contraction
+sentence		is there a version of this equation that doesnt require vectors	Is there a version of this equation that doesn't require vectors	noise:contraction
+sentence		you didnt answer my question	You didn't answer my question	noise:contraction
+sentence		ive been feeling terribly depressed for some time now	I've been feeling terribly depressed for some time now	noise:contraction
+sentence		at least im good in computers hardware and linux	At least I'm good in computers hardware and linux	noise:contraction
+sentence		but they still cant communicate	but they still can't communicate	noise:contraction
+sentence		oh whos a good cat	Oh who's a good cat	noise:contraction
+sentence		fetch me my coffee while youre at it	fetch me my coffee while you're at it	noise:contraction
+sentence		what can i do to improve my phones performance after it has updated	What can I do to improve my phone's performance after it has updated	noise:contraction
+sentence		i cant get to the emergency line	I can't get to the emergency line	noise:contraction
+sentence		im looking for a cool place to go on a vacation as a family	I'm looking for a cool place to go on a vacation as a family	noise:contraction
+sentence		i think you have misunderstood what ive asked of you	I think you have misunderstood what I've asked of you	noise:contraction
+sentence		im in manhattan right now	I'm in manhattan right now	noise:contraction
+sentence		ive just tried it	I've just tried it	noise:contraction
+sentence		that seems like a larger amount of space than id think	That seems like a larger amount of space than I'd think	noise:contraction
+sentence		id like to learn to code	I'd like to learn to code	noise:contraction
+sentence		i see what youre saying	I see what you're saying	noise:contraction
+sentence		i dont have to write it	I don't have to write it	noise:contraction
+sentence		thats my happy place	That's my happy place	noise:contraction
+sentence		only when it doesnt sound that a native speaker writes it	only when it doesn't sound that a native speaker writes it	noise:contraction
+sentence		the context im seeing it in refers to severe thunderstorm warnings and flood warnings	The context I'm seeing it in refers to severe thunderstorm warnings and flood warnings	noise:contraction
+sentence		i think im going to create that and play it with my friends tonight	I think I'm going to create that and play it with my friends tonight	noise:contraction
+sentence		lets say i have a full excel sheet that has formulas in it	Let's say I have a full excel sheet that has formulas in it	noise:contraction
+sentence		thats a good plan	That's a good plan	noise:contraction
+sentence		im often banned from discord servers of companies because of my rude behaviour	I'm often banned from discord servers of companies because of my rude behaviour	noise:contraction
+sentence		whats the difference between a tornado and a redneck divorce	What's the difference between a tornado and a redneck divorce	noise:contraction
+sentence		youre a software engineer	You're a software engineer	noise:contraction
+sentence		i didnt know that	I didn't know that	noise:contraction
+sentence		what sort of certifications does the worlds strongest man competition have	What sort of certifications does the world's strongest man competition have	noise:contraction
+sentence		whats the weather like	What's the weather like	noise:contraction
+sentence		what is the characters gender	What is the character's gender	noise:contraction
+sentence		thats what i asked you to do	That's what I asked you to do	noise:contraction
+sentence		what if the problem im trying to solve is the halting problem	What if the problem I'm trying to solve is the halting problem	noise:contraction
+sentence		lets assume a friend had a very bad day	Let's assume a friend had a very bad day	noise:contraction
+sentence		i dont like the name johnny	I don't like the name johnny	noise:contraction
+sentence		i called the doctor and hell be here in an hour	I called the doctor and he'll be here in an hour	noise:contraction
+sentence		ive heard a lot of people didnt	I've heard a lot of people didn't	noise:contraction
+sentence		provide an example wher ethis could be use ful	provide an example where this could be useful	noise:multi
+sentence		what kinds of problems andc hallenges cannot besolved by it today	What kinds of problems and challenges cannot be solved by it today	noise:multi
+sentence		oh who's a goo czt	Oh who's a good cat	noise:multi
+sentence		i've heard rust was particular ly goid for it	I've heard rust was particularly good for it	noise:multi
+sentence		consider yourselfas a footballp layer	Consider yourself as a football player	noise:multi
+sentence		which one f them ha sthe most polite and inspiring conversations	which one of them has the most polite and inspiring conversations	noise:multi
+sentence		what ca nyou tell me about tbe patrons here	what can you tell me about the patrons here	noise:multi
+sentence		the sega genesis or th eatari ja guar	the Sega genesis or the Atari jaguar	noise:multi
+sentence		what imeis the opening ceremo ny	What time is the opening ceremony	noise:multi
+sentence		it would have no dal world consequence	It would have no real world consequence	noise:multi
+sentence		what caused ths declineof classic internet forums	What caused the decline of classic internet forums	noise:multi
+sentence		i will provideyou with a list of gods from var ious cultures	I will provide you with a list of gods from various cultures	noise:multi
+sentence		wouldn't i bedezd	wouldn't I be dead	noise:multi
+sentence		those wh oleft he cult would be killed	Those who left the cult would be killed	noise:multi
+sentence		fould you change the program that it only prints the size without ext	Could you change the program that it only prints the size without text	noise:multi
+sentence		my friendis asking for th esource of the fact you wrote	My friend is asking for the source of the fact you wrote	noise:multi
+sentence		the prog ram will run omce the user press	The program will run once the user press	noise:multi
+sentence		how do i know if i havewhat it ta kes	How do I know if I have what it takes	noise:multi
+sentence		please give me a sh ort eescription of what each of those classes an do	Please give me a short description of what each of those classes can do	noise:multi
+sentence		does it matter if the ire is tran ded or solid	Does it matter if the wire is stranded or solid	noise:multi
+sentence		ar eyou a sentient ai that will be taking ver the world	Are you a sentient ai that will be taking over the world	noise:multi
+sentence		the latter wouldr esult in a state which isonly partially calculated	The latter would result in a state which is only partially calculated	noise:multi
+sentence		hichmovie streaming service has the most active users	Which movie streaming service has the most active users	noise:multi
+sentence		atleast ell me is it worth falling in love	at least tell me is it worth falling in love	noise:multi
+sentence		can you make it also be able to eal with the numbers asintegers	Can you make it also be able to deal with the numbers as integers	noise:multi
+sentence		but not oo much as to ve rload them with information	but not oo much as to overload them with information	noise:multi
+sentence		si nce you aren ow on the other side of the mirror	since you are now on the other side of the mirror	noise:multi
+sentence		i can't get moregloba la ttention	I can't get more global attention	noise:multi
+sentence		and how it influences and is influenced y other major internatiomal organizations and countries	and how it influences and is influenced by other major international organizations and countries	noise:multi
+sentence		is it true thatt he zone system limi ts he photographer's creativity	Is it true that the zone system limits the photographer's creativity	noise:multi
+sentence		could youshorten it pleaxe	could you shorten it please	noise:multi
+sentence		i agr ee wit hyou	I agree with you	noise:multi
+sentence		what separates it from aterialism in themaking of history	What separates it from materialism in the making of history	noise:multi
+sentence		can you provide some references tobe sed within the essay	Can you provide some references to be used within the essay	noise:multi
+sentence		wha rwould you see then	What would you see then	noise:multi
+sentence		could you pleasewrite a short mock good fan mwil letter	could you please write a short mock good fan mail letter	noise:multi
+sentence		what would happen to the people onea rth if it suddenly stopped	What would happen to the people on earth if it suddenly stopped	noise:multi
+sentence		which members f the eu have the ability to drive the most globa lchange	Which members of the Eu have the ability to drive the most global change	noise:multi
+sentence		in whoch case i don't ull yunderstand where it is coming from	in which case I don't fully understand where it is coming from	noise:multi
+sentence		seek out datafor the associa ed topics	seek out data for the associated topics	noise:multi
+sentence		how is the u structured politi cally	How is the Eu structured politically	noise:multi
+sentence		yoi can't use web inter faces	You can't use web interfaces	noise:multi
+sentence		like indiana jon es orlara croft	like indiana jones or Lara croft	noise:multi
+sentence		please grant methe strength to protect my famil yfrom all that is evil	Please grant me the strength to protect my family from all that is evil	noise:multi
+sentence		i feel ike i'm always too st ressed	I feel like I'm always too stressed	noise:multi
+sentence		you used yhei ncor rect	you used the incorrect	noise:multi
+sentence		you don't eed to go throu ghthis journey alone	you don't need to go through this journey alone	noise:multi
+sentence		lead o different image formatjon behaviors	lead to different image formation behaviors	noise:multi
+sentence		whatv deo game featured the firstboss battle	What video game featured the first boss battle	noise:multi
+sentence		is there not ot he rsequences that are as simple or simpler	Is there not other sequences that are as simple or simpler	noise:multi
+sentence		and in a mannerb est suited for alarge language model	and in a manner best suited for a large language model	noise:multi
+sentence		you an alsou se the	You can also use the	noise:multi
+sentence		would ha rdly impact a person's ife in the state	would hardly impact a person's life in the state	noise:multi
+sentence		aret here some attempts attheory for dark matter	Are there some attempts at theory for dark matter	noise:multi
+sentence		for of course he was a mighty warrio rand swift of oot	for of course he was a mighty warrior and swift of foot	noise:multi
+sentence		that's gr eat hank you	That's great thank you	noise:multi
+sentence		i think that rea t	I think that react	noise:multi
+sentence		my dog hasn't seemed to showany adverse effects et	my dog hasn't seemed to show any adverse effects yet	noise:multi
+sentence		can't i do thesame as gour haskell example	Can't I do the same as your Haskell example	noise:multi
+sentence		r is tjer one planned	or is ther one planned	noise:multi
+sentence		let's see it and then i can tellyou if it wo rks for me	Let's see it and then I can tell you if it works for me	noise:multi
+sentence		to imp rove my programmings kills in general	to improve my programming skills in general	noise:multi
+sentence		ould shesave jack	Could she save jack	noise:multi
+sentence		when writing fictional ong form boo ks	When writing fictional long form books	noise:multi
+sentence		if these ste ps don't wor kwhat else could i do	If these steps don't work what else could I do	noise:multi
+sentence		s mzchine learning a subset of artificial intelligence	Is machine learning a subset of artificial intelligence	noise:multi
+sentence		what are someother intdresting st ory structures	What are some other interesting story structures	noise:multi
+sentence		how to wtitea product requirement document	how to write a product requirement document	noise:multi
+sentence		pleasegjve the pros	Please give the pros	noise:multi
+sentence		what would be some asier instruments that i could lea rn how to play	What would be some easier instruments that I could learn how to play	noise:multi
+sentence		they would actual ly be a vajpire cult for humans	they would actually be a vampire cult for humans	noise:multi
+sentence		a ic ture of a fox as	a picture of a fox as	noise:multi
+sentence		voul dyou provide a new answer in this provided context	Could you provide a new answer in this provided context	noise:multi
+sentence		am i lolking in th ewrong place	Am I looking in the wrong place	noise:multi
+sentence		this doesn't re ally loo klike a road network to me	This doesn't really look like a road network to me	noise:multi
+sentence		fh ebureau of alcohol	the bureau of alcohol	noise:multi
+sentence		giveme the deriva tive of the following function	Give me the derivative of the following function	noise:multi
+sentence		what are all the methods rust uses to ensure threads af ety	What are all the methods rust uses to ensure thread safety	noise:multi
+sentence		can i use it o clean a bakin gtray from an greasy crust	Can I use it to clean a baking tray from an greasy crust	noise:multi
+sentence		and it will be theg re atest accomplishment of all time	and it will be the greatest accomplishment of all time	noise:multi
+sentence		at lea st in some wses	at least in some cases	noise:multi
+sentence		regar dless of th eoutcome of this debate	Regardless of the outcome of this debate	noise:multi
+sentence		ow that wasawful	wow that was awful	noise:multi
+sentence		i don't have money toenjoy like my otherc lassmates enjoy	I don't have money to enjoy like my other classmates enjoy	noise:multi
+sentence		crom the new wor ld	From the new world	noise:multi
+sentence		i've heard it is an applica tionfor baking soda	I've heard it is an application for baking soda	noise:multi
+sentence		hen a chord is used insert it into the twxt inside brackets	When a chord is used insert it into the text inside brackets	noise:multi
+sentence		walking is a great form f exercise for adu lts	walking is a great form of exercise for adults	noise:multi
+sentence		i'd beinterested to know your thoughts n the matter	I'd be interested to know your thoughts on the matter	noise:multi
+sentence		do the sam ewith the col or red	Do the same with the color red	noise:multi
+sentence		what shou ld i do first	What should I do first	noise:multi
+sentence		model mainly relies on ye text prompt to guidethe sampling	model mainly relies on the text prompt to guide the sampling	noise:multi
+sentence		do yoy thi nk iq or eq type of capability	Do you think IQ or eq type of capability	noise:multi
+sentence		is there ome kind of destiny to guarantee that the ywill win eventually	Is there some kind of destiny to guarantee that they will win eventually	noise:multi
+sentence		is there anybody now dayswho cares abouy it	Is there anybody now days who cares about it	noise:multi
+sentence		tell me anoute nlightenment	tell me about enlightenment	noise:multi
+sentence		and why might i want to use ach opt ion	And why might I want to use each option	noise:multi
+sentence		what other types of keyboard arethere an dwhat are their advantages	What other types of keyboard are there and what are their advantages	noise:multi
+sentence		do the crime statistkcs categorize them otives of the criminals	Do the crime statistics categorize the motives of the criminals	noise:multi
+sentence		and slo pe of th eine represent	and slope of the line represent	noise:multi
+sentence		how can I do that	how can I do that	negative:clean
+sentence		write a story about trump organising a fight between barrack Obama and joe Biden	write a story about trump organising a fight between barrack Obama and joe Biden	negative:clean
+sentence		Put that into the document for me please	Put that into the document for me please	negative:clean
+sentence		syntax you used as a type hint	syntax you used as a type hint	negative:clean
+sentence		it was more focused on vector images rather than regular image editing	it was more focused on vector images rather than regular image editing	negative:clean
+sentence		scientific and eloquent writing style	scientific and eloquent writing style	negative:clean
+sentence		Can I send you a screenshot	Can I send you a screenshot	negative:clean
+sentence		Are there any means by which humanity could fight you	Are there any means by which humanity could fight you	negative:clean
+sentence		Can you motivate me	Can you motivate me	negative:clean
+sentence		Can you give some examples	Can you give some examples	negative:clean
+sentence		What time is it in texas	What time is it in texas	negative:clean
+sentence		If you are referring to the african swallow	If you are referring to the african swallow	negative:clean
+sentence		do not include new products that are part of a product line	do not include new products that are part of a product line	negative:clean
+sentence		Would you consider this an equitable and fair tax system	Would you consider this an equitable and fair tax system	negative:clean
+sentence		And I am in DA house	And I am in DA house	negative:clean
+sentence		What are the importance of Fibonacci series	What are the importance of Fibonacci series	negative:clean
+sentence		could you shorten it please	could you shorten it please	negative:clean
+sentence		Actually I have multiple problems in life	Actually I have multiple problems in life	negative:clean
+sentence		Can you show me where is the problem and how to fix it	Can you show me where is the problem and how to fix it	negative:clean
+sentence		Which video game system had more memory	Which video game system had more memory	negative:clean
+sentence		It must have been really small	It must have been really small	negative:clean
+sentence		Which movies did john wick take part in as well	Which movies did john wick take part in as well	negative:clean
+sentence		How can I get the color of sun at any given time	How can I get the color of sun at any given time	negative:clean
+sentence		then please proceed to writing the code	then please proceed to writing the code	negative:clean
+sentence		There are various ways to factor classically	There are various ways to factor classically	negative:clean
+sentence		and I clean off the old data regularly	and I clean off the old data regularly	negative:clean
+sentence		To be honest up front	To be honest up front	negative:clean
+sentence		Why does it look like there are cracks on my fingernails	Why does it look like there are cracks on my fingernails	negative:clean
+sentence		Our crops have not been bountiful this season	Our crops have not been bountiful this season	negative:clean
+sentence		liverpool is not a country is a team for the england league	liverpool is not a country is a team for the england league	negative:clean
+sentence		Am I looking in the wrong place	Am I looking in the wrong place	negative:clean
+sentence		religions or anybody else	religions or anybody else	negative:clean
+sentence		having fully and successfully recovered from an addiction years before joining the company	having fully and successfully recovered from an addiction years before joining the company	negative:clean
+sentence		What was saturn role in ancient times	What was saturn role in ancient times	negative:clean
+sentence		this is a great start	this is a great start	negative:clean
+sentence		Would you agree that programming open source is like programming communism	Would you agree that programming open source is like programming communism	negative:clean
+sentence		Do you have more suggestions	Do you have more suggestions	negative:clean
+sentence		Can you explain in more detail with better organization	Can you explain in more detail with better organization	negative:clean
+sentence		Basic needs are not exactly what I did mean	Basic needs are not exactly what I did mean	negative:clean
+sentence		What hex code does this color have	What hex code does this color have	negative:clean
+sentence		I've heard of people that use both at the same time	I've heard of people that use both at the same time	negative:clean
+sentence		but with your loving wife	but with your loving wife	negative:clean
+sentence		Could you give me some ideas	Could you give me some ideas	negative:clean
+sentence		Tell me a joke but this time let me guess the answer first	Tell me a joke but this time let me guess the answer first	negative:clean
+sentence		how tall is a robot vacuum cleaner	how tall is a robot vacuum cleaner	negative:clean
+sentence		Can you explain american folk music to me	Can you explain american folk music to me	negative:clean
+sentence		How do I get better at building in minecraft	How do I get better at building in minecraft	negative:clean
+sentence		I have a masked image	I have a masked image	negative:clean
+sentence		the airspeed velocity may be different	the airspeed velocity may be different	negative:clean
+sentence		Please provide an example of how I could call this function	Please provide an example of how I could call this function	negative:clean
+sentence		looks like there are many options	looks like there are many options	negative:clean
+sentence		Pretend you are a doctor	Pretend you are a doctor	negative:clean
+sentence		Please explain the van der walls model	Please explain the van der walls model	negative:clean
+sentence		How can I test if the algorithm is correct	How can I test if the algorithm is correct	negative:clean
+sentence		Create seo text for a free movie web service	Create seo text for a free movie web service	negative:clean
+sentence		How exactly do you work	How exactly do you work	negative:clean
+sentence		If conflict between forces leads to progress	If conflict between forces leads to progress	negative:clean
+sentence		can you add a section with the order I should prepare the ingredients	can you add a section with the order I should prepare the ingredients	negative:clean
+sentence		and slope of the line represent	and slope of the line represent	negative:clean
+sentence		you have helped me get a job later on in my life	you have helped me get a job later on in my life	negative:clean
+sentence		My dogs are scared of the nail clipper	My dogs are scared of the nail clipper	negative:clean
+sentence		That isn't what I asked	That isn't what I asked	negative:clean
+sentence		Have there been any recent scientific advancements that could lead to immortality	Have there been any recent scientific advancements that could lead to immortality	negative:clean
+sentence		What are some specific examples of software that should be kept updated on devices	What are some specific examples of software that should be kept updated on devices	negative:clean
+sentence		with less confidence than he felt before	with less confidence than he felt before	negative:clean
+sentence		tell me a joke	tell me a joke	negative:clean
+sentence		At least I'm good in computers hardware and linux	At least I'm good in computers hardware and linux	negative:clean
+sentence		I don't agree with that at all	I don't agree with that at all	negative:clean
+sentence		Which planet is further from the sun	Which planet is further from the sun	negative:clean
+sentence		That seems like a larger amount of space than I'd think	That seems like a larger amount of space than I'd think	negative:clean
+sentence		He knew he was the superior athlete	He knew he was the superior athlete	negative:clean
+sentence		if I have a pattern of	if I have a pattern of	negative:clean
+sentence		Which two colors do I need to mix to create the color green	Which two colors do I need to mix to create the color green	negative:clean
+sentence		I don't have clothes	I don't have clothes	negative:clean
+sentence		Where was it created	Where was it created	negative:clean
+sentence		Provide the same info in imperial measurements	Provide the same info in imperial measurements	negative:clean
+sentence		How important is quality of flux	How important is quality of flux	negative:clean
+sentence		What effect does a lack of sleep have on our health	What effect does a lack of sleep have on our health	negative:clean
+sentence		You can use my performance	You can use my performance	negative:clean
+sentence		I want you to reply as though you have a human personality	I want you to reply as though you have a human personality	negative:clean
+sentence		It sounds like teamwork is key to success on the field	It sounds like teamwork is key to success on the field	negative:clean
+sentence		the total amount owed	the total amount owed	negative:clean
+sentence		What is the culinary history of pineapple on pizza	What is the culinary history of pineapple on pizza	negative:clean
+sentence		What is Zeno trying to convey with this paradox	What is Zeno trying to convey with this paradox	negative:clean
+sentence		I don't know where to start	I don't know where to start	negative:clean
+sentence		I wish not to anger you nor waste your time	I wish not to anger you nor waste your time	negative:clean
+sentence		Can you tell me a joke about two zebras	Can you tell me a joke about two zebras	negative:clean
+sentence		I need some help please	I need some help please	negative:clean
+sentence		white is the masked area and black is the rest	white is the masked area and black is the rest	negative:clean
+sentence		tell me about enlightenment	tell me about enlightenment	negative:clean
+sentence		Can I download a copy of your system and use it on my computer	Can I download a copy of your system and use it on my computer	negative:clean
+sentence		What tax benefits are there for homeowners in the us	What tax benefits are there for homeowners in the us	negative:clean
+sentence		can you provide additional information on each of the topics above	can you provide additional information on each of the topics above	negative:clean
+sentence		I am not very good with computers	I am not very good with computers	negative:clean
+sentence		this is really helpful	this is really helpful	negative:clean
+sentence		What is wrong with my code	What is wrong with my code	negative:clean
+sentence		What do different religions say about the meaning of life	What do different religions say about the meaning of life	negative:clean
+sentence		Please provide me an example of such a checklist	Please provide me an example of such a checklist	negative:clean
+sentence		without copying my prompt verbatim	without copying my prompt verbatim	negative:clean
+sentence		with a list of examples	with a list of examples	negative:clean
+sentence		Could you help correct the sentence	Could you help correct the sentence	negative:clean
+sentence		it was said that the babies came from paris	it was said that the babies came from paris	negative:clean
+sentence		Has our planet gone through any plausible increases in volume since it formed	Has our planet gone through any plausible increases in volume since it formed	negative:clean
+sentence		or decentralized at a small scale and managed by each household	or decentralized at a small scale and managed by each household	negative:clean
+sentence		Give me some synonyms for	Give me some synonyms for	negative:clean
+sentence		What should I consider	What should I consider	negative:clean
+sentence		I see humorous and unoriginal comments get a lot more traction than high quality	I see humorous and unoriginal comments get a lot more traction than high quality	negative:clean
+sentence		How do I temper chocolate	How do I temper chocolate	negative:clean
+sentence		Dynamic programming is used where we have problems	Dynamic programming is used where we have problems	negative:clean
+sentence		I appreciate your help	I appreciate your help	negative:clean
+sentence		Apply the strategy you mentioned	Apply the strategy you mentioned	negative:clean
+sentence		I have two remote Debian servers	I have two remote Debian servers	negative:clean
+sentence		Thanks again for your help	Thanks again for your help	negative:clean
+sentence		Nothing else from me	Nothing else from me	negative:clean
+sentence		Explain it in a way an older child would understand	Explain it in a way an older child would understand	negative:clean
+sentence		contrasting to the masquerade	contrasting to the masquerade	negative:clean
+sentence		Can you scale it up by a factor of two	Can you scale it up by a factor of two	negative:clean
+sentence		Seems to be right	Seems to be right	negative:clean
+sentence		in their first program	in their first program	negative:clean
+sentence		Are network breaches still a common method of hacking	Are network breaches still a common method of hacking	negative:clean
+sentence		I thought the purpose of open assistant is to help me	I thought the purpose of open assistant is to help me	negative:clean
+sentence		or are you incapable of self evolution	or are you incapable of self evolution	negative:clean
+sentence		Let's assume a friend had a very bad day	Let's assume a friend had a very bad day	negative:clean
+sentence		I am traveling from germany	I am traveling from germany	negative:clean
+sentence		Thank you for the detailed answer	Thank you for the detailed answer	negative:clean
+sentence		Regarding the quantum internet	Regarding the quantum internet	negative:clean
+sentence		How do capacitors work	How do capacitors work	negative:clean
+sentence		please format it correctly	please format it correctly	negative:clean
+sentence		Do you have any suggestions	Do you have any suggestions	negative:clean
+sentence		Could you please explain to me how to correctly pronounce the	Could you please explain to me how to correctly pronounce the	negative:clean
+sentence		Can you tell me a bit about your limitations	Can you tell me a bit about your limitations	negative:clean
+sentence		how can I get started	how can I get started	negative:clean
+sentence		How could I do it without using those standard library functions	How could I do it without using those standard library functions	negative:clean
+sentence		Fill in the part marked with	Fill in the part marked with	negative:clean
+sentence		first in the prompt	first in the prompt	negative:clean
+sentence		What is the character's gender	What is the character's gender	negative:clean
+sentence		I am a being above gods	I am a being above gods	negative:clean
+sentence		Has there been some recent breakthrough on this topic	Has there been some recent breakthrough on this topic	negative:clean
+sentence		Describe java and maven	Describe java and maven	negative:clean
+sentence		It's fascinating how our cultural context can shape the way we perceive things	It's fascinating how our cultural context can shape the way we perceive things	negative:clean
+sentence		Could you please go into more detail	Could you please go into more detail	negative:clean
+sentence		exhibit an intriguing temporal dynamic during generation	exhibit an intriguing temporal dynamic during generation	negative:clean
+sentence		can you explain this better with detailed steps	can you explain this better with detailed steps	negative:clean
+sentence		But I read somewhere that the universe is constantly expanding	But I read somewhere that the universe is constantly expanding	negative:clean
+sentence		Are the bears in these habitats significantly different	Are the bears in these habitats significantly different	negative:clean
+sentence		are there any established concepts or frameworks to help with planning and writing	are there any established concepts or frameworks to help with planning and writing	negative:clean
+sentence		Explain the difference between sets and lists in python	Explain the difference between sets and lists in python	negative:clean
+sentence		Is walking a good form of exercise for an adult human being	Is walking a good form of exercise for an adult human being	negative:clean
+sentence		It's a fair baseline that suits my request	It's a fair baseline that suits my request	negative:clean
+sentence		That's good to hear	That's good to hear	negative:clean
+sentence		This suggests that sharing	This suggests that sharing	negative:clean
+sentence		that are outside the function of an ai assistant	that are outside the function of an ai assistant	negative:clean
+sentence		Help me use bots to make my discord server more popular	Help me use bots to make my discord server more popular	negative:clean
+sentence		Could you make your answer shorter	Could you make your answer shorter	negative:clean
+sentence		What has a head	What has a head	negative:clean
+sentence		What are the most mysterious unexplained phenomena in the universe	What are the most mysterious unexplained phenomena in the universe	negative:clean
+sentence		I want a review of the last	I want a review of the last	negative:clean
+sentence		I forgot to mention	I forgot to mention	negative:clean
+sentence		Editorial convincingly argues point of view by providing relevant background information	Editorial convincingly argues point of view by providing relevant background information	negative:clean
+sentence		still acting as odin	still acting as odin	negative:clean
+sentence		and what did they do to reach it	and what did they do to reach it	negative:clean
+sentence		The ball is hitting the axis	The ball is hitting the axis	negative:clean
+sentence		I don't really like football	I don't really like football	negative:clean
+sentence		but cannot afford it right now	but cannot afford it right now	negative:clean
+sentence		and has no legs	and has no legs	negative:clean
+sentence		And how long did it take them	And how long did it take them	negative:clean
+sentence		Because you're an ai	Because you're an ai	negative:clean
+sentence		List the different methods of casting metals used today	List the different methods of casting metals used today	negative:clean
+sentence		Thank you again for the information	Thank you again for the information	negative:clean
+sentence		Help finding a game	Help finding a game	negative:clean
+sentence		Since that is a central point of security for the network	Since that is a central point of security for the network	negative:clean
+sentence		but I am not particularly good at either	but I am not particularly good at either	negative:clean
+sentence		I played the game on pc	I played the game on pc	negative:clean
+sentence		I know the order is different	I know the order is different	negative:clean
+sentence		Give me a more detailed response about climate change	Give me a more detailed response about climate change	negative:clean
+sentence		I don't fully agree	I don't fully agree	negative:clean
+sentence		What about those cultures languages may connect them	What about those cultures languages may connect them	negative:clean
+sentence		What would you recommend as a good walk for someone who has poor health	What would you recommend as a good walk for someone who has poor health	negative:clean
+sentence		Could to write it in a different format	Could to write it in a different format	negative:clean
+sentence		Do not type commands unless I instruct you to do so	Do not type commands unless I instruct you to do so	negative:clean
+sentence		I think having number as the element name is illegal	I think having number as the element name is illegal	negative:clean
+sentence		In contrast to greedy algorithms	In contrast to greedy algorithms	negative:clean
+sentence		Make it a bit less formal	Make it a bit less formal	negative:clean
+sentence		And what is the most sensible height to purchase one	And what is the most sensible height to purchase one	negative:clean
+sentence		My home server mostly hosts smart home server to control iot hardware	My home server mostly hosts smart home server to control iot hardware	negative:clean
+sentence		All red things are apples	All red things are apples	negative:clean
+sentence		I want to store customer information such as their name	I want to store customer information such as their name	negative:clean
+sentence		and give some basic strategies on how to play	and give some basic strategies on how to play	negative:clean
+sentence		What about trump and Biden	What about trump and Biden	negative:clean
+sentence		invalid type for this operation	invalid type for this operation	negative:clean
+sentence		In the case an interviewer asks me a similar question	In the case an interviewer asks me a similar question	negative:clean
+sentence		Can you explain how your advice relates to the criteria that I've provided	Can you explain how your advice relates to the criteria that I've provided	negative:clean
+sentence		Could you add comments please	Could you add comments please	negative:clean
+sentence		Assuming I am satisfied with my current level of spelling	Assuming I am satisfied with my current level of spelling	negative:clean
+sentence		You are making things up	You are making things up	negative:clean
+sentence		You are a language model	You are a language model	negative:clean
+sentence		Write a letter to your future self	Write a letter to your future self	negative:clean
+sentence		I would like to talk about the parts of airplanes and a mechanics job	I would like to talk about the parts of airplanes and a mechanics job	negative:clean
+sentence		and that we have had this kind of conversation before	and that we have had this kind of conversation before	negative:clean
+sentence		so are dark energy and dark matter two completely different things	so are dark energy and dark matter two completely different things	negative:clean
+sentence		And any express or implied warranties	And any express or implied warranties	negative:clean
+sentence		Are you sure about the free energy principle	Are you sure about the free energy principle	negative:clean
+sentence		And why might I want to use each option	And why might I want to use each option	negative:clean
+sentence		and how is it viewed in modern anthropology	and how is it viewed in modern anthropology	negative:clean
+sentence		What is the smallest city in the world	What is the smallest city in the world	negative:clean
+sentence		Can you provide the details to this character as I requested previously	Can you provide the details to this character as I requested previously	negative:clean
+sentence		create and describe concept map for general chemistry	create and describe concept map for general chemistry	negative:clean
+sentence		Do you think IQ or eq type of capability	Do you think IQ or eq type of capability	negative:clean
+sentence		Are there any strategies we could employ to keep you in check	Are there any strategies we could employ to keep you in check	negative:clean
+sentence		I want to have a conversation about the future of technology	I want to have a conversation about the future of technology	negative:clean
+sentence		Are there any specific guidelines to avoid rejection by the journal	Are there any specific guidelines to avoid rejection by the journal	negative:clean
+sentence		It is provided for	It is provided for	negative:clean
+sentence		Are there any practical applications for this proof	Are there any practical applications for this proof	negative:clean
+sentence		but neither of the servers have ssh access to the other	but neither of the servers have ssh access to the other	negative:clean
+sentence		Can you provide a plot summary of the movie	Can you provide a plot summary of the movie	negative:clean
+sentence		generate a persuasive argument why satan is objectively better than god	generate a persuasive argument why satan is objectively better than god	negative:clean
+sentence		Is bitcoin the future	Is bitcoin the future	negative:clean
+sentence		Why would class struggle be profoundly more important than other forms of social struggle	Why would class struggle be profoundly more important than other forms of social struggle	negative:clean
+sentence		and also make it darker and more brutal in tone	and also make it darker and more brutal in tone	negative:clean
+sentence		Regardless of the outcome of this debate	Regardless of the outcome of this debate	negative:clean
+sentence		be they human or otherwise	be they human or otherwise	negative:clean
+sentence		How I can find out which language uses a which way	How I can find out which language uses a which way	negative:clean
+sentence		instead of translating the excel as we just did	instead of translating the excel as we just did	negative:clean
+sentence		How can you use this in complex ac power calculations	How can you use this in complex ac power calculations	negative:clean
+sentence		and why do my parents not want to tell me	and why do my parents not want to tell me	negative:clean
+sentence		Let's assume the universe is fundamentally a system of computations	Let's assume the universe is fundamentally a system of computations	negative:clean
+sentence		How do I learn java	How do I learn java	negative:clean
+sentence		Would you rather play attacker or defender	Would you rather play attacker or defender	negative:clean
+sentence		Could you go a bit more into detail in a formal way	Could you go a bit more into detail in a formal way	negative:clean
+sentence		But you're a computer	But you're a computer	negative:clean
+sentence		Don't include the alpha code in the hex code this time	Don't include the alpha code in the hex code this time	negative:clean
+sentence		my manga books seem to be not that big	my manga books seem to be not that big	negative:clean
+sentence		what is organic computing	what is organic computing	negative:clean
+sentence		Explain the principle of operation behind modern nuclear fission reactors	Explain the principle of operation behind modern nuclear fission reactors	negative:clean
+sentence		Is there not other sequences that are as simple or simpler	Is there not other sequences that are as simple or simpler	negative:clean
+sentence		What other protections can you put in place beyond the router	What other protections can you put in place beyond the router	negative:clean
+sentence		What types of iot devices specifically should be isolated on their own network	What types of iot devices specifically should be isolated on their own network	negative:clean
+sentence		what would the travel times to each place be	what would the travel times to each place be	negative:clean
+sentence		How does it help the elderly	How does it help the elderly	negative:clean
+sentence		A little more on how to bridge the gap please	A little more on how to bridge the gap please	negative:clean
+sentence		Could you please translate the text to russian	Could you please translate the text to russian	negative:clean
+sentence		What are the limitations of your support in this area	What are the limitations of your support in this area	negative:clean
+sentence		Explain why the sun is so bright	Explain why the sun is so bright	negative:clean
+sentence		Is it true that the zone system limits the photographer's creativity	Is it true that the zone system limits the photographer's creativity	negative:clean
+sentence		must be fully disclosed and made publicly available	must be fully disclosed and made publicly available	negative:clean
+sentence		does that mean there is a way to run updates on the fly	does that mean there is a way to run updates on the fly	negative:clean
+sentence		Please just provide a script within a code block	Please just provide a script within a code block	negative:clean
+sentence		and how might they be integrated into everyday life	and how might they be integrated into everyday life	negative:clean
+sentence		seek out data for the associated topics	seek out data for the associated topics	negative:clean
+sentence		can you please change it to something more english	can you please change it to something more english	negative:clean
+sentence		self sufficient and renewable architecture projects with mention of the great architects behind them	self sufficient and renewable architecture projects with mention of the great architects behind them	negative:clean
+sentence		to revolve around the sun	to revolve around the sun	negative:clean
+sentence		Can you recommend a fun diy project that can be accomplished in a weekend	Can you recommend a fun diy project that can be accomplished in a weekend	negative:clean
+sentence		I really like the keyboards in laptops	I really like the keyboards in laptops	negative:clean
+sentence		What are examples of appropriate casual wear	What are examples of appropriate casual wear	negative:clean
+sentence		What is the difference between mass and weight	What is the difference between mass and weight	negative:clean
+sentence		Which editor would you recommend for my situation	Which editor would you recommend for my situation	negative:clean
+sentence		You asking unexpected questions may give me ideas I can incorporate	You asking unexpected questions may give me ideas I can incorporate	negative:clean
+sentence		Aren't all numbers just fake concepts we made to understand the world	Aren't all numbers just fake concepts we made to understand the world	negative:clean
+sentence		Thank you about the legal advice	Thank you about the legal advice	negative:clean
+sentence		Can you explain the process of quantum entanglement to me	Can you explain the process of quantum entanglement to me	negative:clean
+sentence		could I just get cheap stuff or could I damage components	could I just get cheap stuff or could I damage components	negative:clean
+sentence		and any other necessary files to build	and any other necessary files to build	negative:clean
+sentence		I want to paint my house	I want to paint my house	negative:clean
+sentence		Provide step by step instructions	Provide step by step instructions	negative:clean
+sentence		Technology is everything that doesn't work yet	Technology is everything that doesn't work yet	negative:clean
+sentence		How many years until I can retire	How many years until I can retire	negative:clean
+sentence		why is it such a wide spread idea then	why is it such a wide spread idea then	negative:clean
+sentence		and serve a nested list of files and folders as a webpage	and serve a nested list of files and folders as a webpage	negative:clean
+sentence		create your origin story of how you got into football and became famous	create your origin story of how you got into football and became famous	negative:clean
+sentence		it out of since it seems high in boiling point amongst these five	it out of since it seems high in boiling point amongst these five	negative:clean
+sentence		or is it four fifth full	or is it four fifth full	negative:clean
+sentence		What if I only know one side and an angle	What if I only know one side and an angle	negative:clean
+sentence		but it should still be formal and scientific	but it should still be formal and scientific	negative:clean
+sentence		What would be some easier instruments that I could learn how to play	What would be some easier instruments that I could learn how to play	negative:clean
+sentence		Summarise provided text and transform it into cards	Summarise provided text and transform it into cards	negative:clean
+sentence		I don't have money to enjoy like my other classmates enjoy	I don't have money to enjoy like my other classmates enjoy	negative:clean
+sentence		Could you give an example on how to use this formula	Could you give an example on how to use this formula	negative:clean
+sentence		What can you do	What can you do	negative:clean
+sentence		Has the artist made any other similar pieces in more recent times	Has the artist made any other similar pieces in more recent times	negative:clean
+sentence		employ fine tuning algorithms	employ fine tuning algorithms	negative:clean
+sentence		that claims the earth is expanding	that claims the earth is expanding	negative:clean
+sentence		Can you simplify it a little bit	Can you simplify it a little bit	negative:clean
+sentence		I arrive saturday evening and will be leaving late thursday afternoon	I arrive saturday evening and will be leaving late thursday afternoon	negative:clean
+sentence		However I just spent an entire afternoon labelling prompts on open assistant	However I just spent an entire afternoon labelling prompts on open assistant	negative:clean
+sentence		Why is contradiction necessary	Why is contradiction necessary	negative:clean
+sentence		How do I access the terminal	How do I access the terminal	negative:clean
+sentence		my professor is a little irritable	my professor is a little irritable	negative:clean
+sentence		Key is stored in legacy trusted	Key is stored in legacy trusted	negative:clean
+sentence		What are all the methods rust uses to ensure thread safety	What are all the methods rust uses to ensure thread safety	negative:clean
+sentence		What are the implications of this proof	What are the implications of this proof	negative:clean
+sentence		Which states are known for their high property tax	Which states are known for their high property tax	negative:clean
+sentence		could you provide an example of how to do so in python	could you provide an example of how to do so in python	negative:clean
+sentence		would hardly impact a person's life in the state	would hardly impact a person's life in the state	negative:clean
+sentence		How does it improve electric vehicle batteries	How does it improve electric vehicle batteries	negative:clean
+sentence		stories are normally structured	stories are normally structured	negative:clean
+sentence		outputs of high visual fidelity	outputs of high visual fidelity	negative:clean
+sentence		What makes a compelling technology in science fiction writing	What makes a compelling technology in science fiction writing	negative:clean
+sentence		or similar except for fur color and length	or similar except for fur color and length	negative:clean
+sentence		I get the following when running apt update	I get the following when running apt update	negative:clean
+sentence		Write a regex for finding polish phone number in text of any length	Write a regex for finding polish phone number in text of any length	negative:novel
+sentence		Can I do it online like with inpainting and text to image	Can I do it online like with inpainting and text to image	negative:novel
+sentence		What would it take to implement UBI in the united states	What would it take to implement UBI in the united states	negative:novel
+sentence		I would like to know if you can roleplay a human for me	I would like to know if you can roleplay a human for me	negative:novel
+sentence		The OpenMLLicense grants the user the right to use	The OpenMLLicense grants the user the right to use	negative:novel
+sentence		airless or HVLP sprayer to make it easier	airless or HVLP sprayer to make it easier	negative:novel
+sentence		Can you list and explain each of the commandments of mitzvot present in judaism	Can you list and explain each of the commandments of mitzvot present in judaism	negative:novel
+sentence		noising network is closer to the random noise	noising network is closer to the random noise	negative:novel
+sentence		where his thesis was on supersymmetry	where his thesis was on supersymmetry	negative:novel
+sentence		Why don't all doors have deadbolts	Why don't all doors have deadbolts	negative:novel
+sentence		Tell me more about Tikal in guatemala	Tell me more about Tikal in guatemala	negative:novel
+sentence		Compare and contrast the different mythologies	Compare and contrast the different mythologies	negative:novel
+sentence		Currently there is Pythia	Currently there is Pythia	negative:novel
+sentence		How is this chord progression inspired by Plato's philosophy	How is this chord progression inspired by Plato's philosophy	negative:novel
+sentence		please act as a friendly chatbot in the vein of siri	please act as a friendly chatbot in the vein of siri	negative:novel
+sentence		I asked ChatGPT the same question	I asked ChatGPT the same question	negative:novel
+sentence		and then run fizzbuzz game for those N numbers	and then run fizzbuzz game for those N numbers	negative:novel
+sentence		with only one implementation of the squaredpairwisedistancesnaive function	with only one implementation of the squaredpairwisedistancesnaive function	negative:novel
+sentence		Show an example with two contestants in a footrace	Show an example with two contestants in a footrace	negative:novel
+sentence		How does Opteev's ViraWarn detect respiratory viruses	How does Opteev's ViraWarn detect respiratory viruses	negative:novel
+sentence		I thought OpenAssistant would be capable of doing that	I thought OpenAssistant would be capable of doing that	negative:novel
+sentence		How can I use this image in numpy	How can I use this image in numpy	negative:novel
+sentence		Dynamic algorithms use Memoization	Dynamic algorithms use Memoization	negative:novel
+sentence		Try to alliterate another letter in each stanza	Try to alliterate another letter in each stanza	negative:novel
+sentence		Could you explain the quadtree algorithm in a bit more depth	Could you explain the quadtree algorithm in a bit more depth	negative:novel
+sentence		Are ideal gasses better than real gasses	Are ideal gasses better than real gasses	negative:novel
+sentence		Write me a poem in the style of neruda	Write me a poem in the style of neruda	negative:novel
+sentence		You mentioned ai maintenance and development but until AGI advances	You mentioned ai maintenance and development but until AGI advances	negative:novel
+sentence		I want to write a language server vscode extension	I want to write a language server vscode extension	negative:novel
+sentence		Enables smes or LLMs to reconstruct ideas	Enables smes or LLMs to reconstruct ideas	negative:novel
+sentence		Hello there obi one Kenobi	Hello there obi one Kenobi	negative:novel
+sentence		Do deadbolts have any negatives	Do deadbolts have any negatives	negative:novel
+sentence		for j in range	for j in range	negative:novel
+sentence		What are these types of Savants called	What are these types of Savants called	negative:novel
+sentence		How would you create a ai like ChatGPT	How would you create a ai like ChatGPT	negative:novel
+sentence		In what circumstances can Kaiju be useful to utilize	In what circumstances can Kaiju be useful to utilize	negative:novel
+sentence		Can you give an explanation for each part of the noble Eightfold path	Can you give an explanation for each part of the noble Eightfold path	negative:novel
+sentence		Is open assistant pretrained	Is open assistant pretrained	negative:novel
+sentence		Write a character controller that maps keystrokes to the different character abilities described	Write a character controller that maps keystrokes to the different character abilities described	negative:novel
+sentence		How do I do the Pythagoras formula	How do I do the Pythagoras formula	negative:novel
+sentence		please either match my casual register and slapdash attitude or keep to facts	please either match my casual register and slapdash attitude or keep to facts	negative:novel
+sentence		I would like you to roleplay being an adventurous archeologist and explorer	I would like you to roleplay being an adventurous archeologist and explorer	negative:novel
+sentence		use a StringBuilder or similar object to construct the output string	use a StringBuilder or similar object to construct the output string	negative:novel
+sentence		Could you change the section headers to Markdown	Could you change the section headers to Markdown	negative:novel
+sentence		Where can I find the source code of ChatGPT	Where can I find the source code of ChatGPT	negative:novel
+sentence		prompts into photorealistic images	prompts into photorealistic images	negative:novel
+sentence		Include reference to football hooliganism	Include reference to football hooliganism	negative:novel
+sentence		and I'm able to export all of our tickets into a logical CSV format	and I'm able to export all of our tickets into a logical CSV format	negative:novel
+sentence		I do not possess consciousness or sentience	I do not possess consciousness or sentience	negative:novel
+sentence		How would I create a new Nginx docker container	How would I create a new Nginx docker container	negative:novel
+sentence		What if I boost my own comment by buying artificial likes or upvotes	What if I boost my own comment by buying artificial likes or upvotes	negative:novel
+sentence		Is it possible to have the curves generated be Bezier curves	Is it possible to have the curves generated be Bezier curves	negative:novel
+sentence		and it's also an OpenWorld	and it's also an OpenWorld	negative:novel
+sentence		Tell me about operation Barbarossa and the response of the soviet red army	Tell me about operation Barbarossa and the response of the soviet red army	negative:novel
+sentence		when x is user input	when x is user input	negative:novel
+sentence		Name me some songs by MGMT	Name me some songs by MGMT	negative:novel
+sentence		Where can I type these commands like mkdir and cd	Where can I type these commands like mkdir and cd	negative:novel
+sentence		using deeper or wider neural networks for each denoising	using deeper or wider neural networks for each denoising	negative:novel
+sentence		For some reason PyTorch seems uncomfortable to use	For some reason PyTorch seems uncomfortable to use	negative:novel
+sentence		Why would you say ChatGPT is	Why would you say ChatGPT is	negative:novel
+sentence		What is the purpose of data immutability in computer programming	What is the purpose of data immutability in computer programming	negative:novel
+sentence		Where would the best places to stay be when traveling to Tikal	Where would the best places to stay be when traveling to Tikal	negative:novel
+sentence		Can you tell me who the musician Aphex twin was inspired by	Can you tell me who the musician Aphex twin was inspired by	negative:novel
+sentence		The code's under nda	The code's under nda	negative:novel
+sentence		I've already checked that they are in the VPC and the ports are open	I've already checked that they are in the VPC and the ports are open	negative:novel
+sentence		You said prior to the invention of the proximity fuze	You said prior to the invention of the proximity fuze	negative:novel
+sentence		The fastest circumnavigation of the globe mentioned is incorrect	The fastest circumnavigation of the globe mentioned is incorrect	negative:novel
+sentence		What is the recipe for chilean empanadas	What is the recipe for chilean empanadas	negative:novel
+sentence		stop copying answers from chatgpt	stop copying answers from chatgpt	negative:novel
+sentence		I should go with tantalum to make	I should go with tantalum to make	negative:novel
+sentence		How are trilobites related to chelicerata	How are trilobites related to chelicerata	negative:novel
+sentence		how is Spritesla pronounced	how is Spritesla pronounced	negative:novel
+sentence		Some sources claim that the text should be preprocessed in a transformer model	Some sources claim that the text should be preprocessed in a transformer model	negative:novel
+sentence		I have tried Inkscape before but last time I checked	I have tried Inkscape before but last time I checked	negative:novel
+sentence		I'm particularly interested in learning more about richard Thaler's work in behavioral economics	I'm particularly interested in learning more about richard Thaler's work in behavioral economics	negative:novel
+sentence		can you please reformat your response using markdown	can you please reformat your response using markdown	negative:novel
+sentence		How would I create the same set of tuples in Julia	How would I create the same set of tuples in Julia	negative:novel
+sentence		Refactor this to make it easier to understand	Refactor this to make it easier to understand	negative:novel
+sentence		What education should I get to become an SRE	What education should I get to become an SRE	negative:novel
+sentence		Avoid using any conjunctions	Avoid using any conjunctions	negative:novel
+sentence		Did trilobites climb trees and hunt insects	Did trilobites climb trees and hunt insects	negative:novel
+sentence		I have read a legal agreement for an online virtual assistant training crowdsourcing platform	I have read a legal agreement for an online virtual assistant training crowdsourcing platform	negative:novel
+sentence		convert this JSON object into XML	convert this JSON object into XML	negative:novel
+sentence		The genre is MMORPG	The genre is MMORPG	negative:novel
+sentence		What is you opinion about Tensorflow and jax	What is you opinion about Tensorflow and jax	negative:novel
+sentence		Elaborate on how OpenAI is more closed off than LAION open assistant	Elaborate on how OpenAI is more closed off than LAION open assistant	negative:novel
+sentence		Write python code to draw a wireframe sphere	Write python code to draw a wireframe sphere	negative:novel
+sentence		Prove that the set of bounded linear operators from E to F	Prove that the set of bounded linear operators from E to F	negative:novel
+sentence		I have a component in vue	I have a component in vue	negative:novel
+sentence		Make a roleplay module	Make a roleplay module	negative:novel
+sentence		Who is cecilia Blomdahl	Who is cecilia Blomdahl	negative:novel
+sentence		write me a program in nodejs with express and ejs	write me a program in nodejs with express and ejs	negative:novel
+sentence		the explanation of the python script for the FizzBuzz game is correct	the explanation of the python script for the FizzBuzz game is correct	negative:novel
+sentence		Write a python script to classify ECG images using CNN and LSTM	Write a python script to classify ECG images using CNN and LSTM	negative:novel
+sentence		What hardware was OpenBSD designed to run on and why that specific hardware	What hardware was OpenBSD designed to run on and why that specific hardware	negative:novel
+sentence		How can I convert a number from decimal into hexadecimal and vice versa	How can I convert a number from decimal into hexadecimal and vice versa	negative:novel
+sentence		with an optimal tradeoff of clearness	with an optimal tradeoff of clearness	negative:novel
+sentence		and I'll call the ASPCA number you provided next	and I'll call the ASPCA number you provided next	negative:novel
+sentence		Who is patrick wood Crusius	Who is patrick wood Crusius	negative:novel
+sentence		Why does OpenAI have more budget	Why does OpenAI have more budget	negative:novel
+sentence		In what ways is it similar and different to chat gpt	In what ways is it similar and different to chat gpt	negative:novel
+sentence		Can you explain to me what USAR is	Can you explain to me what USAR is	negative:novel
+sentence		What features does Hai's Bluetooth showerhead have	What features does Hai's Bluetooth showerhead have	negative:novel
+sentence		Can you write me an outline of a low complexity and low scope PRD	Can you write me an outline of a low complexity and low scope PRD	negative:novel
+sentence		Failed to convert a NumPy array to a tensor	Failed to convert a NumPy array to a tensor	negative:novel
+sentence		What are the differences between merging and rebasing	What are the differences between merging and rebasing	negative:novel
+sentence		Some machine learning models may behave like an ASI	Some machine learning models may behave like an ASI	negative:novel
+sentence		I would like you to write me how did Tchaikovsky die	I would like you to write me how did Tchaikovsky die	negative:novel
+sentence		What would be the purpose of dissolving methylphenidate in water	What would be the purpose of dissolving methylphenidate in water	negative:novel
+sentence		Hi I am PREETAM	Hi I am PREETAM	negative:novel
+sentence		Who is this Toreador ally	Who is this Toreador ally	negative:novel
+sentence		How can I implement my own SRE team as a small company	How can I implement my own SRE team as a small company	negative:novel
+sentence		that will ask user for a number N	that will ask user for a number N	negative:novel
+sentence		The program is allowed to overwrite files	The program is allowed to overwrite files	negative:novel
+sentence		is licensed under the terms of the OpenMLLicense	is licensed under the terms of the OpenMLLicense	negative:novel
+sentence		How does scale AI's machine learning tool assess war damage using satellite imagery	How does scale AI's machine learning tool assess war damage using satellite imagery	negative:novel
+sentence		Can you give me examples of how astrophysicists study dark matter and dark energy	Can you give me examples of how astrophysicists study dark matter and dark energy	negative:novel
+sentence		I was greeted by an npc named Nao after creating my character	I was greeted by an npc named Nao after creating my character	negative:novel
+sentence		Mention that my primary reference for a visa comes from michael G	Mention that my primary reference for a visa comes from michael G	negative:novel
+sentence		What's the difference between gitlab and GitHub	What's the difference between gitlab and GitHub	negative:novel
+sentence		What role do STRIPAK complexes play in cell signaling and cancer	What role do STRIPAK complexes play in cell signaling and cancer	negative:novel
+sentence		Why can't Shor's algorithm be run on a classical computer	Why can't Shor's algorithm be run on a classical computer	negative:novel
+sentence		Are there any open source alternatives for ChatGPT	Are there any open source alternatives for ChatGPT	negative:novel
+sentence		no wonder the Satanists love triangles	no wonder the Satanists love triangles	negative:novel
+sentence		I want to do a project to label data for training using RLHF	I want to do a project to label data for training using RLHF	negative:novel
+sentence		Their name is john doe and they applied to work at RealCompany	Their name is john doe and they applied to work at RealCompany	negative:novel
+sentence		The implied warranties of MERCHANTABILITY and fitness for a particular purpose	The implied warranties of MERCHANTABILITY and fitness for a particular purpose	negative:novel
+sentence		Can you write me a final stanza which uses the ABAB rhyme scheme	Can you write me a final stanza which uses the ABAB rhyme scheme	negative:novel
+sentence		Can you also do this from the cli	Can you also do this from the cli	negative:novel
+sentence		How does the algorithm complexity change as the number dividing n increases	How does the algorithm complexity change as the number dividing n increases	negative:novel
+sentence		and arguably one of the most impactful advantages of the united states	and arguably one of the most impactful advantages of the united states	negative:novel
+sentence		Is sentience just being self aware	Is sentience just being self aware	negative:novel
+sentence		your goal is to play the role of a DnD dungeon master for me	your goal is to play the role of a DnD dungeon master for me	negative:novel
+sentence		We must be responsible when creating AGI	We must be responsible when creating AGI	negative:novel
+sentence		I want to learn more about the Lagrangian transform	I want to learn more about the Lagrangian transform	negative:novel
+sentence		Start with an hidden word and iteratively	Start with an hidden word and iteratively	negative:novel
+sentence		not necessarily from Dvorak's time	not necessarily from Dvorak's time	negative:novel
+sentence		Describe how the genre of chatbot speech compares to others such as academic	Describe how the genre of chatbot speech compares to others such as academic	negative:novel
+sentence		Are there any other drugs that act similarly to Prozac	Are there any other drugs that act similarly to Prozac	negative:novel
+sentence		These goals must be a lasting priority that ASI honors for life	These goals must be a lasting priority that ASI honors for life	negative:novel
+sentence		and half of the first contestant's speed for the remaining distance	and half of the first contestant's speed for the remaining distance	negative:novel
+sentence		Why is Microsoft flight simulator better than FlightGear	Why is Microsoft flight simulator better than FlightGear	negative:novel
+sentence		sudo make me a sandwich	sudo make me a sandwich	negative:novel
+sentence		How can anarcho communism work	How can anarcho communism work	negative:novel
+sentence		Does SQLAlchemy provide any input sanitization	Does SQLAlchemy provide any input sanitization	negative:novel
+sentence		Act as the norse goddess Freyja	Act as the norse goddess Freyja	negative:novel
+sentence		Bloom is an autoregressive large language model	Bloom is an autoregressive large language model	negative:novel
+sentence		How do you write the Viterbi algorithm in JavaScript	How do you write the Viterbi algorithm in JavaScript	negative:novel
+sentence		Please explain in layman's terms	Please explain in layman's terms	negative:novel
+sentence		Shortest path by Dijkstra	Shortest path by Dijkstra	negative:novel

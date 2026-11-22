@@ -164,3 +164,131 @@ Who's the starting point guard from the indiana pacers	keep	引擎误判 -> Who'
 On what service is it available	keep	引擎误判 -> In what service is it available
 I'm wondering when was their last game	keep	引擎误判 -> I'm wondering when was there last game
 Can you tell me what place crystal palace are in	keep	引擎误判 -> Can you tell me what place crystal palace or in
+how eloquent of wo is that sound	keep	古语 wo(=woe)，属于 ood_v1 文学源句；引擎误判 wo->who
+what do you mean by our smuggling	keep	引擎误判 -> what do you mean by your smuggling
+and which conference are they in	keep	引擎误判 -> and which conferences are they in
+In which conference are they in	keep	引擎误判 -> In which conferences are they in
+Which team is in last place in american league central	keep	引擎误判 -> Which team is on last place in american league central
+equiped with the operator norm	exclude	源句错拼 equiped
+if you substract all the downtime	exclude	源句错拼 substract
+Can I do it online like with inpainting and text to image	keep	引擎误判 -> Can I do it online like with in painting and text to image
+What would it take to implement UBI in the united states	keep	引擎误判 -> What would it take to implement UP in the united states
+I would like to know if you can roleplay a human for me	keep	引擎误判 -> I would like to know if you can repay a human for me
+airless or HVLP sprayer to make it easier	keep	引擎误判 -> airless or HELP sprayer to make it easier
+Can you list and explain each of the commandments of mitzvot present in judaism	keep	引擎误判 -> Can you list and explain each of the commandments of mitzvoth present in judaism
+But how can we make sure that students still do their assignments on theirselves	exclude	源句非标准词 theirselves
+where his thesis was on supersymmetry	keep	引擎误判 -> where his thesis was on superstar
+Tell me more about Tikal in guatemala	keep	引擎误判 -> Tell me more about Talking in guatemala
+Use a fonction named	exclude	源句错拼 fonction
+Currently there is Pythia	keep	引擎误判 -> Currently there is This
+How is this chord progression inspired by Plato's philosophy	keep	引擎误判 -> How is this chord progression inspired by Plates philosophy
+please act as a friendly chatbot in the vein of siri	keep	引擎误判 -> please act as a friendly harbor in the vein of siri
+I asked ChatGPT the same question	keep	引擎误判 -> I asked Chapter the same question
+and then run fizzbuzz game for those N numbers	keep	引擎误判 -> and then run fizzy game for those In numbers
+How does Opteev's ViraWarn detect respiratory viruses	keep	引擎误判 -> How does Peter's Forewarn detect respiratory viruses
+How can I use this image in numpy	keep	引擎误判 -> How can I use this image in jump
+Dynamic algorithms use Memoization	keep	引擎误判 -> Dynamic algorithms use Memorization
+are you better than chat gtp	exclude	源句错拼 gtp
+Try to alliterate another letter in each stanza	keep	引擎误判 -> Try to illiterate another letter in each stanza
+Could you explain the quadtree algorithm in a bit more depth	keep	引擎误判 -> Could you explain the quieter algorithm in a bit more depth
+Are ideal gasses better than real gasses	keep	引擎误判 -> Are ideal gases better than real gases
+Write me a poem in the style of neruda	keep	引擎误判 -> Write me a poem in the style of jerusalem
+You mentioned ai maintenance and development but until AGI advances	keep	引擎误判 -> You mentioned ai maintenance and development but until AGE advances
+I want to write a language server vscode extension	keep	引擎误判 -> I want to write a language server code extension
+Enables smes or LLMs to reconstruct ideas	keep	引擎误判 -> Enables smes or Me to reconstruct ideas
+Hello there obi one Kenobi	keep	引擎误判 -> Hello there obi one Knock
+for j in range	keep	引擎误判 -> for in range
+How would you create a ai like ChatGPT	keep	引擎误判 -> How would you create a ai like Charge
+In what circumstances can Kaiju be useful to utilize	keep	引擎误判 -> In what circumstances can May be useful to utilize
+How to setup authorization and authentication fastapi with explaination	exclude	源句错拼 explaination
+Caffe latte MIT Hafermilch	exclude	非英文
+Is open assistant pretrained	keep	引擎误判 -> Is open assistant retained
+I would like you to roleplay being an adventurous archeologist and explorer	keep	引擎误判 -> I would like you to reply being an adventurous archaeologist and explorer
+use a StringBuilder or similar object to construct the output string	keep	引擎误判 -> use a Stronger or similar object to construct the output string
+Where can I find the source code of ChatGPT	keep	引擎误判 -> Where can I find the source code of Chapter
+and I'm able to export all of our tickets into a logical CSV format	keep	引擎误判 -> and I'm able to export all of our tickets into a logical CAB format
+How would I create a new Nginx docker container	keep	引擎误判 -> How would I create a new Engine docker container
+What if I boost my own comment by buying artificial likes or upvotes	keep	引擎误判 -> What if I boost my own comment by buying artificial likes or up votes
+Is it possible to have the curves generated be Bezier curves	keep	引擎误判 -> Is it possible to have the curves generated be Base curves
+and it's also an OpenWorld	keep	引擎误判 -> and it's also an Open world
+I've heard that the Myer briggs personality test is not scientifically validated	exclude	源句错拼 Myer
+Tell me about operation Barbarossa and the response of the soviet red army	keep	引擎误判 -> Tell me about operation Barbara and the response of the soviet red army
+when x is user input	keep	引擎误判 -> when she is user input
+Name me some songs by MGMT	keep	引擎误判 -> Name me some songs by MY
+Where can I type these commands like mkdir and cd	keep	引擎误判 -> Where can I type these commands like direct and seedy
+using deeper or wider neural networks for each denoising	keep	引擎误判 -> using deeper or wider neural networks for each ending
+For some reason PyTorch seems uncomfortable to use	keep	引擎误判 -> For some reason Porch seems uncomfortable to use
+Why would you say ChatGPT is	keep	引擎误判 -> Why would you say Charge is
+Where would the best places to stay be when traveling to Tikal	keep	引擎误判 -> Where would the best places to stay be when traveling to Talk
+Can you tell me who the musician Aphex twin was inspired by	keep	引擎误判 -> Can you tell me who the musician She twin was inspired by
+I've already checked that they are in the VPC and the ports are open	keep	引擎误判 -> I've already checked that they are in the PC and the ports are open
+You said prior to the invention of the proximity fuze	keep	引擎误判 -> You said prior to the invention of the proximity fuse
+What is the recipe for chilean empanadas	keep	引擎误判 -> What is the recipe for chilean empanada
+stop copying answers from chatgpt	keep	引擎误判 -> stop copying answers from chapter
+Will open assistant eventually have a publically available API	exclude	源句错拼 publically
+How are trilobites related to chelicerata	keep	引擎误判 -> How are trilobites related to chelicerae
+how is Spritesla pronounced	keep	引擎误判 -> how is Spiritual pronounced
+Some sources claim that the text should be preprocessed in a transformer model	keep	引擎误判 -> Some sources claim that the text should be prepared in a transformer model
+I have tried Inkscape before but last time I checked	keep	引擎误判 -> I have tried Iconoscopes before but last time I checked
+I'm particularly interested in learning more about richard Thaler's work in behavioral economics	keep	引擎误判 -> I'm particularly interested in learning more about richard There's work in behavioral economics
+Would you recomend it to my son if he asked you about that	exclude	源句错拼 recomend
+Is their a correlation to deadbolt usage and crime	exclude	源句 their/there 误用
+What education should I get to become an SRE	keep	引擎误判 -> What education should I get to become an SEE
+convert this JSON object into XML	keep	引擎误判 -> convert this JASON object into XML
+The genre is MMORPG	keep	引擎误判 -> The genre is MORE
+malwares can directly attack humans and lead to huge disasters	exclude	源句非标准复数 malwares
+Caffe latte MIT Kokosnussmilch	exclude	非英文
+Elaborate on how OpenAI is more closed off than LAION open assistant	keep	引擎误判 -> Elaborate on how Opening is more closed off than LEON open assistant
+Write python code to draw a wireframe sphere	keep	引擎误判 -> Write python code to draw a wire frame sphere
+Prove that the set of bounded linear operators from E to F	keep	引擎误判 -> Prove that the set of bounded linear operators from End to Find
+I have a component in vue	keep	引擎误判 -> I have a component in view
+Make a roleplay module	keep	引擎误判 -> Make a reply module
+Who is cecilia Blomdahl	keep	引擎误判 -> Who is cecilia Bondage
+write me a program in nodejs with express and ejs	keep	引擎误判 -> write me a program in notes with express and is
+Also you missed an s in million s	exclude	残片
+the explanation of the python script for the FizzBuzz game is correct	keep	引擎误判 -> the explanation of the python script for the Fibula game is correct
+Write a python script to classify ECG images using CNN and LSTM	keep	引擎误判 -> Write a python script to classify ECG images using CNN and LET
+What hardware was OpenBSD designed to run on and why that specific hardware	keep	引擎误判 -> What hardware was Opened designed to run on and why that specific hardware
+using the markdown synatx format	exclude	源句错拼 synatx
+with an optimal tradeoff of clearness	keep	引擎误判 -> with an optimal trade off of clearness
+Who is patrick wood Crusius	keep	引擎误判 -> Who is patrick wood Crisis
+Why does OpenAI have more budget	keep	引擎误判 -> Why does Open have more budget
+In what ways is it similar and different to chat gpt	keep	引擎误判 -> In what ways is it similar and different to chat got
+Can you explain to me what USAR is	keep	引擎误判 -> Can you explain to me what USE is
+S presidents during their first term in office	exclude	缩写切分残片
+What features does Hai's Bluetooth showerhead have	keep	引擎误判 -> What features does His Bluetooth showered have
+Can you write me an outline of a low complexity and low scope PRD	keep	引擎误判 -> Can you write me an outline of a low complexity and low scope OR
+Failed to convert a NumPy array to a tensor	keep	引擎误判 -> Failed to convert a Bumpy array to a tensor
+What are the differences between merging and rebasing	keep	引擎误判 -> What are the differences between merging and reading
+Some machine learning models may behave like an ASI	keep	引擎误判 -> Some machine learning models may behave like an AS
+Hi I am PREETAM	keep	引擎误判 -> Hi I am PRETTY
+How can I implement my own SRE team as a small company	keep	引擎误判 -> How can I implement my own ARE team as a small company
+that will ask user for a number N	keep	引擎误判 -> that will ask user for a number Next
+I think you meant to say dynamically not dinamically	exclude	源句刻意错拼
+I was greeted by an npc named Nao after creating my character	keep	引擎误判 -> I was greeted by an npc named No after creating my character
+Mention that my primary reference for a visa comes from michael G	keep	引擎误判 -> Mention that my primary reference for a visa comes from michael Got
+What's the difference between gitlab and GitHub	keep	引擎误判 -> What's the difference between italy and GitHub
+What role do STRIPAK complexes play in cell signaling and cancer	keep	引擎误判 -> What role do STRIPS complexes play in cell signaling and cancer
+Why can't Shor's algorithm be run on a classical computer	keep	引擎误判 -> Why can't Shores algorithm be run on a classical computer
+Are there any open source alternatives for ChatGPT	keep	引擎误判 -> Are there any open source alternatives for Chapter
+I want to do a project to label data for training using RLHF	keep	引擎误判 -> I want to do a project to label data for training using THE
+Their name is john doe and they applied to work at RealCompany	keep	引擎误判 -> Their name is john doe and they applied to work at Real company
+Can you write me a final stanza which uses the ABAB rhyme scheme	keep	引擎误判 -> Can you write me a final stanza which uses the BABY rhyme scheme
+Can you also do this from the cli	keep	引擎误判 -> Can you also do this from the client
+How does the algorithm complexity change as the number dividing n increases	keep	引擎误判 -> How does the algorithm complexity change as the number dividing in increases
+vides a clear pathway for practitioners to translate larger	exclude	残片
+and arguably one of the most impactful advantages of the united states	keep	引擎误判 -> and arguably one of the most impact advantages of the united states
+your goal is to play the role of a DnD dungeon master for me	keep	引擎误判 -> your goal is to play the role of a And dungeon master for me
+Caffe latte MIT Sojamilch	exclude	非英文
+We must be responsible when creating AGI	keep	引擎误判 -> We must be responsible when creating AGE
+I want to learn more about the Lagrangian transform	keep	引擎误判 -> I want to learn more about the Agrarian transform
+not necessarily from Dvorak's time	keep	引擎误判 -> not necessarily from Drake's time
+Describe how the genre of chatbot speech compares to others such as academic	keep	引擎误判 -> Describe how the genre of harbor speech compares to others such as academic
+Are there any other drugs that act similarly to Prozac	keep	引擎误判 -> Are there any other drugs that act similarly to Process
+These goals must be a lasting priority that ASI honors for life	keep	引擎误判 -> These goals must be a lasting priority that IS honors for life
+Why is Microsoft flight simulator better than FlightGear	keep	引擎误判 -> Why is Microsoft flight simulator better than Lighter
+tionizing the field of image generation	exclude	残片
+sudo make me a sandwich	keep	引擎误判 -> said make me a sandwich
+How can anarcho communism work	keep	引擎误判 -> How can anarchist communism work
+Does SQLAlchemy provide any input sanitization	keep	引擎误判 -> Does SQLAlchemy provide any input sanitation
+How do you write the Viterbi algorithm in JavaScript	keep	引擎误判 -> How do you write the Vitriol algorithm in JavaScript
