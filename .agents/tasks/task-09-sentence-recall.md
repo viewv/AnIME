@@ -64,7 +64,35 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 ## Blocked (必须跨界或改契约时立即暂停：写出明确原因 + 申请修改的文件路径；无阻塞留 None)
 - **[已批准 2026-11-22] 新增 trait 方法需在两个包装器中转发**：P1 在 `LexiconProvider` 新增带默认空实现的 `closed_token_neighbors`；`crates/animed/src/server.rs`（`SharedLexicon`）与 `crates/eval/src/main.rs`（`EvalLexicon`）各自包了一层且未转发，真实守护进程与评测器都拿到空默认实现（实测指标零变化）。用户批准**仅**在这两个文件各加一个与 `segment_runon` 相同模式的转发方法，已加入 `allowed_paths`；`crates/animed`、`crates/eval` 其余文件仍不在白名单内。
 
+- **[标注问题，不阻塞，转交评测 v3 任务] `noise_v1` 的 `negative:clean` 含源句自身错误**：MultiWOZ 用户原话本身有错（`could you tell me he postcode`、`thanks you a lot`、`Thanks for you assistance`、`naw I'm good`、`there address`、`it's departure time`、`helps alot`）。P1 后引擎把其中 4 条"改对"，被计为误改，导致该指标 95.5% → 93.5%。本任务冻结评测集未改，需在评测 v3 中人工复核反例集。
+
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [DONE — 待评审] P1 / P2 完成，6 项噪声召回目标全部达成；`negative:clean` 93.5% 未达 95.5% 目标，原因是反例集标注噪声（见 Blocked 第 2 条），留出集上为 97.5%（task-08：98.0%）。
 - Changed Files:
-- Verification Output:
+  - `crates/lexicon/src/{lexicon,lib,layered}.rs`：`LexiconProvider::closed_token_neighbors`（默认空实现）与 `Lexicon` 实现（一次编辑枚举 + 哈希查表 + QWERTY 物理代价，常见词门槛）。
+  - `crates/engine/src/confusables.rs`：`expand_closed_token_neighbors`（真词原词先验分差 2.8 + 编辑代价 + 顺风惩罚；非词按自然分封顶；罕见原词 Zipf < 3 不展开）。
+  - `crates/engine/src/lib.rs`：整句槽位构建拆分为可缓存的 `build_token_slots`；`space_edit_alternatives`（合并 / 边界左右移 / 两段切分 / `segment_runon`）+ `SPACE_EDIT_PENALTY = 0.75` 联合解码；廉价精确词探测 `exact_log_freq`（编辑预算 0，独立缓存）；词法缓存上限 64 → 256。
+  - `crates/animed/src/server.rs`、`crates/eval/src/main.rs`：经批准各加一个 `closed_token_neighbors` 转发。
+  - 单测：`lexicon::tests::closed_token_neighbors_recover_leading_drop_and_realword_edits`、`engine::tests::closed_token_neighbors_recover_leading_drop_but_keep_clean_words`、`engine::tests::space_edit_alternatives_fix_extra_shifted_and_missing_spaces`；`context_realword_sentence_caps_shorthand_and_privacy_with_l2_lm` 的玩具 LM 补齐 `this/is/great` 一元计数（原玩具 LM 不含 `is`，使近邻 `its` 因 LM 未登录词惩罚胜出，属测试夹具不真实）。
+- Verification Output（L1+L2，L2 = task-08 `ngram_kn_r20`，`LM_LAMBDA = 0.85` 未改）：
+
+  | 指标（top1） | task-08 | **task-09** | 目标 |
+  |---|---|---|---|
+  | noise_v1 leading_drop | 8.3% | **66.7%** | >= 60% |
+  | noise_v1 boundary_gemination | 26.7% | **68.3%** | >= 60% |
+  | noise_v1 space_extra | 0.0% | **60.0%** | >= 50% |
+  | noise_v1 space_shift | 40.0% | **81.7%** | >= 60% |
+  | noise_v1 space_missing | 45.0% | **75.0%** | >= 60% |
+  | noise_v1 realword_edit | 38.3% | **76.7%** | >= 45% |
+  | noise_v1 adjacent_key / contraction | 93.3 / 95.0% | 91.7 / 93.3% | — |
+  | noise_v1 negative:clean | 95.5% | 93.5% | >= 95.5%（未达，见上） |
+  | noise_v1 TOTAL | 58.7% | **81.6%** | — |
+  | core_v2 sentence top1 / top5 | 88.0 / 94.5% | **89.0 / 96.0%** | 不退化 |
+  | core_v2 exact / prefix / typo_simple / typo_prefix / typo_phonetic / context_realword | 99.0 / 82.9 / 92.5 / 56.0 / 69.0 / 92.5% | 完全相同 | 退化 <= 0.5pp |
+  | core_v1 sentence / TOTAL | 88.0 / 78.3% | **89.0 / 78.4%** | 不退化 |
+
+  - **留出噪声集**（`build_eval_v2.py --seed 7`，未入库）：task-08 → task-09 TOTAL 57.4% → 82.9%；leading_drop 8.3 → 70.0、boundary_gemination 21.7 → 63.3、space_extra 0.0 → 61.7、space_shift 35.0 → 90.0、space_missing 40.0 → 70.0、realword_edit 26.7 → 70.0；negative:clean 98.0 → 97.5（-1 句）。增益与开发集一致，未见过拟合。
+  - **调参**：真词近邻基础分差扫描 1.6 / 2.2 / 2.8（1.6 时 core_v2 sentence 降 1.5pp），取 2.8；空格编辑代价扫描 0.75 / 1.0 / 1.5 / 2.25，取 0.75（space_missing 75.0%，negative 不变）。
+  - **延迟**（单键，多次运行区间，随机器负载波动）：core_v2 p50 61–142 us、p99 1.7–2.3 ms、max 5.3–6.2 ms；noise_v1 p99 1.7–3.7 ms、max 6.9–10.5 ms；task-08 时 p99 约 0.6 ms。主要开销为备选切分的额外 Viterbi 解码（最多 8 次）；精确词探测改走编辑预算 0 的廉价查询后 p99 由约 4.4 ms 降至约 2 ms。`core_v1` / `core_v2` `--gate phase3` PASS；`noise_v1` 单键 p50/p99/max 门禁 PASS。
+  - **已知局限**：只覆盖一次编辑（`is -> this` 需两次插入，不召回）；每个备选只含一处空格编辑（同句多处空格错误不能同时修正）；句末 `too/to`、`bye/by` 类误判仍在。
+  - `make check`（0 warning）/ `make test`（64 passed, 0 failed）/ `make eval` / `make verify-infra`（INFRA OK）/ `./scripts/verify-boundaries.sh .agents/tasks/task-09-sentence-recall.md`（含 `--base feat/task-08-eval-and-l2-rebuild --tracked-only`）BOUNDARY OK。

@@ -15,7 +15,17 @@ use anime_protocol::{
 use crate::confusables::{expand_closed_token_neighbors, expand_slot_confusables};
 
 const MAX_CONTEXT_BEFORE_CHARS: usize = 256;
-const MAX_TOKEN_LEX_CACHE: usize = 64;
+const MAX_TOKEN_LEX_CACHE: usize = 256;
+/// 每处空格编辑（合并 / 错位 / 拆分）的信道代价（解码分单位，约等于 LM_LAMBDA × 2 个 log10）：
+/// 默认切分始终优先，只有备选切分在 LM 与词法上显著更好时才胜出。
+const SPACE_EDIT_PENALTY: f32 = 0.75;
+/// 每次按键最多额外解码的备选切分数，守住同步路径延迟预算。
+const MAX_SPACE_EDIT_ALTERNATIVES: usize = 8;
+/// 两段切分的词频门槛（log10 概率）：常规部件 Zipf >= 4，<= 2 字母部件 Zipf >= 6（a、i、to、it、me 级别）。
+const RUNON_PART_MIN_LOG_FREQ: f32 = -5.0;
+const RUNON_SHORT_PART_MIN_LOG_FREQ: f32 = -3.0;
+/// 收录但 Zipf < 3 的粘连形（thankyou、alot）也允许尝试拆分。
+const RUNON_RARE_EXACT_LOG_FREQ: f32 = -6.0;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EngineOutput {
@@ -39,6 +49,8 @@ pub struct EngineSession<L, N, M> {
     // 兼顾退格回退命中，并在配置变更、重置或提交选词后立即清空。
     token_lex_cache: HashMap<String, Vec<LexiconCandidate>>,
     neighbor_cache: HashMap<String, Vec<LexiconCandidate>>,
+    slot_cache: HashMap<(String, bool), (Vec<LatticeSlot>, Vec<LexiconCandidate>)>,
+    exact_probe_cache: HashMap<String, Option<f32>>,
 }
 
 impl<L, N, M> EngineSession<L, N, M>
@@ -62,6 +74,8 @@ where
             last_auto_space: false,
             token_lex_cache: HashMap::with_capacity(16),
             neighbor_cache: HashMap::with_capacity(16),
+            slot_cache: HashMap::with_capacity(32),
+            exact_probe_cache: HashMap::with_capacity(64),
         }
     }
 
@@ -544,6 +558,296 @@ where
         hits
     }
 
+    /// 按 token 切分构建整句词格槽位；同时返回首词的部分选词候选。
+    fn build_sentence_slots(
+        &mut self,
+        tokens: &[(String, usize, usize)],
+        opts: &QueryOptions,
+    ) -> (Vec<LatticeSlot>, Vec<LexiconCandidate>) {
+        let ends_with_space = self.preedit.ends_with(' ');
+        let mut slots = Vec::with_capacity(tokens.len() + 2);
+        let mut first_hits: Vec<LexiconCandidate> = Vec::new();
+        for (slot_idx, (tok, start_char, end_char)) in tokens.iter().enumerate() {
+            let is_closed_word = slot_idx + 1 < tokens.len() || ends_with_space;
+            let key = (tok.clone(), is_closed_word);
+            let (tok_slots, tok_first) = match self.slot_cache.get(&key) {
+                Some(cached) => cached.clone(),
+                None => {
+                    let built = self.build_token_slots(tok, is_closed_word, opts);
+                    if self.slot_cache.len() >= MAX_TOKEN_LEX_CACHE * 2 {
+                        self.slot_cache.clear();
+                    }
+                    self.slot_cache.insert(key, built.clone());
+                    built
+                }
+            };
+            if slot_idx == 0 {
+                first_hits = tok_first;
+            }
+            // 缓存的槽位与 token 字符区间无关，按当前切分回填区间
+            slots.extend(tok_slots.into_iter().map(|mut sl| {
+                sl.start_char = *start_char;
+                sl.end_char = *end_char;
+                sl
+            }));
+        }
+        (slots, first_hits)
+    }
+
+    /// 单个 token 的词格槽位（连打拆分时可能是多个槽位）与作为首词时的部分选词候选。
+    /// 只依赖 token 文本与是否已闭合，可跨按键、跨备选切分缓存。
+    fn build_token_slots(
+        &mut self,
+        tok: &str,
+        is_closed_word: bool,
+        opts: &QueryOptions,
+    ) -> (Vec<LatticeSlot>, Vec<LexiconCandidate>) {
+        let (start_char, end_char) = (0usize, tok.chars().count());
+        let tok = &tok.to_string();
+        let mut slots: Vec<LatticeSlot> = Vec::with_capacity(2);
+        let mut first_hits: Vec<LexiconCandidate> = Vec::new();
+        let hits = self.query_lexicon_cached(tok, opts);
+        if should_expand_runon_token(tok, is_closed_word, &hits) {
+            if let Some(seg_words) = self.lexicon.segment_runon(tok) {
+                first_hits.push(LexiconCandidate {
+                    word: seg_words.join(" "),
+                    kind: LexiconMatchKind::TypoCorrection,
+                    score: 0.0,
+                    log_freq: -2.0,
+                    edit_cost: 0.5,
+                });
+                for sub_word in seg_words {
+                    let sub_hits = self.query_lexicon_cached(&sub_word, &opts);
+                    let mut sub_cands: Vec<SlotCandidate> = sub_hits
+                        .into_iter()
+                        .filter(|h| h.kind != LexiconMatchKind::Completion)
+                        .map(|h| SlotCandidate {
+                            word: h.word,
+                            lex_score: h.score,
+                        })
+                        .collect();
+                    if !sub_cands
+                        .iter()
+                        .any(|c| c.word.eq_ignore_ascii_case(&sub_word))
+                    {
+                        sub_cands.insert(
+                            0,
+                            SlotCandidate {
+                                word: sub_word.clone(),
+                                lex_score: 0.0,
+                            },
+                        );
+                    }
+                    expand_slot_confusables(&self.lexicon, &sub_word, &mut sub_cands, true);
+                    sub_cands.sort_by(|a, b| {
+                        b.lex_score
+                            .total_cmp(&a.lex_score)
+                            .then_with(|| a.word.cmp(&b.word))
+                    });
+                    slots.push(LatticeSlot {
+                        raw_token: sub_word,
+                        start_char,
+                        end_char,
+                        candidates: sub_cands,
+                    });
+                }
+                return (slots, first_hits);
+            }
+        }
+        first_hits = hits.iter().take(2).cloned().collect();
+        let has_exact_hit = hits.iter().any(|h| h.kind == LexiconMatchKind::Exact);
+        let tok_char_len = tok.chars().count();
+        let best_phonetic: Option<SlotCandidate> = hits
+            .iter()
+            .find(|h| h.kind == LexiconMatchKind::PhoneticCorrection)
+            .map(|h| SlotCandidate {
+                word: h.word.clone(),
+                lex_score: h.score,
+            });
+        let mut slot_cands: Vec<SlotCandidate> = hits
+            .into_iter()
+            .filter(|h| {
+                // 已按空格闭合的非末尾精确合法词不扩展前缀补全（如 build->building）；
+                // 闭合错拼词同样过滤超长前缀延伸（> tok_len + 2），为真实纠错词腾出 Viterbi 槽位。
+                if is_closed_word && h.kind == LexiconMatchKind::Completion {
+                    if has_exact_hit {
+                        return false;
+                    }
+                    if h.word.chars().count() > tok_char_len + 2 {
+                        return false;
+                    }
+                }
+                true
+            })
+            .map(|h| SlotCandidate {
+                word: h.word,
+                lex_score: h.score,
+            })
+            .collect();
+        if slot_cands.is_empty() {
+            slot_cands.push(SlotCandidate {
+                word: tok.clone(),
+                lex_score: -50.0,
+            });
+        }
+        expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true);
+        if is_closed_word {
+            let neighbors = self.closed_neighbors_cached(tok);
+            expand_closed_token_neighbors(&neighbors, tok, has_exact_hit, &mut slot_cands);
+        }
+        // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
+        slot_cands.sort_by(|a, b| {
+            b.lex_score
+                .total_cmp(&a.lex_score)
+                .then_with(|| a.word.cmp(&b.word))
+        });
+        // 为读音纠错（PhoneticCorrection，如 sikology->psychology）保底保留 1 个前 10 槽位
+        if slot_cands.len() >= 10 {
+            if let Some(phon) = best_phonetic {
+                let in_top10 = slot_cands[..10]
+                    .iter()
+                    .any(|c| c.word.eq_ignore_ascii_case(&phon.word));
+                if !in_top10 {
+                    slot_cands[9] = phon;
+                }
+            }
+        }
+        slots.push(LatticeSlot {
+            raw_token: tok.clone(),
+            start_char,
+            end_char,
+            candidates: slot_cands,
+        });
+        (slots, first_hits)
+    }
+
+    fn is_exact_word(&mut self, word: &str, opts: &QueryOptions) -> bool {
+        self.exact_log_freq(word, opts).is_some()
+    }
+
+    /// 只判定"是否为词典词及其词频"：编辑预算 0、关闭读音，跳过模糊束搜索与语音桶扫描。
+    /// 备选切分要探测大量碎片（合并串、错位串、两段切分），走完整查询会把同步路径拖到数毫秒。
+    fn exact_log_freq(&mut self, word: &str, _opts: &QueryOptions) -> Option<f32> {
+        if let Some(&cached) = self.exact_probe_cache.get(word) {
+            return cached;
+        }
+        let probe = QueryOptions {
+            limit: 3,
+            enable_phonetic: false,
+            max_edit_cost: 0.0,
+        };
+        let lf = self
+            .lexicon
+            .query(word, &probe)
+            .into_iter()
+            .find(|h| h.kind == LexiconMatchKind::Exact)
+            .map(|h| h.log_freq);
+        if self.exact_probe_cache.len() >= MAX_TOKEN_LEX_CACHE * 4 {
+            self.exact_probe_cache.clear();
+        }
+        self.exact_probe_cache.insert(word.to_string(), lf);
+        lf
+    }
+
+    /// 漏打空格的两段切分：两侧都必须是常见词，极短一侧（<= 2 字母）只接受高频功能词（a/i/it/me/to…），
+    /// 否则几乎任何长词都能被切成"词 + 碎片"。按两侧词频和取前 2 个交给 LM 竞争。
+    fn two_way_splits(&mut self, tok: &str, opts: &QueryOptions) -> Vec<(String, String)> {
+        let n = tok.len();
+        if !tok.is_ascii() || n < 3 {
+            return Vec::new();
+        }
+        let mut cands: Vec<(f32, String, String)> = Vec::new();
+        for k in 1..n {
+            let (l, r) = tok.split_at(k);
+            let min_lf = |w: &str| if w.len() <= 2 { RUNON_SHORT_PART_MIN_LOG_FREQ } else { RUNON_PART_MIN_LOG_FREQ };
+            let (Some(fl), Some(fr)) = (self.exact_log_freq(l, opts), self.exact_log_freq(r, opts)) else {
+                continue;
+            };
+            if fl >= min_lf(l) && fr >= min_lf(r) {
+                cands.push((fl + fr, l.to_string(), r.to_string()));
+            }
+        }
+        cands.sort_by(|a, b| b.0.total_cmp(&a.0));
+        cands.into_iter().take(2).map(|(_, l, r)| (l, r)).collect()
+    }
+
+    /// 空格出错的备选切分（每个备选只含一处空格编辑）：
+    /// - 多打空格：相邻两 token 合并后是词（`pr ice -> price`）；
+    /// - 空格错位：边界左移 / 右移一个字符后两侧都是词（`wantt o -> want to`、`theatrey ou -> theatre you`）；
+    /// - 漏打空格：非词 token 可被连打分词切开（`theone -> the one`）。
+    /// 只在至少一侧不是合法词时生成，干净整句不产生任何备选，从结构上保证零误伤。
+    fn space_edit_alternatives(
+        &mut self,
+        tokens: &[(String, usize, usize)],
+        opts: &QueryOptions,
+    ) -> Vec<Vec<(String, usize, usize)>> {
+        let exact: Vec<bool> = tokens
+            .iter()
+            .map(|(t, _, _)| self.is_exact_word(t, opts))
+            .collect();
+        let mut alts: Vec<Vec<(String, usize, usize)>> = Vec::new();
+        let push_alt = |alts: &mut Vec<Vec<(String, usize, usize)>>, i: usize, width: usize, repl: Vec<(String, usize, usize)>| {
+            let mut alt = Vec::with_capacity(tokens.len() + 1);
+            alt.extend_from_slice(&tokens[..i]);
+            alt.extend(repl);
+            alt.extend_from_slice(&tokens[i + width..]);
+            alts.push(alt);
+        };
+        for i in 0..tokens.len().saturating_sub(1) {
+            if exact[i] && exact[i + 1] {
+                continue;
+            }
+            let (a, sa, ea) = &tokens[i];
+            let (b, sb, eb) = &tokens[i + 1];
+            if !a.is_ascii() || !b.is_ascii() {
+                continue;
+            }
+            let merged = format!("{a}{b}");
+            if self.is_exact_word(&merged, opts) {
+                push_alt(&mut alts, i, 2, vec![(merged, *sa, *eb)]);
+            }
+            if a.len() >= 2 {
+                let (a2, moved) = a.split_at(a.len() - 1);
+                let b2 = format!("{moved}{b}");
+                if self.is_exact_word(a2, opts) && self.is_exact_word(&b2, opts) {
+                    push_alt(&mut alts, i, 2, vec![(a2.to_string(), *sa, ea - 1), (b2, ea - 1, *eb)]);
+                }
+            }
+            if b.len() >= 2 {
+                let (moved, b2) = b.split_at(1);
+                let a2 = format!("{a}{moved}");
+                if self.is_exact_word(&a2, opts) && self.is_exact_word(b2, opts) {
+                    push_alt(&mut alts, i, 2, vec![(a2, *sa, sb + 1), (b2.to_string(), sb + 1, *eb)]);
+                }
+            }
+        }
+        for (i, (t, st, en)) in tokens.iter().enumerate() {
+            // 非词，或虽收录但极罕见（如 thankyou）的 token 才尝试拆分
+            let rare_exact = exact[i]
+                && self.exact_log_freq(t, opts).is_some_and(|lf| lf < RUNON_RARE_EXACT_LOG_FREQ);
+            if exact[i] && !rare_exact {
+                continue;
+            }
+            for (l, r) in self.two_way_splits(t, opts) {
+                let mid = st + l.chars().count();
+                push_alt(&mut alts, i, 1, vec![(l, *st, mid), (r, mid, *en)]);
+            }
+            if t.chars().count() < 4 {
+                continue;
+            }
+            let hits = self.query_lexicon_cached(t, opts);
+            if should_expand_runon_token(t, true, &hits) {
+                continue; // 已在默认切分中强制拆开
+            }
+            if let Some(words) = self.lexicon.segment_runon(t) {
+                let repl = words.into_iter().map(|w| (w, *st, *en)).collect();
+                push_alt(&mut alts, i, 1, repl);
+            }
+        }
+        alts.truncate(MAX_SPACE_EDIT_ALTERNATIVES);
+        alts
+    }
+
     fn closed_neighbors_cached(&mut self, token: &str) -> Vec<LexiconCandidate> {
         if let Some(cached) = self.neighbor_cache.get(token) {
             return cached.clone();
@@ -728,131 +1032,18 @@ where
             self.candidates
                 .sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
         } else {
-            let mut slots = Vec::with_capacity(tokens.len() + 2);
-            let mut first_hits: Vec<LexiconCandidate> = Vec::new();
-            for (slot_idx, (tok, start_char, end_char)) in tokens.iter().enumerate() {
-                let hits = self.query_lexicon_cached(tok, &opts);
-                let is_closed_word = slot_idx + 1 < tokens.len() || self.preedit.ends_with(' ');
-                if should_expand_runon_token(tok, is_closed_word, &hits) {
-                    if let Some(seg_words) = self.lexicon.segment_runon(tok) {
-                        if slot_idx == 0 {
-                            first_hits.push(LexiconCandidate {
-                                word: seg_words.join(" "),
-                                kind: LexiconMatchKind::TypoCorrection,
-                                score: 0.0,
-                                log_freq: -2.0,
-                                edit_cost: 0.5,
-                            });
-                        }
-                        for sub_word in seg_words {
-                            let sub_hits = self.query_lexicon_cached(&sub_word, &opts);
-                            let mut sub_cands: Vec<SlotCandidate> = sub_hits
-                                .into_iter()
-                                .filter(|h| h.kind != LexiconMatchKind::Completion)
-                                .map(|h| SlotCandidate {
-                                    word: h.word,
-                                    lex_score: h.score,
-                                })
-                                .collect();
-                            if !sub_cands
-                                .iter()
-                                .any(|c| c.word.eq_ignore_ascii_case(&sub_word))
-                            {
-                                sub_cands.insert(
-                                    0,
-                                    SlotCandidate {
-                                        word: sub_word.clone(),
-                                        lex_score: 0.0,
-                                    },
-                                );
-                            }
-                            expand_slot_confusables(&self.lexicon, &sub_word, &mut sub_cands, true);
-                            sub_cands.sort_by(|a, b| {
-                                b.lex_score
-                                    .total_cmp(&a.lex_score)
-                                    .then_with(|| a.word.cmp(&b.word))
-                            });
-                            slots.push(LatticeSlot {
-                                raw_token: sub_word,
-                                start_char: *start_char,
-                                end_char: *end_char,
-                                candidates: sub_cands,
-                            });
-                        }
-                        continue;
-                    }
+            let (slots, first_hits) = self.build_sentence_slots(&tokens, &opts);
+            let max = self.config.max_candidates;
+            let mut sentences = self.ngram.decode_lattice(&self.context.before, &slots, max);
+            // 空格可能打错：对可疑词边界生成备选切分，按联合打分 - 空格信道代价与默认切分竞争
+            for alt in self.space_edit_alternatives(&tokens, &opts) {
+                let (alt_slots, _) = self.build_sentence_slots(&alt, &opts);
+                for mut s in self.ngram.decode_lattice(&self.context.before, &alt_slots, max) {
+                    s.score -= SPACE_EDIT_PENALTY;
+                    sentences.push(s);
                 }
-                if slot_idx == 0 {
-                    first_hits = hits.iter().take(2).cloned().collect();
-                }
-                let has_exact_hit = hits.iter().any(|h| h.kind == LexiconMatchKind::Exact);
-                let tok_char_len = tok.chars().count();
-                let best_phonetic: Option<SlotCandidate> = hits
-                    .iter()
-                    .find(|h| h.kind == LexiconMatchKind::PhoneticCorrection)
-                    .map(|h| SlotCandidate {
-                        word: h.word.clone(),
-                        lex_score: h.score,
-                    });
-                let mut slot_cands: Vec<SlotCandidate> = hits
-                    .into_iter()
-                    .filter(|h| {
-                        // 已按空格闭合的非末尾精确合法词不扩展前缀补全（如 build->building）；
-                        // 闭合错拼词同样过滤超长前缀延伸（> tok_len + 2），为真实纠错词腾出 Viterbi 槽位。
-                        if is_closed_word && h.kind == LexiconMatchKind::Completion {
-                            if has_exact_hit {
-                                return false;
-                            }
-                            if h.word.chars().count() > tok_char_len + 2 {
-                                return false;
-                            }
-                        }
-                        true
-                    })
-                    .map(|h| SlotCandidate {
-                        word: h.word,
-                        lex_score: h.score,
-                    })
-                    .collect();
-                if slot_cands.is_empty() {
-                    slot_cands.push(SlotCandidate {
-                        word: tok.clone(),
-                        lex_score: -50.0,
-                    });
-                }
-                expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true);
-                if is_closed_word {
-                    let neighbors = self.closed_neighbors_cached(tok);
-                    expand_closed_token_neighbors(&neighbors, tok, has_exact_hit, &mut slot_cands);
-                }
-                // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
-                slot_cands.sort_by(|a, b| {
-                    b.lex_score
-                        .total_cmp(&a.lex_score)
-                        .then_with(|| a.word.cmp(&b.word))
-                });
-                // 为读音纠错（PhoneticCorrection，如 sikology->psychology）保底保留 1 个前 10 槽位
-                if slot_cands.len() >= 10 {
-                    if let Some(phon) = best_phonetic {
-                        let in_top10 = slot_cands[..10]
-                            .iter()
-                            .any(|c| c.word.eq_ignore_ascii_case(&phon.word));
-                        if !in_top10 {
-                            slot_cands[9] = phon;
-                        }
-                    }
-                }
-                slots.push(LatticeSlot {
-                    raw_token: tok.clone(),
-                    start_char: *start_char,
-                    end_char: *end_char,
-                    candidates: slot_cands,
-                });
             }
-
-            let sentences =
-                self.ngram
-                    .decode_lattice(&self.context.before, &slots, self.config.max_candidates);
+            sentences.sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
             for s in sentences {
                 let formatted = format_sentence_proper_nouns(&s.text);
                 let text = if sentence_start {
@@ -1826,6 +2017,50 @@ mod tests {
         sess.reset();
         let st = feed_text(&mut sess, "o");
         assert!(st.candidates.iter().all(|c| c.text.to_ascii_lowercase() != "to"));
+    }
+
+    #[test]
+    fn space_edit_alternatives_fix_extra_shifted_and_missing_spaces() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("the", 7.7),
+                ("best", 6.0),
+                ("price", 5.6),
+                ("ice", 4.9),
+                ("i", 7.0),
+                ("want", 6.0),
+                ("to", 7.4),
+                ("go", 6.2),
+                ("book", 5.7),
+                ("it", 7.3),
+                ("now", 6.4),
+                ("is", 7.2),
+                ("good", 6.4),
+            ],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![("the", 3000), ("best", 300), ("price", 150), ("ice", 60), ("i", 900), ("want", 400),
+                 ("to", 1500), ("go", 300), ("book", 200), ("it", 1200), ("now", 400), ("is", 1300),
+                 ("good", 300)],
+            vec![("the", "best", 200), ("best", "price", 80), ("i", "want", 300), ("want", "to", 280),
+                 ("to", "go", 200), ("book", "it", 90), ("it", "now", 60), ("is", "good", 100)],
+            vec![("the", "best", "price", 60), ("i", "want", "to", 200), ("want", "to", "go", 150),
+                 ("book", "it", "now", 40)],
+        );
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+        let top = |sess: &mut EngineSession<_, _, _>, s: &str| {
+            sess.reset();
+            feed_text(sess, s).candidates[0].text.to_ascii_lowercase()
+        };
+        assert_eq!(top(&mut sess, "the best pr ice"), "the best price");
+        assert_eq!(top(&mut sess, "i wantt o go"), "i want to go");
+        assert_eq!(top(&mut sess, "bookit now"), "book it now");
+        // 全部为合法词的干净整句不生成任何备选切分
+        assert_eq!(top(&mut sess, "it is good"), "it is good");
+        let toks = split_char_spans("it is good");
+        let opts = QueryOptions::default();
+        assert!(sess.space_edit_alternatives(&toks, &opts).is_empty());
     }
 
     #[test]
