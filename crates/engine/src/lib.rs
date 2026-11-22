@@ -616,7 +616,15 @@ where
 
         if tokens.len() == 1 {
             let (tok, _, _) = &tokens[0];
+            let is_closed_word = self.preedit.ends_with(' ');
             let lex_hits = self.query_lexicon_cached(tok, &opts);
+            let expand_runon = should_expand_runon_token(tok, is_closed_word, &lex_hits);
+            let runon_words = if expand_runon {
+                self.lexicon.segment_runon(tok)
+            } else {
+                None
+            };
+
             let mut kind_by_lower: Vec<(String, CandidateKind)> = Vec::with_capacity(lex_hits.len());
             let mut slot_cands: Vec<SlotCandidate> = Vec::with_capacity(lex_hits.len() + 4);
             for hit in lex_hits {
@@ -663,17 +671,106 @@ where
                     trailing_space: self.config.smart_spacing,
                 });
             }
+
+            if let Some(seg_words) = runon_words {
+                let joined = format_sentence_proper_nouns(&seg_words.join(" "));
+                let text = if sentence_start {
+                    capitalize_first_ascii(&joined)
+                } else {
+                    joined
+                };
+                if !self
+                    .candidates
+                    .iter()
+                    .any(|c| c.consumed_chars == total_chars && c.text == text)
+                {
+                    let best_single = self
+                        .candidates
+                        .iter()
+                        .map(|c| c.score)
+                        .fold(f32::NEG_INFINITY, f32::max);
+                    let score = if expand_runon {
+                        if best_single.is_finite() {
+                            (best_single + 1.5).max(0.5)
+                        } else {
+                            0.5
+                        }
+                    } else if best_single.is_finite() {
+                        best_single - 1.5
+                    } else {
+                        -2.0
+                    };
+                    self.candidates.push(Candidate {
+                        text,
+                        kind: CandidateKind::Sentence,
+                        comment: Some("runon".into()),
+                        score,
+                        consumed_chars: total_chars,
+                        trailing_space: self.config.smart_spacing,
+                    });
+                }
+            }
+
             self.candidates
                 .sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
         } else {
-            let mut slots = Vec::with_capacity(tokens.len());
+            let mut slots = Vec::with_capacity(tokens.len() + 2);
             let mut first_hits: Vec<LexiconCandidate> = Vec::new();
             for (slot_idx, (tok, start_char, end_char)) in tokens.iter().enumerate() {
                 let hits = self.query_lexicon_cached(tok, &opts);
+                let is_closed_word = slot_idx + 1 < tokens.len() || self.preedit.ends_with(' ');
+                if should_expand_runon_token(tok, is_closed_word, &hits) {
+                    if let Some(seg_words) = self.lexicon.segment_runon(tok) {
+                        if slot_idx == 0 {
+                            first_hits.push(LexiconCandidate {
+                                word: seg_words.join(" "),
+                                kind: LexiconMatchKind::TypoCorrection,
+                                score: 0.0,
+                                log_freq: -2.0,
+                                edit_cost: 0.5,
+                            });
+                        }
+                        for sub_word in seg_words {
+                            let sub_hits = self.query_lexicon_cached(&sub_word, &opts);
+                            let mut sub_cands: Vec<SlotCandidate> = sub_hits
+                                .into_iter()
+                                .filter(|h| h.kind != LexiconMatchKind::Completion)
+                                .map(|h| SlotCandidate {
+                                    word: h.word,
+                                    lex_score: h.score,
+                                })
+                                .collect();
+                            if !sub_cands
+                                .iter()
+                                .any(|c| c.word.eq_ignore_ascii_case(&sub_word))
+                            {
+                                sub_cands.insert(
+                                    0,
+                                    SlotCandidate {
+                                        word: sub_word.clone(),
+                                        lex_score: 0.0,
+                                    },
+                                );
+                            }
+                            expand_slot_confusables(&self.lexicon, &sub_word, &mut sub_cands, true);
+                            sub_cands.sort_by(|a, b| {
+                                b.lex_score
+                                    .total_cmp(&a.lex_score)
+                                    .then_with(|| a.word.cmp(&b.word))
+                            });
+                            slots.push(LatticeSlot {
+                                raw_token: sub_word,
+                                start_char: *start_char,
+                                end_char: *end_char,
+                                candidates: sub_cands,
+                            });
+                        }
+                        continue;
+                    }
+                }
                 if slot_idx == 0 {
                     first_hits = hits.iter().take(2).cloned().collect();
                 }
-                let is_closed_word = slot_idx + 1 < tokens.len() || self.preedit.ends_with(' ');
                 let has_exact_hit = hits.iter().any(|h| h.kind == LexiconMatchKind::Exact);
                 let tok_char_len = tok.chars().count();
                 let best_phonetic: Option<SlotCandidate> = hits
@@ -921,6 +1018,49 @@ fn format_sentence_proper_nouns(sentence: &str) -> String {
         prev_lower = tok.to_ascii_lowercase();
     }
     out
+}
+
+/// 判断一个无空格的 token 是否应作为连打漏空格串优先展开为多词槽位：
+/// - 只要词库存在 `Exact` 命中（如 `software`、`without`、`something`），绝不切分；
+/// - 若存在显式驼峰或句首 `I` 连打边界（如 `Ilikethe`、`thatLikes`），优先允许切分；
+/// - 否则若存在极低编辑代价的单键邻键纠错（`edit_cost <= 0.65`，如 `agrain->again`），
+///   或未闭合词尾存在高频前缀补全（如 `internat->international`、`considera->consideration`），
+///   优先保留单词纠错/补全，不在整句词格中强行拆碎。
+fn should_expand_runon_token(tok: &str, is_closed_word: bool, hits: &[LexiconCandidate]) -> bool {
+    if hits.iter().any(|h| h.kind == LexiconMatchKind::Exact) {
+        return false;
+    }
+    let has_camel_or_i_prefix = tok.chars().skip(1).any(|c| c.is_ascii_uppercase())
+        || (tok.starts_with('I') && tok.chars().nth(1).is_some_and(|c| c.is_ascii_lowercase()));
+    if has_camel_or_i_prefix {
+        return true;
+    }
+    let is_with_article = matches!(
+        tok.to_ascii_lowercase().as_str(),
+        "witha" | "ina" | "ona" | "fora" | "asa" | "isa" | "wasa" | "hasa" | "hada" | "nota"
+    );
+    if is_with_article {
+        return true;
+    }
+    // 对纯小写无驼峰边界的词条：若词典已召回常规拼写纠错或读音纠错，
+    // 优先走单词纠错，仅当词典完全未命中或最接近单字候选的编辑距离较大（edit_cost > 2.25，即至少 3 处非邻键改动，如 thatlikes / ilikethe / dontknow）时才触发连打分词。
+    if hits.iter().any(|h| {
+        (h.kind == LexiconMatchKind::TypoCorrection && h.edit_cost <= 2.25)
+            || (h.kind == LexiconMatchKind::PhoneticCorrection && h.edit_cost <= 2.5)
+    }) {
+        return false;
+    }
+    if tok.len() < 7 && !hits.is_empty() {
+        return false;
+    }
+    if !is_closed_word
+        && hits
+            .iter()
+            .any(|h| h.kind == LexiconMatchKind::Completion && h.log_freq >= -5.5)
+    {
+        return false;
+    }
+    true
 }
 
 fn split_char_spans(input: &str) -> Vec<(String, usize, usize)> {
@@ -1607,5 +1747,71 @@ mod tests {
             EngineOutput::State(st) => assert!(st.passthrough),
             other => panic!("expected passthrough State for '.' after digit 6, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn smart_runon_word_segmentation_in_single_and_sentence_mode() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("I", 7.1),
+                ("like", 6.5),
+                ("likes", 5.6),
+                ("the", 7.6),
+                ("software", 5.8),
+                ("that", 7.0),
+                ("me", 6.7),
+                ("with", 6.9),
+                ("a", 7.4),
+                ("don't", 6.6),
+                ("know", 6.5),
+            ],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![
+                ("I", 800),
+                ("like", 400),
+                ("likes", 220),
+                ("the", 950),
+                ("software", 300),
+                ("that", 600),
+                ("me", 450),
+                ("with", 500),
+                ("a", 850),
+                ("don't", 420),
+                ("know", 410),
+            ],
+            vec![
+                ("I", "like", 260),
+                ("like", "the", 240),
+                ("the", "software", 190),
+                ("software", "that", 160),
+                ("that", "likes", 180),
+                ("likes", "me", 190),
+                ("with", "a", 210),
+                ("don't", "know", 230),
+            ],
+            Vec::<(&str, &str, &str, u32)>::new(),
+        );
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+
+        // 1. 单 token 连打分词："Ilikethe" -> "I like the"
+        let st_single = feed_text(&mut sess, "Ilikethe");
+        assert_eq!(st_single.candidates[0].text, "I like the");
+
+        // 2. 缩略词省撇号 + 连打："dontknow" -> "don't know"
+        sess.reset();
+        let st_contr = feed_text(&mut sess, "dontknow");
+        assert_eq!(st_contr.candidates[0].text, "don't know");
+
+        // 3. 整句混合连打与合法复合词（software 不被拆开，Ilikethe 与 thatlikes 自动切分）
+        sess.reset();
+        let st_sent = feed_text(&mut sess, "Ilikethe software thatlikes me");
+        assert_eq!(
+            st_sent.candidates[0].text,
+            "I like the software that likes me",
+            "expected segmented sentence at top-1, got: {:?}",
+            st_sent.candidates
+        );
     }
 }

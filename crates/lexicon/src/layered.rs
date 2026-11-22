@@ -532,4 +532,12 @@ impl LexiconProvider for LayeredLexicon {
     fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<crate::ConfusableCandidate> {
         self.base.contextual_confusables(raw, limit)
     }
+
+    fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
+        let trimmed = raw.trim();
+        if self.has_exact_lower(&trimmed.to_ascii_lowercase()) {
+            return None;
+        }
+        self.base.segment_runon(raw)
+    }
 }

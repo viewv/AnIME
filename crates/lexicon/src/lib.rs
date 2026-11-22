@@ -80,6 +80,11 @@ pub trait LexiconProvider: Send + Sync {
     fn contextual_confusables(&self, _raw: &str, _limit: usize) -> Vec<ConfusableCandidate> {
         Vec::new()
     }
+
+    /// 对快速输入漏敲空格产生的粘连词（如 `Ilikethe` / `thatlikes` / `dontknow`）做 $O(L^2)$ 词频动态规划切分。
+    fn segment_runon(&self, _raw: &str) -> Option<Vec<String>> {
+        None
+    }
 }
 
 /// Phase 0 最小只读词表桩：仅做精确与前缀匹配，用于验证引擎主链路与测试基线。
@@ -595,5 +600,53 @@ mod tests {
 
         layered.clear_dynamic_words();
         assert_eq!(layered.dynamic_word_count(), 0);
+    }
+
+    #[test]
+    fn segment_runon_token_splits_concatenated_words_and_preserves_compounds() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("I", 7.1),
+                ("like", 6.5),
+                ("likes", 5.6),
+                ("the", 7.6),
+                ("software", 5.8),
+                ("something", 6.3),
+                ("without", 6.4),
+                ("that", 7.0),
+                ("me", 6.7),
+                ("with", 6.9),
+                ("a", 7.4),
+                ("don't", 6.6),
+                ("know", 6.5),
+                ("thank", 6.0),
+                ("you", 7.3),
+            ],
+            Vec::new(),
+        );
+        assert_eq!(
+            lex.segment_runon("Ilikethe"),
+            Some(vec!["I".to_string(), "like".to_string(), "the".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("thatlikes"),
+            Some(vec!["that".to_string(), "likes".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("dontknow"),
+            Some(vec!["don't".to_string(), "know".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("witha"),
+            Some(vec!["with".to_string(), "a".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("thankyou"),
+            Some(vec!["thank".to_string(), "you".to_string()])
+        );
+        // 已存在于词典的合法复合词绝不拆分
+        assert_eq!(lex.segment_runon("software"), None);
+        assert_eq!(lex.segment_runon("something"), None);
+        assert_eq!(lex.segment_runon("without"), None);
     }
 }

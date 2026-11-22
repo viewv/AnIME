@@ -31,6 +31,10 @@ impl LexiconProvider for SharedLexicon {
     fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<ConfusableCandidate> {
         self.0.contextual_confusables(raw, limit)
     }
+
+    fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
+        self.0.segment_runon(raw)
+    }
 }
 
 #[derive(Clone)]

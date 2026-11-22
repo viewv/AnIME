@@ -44,6 +44,13 @@ impl LexiconProvider for EvalLexicon {
             Self::Compiled(l) => l.contextual_confusables(raw, limit),
         }
     }
+
+    fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
+        match self {
+            Self::Smoke(s) => s.segment_runon(raw),
+            Self::Compiled(l) => l.segment_runon(raw),
+        }
+    }
 }
 
 enum EvalNgram {

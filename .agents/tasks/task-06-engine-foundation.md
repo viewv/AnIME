@@ -35,6 +35,11 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
    - **Bug A（句中 `now` 恒变大写 `Now`）**：句首自动大写上屏（如 `"Now"`）写入 `user.db` 并预加载到 `LayeredLexicon` 动态热词层时被误当作专有名词保留首字母大写。修复：`LayeredLexicon::apply_learn_locked` 与 `EngineSession::normalize_commit_for_learning` 对主词典已收录的纯小写普通词统一按小写归档。
    - **Bug B（组合态敲符号变 `?rdp` 符号跑到词前面）**：在 `preedit` 非空时敲击 `?` / `.` / `,` 等标点符号，前端未拦截而直接透传给 Wayland 应用，导致符号先于未落盘的 `preedit` 插入光标处。修复：组合态下敲击终止标点或可见符号时，前端 `filterAndAccept()` 并交由引擎将当前首选候选（去尾空格）与该符号合并一次性上屏（`... new rdp?`）。
    - **Bug C（`KDE` 上屏后输入数字 `6` 再输入 `.` 导致 `6` 消失）**：`KDE ` 上屏后置位 `last_auto_space = true`，随后空闲态敲入数字 `6`（或其他非字母透传键）时前端未清除 `lastAutoSpace_`，导致紧接着敲 `.` 时错误触发智能尾空格回删（`delete_before = 1`），把刚输入的 `6` 删掉。修复：空闲态下任何非终止标点的透传按键（数字、符号、退格、方向键等）及 `set_context` 非空格结尾更新均立即清除 `last_auto_space`。
+7. **新功能记录 — 智能连打分词 / 漏空格自动切分（Smart Run-on Word Segmentation）**：
+   - **场景与目标**：用户快速盲打时常漏敲一个或多个空格，产生粘连词（如 `Ilikethe software thatlikes me`、`witha`、`ofthe`、`dontknow`、`thankyou`）。需要引擎自动识别粘连串并切分补齐空格，输出 `I like the software that likes me`。
+   - **算法设计**：
+     1. 对非精确命中词典（或内部含大写驼峰边界如 `Ilike`）的 token（长度 $\ge 3$），基于 `CompactTrie` + 缩写表做 $O(L^2)$ 动态规划切分（最多切分为 $2 \sim 4$ 个连续合法高频词，单字母段仅允许 `a` / `I`，耗时 `< 10 us`）；
+     2. 单 token 模式下将最优切分短语作为高优候选注入；多词整句模式下，对高置信粘连 token 直接展开为多个词槽送入 L2 2/3-gram Viterbi 与 L3 `SmolLM2` 联合解码，同时保证合法复合词（如 `something`、`software`、`without`、`database`）因自身具备 `Exact` 命中绝不被误拆。
 
 ## Constraints (局部硬约束)
 - 仅改动 `allowed_paths` 内文件，保持工作区 `unsafe_code = "forbid"`，零平台专有依赖，默认 `make test` 全绿且 0 warnings。
@@ -66,7 +71,11 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
   - `.agents/tasks/task-06-engine-foundation.md`
 - Verification Output:
   - Data pipeline & provenance (`python3 scripts/data_pipeline/fetch_sources.py --verify-only` & `build_lexicon.py --cmudict data/raw/cmudict/cmudict.dict`): `MANIFEST OK: 10 个数据源全部通过开源协议与格式校验`; rebuilt `data/compiled/lexicon.animelex.bin` (`120000 words, 57117 misspellings, 56318 entries populated with CMUdict ARPAbet phonetics`).
-  - Offline workspace (`make check && make test && make eval && make verify-infra`): all exit 0 with 0 warnings (`engine`: 11 unit + 1 integration, `lexicon`: 11 unit + 2 integration, `lm-neural`: 5, `lm-ngram`: 5, `protocol`: 4, `animed`: 4, `eval`: 7; `INFRA OK`).
+  - Offline workspace (`make check && make test && make eval && make verify-infra`): all exit 0 with 0 warnings (`engine`: 13 unit + 1 integration, `lexicon`: 12 unit + 2 integration, `lm-neural`: 5, `lm-ngram`: 5, `protocol`: 4, `animed`: 4, `eval`: 7; `INFRA OK`).
+  - Smart Run-on Word Segmentation (`segment_runon`) & live bug regression tests:
+    - `crates/lexicon::tests::segment_runon_token_splits_concatenated_words_and_preserves_compounds`: `"Ilikethe"` -> `["I", "like", "the"]`, `"thatlikes"` -> `["that", "likes"]`, `"dontknow"` -> `["don't", "know"]`, `"witha"` -> `["with", "a"]`, `"thankyou"` -> `["thank", "you"]`, while `"software"` / `"something"` / `"without"` return `None`.
+    - `crates/engine::tests::smart_runon_word_segmentation_in_single_and_sentence_mode`: `"Ilikethe"` -> `"I like the"` (#1), `"dontknow"` -> `"don't know"` (#1), and `"Ilikethe software thatlikes me"` -> `"I like the software that likes me"` (#1).
+    - Release L1+L2 end-to-end eval (`cargo test --release -p anime-engine --test real_l1_l2_eval`): `core_v1` keystroke latency `p50=149 us, p99=555 us` (Layered `p50=150 us, p99=536 us`, `eval_large_open` `p50=229 us, p99=556 us`), all 7 category accuracy and latency gates PASS.
   - Release L1 latency gate (`cargo test --release -p anime-lexicon --test real_lexicon_eval -- --nocapture`): 120K CMUdict `ANIMELEX` loaded in `294 ms`; `core_v1` `p50=382 us, p99=538 us` (Layered `p50=399 us, p99=574 us`; `eval_large_open` `p50=364 us, p99=494 us` < `1000 us` gate).
   - Vulkan release rebuild (`make engine-vulkan && cargo build --release -p anime-eval --features vulkan`): exit 0 with 0 warnings.
   - Data-Driven Plan A (0 hand-crafted confusable groups) on `eval/benchmarks/core_v1.tsv` (1400 rows, Radeon 780M `Vulkan0(Vulkan)`):
