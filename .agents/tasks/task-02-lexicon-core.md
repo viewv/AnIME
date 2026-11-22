@@ -31,6 +31,23 @@ acceptance_cmd: "cargo test -p anime-lexicon && ./scripts/verify-boundaries.sh .
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [DONE]
 - Changed Files:
+  - `crates/lexicon/src/lib.rs`
+  - `crates/lexicon/src/format.rs`
+  - `crates/lexicon/src/keyboard.rs`
+  - `crates/lexicon/src/phonetic.rs`
+  - `crates/lexicon/src/trie.rs`
+  - `crates/lexicon/src/contractions.rs`
+  - `crates/lexicon/src/lexicon.rs`
+  - `crates/lexicon/tests/real_lexicon_eval.rs`
+  - `.agents/tasks/task-02-lexicon-core.md`
 - Verification Output:
+  - `cargo check --workspace`: 0 errors, 0 warnings
+  - `cargo test -p anime-lexicon` (debug): 5 lib unit tests + 1 real-lexicon integration test passed (0 warnings)
+  - `cargo test --release -p anime-lexicon -- --nocapture`: loaded 120,000 words & 54,073 typo keys from `data/compiled/lexicon.animelex.bin` in 182 ms;
+    - `eval/benchmarks/core_v1.tsv` (1,000 word queries): `exact` Top1=99.0% (p50=14us, p99=45us), `prefix` Top1=68.0%/Top3=96.0%/Top5=99.5% (p50=117us, p99=230us), `typo_simple` Top1=92.5%/Top3=100.0% (p50=410us, p99=581us), `typo_prefix` Top1=39.0%/Top3=69.0%/Top5=79.5% (p50=396us, p99=498us), `typo_phonetic` Top1=69.5%/Top3=85.5%/Top5=91.5% (p50=398us, p99=481us); overall L1 latency `p50=363 us`, `p99=503 us` (< 1 ms)
+    - `data/compiled/eval_large_open.tsv` (7,500 held-out word queries): `exact` Top1=99.8% (p50=12us, p99=26us), `prefix` Top3=95.6%/Top5=99.2%, `typo_simple` Top1=93.2%/Top3=98.4%, `typo_prefix` Top3=65.1%/Top5=73.8%, `typo_phonetic` Top3=83.6%; overall L1 latency `p50=373 us`, `p99=608 us` (< 1 ms)
+  - `cargo test --workspace`: all 24 tests across 7 workspace crates passed (0 warnings)
+  - `make eval`: `smoke.tsv` baseline passed
+  - `./scripts/verify-boundaries.sh .agents/tasks/task-02-lexicon-core.md`: `BOUNDARY OK (task-02-lexicon-core): 已检查 8 个文件，零越界`
