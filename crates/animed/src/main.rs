@@ -221,7 +221,13 @@ fn load_resources(
     let neural: Arc<dyn NeuralSentenceModel> = if disable_neural {
         Arc::new(NoopNeuralModel)
     } else if let Some(ref model_path) = paths.neural_model_path {
-        if !cfg!(feature = "llama") && !explicit_model {
+        if !cfg!(any(
+            feature = "llama",
+            feature = "vulkan",
+            feature = "metal",
+            feature = "cuda"
+        )) && !explicit_model
+        {
             // 默认无 `llama` 特性编译时静默使用 Noop，以免未传 `--model` 的本地 smoke 测试变慢或报冗余警告
             Arc::new(NoopNeuralModel)
         } else {

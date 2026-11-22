@@ -50,6 +50,8 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
   - `crates/lexicon/src/lexicon.rs`
   - `crates/lexicon/src/lib.rs`
   - `crates/lexicon/src/trie.rs`
+  - `crates/animed/Cargo.toml`
+  - `crates/animed/src/main.rs`
   - `crates/animed/src/server.rs`
   - `crates/eval/src/main.rs`
   - `data/MANIFEST.yaml`

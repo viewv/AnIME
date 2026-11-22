@@ -7,9 +7,9 @@ license.workspace = true
 [features]
 default = []
 llama = ["anime-lm-neural/llama"]
-vulkan = ["anime-lm-neural/llama-vulkan"]
-metal = ["anime-lm-neural/llama-metal"]
-cuda = ["anime-lm-neural/llama-cuda"]
+vulkan = ["llama", "anime-lm-neural/llama-vulkan"]
+metal = ["llama", "anime-lm-neural/llama-metal"]
+cuda = ["llama", "anime-lm-neural/llama-cuda"]
 
 [dependencies]
 anime-protocol = { path = "../protocol" }
