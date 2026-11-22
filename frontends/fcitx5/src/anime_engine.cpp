@@ -560,6 +560,7 @@ private:
 
         if (!candidates.empty()) {
             ic->inputPanel().setCandidateList(anime::buildCandidateList(
+                preedit,
                 candidates,
                 ui_options_,
                 [this](fcitx::InputContext *target_ic, size_t idx) {

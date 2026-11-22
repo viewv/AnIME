@@ -291,7 +291,7 @@ void testCandidatePresentationAdaptiveLayout() {
         Candidate{"apply", CandidateKind::Exact, std::nullopt, -1.2F, 5, true},
         Candidate{"appie", CandidateKind::Raw, "raw", -9.0F, 5, false},
     };
-    const auto short_plan = decideCandidatePresentation(short_words, opts);
+    const auto short_plan = decideCandidatePresentation("apple", short_words, opts);
     expect(!short_plan.is_long_mode && short_plan.layout == ResolvedLayout::Default &&
                short_plan.page_size == 9,
            "short words keep default layout and 9 per page");
@@ -307,7 +307,7 @@ void testCandidatePresentationAdaptiveLayout() {
                                       true});
     }
     sentences.push_back(Candidate{"I wanto to test the", CandidateKind::Raw, "raw", -99.0F, 18, false});
-    const auto long_plan = decideCandidatePresentation(sentences, opts);
+    const auto long_plan = decideCandidatePresentation("I wanto to test the", sentences, opts);
     expect(long_plan.is_long_mode && long_plan.layout == ResolvedLayout::Vertical &&
                long_plan.page_size == 5,
            "sentence candidates switch to vertical layout with page_size 5");
@@ -316,16 +316,115 @@ void testCandidatePresentationAdaptiveLayout() {
     CandidatePresentationOptions force_horiz = opts;
     force_horiz.layout = LayoutPreference::Horizontal;
     force_horiz.long_page_size = 4;
-    const auto horiz_plan = decideCandidatePresentation(sentences, force_horiz);
+    const auto horiz_plan = decideCandidatePresentation("I wanto to test the", sentences, force_horiz);
     expect(horiz_plan.layout == ResolvedLayout::Horizontal && horiz_plan.page_size == 4,
            "horizontal override preserves custom long page size");
+}
 
-    // 4. 注释精简规则：Sentence 的冗余 "sentence" 省略，typo/raw 保留，关闭后清空
-    expect(formatCandidateComment(sentences[0], true).empty(),
-           "redundant 'sentence' comment hidden");
-    expect(formatCandidateComment(short_words[0], true) == "typo", "typo comment preserved");
-    expect(formatCandidateComment(short_words[0], false).empty(),
-           "comments hidden when disabled");
+void testSpellingLabelsAndClassification() {
+    // 1. 真实英语单词 "apple" -> ExactWord，Exact 候选标 "✓"
+    {
+        std::vector<Candidate> cands{
+            Candidate{"apple", CandidateKind::Exact, std::nullopt, 0.0F, 5, true},
+            Candidate{"apples", CandidateKind::Completion, std::nullopt, -1.0F, 5, true},
+        };
+        const auto st = classifyInputSpelling("apple", cands);
+        expect(st == InputSpellingStatus::ExactWord, "real word classified ExactWord");
+        expect(formatCandidateComment(cands[0], 0, "apple", st, true) == "\xE2\x9C\x93",
+               "real word labeled checkmark");
+        expect(formatCandidateComment(cands[1], 1, "apple", st, true) == "\xE2\x80\xA6",
+               "completion labeled ellipsis");
+        expect(formatCandidateComment(cands[0], 0, "apple", st, false).empty(),
+               "hidden when show_comments=false");
+    }
+
+    // 2. 合法前缀 "envir" -> PrefixInProgress，Raw 不误报 "? raw"
+    {
+        std::vector<Candidate> cands{
+            Candidate{"environment", CandidateKind::Completion, std::nullopt, -0.5F, 5, true},
+            Candidate{"envir", CandidateKind::Raw, "raw", -999.0F, 5, false},
+        };
+        const auto st = classifyInputSpelling("envir", cands);
+        expect(st == InputSpellingStatus::PrefixInProgress, "valid prefix classified PrefixInProgress");
+        expect(formatCandidateComment(cands[0], 0, "envir", st, true) == "\xE2\x80\xA6",
+               "completion shows ellipsis");
+        expect(formatCandidateComment(cands[1], 1, "envir", st, true) == "raw",
+               "prefix raw stays plain 'raw'");
+    }
+
+    // 3. 拼写错误 "appie" -> LikelyMisspelled，TypoCorrection 标 "typo"，Raw 标 "? raw"
+    {
+        std::vector<Candidate> cands{
+            Candidate{"apple", CandidateKind::TypoCorrection, std::nullopt, -1.2F, 5, true},
+            Candidate{"appie", CandidateKind::Raw, "raw", -999.0F, 5, false},
+        };
+        const auto st = classifyInputSpelling("appie", cands);
+        expect(st == InputSpellingStatus::LikelyMisspelled, "typo classified LikelyMisspelled");
+        expect(formatCandidateComment(cands[0], 0, "appie", st, true) == "typo",
+               "typo candidate labeled typo");
+        expect(formatCandidateComment(cands[1], 1, "appie", st, true) == "? raw",
+               "misspelled raw labeled '? raw'");
+    }
+
+    // 4. 读音错拼 "numonia" -> LikelyMisspelled，PhoneticCorrection 标 "phonetic"，Raw 标 "? raw"
+    {
+        std::vector<Candidate> cands{
+            Candidate{"pneumonia", CandidateKind::PhoneticCorrection, std::nullopt, -2.0F, 7, true},
+            Candidate{"numonia", CandidateKind::Raw, "raw", -999.0F, 7, false},
+        };
+        const auto st = classifyInputSpelling("numonia", cands);
+        expect(st == InputSpellingStatus::LikelyMisspelled, "phonetic classified LikelyMisspelled");
+        expect(formatCandidateComment(cands[0], 0, "numonia", st, true) == "phonetic",
+               "phonetic candidate labeled phonetic");
+        expect(formatCandidateComment(cands[1], 1, "numonia", st, true) == "? raw",
+               "phonetic raw labeled '? raw'");
+    }
+
+    // 5. 纯未知瞎打词 "zxqvk"（仅 Raw）-> LikelyMisspelled，标 "? raw"
+    {
+        std::vector<Candidate> cands{
+            Candidate{"zxqvk", CandidateKind::Raw, "raw", -999.0F, 5, false},
+        };
+        const auto st = classifyInputSpelling("zxqvk", cands);
+        expect(st == InputSpellingStatus::LikelyMisspelled, "gibberish classified LikelyMisspelled");
+        expect(formatCandidateComment(cands[0], 0, "zxqvk", st, true) == "? raw",
+               "unknown raw labeled '? raw'");
+    }
+
+    // 6. 合法整句 "I want to test the " -> ExactWord，命中原句标 "✓"，其余整句留空
+    {
+        std::vector<Candidate> cands{
+            Candidate{"I want to test the", CandidateKind::Sentence, "sentence", -1.0F, 18, true},
+            Candidate{"I went to test the", CandidateKind::Sentence, "sentence", -2.0F, 18, true},
+            Candidate{"I", CandidateKind::Exact, "partial", -1.5F, 1, false},
+        };
+        const auto st = classifyInputSpelling("i want to test the ", cands);
+        expect(st == InputSpellingStatus::ExactWord, "valid sentence classified ExactWord");
+        expect(formatCandidateComment(cands[0], 0, "i want to test the ", st, true) == "\xE2\x9C\x93",
+               "matching sentence labeled checkmark");
+        expect(formatCandidateComment(cands[1], 1, "i want to test the ", st, true).empty(),
+               "alt sentence leaves comment empty");
+        expect(formatCandidateComment(cands[2], 2, "i want to test the ", st, true) ==
+                   "\xE2\x9C\x93 partial",
+               "exact partial labeled checkmark partial");
+    }
+
+    // 7. 含错词整句 "I wanto to test the " -> LikelyMisspelled，首项 "fix"，次项留空，Raw "? raw"
+    {
+        std::vector<Candidate> cands{
+            Candidate{"I want to test the", CandidateKind::Sentence, "sentence", -1.0F, 19, true},
+            Candidate{"I went to test the", CandidateKind::Sentence, "sentence", -2.0F, 19, true},
+            Candidate{"I wanto to test the", CandidateKind::Raw, "raw", -999.0F, 19, false},
+        };
+        const auto st = classifyInputSpelling("I wanto to test the ", cands);
+        expect(st == InputSpellingStatus::LikelyMisspelled, "sentence with typo LikelyMisspelled");
+        expect(formatCandidateComment(cands[0], 0, "I wanto to test the ", st, true) == "fix",
+               "top corrected sentence labeled fix");
+        expect(formatCandidateComment(cands[1], 1, "I wanto to test the ", st, true).empty(),
+               "secondary sentence leaves comment empty");
+        expect(formatCandidateComment(cands[2], 2, "I wanto to test the ", st, true) == "? raw",
+               "misspelled sentence raw labeled '? raw'");
+    }
 }
 
 void testSocketPermissionsAndClientFraming() {
@@ -576,6 +675,7 @@ int main(int argc, char **argv) {
     testSurroundingUtf8Truncation();
     testShiftTapStateMachine();
     testCandidatePresentationAdaptiveLayout();
+    testSpellingLabelsAndClassification();
     testSocketPermissionsAndClientFraming();
     std::cout << "ALL FCITX5 FRONTEND UNIT TESTS PASSED\n";
     return 0;

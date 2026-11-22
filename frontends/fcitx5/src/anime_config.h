@@ -71,7 +71,7 @@ FCITX_CONFIGURATION(
     Option<bool> showCandidateComments{
         this,
         "ShowCandidateComments",
-        "Show candidate hint labels (typo / phonetic / raw / next)",
+        "Show dictionary status & correction labels (✓ / typo / phonetic / ? raw)",
         true,
     };
     Option<bool> enablePhonetic{

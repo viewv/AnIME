@@ -56,14 +56,31 @@ struct CandidatePresentationPlan {
     bool is_long_mode = false;
 };
 
-// 统一候选注释展示规则：保留 typo/phonetic/raw/next 等有效区分标签，
-// 自动隐藏冗余的 "sentence" 重复标签以减轻视觉噪音并缩小横排占用宽度。
-std::string_view formatCandidateComment(const ipc::Candidate &cand, bool show_comments);
+enum class InputSpellingStatus {
+    ExactWord,
+    PrefixInProgress,
+    LikelyMisspelled,
+};
+
+// 基于 animed 返回的 CandidateKind 与当前 preedit，判断用户原输入是否命中真实英语词典（纯展示分类，不含词典逻辑）。
+InputSpellingStatus classifyInputSpelling(
+    std::string_view preedit,
+    const std::vector<ipc::Candidate> &candidates);
+
+// 统一候选注释展示规则：用 "✓" 标识词典真实存在的词/合法整句，
+// 用 "typo"/"phonetic"/"fix"/"? raw" 醒目提示用户可能输入了错词或未收录词，
+// 并省略整句次要候选的重复标签以减少视觉噪音和横向占位。
+std::string_view formatCandidateComment(const ipc::Candidate &cand,
+                                        size_t index,
+                                        std::string_view preedit,
+                                        InputSpellingStatus status,
+                                        bool show_comments);
 
 // 长句/宽候选自适应排版决策（纯逻辑，零 Fcitx5 依赖）：
 // Auto 模式下，一旦出现多词整句/短语候选或候选条总展示宽度过大，自动切为竖排并限制每页显示条数，
 // 防止横排候选框超出屏幕。
 CandidatePresentationPlan decideCandidatePresentation(
+    std::string_view preedit,
     const std::vector<ipc::Candidate> &candidates,
     const CandidatePresentationOptions &opts);
 

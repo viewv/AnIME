@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace anime {
@@ -19,7 +20,7 @@ class AnimeCandidateWord final : public fcitx::CandidateWord {
 public:
     AnimeCandidateWord(const ipc::Candidate &cand,
                        size_t index,
-                       bool show_comment,
+                       std::string_view comment,
                        CandidateSelectCallback on_select);
 
     void select(fcitx::InputContext *inputContext) const override;
@@ -30,6 +31,7 @@ private:
 };
 
 std::unique_ptr<fcitx::CommonCandidateList> buildCandidateList(
+    std::string_view preedit,
     const std::vector<ipc::Candidate> &candidates,
     const CandidatePresentationOptions &options,
     CandidateSelectCallback on_select);

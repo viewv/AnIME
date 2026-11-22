@@ -47,7 +47,7 @@ acceptance_cmd: "cmake -S frontends/fcitx5 -B frontends/fcitx5/build && cmake --
   - `frontends/fcitx5/tests/fcitx5_frontend_test.cpp`
 - Verification Output:
   - Clean C++20 build (`cmake -S frontends/fcitx5 -B frontends/fcitx5/build && cmake --build frontends/fcitx5/build --clean-first -j4`): exited 0 with 0 warnings under `-Wall -Wextra`, producing `libanime.so` and `anime_fcitx5_tests`.
-  - CTest (`ctest --test-dir frontends/fcitx5/build --output-on-failure -V`): `1/1` passed (`ALL FCITX5 FRONTEND UNIT TESTS PASSED`, 0.01s, including adaptive layout/paging and config tests).
+  - CTest (`ctest --test-dir frontends/fcitx5/build --output-on-failure -V`): `1/1` passed (`ALL FCITX5 FRONTEND UNIT TESTS PASSED`, 0.01s, including adaptive layout/paging, spelling existence/typo label, and config tests).
   - Live Unix Socket E2E (`./frontends/fcitx5/build/anime_fcitx5_tests --live-socket ...` against `target/release/animed` with 0700/0600 permissions & real compiled assets): `LIVE SOCKET E2E OK: hello_ack(v0.1.0), preedit='i wnt appie', commit='I want appeared ', no_space_commit='hello'`, closing `.` `delete_before=1`, `Enter` raw `"foobar"`, and `reset`.
   - Rust workspace regression (`make check && make test`): 0 warnings, all 39 tests across 7 crates passed.
   - Boundary guard (`./scripts/verify-boundaries.sh .agents/tasks/task-04-fcitx5-frontend.md --base main --tracked-only`): `BOUNDARY OK (task-04-fcitx5-frontend): 已检查 15 个文件，零越界`.

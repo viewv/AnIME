@@ -73,7 +73,12 @@ systemctl --user enable --now animed.service
    - **`CandidateLayout`（默认 `Auto`）**：`Auto` 会在多词整句或候选较长时自动切为竖排并按页展示，单词保持 Fcitx5 主题默认/横排；也可强制设成 `Vertical` 或 `Horizontal`。
    - **`MaxCandidates`（默认 `9`）**：最大候选数量（`3`–`9`）。
    - **`LongCandidatePageSize`（默认 `5`）**：长句/多词模式每页显示候选数（`3`–`9`），超出部分可用 `PageDown` / `PageUp` 翻页。
-   - **`ShowCandidateComments`（默认开启）**：显示 `typo` / `phonetic` / `raw` / `next` 等提示标签（已自动省略整句候选重复的 `sentence` 标签）。
+   - **`ShowCandidateComments`（默认开启）**：展示词典存在性与纠错状态标签：
+     - `✓`：词典中真实存在的英语单词或原句完全合法（`✓ partial` 表示整句首词部分确认）；
+     - `…`：合法前缀补全（仍在输入前半截，不会误报错误）；
+     - `typo` / `phonetic`：邻键笔误纠错 / 读音纠错建议；
+     - `fix`：整句中包含纠错后的候选；
+     - `? raw`：原输入未命中词典且无整句全匹配，提示可能输入了拼写错误单词（若是合法前缀则为 `raw`）。
    - **`EnablePhonetic` / `EnableNeural`**：读音纠错与神经模型重排/续写开关。
 
 ---

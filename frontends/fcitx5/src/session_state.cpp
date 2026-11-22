@@ -88,6 +88,40 @@ void popLastUtf8Codepoint(std::string &s) {
     }
 }
 
+std::string_view trimAsciiSpaces(std::string_view s) {
+    while (!s.empty() && (s.front() == ' ' || s.front() == '\t')) {
+        s.remove_prefix(1);
+    }
+    while (!s.empty() && (s.back() == ' ' || s.back() == '\t')) {
+        s.remove_suffix(1);
+    }
+    return s;
+}
+
+unsigned char toAsciiLower(unsigned char c) {
+    return (c >= 'A' && c <= 'Z') ? static_cast<unsigned char>(c + ('a' - 'A')) : c;
+}
+
+bool asciiEqualsIgnoreCase(std::string_view a, std::string_view b) {
+    if (a.size() != b.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (toAsciiLower(static_cast<unsigned char>(a[i])) !=
+            toAsciiLower(static_cast<unsigned char>(b[i]))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool asciiStartsWithIgnoreCase(std::string_view text, std::string_view prefix) {
+    if (text.size() < prefix.size()) {
+        return false;
+    }
+    return asciiEqualsIgnoreCase(text.substr(0, prefix.size()), prefix);
+}
+
 }  // namespace
 
 bool isValidUtf8(std::string_view s) {
@@ -207,25 +241,100 @@ bool isClosingPunctuation(uint32_t cp) {
     }
 }
 
-std::string_view formatCandidateComment(const ipc::Candidate &cand, bool show_comments) {
-    if (!show_comments || !cand.comment || cand.comment->empty()) {
+InputSpellingStatus classifyInputSpelling(
+    std::string_view preedit,
+    const std::vector<ipc::Candidate> &candidates) {
+    const std::string_view trimmed = trimAsciiSpaces(preedit);
+    if (trimmed.empty()) {
+        return InputSpellingStatus::PrefixInProgress;
+    }
+
+    if (trimmed.find(' ') == std::string_view::npos) {
+        bool has_exact = false;
+        bool has_completion = false;
+        for (const auto &c : candidates) {
+            if (c.kind == ipc::CandidateKind::Exact) {
+                has_exact = true;
+                break;
+            }
+            if (c.kind == ipc::CandidateKind::Completion &&
+                asciiStartsWithIgnoreCase(c.text, trimmed)) {
+                has_completion = true;
+            }
+        }
+        if (has_exact) {
+            return InputSpellingStatus::ExactWord;
+        }
+        if (has_completion) {
+            return InputSpellingStatus::PrefixInProgress;
+        }
+        return InputSpellingStatus::LikelyMisspelled;
+    }
+
+    bool has_raw = false;
+    for (const auto &c : candidates) {
+        if (c.kind == ipc::CandidateKind::Sentence &&
+            asciiEqualsIgnoreCase(trimmed, c.text)) {
+            return InputSpellingStatus::ExactWord;
+        }
+        if (c.kind == ipc::CandidateKind::Raw) {
+            has_raw = true;
+        }
+    }
+    return has_raw ? InputSpellingStatus::LikelyMisspelled
+                   : InputSpellingStatus::PrefixInProgress;
+}
+
+std::string_view formatCandidateComment(const ipc::Candidate &cand,
+                                        size_t index,
+                                        std::string_view preedit,
+                                        InputSpellingStatus status,
+                                        bool show_comments) {
+    if (!show_comments) {
         return {};
     }
-    if (cand.kind == ipc::CandidateKind::Continuation && *cand.comment == "\xE2\x9C\xA6") {
-        return "next";
+    switch (cand.kind) {
+        case ipc::CandidateKind::Exact:
+            if (cand.comment && *cand.comment == "partial") {
+                return "\xE2\x9C\x93 partial";
+            }
+            return "\xE2\x9C\x93";
+        case ipc::CandidateKind::Completion:
+            if (cand.comment && *cand.comment == "partial") {
+                return "partial";
+            }
+            return "\xE2\x80\xA6";
+        case ipc::CandidateKind::TypoCorrection:
+            return "typo";
+        case ipc::CandidateKind::PhoneticCorrection:
+            return "phonetic";
+        case ipc::CandidateKind::Continuation:
+            if (cand.comment && !cand.comment->empty() && *cand.comment != "\xE2\x9C\xA6") {
+                return *cand.comment;
+            }
+            return "next";
+        case ipc::CandidateKind::Sentence:
+            if (asciiEqualsIgnoreCase(trimAsciiSpaces(preedit), cand.text)) {
+                return "\xE2\x9C\x93";
+            }
+            if (index == 0 && status == InputSpellingStatus::LikelyMisspelled) {
+                return "fix";
+            }
+            return {};
+        case ipc::CandidateKind::Raw:
+            return (status == InputSpellingStatus::LikelyMisspelled) ? "? raw" : "raw";
     }
-    if (cand.kind == ipc::CandidateKind::Sentence && *cand.comment == "sentence") {
-        return {};
-    }
-    return *cand.comment;
+    return {};
 }
 
 CandidatePresentationPlan decideCandidatePresentation(
+    std::string_view preedit,
     const std::vector<ipc::Candidate> &candidates,
     const CandidatePresentationOptions &opts) {
     CandidatePresentationPlan plan;
     const size_t max_cap = std::clamp(opts.max_candidates, size_t{1}, size_t{9});
     const size_t inspect_count = std::min(candidates.size(), max_cap);
+    const auto status = classifyInputSpelling(preedit, candidates);
 
     bool has_multiword = false;
     size_t max_single_chars = 0;
@@ -242,7 +351,8 @@ CandidatePresentationPlan decideCandidatePresentation(
 
         // 估算本项在横排条中的显示列宽：序号 "N. " (3) + 文本字符数 + 可选注释
         total_display_chars += text_chars + 3;
-        const auto comment = formatCandidateComment(cand, opts.show_comments);
+        const auto comment =
+            formatCandidateComment(cand, i, preedit, status, opts.show_comments);
         if (!comment.empty()) {
             total_display_chars += 1 + countUtf8Chars(comment);
         }
