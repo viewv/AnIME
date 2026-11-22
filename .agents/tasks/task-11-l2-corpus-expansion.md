@@ -61,6 +61,23 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [CLOSED — 负面结果为主] 用户仅批准 oasst1；L2 语料扩展对日常口语无显著收益（未达 `ood_tm2_v1 >= 72%` 目标）。经用户决定：采用 oasst1 加权版（b）以补充现代词汇并替换已安装模型，后续领域外与语义问题交由 L3（Task 07）。
 - Changed Files:
-- Verification Output:
+  - `scripts/data_pipeline/build_oasst_text.py`（新增）：oasst1 英文、审核通过、非合成消息 → prompter / assistant 纯文本，去除代码块 / 内联代码 / URL / Markdown。
+  - `scripts/data_pipeline/build_ngram_kn.py`：`--weighted-text PATH:REPEAT` 任意来源加权；`scripts/data_pipeline/test_pipeline.py`（26 tests）、`README.md`（正式构建命令加入 oasst1 权重）。
+  - `data/MANIFEST.yaml`：`oasst1`（Apache-2.0，HF revision `fdf72ae0`，SHA256，署名），共 34 个数据源。
+- Verification Output（L1+L2，task-09 引擎，`LM_LAMBDA = 0.85`）：
+  - oasst1 转换：15,452 条 prompter（335,340 词）+ 24,137 条 assistant（3,023,540 词）。
+  - **权重网格（200 MB 预算内）**，top1：
+
+    | 模型 | 规模 | core_v2 | noise_v2 | ood_v1 | ood_tm2_v1 | tm2 negative:clean |
+    |---|---|---|---|---|---|---|
+    | 基线 `ngram_kn_r20_v3` | 172 MB，k_tri=11 | 83.1 | 78.7 | 74.7 | 66.3 | 95.0 |
+    | a（assistant x10 / prompter x30） | 173 MB，k_tri=12 | 83.3 | 78.7 | 73.5 | 66.8 | 95.5 |
+    | **b（x30 / x100，采用）** | 176 MB，k_tri=14 | 83.1 | 78.8 | 73.7 | **67.2** | 94.5 |
+    | c（x60 / x200） | 176 MB，k_tri=14 | 83.2 | 78.5 | 74.2 | 66.8 | 93.5 |
+
+  - **逐样本（ood_tm2_v1，基线 → b）**：16 胜 11 负。胜例集中在现代词汇（`betflix -> Netflix`、`john widk -> John Wick`、`led zeppelin`（原 `lead`）、`by Katy Perry`、`cheese burgers`（原 `burghers`））；负例多为固定体积预算下 oasst 三元组挤出旧搭配后的回退（`movie -> move`、`brighton -> brighten`）——剪枝阈值随加权从 11 升到 14。
+  - **放宽剪枝（容量是否瓶颈）**：`big_base`（20M 三元组预算，实保留 19.8M，426 MB）core_v2 83.0、noise_v2 78.6、**ood_v1 76.7（+2.0）**、ood_tm2_v1 67.2（+0.9，CI 63–71）；`big_b`（+oasst1，379 MB）83.0 / 78.6 / 76.0 / 67.0；`LM_LAMBDA` 0.7 / 1.0 均不优于 0.85。结论：容量只提升训练语料覆盖的领域（文学），日常口语的瓶颈是缺少口语语料与 3-gram 的短上下文，不是体积；2.5 倍内存换 < 1pp 不划算。
+  - 采用模型 b：`ngram_oasst_b`，175,722,357 bytes，SHA256 前缀 `7b977dad`；9.48 亿词、去泄漏丢弃 3,529,704 句、词表 267,832、3,939,531 二元组（cc >= 7）+ 6,677,959 三元组（count >= 14）。`ood_v1` -1.0pp 处于验收允许边界，用户已接受。
+  - 单键延迟在桌面负载下波动大（基线同条件复测 max 16.8–20.5 ms），p99 稳定在 1.7–4.9 ms；单次 max 门禁对系统噪声过敏，建议后续改为多次运行取中位数。

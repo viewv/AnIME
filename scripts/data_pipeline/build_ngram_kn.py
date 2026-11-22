@@ -109,6 +109,14 @@ def main(argv: list[str] | None = None) -> int:
         default=1,
         help="对话语料重复喂入次数：领域语料仅约 150 万词，不加权会在计数剪枝中几乎全部被裁掉",
     )
+    ap.add_argument(
+        "--weighted-text",
+        action="append",
+        default=[],
+        metavar="PATH:REPEAT",
+        help="纯文本语料及其重复喂入次数（如 data/compiled/corpus/oasst1_prompter.txt:100）；"
+        "小语料不加权会在计数剪枝中几乎全部被裁掉，重复只放大原始计数，不改变 KN 续接计数",
+    )
     ap.add_argument("--lexicon-tsv", type=Path, default=REPO_ROOT / "data/compiled/lexicon.tsv")
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "data/compiled/ngram.animengr.bin")
     ap.add_argument("--stats", type=Path, default=REPO_ROOT / "data/compiled/ngram_stats.json")
@@ -154,6 +162,15 @@ def main(argv: list[str] | None = None) -> int:
         cmd += ["--input", "-"]
     for t in args.text:
         cmd += ["--input", str(t)]
+    weighted: list[tuple[Path, int]] = []
+    for spec in args.weighted_text:
+        path_s, _, rep_s = spec.rpartition(":")
+        path = Path(path_s)
+        if not path_s or not rep_s.isdigit() or int(rep_s) < 1 or not path.exists():
+            print(f"invalid --weighted-text '{spec}' (expected existing PATH:REPEAT>=1)", file=sys.stderr)
+            return 2
+        weighted.append((path, int(rep_s)))
+        cmd += ["--input", str(path)] * int(rep_s)
     dialogue_files = sorted({p for g in args.dialogue_glob for p in REPO_ROOT.glob(g)})
     if any("-test-" in str(p) for p in dialogue_files):
         print("refusing to train on MultiWOZ test shards (eval source)", file=sys.stderr)
@@ -176,6 +193,7 @@ def main(argv: list[str] | None = None) -> int:
         str(p.relative_to(REPO_ROOT)) for p in dialogue_files
     ]
     stats["dialogue_turns"] = n_turns
+    stats["weighted_text"] = [{"path": p.name, "repeat": r} for p, r in weighted]
     stats["dialogue_repeat"] = args.dialogue_repeat
     args.stats.write_text(json.dumps(stats, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(stats, indent=2, ensure_ascii=False))
