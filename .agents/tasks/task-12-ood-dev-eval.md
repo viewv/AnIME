@@ -45,6 +45,27 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [DONE — 待评审] `ood_dev_v1` 已生成并复核；是否把去泄漏重建的 L2 替换为已安装模型由用户决定。
 - Changed Files:
-- Verification Output:
+  - `.agents/contracts/eval-schema.md`：§1 新增 `negative:novel` 标签定义。
+  - `scripts/data_pipeline/build_oasst_text.py`：按 `message_tree_id` CRC32 留出约 15% 对话树（`is_heldout_tree`，空 ID 不算留出），训练文本跳过留出树；`heldout_prompter_paragraphs` 供评测复用。
+  - `scripts/data_pipeline/build_eval_v3.py`：`dev_clauses`（4–14 词，代词 `I` 视为已知词，Zipf < 2.5 或词典外的字母词视为新词，<= 2 个新词）、`build_novel_negatives`；新词句只用于 `negative:novel`，不加噪。
+  - `scripts/data_pipeline/test_pipeline.py`（29 tests）、`eval/benchmarks/ood_dev_v1.tsv`（新增，1030 行）、`eval/review/negative_review.tsv`（追加 128 条裁决，20 条剔除）。
+- Verification Output：
+  - 留出：5,717 条消息（对话树级）不进入训练；留出树英文提问 3,420 段 → 2,766 条常见词子句 + 366 条新词子句。
+  - `ood_dev_v1`：8 类单错误各 60、`noise:multi` 100、`negative:clean` 300、`negative:novel` 150。复核 2 轮收敛（剔除源句错拼 `equiped` / `substract` / `fonction` / `recomend` / `synatx` / `explaination` / `publically` / `chat gtp` / `Myer briggs`、非英文与残片）；既有冻结评测集逐字节不变（曾误剔除 1 条 LibriSpeech 源句 `how eloquent of wo is that sound` 导致 ood_v1 变动，已改回 keep 并复核恢复）。
+  - 去泄漏 L2：`ngram_dev_b`（MultiWOZ x20 + oasst1 assistant x30 / prompter x100，留出树已剔除），178,626,666 bytes，9.29 亿词，去泄漏丢弃 3,407,419 句；`ood_dev_v1` 1,090 条参考文本全部在去泄漏参照中。
+  - **基线（task-09 引擎，L1+L2）**：
+
+    | 指标（ood_dev_v1 top1） | 已安装 L2（训练含留出树，泄漏） | **去泄漏 L2** | 去泄漏 L2 + SmolLM2-360M |
+    |---|---|---|---|
+    | TOTAL（95% CI） | 78.9% | **62.9%（59.9–65.8）** | 66.4%（63.5–69.2） |
+    | sentence / context_realword | 78.6 / 85.0 | 63.0 / 61.7 | 65.9 / 75.0 |
+    | negative:clean | 100.0 | 88.7 | 88.7 |
+    | **negative:novel** | 31.3 | **22.7** | 24.7 |
+    | noise:multi | 45.0 | 32.0 | 36.0 |
+    | leading_drop / boundary_gemination / space_shift | 83.3 / 88.3 / 95.0 | 53.3 / 56.7 / 58.3 | 58.3 / 60.0 / 73.3 |
+
+  - **结论**：开发者文本是所有评测集中最弱的领域（L1+L2 62.9%，低于日常口语 67.2%、MultiWOZ 78.8%）；含新词的干净句约 77% 被误改（`ChatGPT -> Chapter`、`numpy -> jump`、`PyTorch -> Porch`、`Nginx -> Engine`、`JSON -> JASON`、`mkdir -> direct`、`gitlab -> italy`、`fastapi -> fatality`），L3 几乎不改善（+2pp）。"不误改新词"是比领域语料更优先的问题，指向可挂载技术词典与 L1 / L3 的新词保护。泄漏对比（78.9% vs 62.9%）也说明按对话树留出与去泄漏是必要的。
+  - **已知偏差**：`build_eval_v2.extract_clauses` / `clauses_from_texts` 的源句过滤要求每个 token 都在词典 TSV 中，而 TSV 不收录代词 `I`，导致 noise_v1 / noise_v2 / ood_v1 / ood_tm2_v1 系统性缺少含独立 `I` 的句子；这些集合已冻结未改，`ood_dev_v1` 已修正。
+  - `ood_v1`（LibriSpeech 文学）按用户意见降级为仅参考（ROADMAP 已注明）。

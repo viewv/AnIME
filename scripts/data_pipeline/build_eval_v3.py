@@ -21,6 +21,7 @@ import argparse
 import gzip
 import json
 import random
+import re
 import sys
 import zlib
 from collections import Counter
@@ -32,6 +33,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from build_eval_benchmark import ALPHA_WORD_RE, is_valid_sample  # noqa: E402
+from build_oasst_text import DEFAULT_IN as OASST_IN, heldout_prompter_paragraphs  # noqa: E402
 from build_eval_v2 import (  # noqa: E402
     DROPPED_APOSTROPHE_FORMS,
     clauses_from_texts,
@@ -105,6 +107,65 @@ def taskmaster_user_texts(paths: list[Path]) -> list[str]:
                 if utt.get("speaker") == "USER":
                     texts.append(" ".join(str(utt.get("text", "")).split()))
     return texts
+
+
+# 开发者风格源句：比 MultiWOZ 句子更长更杂，放宽到 14 词；词频低于该门槛或不在词典的字母词视为"新词"
+DEV_MIN_WORDS, DEV_MAX_WORDS = 4, 14
+DEV_KNOWN_MIN_ZIPF = 2.5
+DEV_MAX_NOVEL_TOKENS = 2
+_DEV_SPLIT_RE = re.compile(r"[.!?,;:()\"]+")
+
+
+def dev_clauses(texts: list[str], lex) -> tuple[list[list[str]], list[list[str]]]:
+    """切出 (全部为常见词典词的子句, 含 1–2 个词典外新词的子句)；新词保留原始大小写，不参与加噪。"""
+    standard: list[list[str]] = []
+    novel: list[list[str]] = []
+    seen: set[str] = set()
+    for utt in texts:
+        for seg in [utt] + [x.strip() for x in _DEV_SPLIT_RE.split(utt)]:
+            toks = seg.strip().rstrip(".!?").split()
+            if not (DEV_MIN_WORDS <= len(toks) <= DEV_MAX_WORDS):
+                continue
+            if any(not ALPHA_WORD_RE.match(t) or t.lower() in DROPPED_APOSTROPHE_FORMS for t in toks):
+                continue
+            norm: list[str] = []
+            n_novel = 0
+            for i, t in enumerate(toks):
+                if t.lower() == "i":
+                    # 词典 TSV 不收录代词 I（引擎以缩写规则处理 i -> I），不能把它当新词
+                    norm.append("I")
+                    continue
+                hit = lex.get(t.lower())
+                if hit is not None and hit[1] >= DEV_KNOWN_MIN_ZIPF:
+                    canon = hit[0]
+                    norm.append(t[0] + canon[1:] if i == 0 and t[0].isupper() and canon.lower() == t.lower() else canon)
+                else:
+                    n_novel += 1
+                    norm.append(t)
+            key = " ".join(norm).lower()
+            if key in seen or n_novel > DEV_MAX_NOVEL_TOKENS:
+                continue
+            seen.add(key)
+            (standard if n_novel == 0 else novel).append(norm)
+    return standard, novel
+
+
+def is_valid_novel_sample(sent: str) -> bool:
+    # 新词句允许驼峰 / 全大写（JavaScript、API），只做最基本的格式校验
+    return bool(sent) and "\t" not in sent and "  " not in sent and sent == sent.strip() and sent[0].isalpha()
+
+
+def build_novel_negatives(clauses: list[list[str]], quota: int, excluded: set[str], seed_tag: str) -> list[Row]:
+    order = sorted(clauses, key=lambda c: zlib.crc32(f"{seed_tag}:novel:{' '.join(c).lower()}".encode()))
+    rows: list[Row] = []
+    for c in order:
+        if len(rows) >= quota:
+            break
+        sent = " ".join(c)
+        if sent.lower() in excluded or not is_valid_novel_sample(sent):
+            continue
+        rows.append(("sentence", "", sent, sent, "negative:novel"))
+    return rows
 
 
 def noise_multi(toks: list[str], rng: random.Random, lex) -> str | None:
@@ -204,6 +265,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out-noise", type=Path, default=REPO_ROOT / "eval/benchmarks/noise_v2.tsv")
     ap.add_argument("--out-ood", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_v1.tsv")
     ap.add_argument("--taskmaster-json", type=Path, action="append", default=[])
+    ap.add_argument("--oasst", type=Path, default=OASST_IN)
+    ap.add_argument("--out-ood-dev", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_dev_v1.tsv")
+    ap.add_argument("--dev-per-type", type=int, default=60)
+    ap.add_argument("--dev-multi", type=int, default=100)
+    ap.add_argument("--dev-negatives", type=int, default=300)
+    ap.add_argument("--dev-novel", type=int, default=150)
     ap.add_argument("--out-ood-tm2", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_tm2_v1.tsv")
     ap.add_argument("--emit-negative-candidates", type=Path, default=None,
                     help="额外导出全部干净候选（未经复核）为评测 TSV，用于分歧裁决")
@@ -226,8 +293,9 @@ def main(argv: list[str] | None = None) -> int:
         args.taskmaster_json = sorted((REPO_ROOT / "data/raw").glob("taskmaster-2-*/*.json"))
     woz = extract_clauses(args.multiwoz_json, lex)
     tm2 = clauses_from_texts(taskmaster_user_texts(args.taskmaster_json), lex)
+    dev_std, dev_novel = dev_clauses(heldout_prompter_paragraphs(args.oasst), lex) if args.oasst.exists() else ([], [])
     libri = librispeech_holdout_clauses(args.librispeech, lex)
-    print(f"source clauses: multiwoz={len(woz)} librispeech_holdout={len(libri)} taskmaster2={len(tm2)} review_excluded={len(excluded)}")
+    print(f"source clauses: multiwoz={len(woz)} librispeech_holdout={len(libri)} taskmaster2={len(tm2)} oasst_dev={len(dev_std)}+{len(dev_novel)}novel review_excluded={len(excluded)}")
 
     noise_rows, noise_stats, woz_cands = build_rows(
         woz, lex, realword_vocab, random.Random(args.seed), args.per_type, args.multi, args.negatives, excluded,
@@ -241,6 +309,12 @@ def main(argv: list[str] | None = None) -> int:
         tm2, lex, realword_vocab, random.Random(args.seed + 2), args.ood_per_type, args.ood_multi,
         args.ood_negatives, excluded, seed_tag=f"{args.seed}:tm2",
     )
+    dev_rows, dev_stats, dev_cands = build_rows(
+        dev_std, lex, realword_vocab, random.Random(args.seed + 3), args.dev_per_type, args.dev_multi,
+        args.dev_negatives, excluded, seed_tag=f"{args.seed}:dev",
+    )
+    novel_rows = build_novel_negatives(dev_novel, args.dev_novel, excluded, f"{args.seed}:dev")
+    dev_stats["negative_novel"] = len(novel_rows)
     header_common = f"seed={args.seed}；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核"
     write_tsv(args.out_noise, noise_rows, [
         "AnIME noise_v2：MultiWOZ 2.2 test 子句，8 类单错误 + noise:multi 多错误 + 复核后的 negative:clean",
@@ -256,8 +330,15 @@ def main(argv: list[str] | None = None) -> int:
             "food-ordering / music / sports / movies 领域；仅评测，L2 构建按 eval/** 去泄漏；" + header_common,
         ])
         print(f"ood_tm2_v1: {len(tm2_rows)} rows {dict(sorted(tm2_stats.items()))}")
+    if dev_rows:
+        write_tsv(args.out_ood_dev, dev_rows + novel_rows, [
+            "AnIME ood_dev_v1：OpenAssistant oasst1（Apache-2.0）按对话树留出的英文用户提问（开发者 / 现代日常文本）",
+            "negative:novel = 含词典外新词的干净句；留出树不进入 L2 训练（build_oasst_text.py）；" + header_common,
+        ])
+        print(f"ood_dev_v1: {len(dev_rows) + len(novel_rows)} rows {dict(sorted(dev_stats.items()))}")
     if args.emit_negative_candidates:
-        cands = [("sentence", "", s, s, "negative:clean") for s in woz_cands + libri_cands + tm2_cands]
+        cands = [("sentence", "", s, s, "negative:clean") for s in woz_cands + libri_cands + tm2_cands + dev_cands]
+        cands += [(r[0], r[1], r[2], r[3], "negative:novel") for r in novel_rows]
         write_tsv(args.emit_negative_candidates, cands, ["未复核的干净反例候选（仅用于分歧裁决，勿入库）"])
     print(f"noise_v2: {len(noise_rows)} rows {dict(sorted(noise_stats.items()))}")
     print(f"ood_v1: {len(ood_rows)} rows {dict(sorted(ood_stats.items()))}")
