@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::contractions::{apply_input_casing, lookup_contraction};
 use crate::format::{
     LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord, load_animelex_file,
-    parse_animelex_bytes, zipf_to_log_freq,
+    load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv, zipf_to_log_freq,
 };
 use crate::keyboard::{APOSTROPHE_SKIP_COST, weighted_damerau_levenshtein};
 use crate::phonetic::PhoneticIndex;
@@ -51,6 +51,14 @@ pub struct Lexicon {
 }
 
 impl Lexicon {
+    pub fn empty() -> Self {
+        Self::from_data(LexiconData {
+            flags: 0,
+            words: Vec::new(),
+            misspellings: Vec::new(),
+        })
+    }
+
     pub fn from_animelex_file(path: &Path) -> Result<Self, LexiconError> {
         let data = load_animelex_file(path)?;
         Ok(Self::from_data(data))
@@ -58,6 +66,16 @@ impl Lexicon {
 
     pub fn from_animelex_bytes(bytes: &[u8]) -> Result<Self, LexiconError> {
         let data = parse_animelex_bytes(bytes)?;
+        Ok(Self::from_data(data))
+    }
+
+    pub fn from_tsv_str(content: &str, default_zipf: f32) -> Result<Self, LexiconError> {
+        let data = parse_wordlist_tsv(content, default_zipf)?;
+        Ok(Self::from_data(data))
+    }
+
+    pub fn from_wordlist_file(path: &Path, default_zipf: f32) -> Result<Self, LexiconError> {
+        let data = load_wordlist_file(path, default_zipf)?;
         Ok(Self::from_data(data))
     }
 
@@ -167,6 +185,11 @@ impl Lexicon {
         self.misspellings.len()
     }
 
+    #[inline]
+    pub(crate) fn contains_exact_lower(&self, lower: &str) -> bool {
+        self.exact_by_lower.contains_key(lower)
+    }
+
     fn insert_candidate(
         best: &mut HashMap<String, LexiconCandidate>,
         cand: LexiconCandidate,
@@ -188,31 +211,41 @@ impl Lexicon {
             }
         }
     }
-}
 
-impl LexiconProvider for Lexicon {
-    fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
+    /// 跨层复用查询入口：
+    /// - `include_builtins`: 仅主基础层注入内置缩写/大小写兜底（`i->I`、`dont->don't`），避免扩展层重复注入并被加权偏移；
+    /// - `suppress_heavy_fuzzy`: 当上层已存在精确命中时，主层走轻量快路径以跳过 64 束重搜索与全量语音桶扫描，守住 `< 1 ms` 预算。
+    pub(crate) fn query_layer(
+        &self,
+        raw: &str,
+        opts: &QueryOptions,
+        include_builtins: bool,
+        suppress_heavy_fuzzy: bool,
+    ) -> Vec<LexiconCandidate> {
         let trimmed = raw.trim();
-        if trimmed.is_empty() || opts.limit == 0 {
+        if trimmed.is_empty() || opts.limit == 0 || (self.words.is_empty() && !include_builtins) {
             return Vec::new();
         }
         let needle = trimmed.to_ascii_lowercase();
         let mut best: HashMap<String, LexiconCandidate> = HashMap::with_capacity(opts.limit * 4);
         let exact_hit_id = self.exact_by_lower.get(&needle).copied();
+        let use_exact_fast_path = exact_hit_id.is_some() || suppress_heavy_fuzzy;
 
         // 1. 精确命中快路径 vs 完整模糊召回路径
-        if let Some(wid) = exact_hit_id {
-            let slot = &self.words[wid as usize];
-            Self::insert_candidate(
-                &mut best,
-                LexiconCandidate {
-                    word: apply_input_casing(trimmed, &slot.word, slot.is_proper_or_mixed),
-                    kind: LexiconMatchKind::Exact,
-                    edit_cost: 0.0,
-                    log_freq: slot.log_freq,
-                    score: slot.log_freq + EXACT_BONUS,
-                },
-            );
+        if use_exact_fast_path {
+            if let Some(wid) = exact_hit_id {
+                let slot = &self.words[wid as usize];
+                Self::insert_candidate(
+                    &mut best,
+                    LexiconCandidate {
+                        word: apply_input_casing(trimmed, &slot.word, slot.is_proper_or_mixed),
+                        kind: LexiconMatchKind::Exact,
+                        edit_cost: 0.0,
+                        log_freq: slot.log_freq,
+                        score: slot.log_freq + EXACT_BONUS,
+                    },
+                );
+            }
             if let Some(node_id) = self.trie.find_node(&needle) {
                 for (cid, extra_chars) in self.trie.complete_prefix(node_id, opts.limit) {
                     let cslot = &self.words[cid as usize];
@@ -350,36 +383,38 @@ impl LexiconProvider for Lexicon {
         }
 
         // 2. 漏撇号缩写恢复与第一人称 "i" -> "I" 兜底
-        if needle == "i" && !best.contains_key("i") {
-            Self::insert_candidate(
-                &mut best,
-                LexiconCandidate {
-                    word: "I".to_string(),
-                    kind: LexiconMatchKind::Exact,
-                    edit_cost: 0.0,
-                    log_freq: -1.6,
-                    score: -1.6 + EXACT_BONUS,
-                },
-            );
-        }
-        if let Some(rule) = lookup_contraction(&needle) {
-            let exp_lower = rule.expanded.to_ascii_lowercase();
-            let log_freq = self
-                .exact_by_lower
-                .get(&exp_lower)
-                .map(|&id| self.words[id as usize].log_freq)
-                .unwrap_or(rule.assumed_log_freq);
-            let boost = if rule.collides_with_word { 2.0 } else { 5.8 };
-            Self::insert_candidate(
-                &mut best,
-                LexiconCandidate {
-                    word: rule.expanded.to_string(),
-                    kind: LexiconMatchKind::TypoCorrection,
-                    edit_cost: APOSTROPHE_SKIP_COST,
-                    log_freq,
-                    score: log_freq + boost,
-                },
-            );
+        if include_builtins {
+            if needle == "i" && !best.contains_key("i") {
+                Self::insert_candidate(
+                    &mut best,
+                    LexiconCandidate {
+                        word: "I".to_string(),
+                        kind: LexiconMatchKind::Exact,
+                        edit_cost: 0.0,
+                        log_freq: -1.6,
+                        score: -1.6 + EXACT_BONUS,
+                    },
+                );
+            }
+            if let Some(rule) = lookup_contraction(&needle) {
+                let exp_lower = rule.expanded.to_ascii_lowercase();
+                let log_freq = self
+                    .exact_by_lower
+                    .get(&exp_lower)
+                    .map(|&id| self.words[id as usize].log_freq)
+                    .unwrap_or(rule.assumed_log_freq);
+                let boost = if rule.collides_with_word { 2.0 } else { 5.8 };
+                Self::insert_candidate(
+                    &mut best,
+                    LexiconCandidate {
+                        word: rule.expanded.to_string(),
+                        kind: LexiconMatchKind::TypoCorrection,
+                        edit_cost: APOSTROPHE_SKIP_COST,
+                        log_freq,
+                        score: log_freq + boost,
+                    },
+                );
+            }
         }
 
         // 3. 训练期常见人类错拼直达表（与评测集严格隔离）
@@ -402,7 +437,7 @@ impl LexiconProvider for Lexicon {
         }
 
         // 4. Double Metaphone 读音倒排纠错（拯救重度哑字母/音近拼错；已精确匹配时仅保留轻量纠错不扫描重度语音桶）
-        if exact_hit_id.is_none()
+        if !use_exact_fast_path
             && opts.enable_phonetic
             && (3..=MAX_FUZZY_QUERY_LEN).contains(&needle.len())
         {
@@ -448,5 +483,11 @@ impl LexiconProvider for Lexicon {
         });
         out.truncate(opts.limit);
         out
+    }
+}
+
+impl LexiconProvider for Lexicon {
+    fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
+        self.query_layer(raw, opts, true, false)
     }
 }

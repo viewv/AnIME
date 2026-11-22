@@ -36,6 +36,7 @@ acceptance_cmd: "cargo test -p anime-lexicon && ./scripts/verify-boundaries.sh .
   - `crates/lexicon/src/lib.rs`
   - `crates/lexicon/src/format.rs`
   - `crates/lexicon/src/keyboard.rs`
+  - `crates/lexicon/src/layered.rs`
   - `crates/lexicon/src/phonetic.rs`
   - `crates/lexicon/src/trie.rs`
   - `crates/lexicon/src/contractions.rs`
@@ -45,10 +46,11 @@ acceptance_cmd: "cargo test -p anime-lexicon && ./scripts/verify-boundaries.sh .
   - `.agents/tasks/task-02-lexicon-core.md`
 - Verification Output:
   - `cargo check --workspace`: 0 errors, 0 warnings
-  - `cargo test -p anime-lexicon` (debug): 5 lib unit tests + 1 real-lexicon integration test passed (0 warnings)
-  - `cargo test --release -p anime-lexicon -- --nocapture`: loaded 120,000 words & 54,073 typo keys from `data/compiled/lexicon.animelex.bin` in 182 ms;
-    - `eval/benchmarks/core_v1.tsv` (1,000 word queries): `exact` Top1=99.0% (p50=14us, p99=45us), `prefix` Top1=68.0%/Top3=96.0%/Top5=99.5% (p50=117us, p99=230us), `typo_simple` Top1=92.5%/Top3=100.0% (p50=410us, p99=581us), `typo_prefix` Top1=39.0%/Top3=69.0%/Top5=79.5% (p50=396us, p99=498us), `typo_phonetic` Top1=69.5%/Top3=85.5%/Top5=91.5% (p50=398us, p99=481us); overall L1 latency `p50=363 us`, `p99=503 us` (< 1 ms)
-    - `data/compiled/eval_large_open.tsv` (7,500 held-out word queries): `exact` Top1=99.8% (p50=12us, p99=26us), `prefix` Top3=95.6%/Top5=99.2%, `typo_simple` Top1=93.2%/Top3=98.4%, `typo_prefix` Top3=65.1%/Top5=73.8%, `typo_phonetic` Top3=83.6%; overall L1 latency `p50=373 us`, `p99=608 us` (< 1 ms)
-  - `cargo test --workspace`: all 24 tests across 7 workspace crates passed (0 warnings)
+  - `cargo test -p anime-lexicon` (debug): 8 lib unit tests + 2 real-lexicon integration tests passed (0 warnings)
+  - `cargo test --release -p anime-lexicon -- --nocapture`: loaded 120,000 words & 54,073 typo keys from `data/compiled/lexicon.animelex.bin` in 185 ms;
+    - `Lexicon` Base on `eval/benchmarks/core_v1.tsv` (1,000 word queries): `exact` Top1=99.0% (p50=11us, p99=27us), `prefix` Top1=68.0%/Top3=96.0%/Top5=99.5% (p50=111us, p99=166us), `typo_simple` Top1=92.5%/Top3=100.0%, `typo_prefix` Top1=39.0%/Top3=69.0%/Top5=79.5%, `typo_phonetic` Top1=69.5%/Top3=85.5%/Top5=91.5%; overall L1 latency `p50=386 us`, `p99=733 us` (< 1 ms)
+    - `LayeredLexicon` (3-layer: Base 120k + external TSV extension + runtime learned `Antigravity`/`Hyprland`) on `eval/benchmarks/core_v1.tsv` (1,000 word queries): `exact` Top1=**100.0%** (p50=13us, p99=29us), `prefix` Top1=68.5%/Top3=96.5%/Top5=100.0% (p50=122us, p99=171us), `typo_simple` Top1=92.5%/Top3=100.0%, `typo_prefix` Top1=39.5%/Top3=69.5%/Top5=80.0%, `typo_phonetic` Top1=69.5%/Top3=85.5%/Top5=91.5%; overall 3-layer L1 latency `p50=394 us`, `p99=710 us` (< 1 ms)
+    - `Lexicon` Base on `data/compiled/eval_large_open.tsv` (7,500 held-out word queries): `exact` Top1=99.8% (p50=11us, p99=25us), `prefix` Top3=95.6%/Top5=99.2%, `typo_simple` Top1=93.2%/Top3=98.4%, `typo_prefix` Top3=65.1%/Top5=73.8%, `typo_phonetic` Top3=83.6%; overall L1 latency `p50=354 us`, `p99=506 us` (< 1 ms)
+  - `cargo test --workspace`: all 28 tests across 7 workspace crates passed (0 warnings)
   - `make eval`: `smoke.tsv` baseline passed
-  - `./scripts/verify-boundaries.sh .agents/tasks/task-02-lexicon-core.md`: `BOUNDARY OK (task-02-lexicon-core): 已检查 8 个文件，零越界`
+  - `./scripts/verify-boundaries.sh .agents/tasks/task-02-lexicon-core.md`: `BOUNDARY OK`

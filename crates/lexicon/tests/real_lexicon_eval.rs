@@ -5,7 +5,9 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
-use anime_lexicon::{Lexicon, LexiconProvider, QueryOptions};
+use anime_lexicon::{
+    DEFAULT_EXTENSION_ZIPF, LayeredLexicon, Lexicon, LexiconProvider, QueryOptions,
+};
 
 #[derive(Default)]
 struct CatMetric {
@@ -69,7 +71,7 @@ impl CatMetric {
     }
 }
 
-fn eval_word_tsv(lex: &Lexicon, tsv_path: &Path) -> BTreeMap<String, CatMetric> {
+fn eval_word_tsv<L: LexiconProvider>(lex: &L, tsv_path: &Path) -> BTreeMap<String, CatMetric> {
     let raw = fs::read_to_string(tsv_path).expect("read eval TSV");
     let opts = QueryOptions::default();
     let mut stats: BTreeMap<String, CatMetric> = BTreeMap::new();
@@ -240,5 +242,71 @@ fn real_animelex_meets_phase1_accuracy_and_latency_gates() {
                 "large release L1 query p99 latency {lp99} us exceeds 1000 us (< 1 ms) budget"
             );
         }
+    }
+}
+
+#[test]
+fn layered_lexicon_extends_real_animelex_within_latency_budget() {
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let bin_path = manifest_dir.join("../../data/compiled/lexicon.animelex.bin");
+    let core_tsv = manifest_dir.join("../../eval/benchmarks/core_v1.tsv");
+
+    if !bin_path.is_file() {
+        eprintln!(
+            "SKIP layered real_lexicon_eval: '{}' not found",
+            bin_path.display()
+        );
+        return;
+    }
+
+    let mut layered =
+        LayeredLexicon::from_animelex_file(&bin_path).expect("load real ANIMELEX binary");
+    let tech_ext = Lexicon::from_tsv_str(
+        "kubernetes\t4.8\nwayland\t4.8\ntypescript\t4.8\nfcitx\t4.5\nanimed\t4.5\n",
+        DEFAULT_EXTENSION_ZIPF,
+    )
+    .expect("parse tech_modern.tsv");
+    layered.add_extension("tech_modern.tsv", tech_ext, 0.0);
+
+    assert!(layered.learn_word("Antigravity", 3));
+    assert!(layered.learn_word("Hyprland", 2));
+    assert_eq!(layered.dynamic_word_count(), 2);
+
+    let stats = eval_word_tsv(&layered, &core_tsv);
+    let (_layered_p50, _layered_p99) = print_summary(
+        "eval/benchmarks/core_v1.tsv (LayeredLexicon 3-layer)",
+        &stats,
+    );
+
+    assert_eq!(
+        stats["exact"].top1, stats["exact"].total,
+        "layered exact Top1 missed some words ({}/{})",
+        stats["exact"].top1, stats["exact"].total
+    );
+
+    let simple_top1 = CatMetric::pct(stats["typo_simple"].top1, stats["typo_simple"].total);
+    let phonetic_top3 = CatMetric::pct(stats["typo_phonetic"].top3, stats["typo_phonetic"].total);
+    assert!(
+        simple_top1 >= 85.0,
+        "layered typo_simple Top1 {simple_top1:.1}% below 85.0% gate"
+    );
+    assert!(
+        phonetic_top3 >= 75.0,
+        "layered typo_phonetic Top3 {phonetic_top3:.1}% below 75.0% gate"
+    );
+
+    let opts = QueryOptions::default();
+    assert_eq!(layered.query("kubern", &opts)[0].word, "kubernetes");
+    assert_eq!(layered.query("kubrenet", &opts)[0].word, "kubernetes");
+    assert_eq!(layered.query("waylnd", &opts)[0].word, "wayland");
+    assert_eq!(layered.query("antigr", &opts)[0].word, "Antigravity");
+    assert_eq!(layered.query("hyprlnd", &opts)[0].word, "Hyprland");
+
+    #[cfg(not(debug_assertions))]
+    {
+        assert!(
+            _layered_p99 <= 1000,
+            "release LayeredLexicon p99 latency {_layered_p99} us exceeds 1000 us (< 1 ms) budget"
+        );
     }
 }

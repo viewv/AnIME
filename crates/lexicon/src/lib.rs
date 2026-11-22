@@ -1,9 +1,10 @@
 //! L1 英文词法与纠错内核：紧凑前缀树、QWERTY 物理键距矩阵、加权模糊束搜索、
-//! Double Metaphone 读音倒排、缩写/大小写恢复与 `ANIMELEX` v1 加载器。
+//! Double Metaphone 读音倒排、缩写/大小写恢复、`ANIMELEX` v1 加载器与三层可扩展词典。
 
 pub mod contractions;
 pub mod format;
 pub mod keyboard;
+pub mod layered;
 pub mod lexicon;
 pub mod phonetic;
 pub mod trie;
@@ -11,12 +12,17 @@ pub mod trie;
 use anime_protocol::CandidateKind;
 
 pub use crate::format::{
-    ANIMELEX_MAGIC, ANIMELEX_VERSION, ENTRY_FLAG_CAPITALIZED, ENTRY_FLAG_CONTRACTION,
-    ENTRY_FLAG_FROM_SCOWL, FLAG_CASE_PRESERVED, FLAG_COMPACT_QUANTIZED, FLAG_PHONETIC_INDEX,
-    LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord, load_animelex_file,
-    parse_animelex_bytes, zipf_to_log_freq,
+    ANIMELEX_MAGIC, ANIMELEX_VERSION, DEFAULT_EXTENSION_ZIPF, ENTRY_FLAG_CAPITALIZED,
+    ENTRY_FLAG_CONTRACTION, ENTRY_FLAG_FROM_SCOWL, FLAG_CASE_PRESERVED, FLAG_COMPACT_QUANTIZED,
+    FLAG_PHONETIC_INDEX, LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord,
+    load_animelex_file, load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv,
+    zipf_to_log_freq,
 };
 pub use crate::keyboard::weighted_damerau_levenshtein;
+pub use crate::layered::{
+    DEFAULT_DYNAMIC_BASE_ZIPF, DEFAULT_DYNAMIC_MAX_ZIPF, ExtensionLayer, LayeredLexicon,
+    user_freq_to_zipf,
+};
 pub use crate::lexicon::Lexicon;
 pub use crate::phonetic::{PhoneticIndex, encode_double_metaphone};
 
@@ -378,5 +384,204 @@ mod tests {
 
         // 首字母大写输入继承
         assert_eq!(lex.query("Appie", &opts)[0].word, "Apple");
+    }
+
+    #[test]
+    fn wordlist_tsv_parser_handles_plain_tsv_comments_bom_and_errors() {
+        let sample = "\u{feff}# domain extension\n\
+                      word\tzipf\tfreq_rank\tentry_flags\tsource\n\
+                      \n\
+                      kubernetes\n\
+                      Wayland\t4.85\n\
+                      typescript\t5.10\t42\t0\tscowl+wordfreq\n\
+                      don't\t6.60\n";
+        let data = parse_wordlist_tsv(sample, DEFAULT_EXTENSION_ZIPF).expect("valid tsv");
+        assert_eq!(data.words.len(), 4);
+
+        assert_eq!(data.words[0].word, "kubernetes");
+        assert!((data.words[0].zipf - DEFAULT_EXTENSION_ZIPF).abs() < 1e-5);
+        assert_eq!(data.words[0].freq_rank, 1);
+
+        assert_eq!(data.words[1].word, "Wayland");
+        assert!((data.words[1].zipf - 4.85).abs() < 1e-5);
+        assert_ne!(data.words[1].entry_flags & ENTRY_FLAG_CAPITALIZED, 0);
+
+        assert_eq!(data.words[2].word, "typescript");
+        assert_eq!(data.words[2].freq_rank, 42);
+        assert_eq!(data.words[2].entry_flags, 0);
+
+        assert_ne!(data.words[3].entry_flags & ENTRY_FLAG_CONTRACTION, 0);
+
+        // 非法数字、超范围 zipf、含空格词条与空白首列均应带行号报错
+        assert!(matches!(
+            parse_wordlist_tsv("foo\tnot_a_float\n", 4.5),
+            Err(LexiconError::InvalidTextFormat { line: 1, .. })
+        ));
+        assert!(matches!(
+            parse_wordlist_tsv("foo\t9.9\n", 4.5),
+            Err(LexiconError::InvalidTextFormat { line: 1, .. })
+        ));
+        assert!(matches!(
+            parse_wordlist_tsv("hello world\t4.5\n", 4.5),
+            Err(LexiconError::InvalidTextFormat { line: 1, .. })
+        ));
+        assert!(matches!(
+            parse_wordlist_tsv("   \t4.5\n", 4.5),
+            Err(LexiconError::InvalidTextFormat { line: 1, .. })
+        ));
+        assert!(matches!(
+            parse_wordlist_tsv("kubernetes\n", f32::NAN),
+            Err(LexiconError::InvalidTextFormat { line: 0, .. })
+        ));
+    }
+
+    #[test]
+    fn layered_lexicon_merges_extensions_and_directory_loading() {
+        use std::fs;
+        use std::path::PathBuf;
+        use std::time::{SystemTime, UNIX_EPOCH};
+
+        struct TempDirGuard(PathBuf);
+        impl Drop for TempDirGuard {
+            fn drop(&mut self) {
+                let _ = fs::remove_dir_all(&self.0);
+            }
+        }
+
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        let dir = std::env::temp_dir().join(format!(
+            "anime_lexicon_dir_test_{}_{}",
+            std::process::id(),
+            unique
+        ));
+        fs::create_dir_all(dir.join("nested")).expect("create temp test dir");
+        let _guard = TempDirGuard(dir.clone());
+
+        fs::write(dir.join("01_tech.tsv"), "kubernetes\t4.8\nwayland\t4.8\n")
+            .expect("write tech tsv");
+        fs::write(dir.join("02_custom.animelex.bin"), build_synthetic_animelex())
+            .expect("write synthetic animelex");
+        fs::write(dir.join(".ignored.tsv"), "hiddenword\t6.0\n").expect("write hidden tsv");
+        fs::write(dir.join("notes.json"), "{}").expect("write unrelated file");
+        fs::write(dir.join("nested/skip.tsv"), "nestedword\t6.0\n")
+            .expect("write nested tsv");
+
+        let base = Lexicon::from_word_zipfs([("the", 7.73), ("form", 5.80)], Vec::new());
+        let mut layered = LayeredLexicon::new(base);
+        assert_eq!(layered.extensions().len(), 0);
+
+        // 不存在的目录安全返回 Ok(0)
+        assert_eq!(
+            layered
+                .load_extension_dir(&dir.join("missing_subdir"), 0.0)
+                .expect("missing dir ok"),
+            0
+        );
+        assert!(matches!(
+            layered.load_extension_file(&dir.join("notes.json"), 0.0),
+            Err(LexiconError::UnsupportedFormat(_))
+        ));
+
+        let loaded = layered
+            .load_extension_dir(&dir, 0.0)
+            .expect("load extension dir");
+        assert_eq!(loaded, 2);
+        assert_eq!(layered.extensions()[0].name(), "01_tech.tsv");
+        assert_eq!(layered.extensions()[1].name(), "02_custom.animelex.bin");
+
+        let opts = QueryOptions::default();
+        let exact_k8s = layered.query("kubernetes", &opts);
+        assert_eq!(exact_k8s[0].word, "kubernetes");
+        assert_eq!(exact_k8s[0].kind, LexiconMatchKind::Exact);
+
+        assert_eq!(layered.query("kubern", &opts)[0].word, "kubernetes");
+        assert_eq!(
+            layered.query("kubern", &opts)[0].kind,
+            LexiconMatchKind::Completion
+        );
+        assert_eq!(layered.query("kubrenet", &opts)[0].word, "kubernetes");
+        assert_eq!(layered.query("wayland", &opts)[0].word, "wayland");
+        assert_eq!(layered.query("appie", &opts)[0].word, "apple");
+        assert!(!layered
+            .query("hiddenword", &opts)
+            .iter()
+            .any(|c| c.word == "hiddenword" && c.kind == LexiconMatchKind::Exact));
+        assert!(!layered
+            .query("nestedword", &opts)
+            .iter()
+            .any(|c| c.word == "nestedword" && c.kind == LexiconMatchKind::Exact));
+
+        assert!(layered.remove_extension("01_tech.tsv"));
+        assert!(!layered.remove_extension("01_tech.tsv"));
+        assert!(!layered
+            .query("kubernetes", &opts)
+            .iter()
+            .any(|c| c.word == "kubernetes" && c.kind == LexiconMatchKind::Exact));
+    }
+
+    #[test]
+    fn layered_lexicon_dynamic_hot_words_and_layer_invariants() {
+        fn assert_send_sync<T: Send + Sync>() {}
+        assert_send_sync::<LayeredLexicon>();
+
+        let base = make_test_lexicon();
+        let base_dont_score = base.query("dont", &QueryOptions::default())[0].score;
+
+        let mut layered = LayeredLexicon::new(base).with_dynamic_score_bias(0.3);
+        let tech = Lexicon::from_tsv_str("wayland\t4.8\n", DEFAULT_EXTENSION_ZIPF)
+            .expect("parse tech tsv");
+        layered.add_extension("tech", tech, 0.5);
+
+        assert!(!layered.learn_word("", 1));
+        assert!(!layered.learn_word("two words", 1));
+        assert!(!layered.learn_word("valid", 0));
+
+        assert!(layered.learn_word("Antigravity", 3));
+        assert_eq!(
+            layered.preload_dynamic_words([("hyprland", 1), ("Hyprland", 1)]),
+            2
+        );
+        assert_eq!(layered.dynamic_word_count(), 2);
+
+        let snapshot = layered.dynamic_words();
+        assert_eq!(snapshot[0].0, "Antigravity");
+        assert_eq!(snapshot[1].0, "Hyprland");
+
+        let opts = QueryOptions::default();
+        assert_eq!(layered.query("antigravity", &opts)[0].word, "Antigravity");
+        assert_eq!(
+            layered.query("antigravity", &opts)[0].kind,
+            LexiconMatchKind::Exact
+        );
+        assert_eq!(layered.query("antigr", &opts)[0].word, "Antigravity");
+        assert_eq!(
+            layered.query("antigr", &opts)[0].kind,
+            LexiconMatchKind::Completion
+        );
+        assert_eq!(layered.query("hyprlnd", &opts)[0].word, "Hyprland");
+
+        // 内置缩写只在主层注入一次，不叠加扩展层/动态层分数偏移
+        let dont_hits = layered.query("dont", &opts);
+        assert_eq!(dont_hits[0].word, "don't");
+        assert!((dont_hits[0].score - base_dont_score).abs() < 1e-5);
+        let its_hits = layered.query("its", &opts);
+        assert_eq!(its_hits[0].word, "its");
+        assert!(its_hits.iter().any(|c| c.word == "it's"));
+
+        assert!(layered.upsert_dynamic_word("ziglang", 6.1));
+        assert_eq!(layered.query("ziglang", &opts)[0].word, "ziglang");
+
+        assert!(layered.remove_dynamic_word("Hyprland"));
+        assert!(!layered.remove_dynamic_word("Hyprland"));
+        assert!(!layered
+            .query("hyprland", &opts)
+            .iter()
+            .any(|c| c.word == "Hyprland" && c.kind == LexiconMatchKind::Exact));
+
+        layered.clear_dynamic_words();
+        assert_eq!(layered.dynamic_word_count(), 0);
     }
 }
