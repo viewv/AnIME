@@ -65,9 +65,9 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
   - Data-Driven Plan A (0 hand-crafted confusable groups) on `eval/benchmarks/core_v1.tsv` (1400 rows, Radeon 780M `Vulkan0(Vulkan)`):
     - Baseline L1+L2: `context_realword top1=85.5%, top3=99.5%, top5=100.0%`; `sentence top1=72.0%, top3=89.5%, top5=91.0%, p50=2517us`; `typo_prefix top5=81.5%`; `TOTAL top1=75.1%, top3=91.2%, top5=94.6%, p50=792us, p99=6529us`.
     - `SmolLM2-135M` Vulkan: `context_realword top1=91.0%, top3=99.5%, top5=99.5%`; `sentence top1=74.5%, top3=90.0%, top5=91.0%`; `TOTAL top1=76.2%, top3=91.3%, top5=94.6%`; `L3 warmup=161ms, p50=28336us, p99=51725us, mean=29036us`.
-    - `SmolLM2-360M` Vulkan: `context_realword top1=89.5%, top3=99.5%, top5=99.5%`; `sentence top1=76.5%, top3=91.0%, top5=92.5%, strict1=68.0%`; `TOTAL top1=76.3%, top3=91.4%, top5=94.8%`; `L3 warmup=276ms, p50=43681us, p99=72421us, mean=43588us`.
+    - `SmolLM2-360M` Vulkan: `context_realword top1=89.5%, top3=99.5%, top5=99.5%`; `sentence top1=77.0%, top3=90.5%, top5=92.5%, strict1=70.0%`; `TOTAL top1=76.4%, top3=91.4%, top5=94.8%, strict1=75.0%`; `L3 warmup=357ms, p50=42825us, p99=63167us, mean=42041us`.
     - `SmolLM2-1.7B` Vulkan: `context_realword top1=89.0%, top3=99.5%, top5=99.5%`; `sentence top1=80.0%, strict1=70.5%, top3=90.5%, top5=92.0%`; `TOTAL top1=76.7%, top3=91.4%, top5=94.7%`; `L3 warmup=2224ms, p50=109723us, p99=152638us, mean=105440us`.
   - OOD Generalization Benchmark (25 OOD real-word confusable cases absent from deleted 40-group list + 5 negative control sentences):
     - Baseline L1+L2: `context_realword top1=48.0%, top3=100.0%, top5=100.0%`; `negative_control top1=60.0%, top3=100.0%`; `TOTAL top1=50.0%, top3=100.0%`.
-    - `SmolLM2-360M` Vulkan: `context_realword top1=76.0% (+28.0pp), top3=100.0%, top5=100.0%` (all 6 remaining misses at `ci_rank=1`, i.e. 100.0% Top-2 recall); `negative_control top1=80.0% (4/5), top3=100.0%`; `TOTAL top1=76.7%, top3=100.0%, top5=100.0%`.
+    - `SmolLM2-360M` Vulkan: `context_realword top1=84.0% (+36.0pp), top3=100.0%, top5=100.0%` (all 4 remaining misses at `ci_rank=1`, i.e. 100.0% Top-2 recall); `negative_control top1=80.0% (4/5), top3=100.0%`; `TOTAL top1=83.3%, top3=100.0%, top5=100.0%`.
   - Boundary guard (`./scripts/verify-boundaries.sh .agents/tasks/task-06-engine-foundation.md`): `BOUNDARY OK`.

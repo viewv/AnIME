@@ -428,8 +428,9 @@ where
         let remaining: String = self.preedit.chars().skip(consumed).collect();
         let remaining = remaining.trim_start_matches(' ').to_string();
 
+        let learn_text = self.normalize_commit_for_learning(&cand.text);
         self.ngram
-            .learn_commit(&self.context.before, &cand.text, self.privacy);
+            .learn_commit(&self.context.before, &learn_text, self.privacy);
 
         let add_space =
             self.config.smart_spacing && cand.trailing_space && remaining.is_empty();
@@ -481,6 +482,57 @@ where
         }
         self.token_lex_cache.insert(token.to_string(), hits.clone());
         hits
+    }
+
+    /// 若当前处于句首自动大写上下文（且用户原始输入首字符并非大写），
+    /// 在写入 `user.db` 学习前将句首第一个词还原为词典原始大小写（如 "Now" -> "now"），
+    /// 同时保留真正的专有名词与第一人称（如 "I"、"Monday"）。
+    fn normalize_commit_for_learning(&self, text: &str) -> String {
+        if !context_starts_sentence(&self.context.before) {
+            return text.to_string();
+        }
+        if self
+            .preedit
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_uppercase())
+        {
+            return text.to_string();
+        }
+        let first_word = text
+            .split(|c: char| !c.is_ascii_alphanumeric() && c != '\'' && c != '-')
+            .find(|s| !s.is_empty())
+            .unwrap_or("");
+        if first_word.is_empty()
+            || !first_word
+                .chars()
+                .next()
+                .is_some_and(|c| c.is_ascii_uppercase())
+        {
+            return text.to_string();
+        }
+        let first_lower = first_word.to_ascii_lowercase();
+        let probe_opts = QueryOptions {
+            limit: 1,
+            enable_phonetic: false,
+            ..QueryOptions::default()
+        };
+        let is_canonical_lower = self
+            .lexicon
+            .query(&first_lower, &probe_opts)
+            .first()
+            .is_some_and(|h| h.kind == LexiconMatchKind::Exact && h.word == first_lower);
+        if !is_canonical_lower {
+            return text.to_string();
+        }
+        let mut chars = text.chars();
+        let Some(first_ch) = chars.next() else {
+            return text.to_string();
+        };
+        let mut out = String::with_capacity(text.len());
+        out.push(first_ch.to_ascii_lowercase());
+        out.push_str(chars.as_str());
+        out
     }
 
     fn recompute_candidates(&mut self) {
@@ -565,13 +617,28 @@ where
                 }
                 let is_closed_word = slot_idx + 1 < tokens.len() || self.preedit.ends_with(' ');
                 let has_exact_hit = hits.iter().any(|h| h.kind == LexiconMatchKind::Exact);
+                let tok_char_len = tok.chars().count();
+                let best_phonetic: Option<SlotCandidate> = hits
+                    .iter()
+                    .find(|h| h.kind == LexiconMatchKind::PhoneticCorrection)
+                    .map(|h| SlotCandidate {
+                        word: h.word.clone(),
+                        lex_score: h.score,
+                    });
                 let mut slot_cands: Vec<SlotCandidate> = hits
                     .into_iter()
                     .filter(|h| {
-                        // 已按空格闭合的非末尾精确合法词不扩展前缀补全，避免无故变成长词（如 build->building）
-                        !(is_closed_word
-                            && has_exact_hit
-                            && h.kind == LexiconMatchKind::Completion)
+                        // 已按空格闭合的非末尾精确合法词不扩展前缀补全（如 build->building）；
+                        // 闭合错拼词同样过滤超长前缀延伸（> tok_len + 2），为真实纠错词腾出 Viterbi 槽位。
+                        if is_closed_word && h.kind == LexiconMatchKind::Completion {
+                            if has_exact_hit {
+                                return false;
+                            }
+                            if h.word.chars().count() > tok_char_len + 2 {
+                                return false;
+                            }
+                        }
+                        true
                     })
                     .map(|h| SlotCandidate {
                         word: h.word,
@@ -591,6 +658,17 @@ where
                         .total_cmp(&a.lex_score)
                         .then_with(|| a.word.cmp(&b.word))
                 });
+                // 为读音纠错（PhoneticCorrection，如 sikology->psychology）保底保留 1 个前 10 槽位
+                if slot_cands.len() >= 10 {
+                    if let Some(phon) = best_phonetic {
+                        let in_top10 = slot_cands[..10]
+                            .iter()
+                            .any(|c| c.word.eq_ignore_ascii_case(&phon.word));
+                        if !in_top10 {
+                            slot_cands[9] = phon;
+                        }
+                    }
+                }
                 slots.push(LatticeSlot {
                     raw_token: tok.clone(),
                     start_char: *start_char,
@@ -603,10 +681,11 @@ where
                 self.ngram
                     .decode_lattice(&self.context.before, &slots, self.config.max_candidates);
             for s in sentences {
+                let formatted = format_sentence_proper_nouns(&s.text);
                 let text = if sentence_start {
-                    capitalize_first_ascii(&s.text)
+                    capitalize_first_ascii(&formatted)
                 } else {
-                    s.text
+                    formatted
                 };
                 if self
                     .candidates
@@ -722,6 +801,67 @@ fn capitalize_first_ascii(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     out.push(first.to_ascii_uppercase());
     out.push_str(chars.as_str());
+    out
+}
+
+/// 在多词整句模式下恢复英文星期、无歧义月份及介词后常见地名的首字母大写，
+/// 避免影响单词模式（tokens.len() == 1）下的纯小写标识符输入。
+fn format_sentence_proper_nouns(sentence: &str) -> String {
+    const ALWAYS_PROPER_IN_SENTENCE: &[(&str, &str)] = &[
+        ("monday", "Monday"),
+        ("tuesday", "Tuesday"),
+        ("wednesday", "Wednesday"),
+        ("thursday", "Thursday"),
+        ("friday", "Friday"),
+        ("saturday", "Saturday"),
+        ("sunday", "Sunday"),
+        ("january", "January"),
+        ("february", "February"),
+        ("april", "April"),
+        ("june", "June"),
+        ("july", "July"),
+        ("august", "August"),
+        ("september", "September"),
+        ("october", "October"),
+        ("november", "November"),
+        ("december", "December"),
+    ];
+    const PLACE_PROPER_AFTER_PREP: &[(&str, &str)] = &[
+        ("cambridge", "Cambridge"),
+        ("oxford", "Oxford"),
+        ("london", "London"),
+        ("europe", "Europe"),
+        ("england", "England"),
+    ];
+    const PLACE_PREPOSITIONS: &[&str] = &["in", "at", "from", "to", "with", "near", "of", "for"];
+
+    let mut out = String::with_capacity(sentence.len());
+    let mut prev_lower = String::new();
+    for (idx, tok) in sentence.split(' ').enumerate() {
+        if idx > 0 {
+            out.push(' ');
+        }
+        let mut replacement: Option<&str> = None;
+        if tok.bytes().all(|b| b.is_ascii_lowercase()) {
+            for &(low, cap) in ALWAYS_PROPER_IN_SENTENCE {
+                if tok == low {
+                    replacement = Some(cap);
+                    break;
+                }
+            }
+            if replacement.is_none() && PLACE_PREPOSITIONS.iter().any(|&p| p == prev_lower) {
+                for &(low, cap) in PLACE_PROPER_AFTER_PREP {
+                    if tok == low {
+                        replacement = Some(cap);
+                        break;
+                    }
+                }
+            }
+        }
+        let chosen = replacement.unwrap_or(tok);
+        out.push_str(chosen);
+        prev_lower = tok.to_ascii_lowercase();
+    }
     out
 }
 
