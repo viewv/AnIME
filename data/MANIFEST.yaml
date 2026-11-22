@@ -50,7 +50,7 @@ sources:
     license: "MIT"
     sha256: "d6f43876cf130fdb2dfa8f96bc056b0995354137f02122e004925d01264ed386"
     build_script: "scripts/data_pipeline/build_eval_benchmark.py"
-    notes: "用于提取真实语境真词消歧（context_realword）与真实英文对话整句（sentence）离线评测样本"
+    notes: "用于提取真实语境真词消歧（context_realword）与真实英文对话整句（sentence）离线评测样本；亦为 build_eval_v2.py 生成 noise_v1 的源句（严禁进入任何训练语料）"
 
   - id: multiwoz-2.2-test-002
     status: ready
@@ -69,8 +69,8 @@ sources:
     version: "openslr-11"
     license: "Public Domain"
     sha256: "927d47656638c2ca93566640e56bcbeb2aa4ca237b8490fe1eff7d6e610a53c7"
-    build_script: "scripts/data_pipeline/build_ngram.py"
-    notes: "支持流式读取 .txt.gz 语料或 .arpa.gz 语言模型并编译为 ANIMENGR v1 二进制表"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "全量 4041 万行经 build_ngram_kn.py（Rust anime-ngram-build：插值修正 Kneser-Ney + 计数剪枝 + eval/** 整句与 5-gram 去泄漏）编译为 ANIMENGR v1。注意源文件按字母序排序，截断前 N 行会严重偏向以 A 开头的句子；旧 build_ngram.py --max-lines 仅保留作小规模测试"
 
   - id: smollm2-360m-q4_k_m
     status: ready

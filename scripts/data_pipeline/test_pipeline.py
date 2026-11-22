@@ -22,6 +22,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 import build_eval_benchmark  # noqa: E402
 import build_eval_v2  # noqa: E402
+import build_ngram_kn  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
 import build_ngram  # noqa: E402
@@ -641,6 +642,22 @@ class TestEvalV2Builder(unittest.TestCase):
         row = build_eval_v2.realword_edit_sample(["I", "think", "that", "works"], rng, {"hat"})
         self.assertEqual(row, ("context_realword", "I think ", "hat works", "that works",
                                "noise:realword_edit that->hat"))
+
+
+class TestNgramKnOrchestrator(unittest.TestCase):
+    def test_collects_context_and_every_reference_for_leak_filter(self):
+        with tempfile.TemporaryDirectory() as td:
+            tsv = Path(td) / "e.tsv"
+            tsv.write_text(
+                "# comment\n"
+                "typo_prefix\t\tgrenad\tgrenade || grenades\tx\n"
+                "context_realword\tgo \tform here\tfrom here\tnoise:realword_edit\n",
+                encoding="utf-8",
+            )
+            texts = build_ngram_kn.collect_eval_texts([tsv])
+            self.assertEqual(texts, ["grenade", "grenades", "go", "from here"])
+            out = Path(td) / "ex.txt"
+            self.assertEqual(build_ngram_kn.write_exclusion_file(texts + ["go"], out), 4)
 
 
 if __name__ == "__main__":

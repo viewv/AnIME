@@ -56,10 +56,19 @@ python3 scripts/data_pipeline/build_eval_benchmark.py \
   --local-jfleg-ref /path/to/test.ref0 \
   --local-out data/compiled/eval_local_jfleg.tsv
 
-# 7. 流式编译 2/3-gram 语言模型（支持 .txt/.txt.gz 语料或 .arpa/.arpa.gz）
+# 7. 全量语料修正 Kneser-Ney 3-gram（默认 L2 构建路径；约 3–4 分钟，峰值内存约 1.5 GB）
+#    自动以 eval/**/*.tsv 的上下文与全部参考答案做整句 + 5-gram 去泄漏；按 --max-bigrams/--max-trigrams 剪枝
+python3 scripts/data_pipeline/build_ngram_kn.py \
+  --out data/compiled/ngram.animengr.bin --stats data/compiled/ngram_stats.json
+
+# 7b. 旧版加一平滑构建器（仅小规模测试 / ARPA 导入）。注意 LibriSpeech 语料按字母序排序，
+#     --max-lines 截断会只保留以 A 开头的句子，严禁用于产出正式 L2
 python3 scripts/data_pipeline/build_ngram.py \
   --corpus data/raw/ngram-corpus/librispeech-lm-norm.txt.gz \
   --max-lines 1000000
+
+# 8. 由冻结的 core_v1 派生 core_v2，并从 MultiWOZ test 合成 noise_v1（含 negative:clean 反例）
+python3 scripts/data_pipeline/build_eval_v2.py
 ```
 
 ## 离线单元测试

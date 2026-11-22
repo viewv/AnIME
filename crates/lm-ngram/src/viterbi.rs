@@ -15,10 +15,11 @@ const PER_STATE_TOP_K: usize = 2;
 // 发射与转移融合权重（原因注释）：
 // 1. L1 对精确词带 EXACT_BONUS=6.5，因此单槽对 `slot_max` 做归一化（LEX_LAMBDA=0.55），
 //    使语境 confusable（-1.8 相对先验）折算约 -0.99；
-// 2. LM_LAMBDA=1.25 下，当上下文 2/3-gram 相对先验具备 ~+1.2 以上对数概率差（或前后双转移合计）时
-//    能果断翻转真实语境错用（如 go form here -> go from here），而无强语境支撑的生僻真词保持零误改。
+// 2. LM_LAMBDA=0.85（LM:LEX 约 1.55）配合全量语料修正 KN 表：KN 的条件概率比旧加一平滑更尖锐，
+//    同样的语境差在对数域更大，旧比值 2.27 会让 LM 压过用户实际键入（their->there、No->Know）。
+//    core_v2 / noise_v1 上扫描显示比值 1.4–1.55 时整句与干净句保留同时最优，低于 1.4 真词消歧开始回落。
 const LEX_LAMBDA: f32 = 0.55;
-const LM_LAMBDA: f32 = 1.25;
+const LM_LAMBDA: f32 = 0.85;
 const REL_LEX_FLOOR: f32 = -12.0;
 
 #[derive(Clone)]
