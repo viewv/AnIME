@@ -122,7 +122,8 @@ where
         let context = parts[1];
         let input = parts[2].trim();
         let expected = parts[3].trim();
-        let expected_lower = expected.to_ascii_lowercase();
+        // eval-schema §1：`||` 分隔的多参考答案任一命中即算命中
+        let refs: Vec<&str> = expected.split("||").map(str::trim).collect();
 
         session.reset();
         session.set_context(context, "");
@@ -142,8 +143,10 @@ where
         let cands = session.candidates();
         let rank_ci = cands
             .iter()
-            .position(|c| c.text.trim().to_ascii_lowercase() == expected_lower);
-        let rank_cs = cands.iter().position(|c| c.text.trim() == expected);
+            .position(|c| refs.iter().any(|r| c.text.trim().eq_ignore_ascii_case(r)));
+        let rank_cs = cands
+            .iter()
+            .position(|c| refs.iter().any(|r| c.text.trim() == *r));
         let top1 = cands.first().map(|c| c.text.as_str());
 
         stats

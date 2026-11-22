@@ -181,6 +181,22 @@ pub struct EvalReport {
     pub overall: CategoryStats,
     pub failures: Vec<SampleFailure>,
     pub l3_stats: Option<L3TimingStats>,
+    /// 按 `notes` 标签分组的统计；无标签样本归入 [`UNTAGGED`]。
+    pub by_tag: BTreeMap<String, CategoryStats>,
+}
+
+pub const UNTAGGED: &str = "untagged";
+
+/// 候选列表中首个命中任一参考答案的位置：`(忽略大小写, 大小写严格)`。
+pub fn rank_against_references(texts: &[&str], references: &[String]) -> (Option<usize>, Option<usize>) {
+    let ci = texts.iter().position(|t| {
+        let t = t.trim();
+        references.iter().any(|r| t.eq_ignore_ascii_case(r))
+    });
+    let cs = texts
+        .iter()
+        .position(|t| references.iter().any(|r| t.trim() == r));
+    (ci, cs)
 }
 
 fn percentile_from_slice(sorted: &[u128], p: usize) -> u128 {
@@ -228,6 +244,7 @@ where
     M: NeuralSentenceModel,
 {
     let mut by_cat: BTreeMap<Category, CategoryStats> = BTreeMap::new();
+    let mut by_tag: BTreeMap<String, CategoryStats> = BTreeMap::new();
     let mut overall = CategoryStats::default();
     let mut failures = Vec::new();
     let mut l3_latencies_us: Vec<u128> = Vec::new();
@@ -290,16 +307,16 @@ where
         }
 
         let expected_exact = row.expected.trim();
-        let expected_lower = expected_exact.to_ascii_lowercase();
         let cands = session.candidates();
-
-        let ci_rank = cands
-            .iter()
-            .position(|c| c.text.trim().to_ascii_lowercase() == expected_lower);
-        let cs_rank = cands.iter().position(|c| c.text.trim() == expected_exact);
+        let texts: Vec<&str> = cands.iter().map(|c| c.text.as_str()).collect();
+        let (ci_rank, cs_rank) = rank_against_references(&texts, &row.references);
 
         by_cat
             .entry(row.category)
+            .or_default()
+            .record(ci_rank, cs_rank, &timing);
+        by_tag
+            .entry(row.tag.clone().unwrap_or_else(|| UNTAGGED.to_string()))
             .or_default()
             .record(ci_rank, cs_rank, &timing);
         overall.record(ci_rank, cs_rank, &timing);
@@ -317,7 +334,7 @@ where
         }
     }
 
-    for stats in by_cat.values_mut() {
+    for stats in by_cat.values_mut().chain(by_tag.values_mut()) {
         stats.finalize();
     }
     overall.finalize();
@@ -349,5 +366,6 @@ where
         overall,
         failures,
         l3_stats,
+        by_tag,
     }
 }

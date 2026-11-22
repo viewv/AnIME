@@ -198,7 +198,7 @@ fn main() {
     let neural_ref = loaded_neural
         .as_ref()
         .map(|(m, info)| (m.as_ref(), info));
-    let report = run_eval_with_neural(&args.tsv_path, &rows, &mut session, neural_ref);
+    let mut report = run_eval_with_neural(&args.tsv_path, &rows, &mut session, neural_ref);
     let gate_summary = if gate_rules.is_empty() {
         None
     } else {
@@ -209,6 +209,10 @@ fn main() {
             args.strict_gate,
         ))
     };
+    // 标签门禁已在上面求值；未要求分组时不输出标签分节，保持默认报告精简
+    if !args.group_by_tag {
+        report.by_tag.clear();
+    }
 
     if let Some(ref json_path) = args.json_out {
         let json_body = render_json(&report, gate_summary.as_ref(), args.show_failures);
@@ -436,6 +440,46 @@ context_realword\tgo \tform here\tfrom here\tcontext
     }
 
     #[test]
+    fn multi_reference_expected_and_notes_tags() {
+        use crate::metrics::rank_against_references;
+        use crate::tsv::{parse_tag, split_references};
+
+        let rows = parse_tsv(
+            "typo_prefix\t\tgrenad\tgrenade || grenades\tnoise:adjacent_key truncated\n\
+             sentence\t\tthe cat\tthe cat\tnegative:clean\n\
+             exact\t\tapple\tapple\tfree text: not a tag\n",
+        )
+        .expect("parse");
+        assert_eq!(rows[0].references, vec!["grenade", "grenades"]);
+        assert_eq!(rows[0].tag.as_deref(), Some("noise:adjacent_key"));
+        assert_eq!(rows[1].tag.as_deref(), Some("negative:clean"));
+        assert_eq!(rows[2].tag, None);
+        assert!(parse_tsv("exact\t\ta\ta || \tx\n").is_err());
+        assert!(split_references("a||b").is_ok());
+        assert_eq!(parse_tag("Noise:X y"), None);
+
+        // 任一参考命中即算命中，并取最靠前的位置
+        let (ci, cs) = rank_against_references(&["Grenades", "grenade"], &rows[0].references);
+        assert_eq!((ci, cs), (Some(0), Some(1)));
+        let (ci, cs) = rank_against_references(&["x"], &rows[0].references);
+        assert_eq!((ci, cs), (None, None));
+
+        let report = run_eval("tags", &rows);
+        assert!(report.by_tag.contains_key("negative:clean"));
+        assert!(report.by_tag.contains_key("untagged"));
+        let rules = parse_gate_spec("tag:negative:clean.top1>=0", false).expect("tag gate");
+        assert_eq!(rules[0].label, "tag:negative:clean.top1");
+        assert!(evaluate_gates(&report, &rules, vec!["t".into()], false).passed);
+        let missing = parse_gate_spec("tag:noise:space_shift.top1>=0", false).expect("tag gate");
+        assert!(!evaluate_gates(&report, &missing, vec!["t".into()], false).passed);
+        assert!(parse_gate_spec("tag:Bad.top1>=1", false).is_err());
+
+        let json = render_json(&report, None, 0);
+        assert!(json.contains("\"tags\": {"));
+        assert!(render_text(&report, None, 0).contains("By notes tag:"));
+    }
+
+    #[test]
     fn gate_presets_custom_rules_and_missing_category() {
         let mut by_cat = BTreeMap::new();
         let mut exact = CategoryStats::default();
@@ -460,6 +504,7 @@ context_realword\tgo \tform here\tfrom here\tcontext
             overall,
             failures: Vec::new(),
             l3_stats: None,
+            by_tag: BTreeMap::new(),
         };
 
         let p1_rules = parse_gate_spec("phase1", false).expect("phase1");

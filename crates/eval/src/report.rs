@@ -32,6 +32,13 @@ pub fn render_text(report: &EvalReport, gate: Option<&GateSummary>, max_failures
     let _ = writeln!(out, "{}", "-".repeat(118));
     write_text_row(&mut out, "TOTAL", &report.overall);
 
+    if !report.by_tag.is_empty() {
+        let _ = writeln!(out, "\nBy notes tag:");
+        for (tag, stats) in &report.by_tag {
+            write_text_row(&mut out, tag, stats);
+        }
+    }
+
     if let Some(g) = gate {
         let _ = writeln!(
             out,
@@ -162,6 +169,18 @@ pub fn render_markdown(
     }
     write_md_row(&mut out, "**TOTAL**", &report.overall);
 
+    if !report.by_tag.is_empty() {
+        let _ = writeln!(out, "\n## Tag Metrics\n");
+        let _ = writeln!(
+            out,
+            "| tag | total | top1% | top3% | top5% | strict1% | strict3% | strict5% | key50(us) | key99(us) | keymax(us) | sample50(us) |"
+        );
+        let _ = writeln!(out, "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+        for (tag, stats) in &report.by_tag {
+            write_md_row(&mut out, &md_escape(tag), stats);
+        }
+    }
+
     if let Some(g) = gate {
         let _ = writeln!(
             out,
@@ -281,6 +300,20 @@ pub fn render_json(report: &EvalReport, gate: Option<&GateSummary>, max_failures
     }
     out.push_str("  },\n");
 
+    if !report.by_tag.is_empty() {
+        out.push_str("  \"tags\": {\n");
+        let tag_count = report.by_tag.len();
+        for (idx, (tag, stats)) in report.by_tag.iter().enumerate() {
+            let _ = write!(out, "    {}: ", json_str(tag));
+            write_json_stats(&mut out, stats, 4);
+            if idx + 1 < tag_count {
+                out.push(',');
+            }
+            out.push('\n');
+        }
+        out.push_str("  },\n");
+    }
+
     match gate {
         Some(g) => {
             out.push_str("  \"gate\": {\n");
@@ -303,7 +336,7 @@ pub fn render_json(report: &EvalReport, gate: Option<&GateSummary>, max_failures
                     out,
                     "      {{\"rule\": {}, \"target\": {}, \"metric\": {}, \"op\": {}, \"threshold\": {:.4}, \"actual\": {actual_json}, \"passed\": {}, \"note\": {note_json}}}",
                     json_str(&check.rule.label),
-                    json_str(check.rule.target.as_str()),
+                    json_str(&check.rule.target.label()),
                     json_str(check.rule.metric.as_str()),
                     json_str(check.rule.op.as_str()),
                     check.rule.threshold,

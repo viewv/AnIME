@@ -94,7 +94,8 @@ fn eval_word_tsv<L: LexiconProvider>(lex: &L, tsv_path: &Path) -> BTreeMap<Strin
         }
         let input = parts[2].trim();
         let expected = parts[3].trim();
-        let expected_lower = expected.to_ascii_lowercase();
+        // eval-schema §1：`||` 分隔的多参考答案任一命中即算命中
+        let refs: Vec<&str> = expected.split("||").map(str::trim).collect();
 
         let t0 = Instant::now();
         let hits = lex.query(input, &opts);
@@ -102,8 +103,8 @@ fn eval_word_tsv<L: LexiconProvider>(lex: &L, tsv_path: &Path) -> BTreeMap<Strin
 
         let rank_ci = hits
             .iter()
-            .position(|c| c.word.to_ascii_lowercase() == expected_lower);
-        let rank_cs = hits.iter().position(|c| c.word == expected);
+            .position(|c| refs.iter().any(|r| c.word.eq_ignore_ascii_case(r)));
+        let rank_cs = hits.iter().position(|c| refs.iter().any(|r| c.word == *r));
         let top1 = hits.first().map(|c| c.word.as_str());
 
         stats
