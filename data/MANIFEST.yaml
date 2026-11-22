@@ -91,3 +91,13 @@ sources:
     sha256: "e3131339bf4e8065265593d4fd8f7bb7ff2d3abff1edb5618aa1197b89cad9f5"
     build_script: "scripts/data_pipeline/fetch_models.py"
     notes: "ggml-org 官方转换 Apache-2.0 GGUF，用于在相同 Radeon 780M Vulkan 环境下对比 135M 与 360M 的延迟与准确率"
+
+  - id: cmudict
+    status: ready
+    description: "Carnegie Mellon Pronouncing Dictionary (CMUdict ARPAbet 音素发音词典)"
+    source_url: "https://raw.githubusercontent.com/cmusphinx/cmudict/master/cmudict.dict"
+    version: "master"
+    license: "BSD-2-Clause"
+    sha256: "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+    build_script: "scripts/data_pipeline/build_lexicon.py"
+    notes: "官方 BSD-2-Clause 开源美式英语音素词典，写入 ANIMELEX phonetic 字段用于数据驱动的同音与近音词发现"

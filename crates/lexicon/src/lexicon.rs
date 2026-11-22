@@ -3,10 +3,12 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use crate::confusable_index::{ConfusableCandidate, ConfusableSourceEntry, RealWordConfusableIndex};
 use crate::contractions::{apply_input_casing, lookup_contraction};
 use crate::format::{
-    LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord, load_animelex_file,
-    load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv, zipf_to_log_freq,
+    ENTRY_FLAG_FROM_SCOWL, LexiconBinaryEntry, LexiconData, LexiconError, MisspellingRecord,
+    load_animelex_file, load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv,
+    zipf_to_log_freq,
 };
 use crate::keyboard::{APOSTROPHE_SKIP_COST, weighted_damerau_levenshtein};
 use crate::phonetic::PhoneticIndex;
@@ -48,6 +50,7 @@ pub struct Lexicon {
     phonetic: PhoneticIndex,
     misspellings: HashMap<String, Vec<MisspellTarget>>,
     exact_by_lower: HashMap<String, u32>,
+    confusables: RealWordConfusableIndex,
 }
 
 impl Lexicon {
@@ -112,6 +115,8 @@ impl Lexicon {
         });
 
         let mut words: Vec<WordSlot> = Vec::with_capacity(data.words.len());
+        let mut raw_phonetics: Vec<String> = Vec::with_capacity(data.words.len());
+        let mut raw_from_scowl: Vec<bool> = Vec::with_capacity(data.words.len());
         let mut exact_by_lower: HashMap<String, u32> = HashMap::with_capacity(data.words.len());
 
         for entry in data.words {
@@ -125,6 +130,8 @@ impl Lexicon {
             }
             let word_id = words.len() as u32;
             let is_proper_or_mixed = trimmed.bytes().any(|b| b.is_ascii_uppercase());
+            let from_scowl =
+                entry.entry_flags == 0 || (entry.entry_flags & ENTRY_FLAG_FROM_SCOWL) != 0;
             exact_by_lower.insert(lower.clone(), word_id);
             words.push(WordSlot {
                 word: trimmed.to_string(),
@@ -132,6 +139,8 @@ impl Lexicon {
                 log_freq: zipf_to_log_freq(entry.zipf),
                 is_proper_or_mixed,
             });
+            raw_phonetics.push(entry.phonetic);
+            raw_from_scowl.push(from_scowl);
         }
 
         let log_freqs: Vec<f32> = words.iter().map(|w| w.log_freq).collect();
@@ -164,12 +173,30 @@ impl Lexicon {
             }
         }
 
+        let confusables = {
+            let sources: Vec<ConfusableSourceEntry<'_>> = words
+                .iter()
+                .enumerate()
+                .map(|(id, w)| ConfusableSourceEntry {
+                    word_id: id as u32,
+                    word: w.word.as_str(),
+                    lower: w.lower.as_str(),
+                    log_freq: w.log_freq,
+                    is_proper_or_mixed: w.is_proper_or_mixed,
+                    from_scowl: raw_from_scowl[id],
+                    phonetic: raw_phonetics[id].as_str(),
+                })
+                .collect();
+            RealWordConfusableIndex::build(&sources)
+        };
+
         Self {
             words,
             trie,
             phonetic,
             misspellings,
             exact_by_lower,
+            confusables,
         }
     }
 
@@ -188,6 +215,16 @@ impl Lexicon {
     #[inline]
     pub(crate) fn contains_exact_lower(&self, lower: &str) -> bool {
         self.exact_by_lower.contains_key(lower)
+    }
+
+    /// 若主词典已收录该词且规范词形为纯小写普通高频/中频词汇（`log_freq >= -5.2`，即 Zipf >= 2.8，
+    /// 排除长尾罕见小写词条），返回 `true`。
+    #[inline]
+    pub(crate) fn has_lowercase_canonical(&self, lower: &str) -> bool {
+        self.exact_by_lower.get(lower).is_some_and(|&id| {
+            let slot = &self.words[id as usize];
+            !slot.is_proper_or_mixed && slot.log_freq >= -5.2
+        })
     }
 
     fn insert_candidate(
@@ -304,7 +341,7 @@ impl Lexicon {
             };
             let (terminal_hits, completion_hits) =
                 self.trie
-                    .fuzzy_search_with_width(&needle, eff_edit, 3, eff_beam);
+                    .fuzzy_search_with_width(&needle, eff_edit, 5, eff_beam);
 
             for hit in terminal_hits {
                 let slot = &self.words[hit.word_id as usize];
@@ -484,10 +521,371 @@ impl Lexicon {
         out.truncate(opts.limit);
         out
     }
+
+    /// O(1) 离线数据驱动上下文易混真词检索：直接查询构建期固化的同音/近音/撇号缩写与拼写近邻静态图。
+    pub fn query_contextual_confusables(
+        &self,
+        raw: &str,
+        limit: usize,
+    ) -> Vec<ConfusableCandidate> {
+        let needle = raw.trim().to_ascii_lowercase();
+        if needle.len() < 2 || limit == 0 {
+            return Vec::new();
+        }
+        let Some(&base_id) = self.exact_by_lower.get(&needle) else {
+            return Vec::new();
+        };
+
+        let base_log_freq = self.words[base_id as usize].log_freq;
+        let mut out: Vec<ConfusableCandidate> = self
+            .confusables
+            .edges_for(base_id)
+            .iter()
+            .filter(|edge| edge.target_id != base_id)
+            .map(|edge| {
+                let slot = &self.words[edge.target_id as usize];
+                ConfusableCandidate {
+                    word: slot.word.clone(),
+                    log_freq: slot.log_freq,
+                    relative_penalty: edge.relative_penalty,
+                }
+            })
+            .collect();
+
+        out.sort_by(|a, b| {
+            let gap_a = (base_log_freq - a.log_freq).clamp(-0.2, 2.5) * 0.25;
+            let gap_b = (base_log_freq - b.log_freq).clamp(-0.2, 2.5) * 0.25;
+            let sa = -(a.relative_penalty + gap_a);
+            let sb = -(b.relative_penalty + gap_b);
+            sb.total_cmp(&sa)
+                .then_with(|| b.log_freq.total_cmp(&a.log_freq))
+                .then_with(|| a.word.cmp(&b.word))
+        });
+        out.truncate(limit);
+        out
+    }
+
+    /// 对未精确命中词典的疑似漏空格粘连词（如 `Ilikethe`、`thatlikes`、`dontknow`、`witha`）
+    /// 执行 $O(L^2)$ 词频动态规划切分（最多 4 段，耗时 < 10 us），返回切分后的规范词序列。
+    pub fn segment_runon_token(&self, raw: &str) -> Option<Vec<String>> {
+        const MAX_RUNON_LEN: usize = 32;
+        const MAX_SEGMENTS: usize = 4;
+        const SPLIT_BOUNDARY_PENALTY: f32 = 1.75;
+        const CAMEL_BOUNDARY_RELIEF: f32 = 1.05;
+        const MIN_AVG_LOG_FREQ: f32 = -3.65;
+        const PRONOUN_FOLLOW_VERBS: &[&str] = &[
+            "like", "love", "want", "need", "think", "know", "have", "had", "am", "was", "will",
+            "would", "can", "could", "should", "dont", "cant", "wont", "didnt", "hope", "wish",
+            "feel", "see", "saw", "believe", "agree", "guess",
+        ];
+        const ARTICLE_PRECEDING_WORDS: &[&str] = &[
+            "with", "in", "on", "for", "to", "of", "is", "was", "as", "have", "had", "has", "want",
+            "need", "like", "take", "make", "get", "got", "give", "find", "such", "what", "not",
+        ];
+
+        let trimmed = raw.trim();
+        let n = trimmed.len();
+        if !(3..=MAX_RUNON_LEN).contains(&n) {
+            return None;
+        }
+        if !trimmed.bytes().all(|b| b.is_ascii_alphabetic() || b == b'\'') {
+            return None;
+        }
+        let lower = trimmed.to_ascii_lowercase();
+        // 已精确存在于主词典或属于单个无歧义缩写时绝不拆分（保护 software / something / without / dont）
+        if self.exact_by_lower.contains_key(&lower) || lookup_contraction(&lower).is_some() {
+            return None;
+        }
+
+        let raw_bytes = trimmed.as_bytes();
+        let lower_bytes = lower.as_bytes();
+
+        #[derive(Clone)]
+        struct DpState {
+            score: f32,
+            sum_log_freq: f32,
+            words: Vec<String>,
+            last_lower: String,
+        }
+
+        // dp[pos][k] 表示前 pos 字节切分为 k 段（1 <= k <= MAX_SEGMENTS）的最优状态
+        let mut dp: Vec<Vec<Option<DpState>>> = vec![vec![None; MAX_SEGMENTS + 1]; n + 1];
+        dp[0][0] = Some(DpState {
+            score: 0.0,
+            sum_log_freq: 0.0,
+            words: Vec::new(),
+            last_lower: String::new(),
+        });
+
+        for i in 0..n {
+            for k in 0..MAX_SEGMENTS {
+                let Some(cur) = dp[i][k].clone() else {
+                    continue;
+                };
+                let max_j = (i + 16).min(n);
+                for j in (i + 1)..=max_j {
+                    let seg_len = j - i;
+                    let sub_lower = &lower[i..j];
+                    let sub_raw = &trimmed[i..j];
+
+                    let (cand_word, cand_log_freq) = if seg_len == 1 {
+                        let ch = lower_bytes[i];
+                        if ch == b'i' && i == 0 {
+                            let rest = &lower[1..];
+                            let explicit_upper_i =
+                                raw_bytes[0] == b'I' && raw_bytes.get(1).is_some_and(|b| b.is_ascii_lowercase());
+                            let followed_by_verb = PRONOUN_FOLLOW_VERBS
+                                .iter()
+                                .any(|&v| rest.starts_with(v));
+                            if !explicit_upper_i && !followed_by_verb {
+                                continue;
+                            }
+                            ("I".to_string(), -1.50_f32)
+                        } else if ch == b'a' {
+                            let explicit_upper_a = i > 0 && raw_bytes[i] == b'A';
+                            let after_prep = i > 0
+                                && ARTICLE_PRECEDING_WORDS
+                                    .iter()
+                                    .any(|&w| cur.last_lower == w);
+                            if !explicit_upper_a && !after_prep {
+                                continue;
+                            }
+                            ("a".to_string(), -1.64_f32)
+                        } else {
+                            continue;
+                        }
+                    } else if seg_len == 2 {
+                        if sub_lower == "im" && i == 0 {
+                            ("I'm".to_string(), -2.30_f32)
+                        } else if let Some(&wid) = self.exact_by_lower.get(sub_lower) {
+                            let slot = &self.words[wid as usize];
+                            if slot.is_proper_or_mixed || slot.log_freq < -3.15 {
+                                continue;
+                            }
+                            (slot.word.clone(), slot.log_freq)
+                        } else {
+                            continue;
+                        }
+                    } else if let Some(rule) =
+                        lookup_contraction(sub_lower).filter(|r| !r.collides_with_word)
+                    {
+                        (rule.expanded.to_string(), rule.assumed_log_freq)
+                    } else if let Some(&wid) = self.exact_by_lower.get(sub_lower) {
+                        let slot = &self.words[wid as usize];
+                        let min_freq = if k >= 2 { -4.35 } else { -4.65 };
+                        if slot.log_freq < min_freq {
+                            continue;
+                        }
+                        if slot.is_proper_or_mixed
+                            && !slot.lower.contains('\'')
+                            && slot.log_freq < -3.8
+                            && !sub_raw.bytes().next().is_some_and(|b| b.is_ascii_uppercase())
+                        {
+                            continue;
+                        }
+                        (slot.word.clone(), slot.log_freq)
+                    } else {
+                        continue;
+                    };
+
+                    let is_camel_boundary = (i > 0 && raw_bytes[i].is_ascii_uppercase())
+                        || (i == 1 && raw_bytes[0] == b'I' && raw_bytes[1].is_ascii_lowercase());
+                    let boundary_cost = if i == 0 {
+                        0.0
+                    } else if is_camel_boundary {
+                        SPLIT_BOUNDARY_PENALTY - CAMEL_BOUNDARY_RELIEF
+                    } else {
+                        SPLIT_BOUNDARY_PENALTY
+                    };
+
+                    let next_score = cur.score + cand_log_freq - boundary_cost;
+                    let next_sum = cur.sum_log_freq + cand_log_freq;
+                    let should_update = match &dp[j][k + 1] {
+                        Some(existing) => next_score > existing.score,
+                        None => true,
+                    };
+                    if should_update {
+                        let mut words = cur.words.clone();
+                        let formatted = if i == 0 {
+                            apply_input_casing(
+                                sub_raw,
+                                &cand_word,
+                                cand_word.bytes().any(|b| b.is_ascii_uppercase()),
+                            )
+                        } else {
+                            cand_word
+                        };
+                        words.push(formatted);
+                        dp[j][k + 1] = Some(DpState {
+                            score: next_score,
+                            sum_log_freq: next_sum,
+                            words,
+                            last_lower: sub_lower.to_string(),
+                        });
+                    }
+                }
+            }
+        }
+
+        let mut best: Option<DpState> = None;
+        for k in 2..=MAX_SEGMENTS {
+            if let Some(st) = &dp[n][k] {
+                let avg_freq = st.sum_log_freq / (k as f32);
+                if avg_freq < MIN_AVG_LOG_FREQ {
+                    continue;
+                }
+                if best.as_ref().is_none_or(|b| st.score > b.score) {
+                    best = Some(st.clone());
+                }
+            }
+        }
+        if let Some(st) = best {
+            return Some(st.words);
+        }
+
+        // 2-segment 容错连打切分回退（Typo-Tolerant Run-on Segmentation）：
+        // 当精确子词 DP 未命中（例如 "takeyearys" 中左半段 "take" 是精确高频词，右半段 "yearys" 是 "years" 的拼错，
+        // 或左半段带 1 键邻键拼错、右半段是精确高频词），枚举切分点 p \in 2..=(n-3)：
+        // 要求一侧为精确高频词（log_freq >= -3.35），另一侧在 Trie 模糊搜索中存在低编辑代价高频纠错（edit_cost <= 0.90, log_freq >= -3.80）。
+        if (6..=20).contains(&n) {
+            let mut best_fuzzy: Option<(f32, Vec<String>)> = None;
+            for p in 2..=(n - 2) {
+                let left_lower = &lower[..p];
+                let right_lower = &lower[p..];
+                let left_raw = &trimmed[..p];
+                let right_raw = &trimmed[p..];
+
+                // Case A: 左半段精确命中高频词（如 "take" / "it" / "that"），右半段带单次拼写错误（如 "yearys" -> "years"）
+                if right_lower.len() >= 3 {
+                    let left_exact: Option<(String, f32)> = if p == 2 && left_lower == "im" {
+                        Some(("I'm".to_string(), -2.30))
+                    } else if let Some(rule) =
+                        lookup_contraction(left_lower).filter(|r| !r.collides_with_word)
+                    {
+                        Some((rule.expanded.to_string(), rule.assumed_log_freq))
+                    } else if let Some(&wid) = self.exact_by_lower.get(left_lower) {
+                        let slot = &self.words[wid as usize];
+                        let min_left = if p == 2 { -2.85 } else { -3.45 };
+                        if !slot.is_proper_or_mixed && slot.log_freq >= min_left {
+                            Some((slot.word.clone(), slot.log_freq))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+
+                    if let Some((l_word, l_freq)) = left_exact {
+                        if let Some((r_word, r_freq, r_cost)) =
+                            self.best_single_typo_subword(right_lower, right_raw)
+                        {
+                            let avg_freq = (l_freq + r_freq) * 0.5;
+                            let score = l_freq + r_freq - EDIT_LAMBDA * r_cost - SPLIT_BOUNDARY_PENALTY;
+                            if avg_freq >= -3.45
+                                && best_fuzzy.as_ref().is_none_or(|(bs, _)| score > *bs)
+                            {
+                                let l_fmt = apply_input_casing(
+                                    left_raw,
+                                    &l_word,
+                                    l_word.bytes().any(|b| b.is_ascii_uppercase()),
+                                );
+                                best_fuzzy = Some((score, vec![l_fmt, r_word]));
+                            }
+                        }
+                    }
+                }
+
+                // Case B: 右半段精确命中高频词（如 "would" / "the" / "years"），左半段带单次拼写错误（如 "takr" -> "take"）
+                if left_lower.len() >= 3 && right_lower.len() >= 2 {
+                    let right_exact: Option<(String, f32)> =
+                        if let Some(&wid) = self.exact_by_lower.get(right_lower) {
+                            let slot = &self.words[wid as usize];
+                            let min_right = if right_lower.len() == 2 { -2.85 } else { -3.45 };
+                            if !slot.is_proper_or_mixed && slot.log_freq >= min_right {
+                                Some((slot.word.clone(), slot.log_freq))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        };
+
+                    if let Some((r_word, r_freq)) = right_exact {
+                        if let Some((l_word, l_freq, l_cost)) =
+                            self.best_single_typo_subword(left_lower, left_raw)
+                        {
+                            let avg_freq = (l_freq + r_freq) * 0.5;
+                            let score = l_freq + r_freq - EDIT_LAMBDA * l_cost - SPLIT_BOUNDARY_PENALTY;
+                            if avg_freq >= -3.45
+                                && best_fuzzy.as_ref().is_none_or(|(bs, _)| score > *bs)
+                            {
+                                best_fuzzy = Some((score, vec![l_word, r_word]));
+                            }
+                        }
+                    }
+                }
+            }
+            if let Some((_, words)) = best_fuzzy {
+                return Some(words);
+            }
+        }
+        None
+    }
+
+    /// 供连打容错切分使用的子词级轻量模糊检索：在编辑代价 `<= 0.90`（1 次邻键替换或单字母多敲/漏敲/转置）内
+    /// 寻找最高频的合法普通词（`log_freq >= -3.65`）。
+    fn best_single_typo_subword(
+        &self,
+        sub_lower: &str,
+        sub_raw: &str,
+    ) -> Option<(String, f32, f32)> {
+        if !(3..=12).contains(&sub_lower.len()) {
+            return None;
+        }
+        let mut best: Option<(String, f32, f32, f32)> = None;
+        if let Some(records) = self.misspellings.get(sub_lower) {
+            for rec in records {
+                let slot = &self.words[rec.word_id as usize];
+                if !slot.is_proper_or_mixed && slot.log_freq >= -3.65 {
+                    let cost = 0.65_f32;
+                    let rank = slot.log_freq - EDIT_LAMBDA * cost;
+                    if best.as_ref().is_none_or(|b| rank > b.3) {
+                        let formatted =
+                            apply_input_casing(sub_raw, &slot.word, slot.is_proper_or_mixed);
+                        best = Some((formatted, slot.log_freq, cost, rank));
+                    }
+                }
+            }
+        }
+        let (hits, _) = self.trie.fuzzy_search_with_width(sub_lower, 0.90, 0, 24);
+        for hit in hits {
+            if hit.edit_cost == 0.0 || hit.edit_cost > 0.90 {
+                continue;
+            }
+            let slot = &self.words[hit.word_id as usize];
+            if slot.is_proper_or_mixed || slot.log_freq < -3.65 {
+                continue;
+            }
+            let rank = slot.log_freq - EDIT_LAMBDA * hit.edit_cost;
+            if best.as_ref().is_none_or(|b| rank > b.3) {
+                let formatted = apply_input_casing(sub_raw, &slot.word, slot.is_proper_or_mixed);
+                best = Some((formatted, slot.log_freq, hit.edit_cost, rank));
+            }
+        }
+        best.map(|(w, freq, cost, _)| (w, freq, cost))
+    }
 }
 
 impl LexiconProvider for Lexicon {
     fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
         self.query_layer(raw, opts, true, false)
+    }
+
+    fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<ConfusableCandidate> {
+        self.query_contextual_confusables(raw, limit)
+    }
+
+    fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
+        self.segment_runon_token(raw)
     }
 }

@@ -1,53 +1,14 @@
-//! 纯 Rust 英文上下文易混词（Real-Word Confusables）与简写展开表。
+//! 纯 Rust 英文上下文易混词（Real-Word Confusables）与简写展开适配器。
 //!
 //! 原因注释：L1 词级引擎对合法真词施加重磅 `EXACT_BONUS = 6.5` 防误纠；
-//! 在具备多词词格或上文语境时，本模块只为明确登记的易混搭档补充可控先验分差（`-1.35`），
-//! 使 L2 2/3-gram 能在 `"go form here"` / `"over their"` / `"I hope your happy"` 中精准翻转，
-//! 同时对无强语境支撑或非易混生僻词保持零误改。
+//! 在具备多词词格或上文语境时，本模块向 `LexiconProvider::contextual_confusables` 查询数据驱动的
+//! 同音/近音/撇号缩写与低代价 QWERTY 邻键易混词（不含静态硬编码易混词列表），
+//! 并以可控先验分差与稀有词温和降权交由 L2/L3 上下文模型决策。
 
+use anime_lexicon::LexiconProvider;
 use anime_lm_ngram::SlotCandidate;
 
-const CONFUSABLE_RELATIVE_PENALTY: f32 = 1.35;
 const SHORTHAND_RELATIVE_PENALTY: f32 = 0.8;
-
-const CONFUSABLE_GROUPS: &[&[&str]] = &[
-    &["their", "there", "they're"],
-    &["your", "you're"],
-    &["its", "it's"],
-    &["to", "too", "two"],
-    &["then", "than"],
-    &["form", "from"],
-    &["affect", "effect"],
-    &["lose", "loose"],
-    &["weather", "whether"],
-    &["quiet", "quite"],
-    &["accept", "except"],
-    &["here", "hear"],
-    &["know", "no"],
-    &["new", "knew"],
-    &["right", "write"],
-    &["where", "wear"],
-    &["passed", "past"],
-    &["peace", "piece"],
-    &["break", "brake"],
-    &["principal", "principle"],
-    &["complement", "compliment"],
-    &["desert", "dessert"],
-    &["ill", "I'll"],
-    &["id", "I'd"],
-    &["were", "we're"],
-    &["well", "we'll"],
-    &["cant", "can't"],
-    &["wont", "won't"],
-    &["dont", "don't"],
-    &["isnt", "isn't"],
-    &["didnt", "didn't"],
-    &["doesnt", "doesn't"],
-    &["thats", "that's"],
-    &["whats", "what's"],
-    &["hes", "he's"],
-    &["shes", "she's"],
-];
 
 const SHORTHAND_PAIRS: &[(&str, &str)] = &[
     ("hw", "how"),
@@ -95,8 +56,9 @@ fn upsert_slot_candidate(cands: &mut Vec<SlotCandidate>, word: String, target_sc
     }
 }
 
-/// 当具备语境或处于多词词格时，为词槽补充易混真词与常见缩写候选。
-pub(crate) fn expand_slot_confusables(
+/// 当具备语境或处于多词词格时，为词槽补充数据驱动的易混真词与常见缩写候选。
+pub(crate) fn expand_slot_confusables<L: LexiconProvider>(
+    lexicon: &L,
     raw_token: &str,
     cands: &mut Vec<SlotCandidate>,
     allow_expansion: bool,
@@ -123,30 +85,38 @@ pub(crate) fn expand_slot_confusables(
         }
     }
 
-    // 同时依据原始输入与前 3 项已有候选激活易混组（例如 youre -> you're 激活 your）
-    let probe_limit = cands.len().min(3);
-    let mut probes: Vec<String> = Vec::with_capacity(1 + probe_limit);
-    probes.push(raw_lower.clone());
-    for c in &cands[..probe_limit] {
-        probes.push(c.word.to_ascii_lowercase());
+    let mut hits = lexicon.contextual_confusables(&raw_lower, 6);
+    // 若原始敲法不在词库（如 youre/theyre/whos 漏敲撇号），尝试以纠错首项（you're/they're/who's）激活易混族（your/their/whose）
+    if hits.is_empty() {
+        if let Some(first) = cands.first() {
+            if !first.word.eq_ignore_ascii_case(&raw_lower) {
+                hits = lexicon.contextual_confusables(&first.word, 6);
+            }
+        }
     }
 
-    let confusable_score = anchor - CONFUSABLE_RELATIVE_PENALTY;
-    for group in CONFUSABLE_GROUPS {
-        let matched = probes.iter().any(|p| {
-            group
-                .iter()
-                .any(|&member| member.eq_ignore_ascii_case(p))
-        });
-        if !matched {
+    // 精确词在 L1 中的基准分为 log_freq + EXACT_BONUS(6.5)，据此还原原词对数词频用于对称频差补偿：
+    // - 当易混候选词频高于用户已敲出的合法词（如 quiet->quite, suite->sweet）时，附加顺风惩罚防止无语境误翻；
+    // - 当易混候选词频低于用户敲出的高频词（如 break->brake, night->knight, colonel->kernel）时，适度减免先验惩罚以抵消 L2/L3 的 unigram 劣势。
+    let est_base_log_freq = (anchor - 6.5).clamp(-8.5, -1.0);
+    let raw_has_apos = raw_lower.contains('\'');
+
+    for hit in hits {
+        if hit.word.eq_ignore_ascii_case(&raw_lower) {
             continue;
         }
-        for &member in *group {
-            if member.eq_ignore_ascii_case(&raw_lower) {
-                continue;
-            }
-            let word = match_raw_casing(raw_token, member);
-            upsert_slot_candidate(cands, word, confusable_score);
-        }
+        let word = match_raw_casing(raw_token, &hit.word);
+        let is_apos_expansion = !raw_has_apos && hit.word.contains('\'');
+        let effective_penalty = if is_apos_expansion {
+            hit.relative_penalty
+        } else if hit.log_freq > est_base_log_freq {
+            let surplus_pen = (hit.log_freq - est_base_log_freq).clamp(0.0, 2.0) * 0.35;
+            hit.relative_penalty + surplus_pen
+        } else {
+            let deficit_relief = (est_base_log_freq - hit.log_freq).clamp(0.0, 1.8) * 0.22;
+            (hit.relative_penalty - deficit_relief).max(0.88)
+        };
+        let target_score = anchor - effective_penalty;
+        upsert_slot_candidate(cands, word, target_score);
     }
 }

@@ -21,11 +21,14 @@ from common import (  # noqa: E402
     ENTRY_FLAG_CONTRACTION,
     ENTRY_FLAG_FROM_SCOWL,
     FLAG_CASE_PRESERVED,
+    FLAG_PHONETIC_INDEX,
     LexiconEntry,
     MisspellingEntry,
     read_wordfreq_cbpack,
     write_animelex,
 )
+
+CMUDICT_VARIANT_RE = re.compile(r"\(\d+\)$")
 
 SCOWL_FILE_RE = re.compile(
     r"^(?:english|american|british|british_z|canadian|australian)-"
@@ -175,6 +178,43 @@ def load_misspellings_tsv(path: Path, valid_targets_lower: set[str]) -> list[Mis
     return out
 
 
+def load_cmudict(path: Path) -> dict[str, str]:
+    """解析开源 CMUdict 发音词典，去除重音数字并保留最多 3 个不重复读音变体（受 ANIMELEX u8 长度限制 <= 250B）。"""
+    variants: dict[str, list[str]] = {}
+    for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line or line.startswith(";;;"):
+            continue
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        base = CMUDICT_VARIANT_RE.sub("", parts[0].lower())
+        if not base:
+            continue
+        pron = " ".join(p.rstrip("012") for p in parts[1:] if p.rstrip("012"))
+        if not pron:
+            continue
+        bucket = variants.setdefault(base, [])
+        if pron not in bucket and len(bucket) < 3:
+            bucket.append(pron)
+
+    out: dict[str, str] = {}
+    for word, prons in variants.items():
+        # ANIMELEX v1 phonetic 字段使用单字节长度 (<= 255)，严格限制 <= 250 UTF-8 字节
+        kept: list[str] = []
+        total_bytes = 0
+        for p in prons:
+            p_bytes = len(p.encode("utf-8"))
+            sep = 1 if kept else 0
+            if total_bytes + sep + p_bytes > 250:
+                break
+            kept.append(p)
+            total_bytes += sep + p_bytes
+        if kept:
+            out[word] = "|".join(kept)
+    return out
+
+
 def build_lexicon(
     scowl_tar: Path | None,
     scowl_dir: Path | None,
@@ -183,12 +223,14 @@ def build_lexicon(
     wordfreq_tsv: Path | None,
     modern_min_zipf: float,
     misspellings_tsv: Path | None,
+    cmudict_path: Path | None,
     max_words: int,
     out_tsv: Path,
     out_bin: Path,
 ) -> tuple[int, int]:
     scowl_forms = load_scowl(scowl_tar, scowl_dir, max_scowl_level)
     freqs = load_wordfreq(wordfreq_whl, wordfreq_tsv)
+    cmudict_prons = load_cmudict(cmudict_path) if cmudict_path is not None else {}
 
     if not scowl_forms and not freqs:
         raise ValueError("empty input: neither SCOWL nor wordfreq produced any valid English words")
@@ -231,7 +273,7 @@ def build_lexicon(
                 zipf=round(zipf, 2),
                 freq_rank=idx,
                 entry_flags=eflags,
-                phonetic="",
+                phonetic=cmudict_prons.get(word.lower(), ""),
             )
         )
 
@@ -247,7 +289,10 @@ def build_lexicon(
             src = "scowl+wordfreq" if (e.entry_flags & ENTRY_FLAG_FROM_SCOWL) else "wordfreq-modern"
             fh.write(f"{e.word}\t{e.zipf:.2f}\t{e.freq_rank}\t{e.entry_flags}\t{src}\n")
 
-    write_animelex(out_bin, entries, misspellings, flags=FLAG_CASE_PRESERVED)
+    bin_flags = FLAG_CASE_PRESERVED
+    if cmudict_prons:
+        bin_flags |= FLAG_PHONETIC_INDEX
+    write_animelex(out_bin, entries, misspellings, flags=bin_flags)
     return len(entries), len(misspellings)
 
 
@@ -283,6 +328,12 @@ def main(argv: list[str] | None = None) -> int:
         help="可选由 build_misspellings.py 生成的错拼 TSV，一并打包进 ANIMELEX",
     )
     parser.add_argument(
+        "--cmudict",
+        type=Path,
+        default=None,
+        help="可选开源 CMUdict cmudict.dict 路径，用于填充 ANIMELEX phonetic 音素字段",
+    )
+    parser.add_argument(
         "--max-words",
         type=int,
         default=120000,
@@ -313,6 +364,7 @@ def main(argv: list[str] | None = None) -> int:
         wordfreq_tsv=args.wordfreq_tsv,
         modern_min_zipf=args.modern_min_zipf,
         misspellings_tsv=args.misspellings_tsv,
+        cmudict_path=args.cmudict,
         max_words=args.max_words,
         out_tsv=args.out_tsv,
         out_bin=args.out_bin,

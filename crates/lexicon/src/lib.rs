@@ -1,6 +1,7 @@
 //! L1 英文词法与纠错内核：紧凑前缀树、QWERTY 物理键距矩阵、加权模糊束搜索、
 //! Double Metaphone 读音倒排、缩写/大小写恢复、`ANIMELEX` v1 加载器与三层可扩展词典。
 
+pub mod confusable_index;
 pub mod contractions;
 pub mod format;
 pub mod keyboard;
@@ -11,6 +12,7 @@ pub mod trie;
 
 use anime_protocol::CandidateKind;
 
+pub use crate::confusable_index::ConfusableCandidate;
 pub use crate::format::{
     ANIMELEX_MAGIC, ANIMELEX_VERSION, DEFAULT_EXTENSION_ZIPF, ENTRY_FLAG_CAPITALIZED,
     ENTRY_FLAG_CONTRACTION, ENTRY_FLAG_FROM_SCOWL, FLAG_CASE_PRESERVED, FLAG_COMPACT_QUANTIZED,
@@ -73,6 +75,16 @@ impl Default for QueryOptions {
 
 pub trait LexiconProvider: Send + Sync {
     fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate>;
+
+    /// 返回数据驱动的上下文易混真词候选（CMUdict 同音/近音 + 自动撇号缩写 + QWERTY 低代价邻键近邻）。
+    fn contextual_confusables(&self, _raw: &str, _limit: usize) -> Vec<ConfusableCandidate> {
+        Vec::new()
+    }
+
+    /// 对快速输入漏敲空格产生的粘连词（如 `Ilikethe` / `thatlikes` / `dontknow`）做 $O(L^2)$ 词频动态规划切分。
+    fn segment_runon(&self, _raw: &str) -> Option<Vec<String>> {
+        None
+    }
 }
 
 /// Phase 0 最小只读词表桩：仅做精确与前缀匹配，用于验证引擎主链路与测试基线。
@@ -574,6 +586,11 @@ mod tests {
         assert!(layered.upsert_dynamic_word("ziglang", 6.1));
         assert_eq!(layered.query("ziglang", &opts)[0].word, "ziglang");
 
+        // 句首自动大写上屏过的普通词（如主词典已有的 "apple" -> "Apple"）不应在句中小写输入时强制变成大写
+        assert!(layered.learn_word("Apple", 10));
+        assert_eq!(layered.query("apple", &opts)[0].word, "apple");
+        assert_eq!(layered.query("Apple", &opts)[0].word, "Apple");
+
         assert!(layered.remove_dynamic_word("Hyprland"));
         assert!(!layered.remove_dynamic_word("Hyprland"));
         assert!(!layered
@@ -583,5 +600,65 @@ mod tests {
 
         layered.clear_dynamic_words();
         assert_eq!(layered.dynamic_word_count(), 0);
+    }
+
+    #[test]
+    fn segment_runon_token_splits_concatenated_words_and_preserves_compounds() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("I", 7.1),
+                ("like", 6.5),
+                ("likes", 5.6),
+                ("the", 7.6),
+                ("software", 5.8),
+                ("something", 6.3),
+                ("without", 6.4),
+                ("that", 7.0),
+                ("me", 6.7),
+                ("with", 6.9),
+                ("a", 7.4),
+                ("don't", 6.6),
+                ("know", 6.5),
+                ("thank", 6.0),
+                ("you", 7.3),
+                ("it", 7.3),
+                ("would", 6.8),
+                ("take", 6.6),
+                ("years", 6.7),
+            ],
+            Vec::new(),
+        );
+        assert_eq!(
+            lex.segment_runon("Ilikethe"),
+            Some(vec!["I".to_string(), "like".to_string(), "the".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("thatlikes"),
+            Some(vec!["that".to_string(), "likes".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("dontknow"),
+            Some(vec!["don't".to_string(), "know".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("witha"),
+            Some(vec!["with".to_string(), "a".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("thankyou"),
+            Some(vec!["thank".to_string(), "you".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("itwould"),
+            Some(vec!["it".to_string(), "would".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("takeyearys"),
+            Some(vec!["take".to_string(), "years".to_string()])
+        );
+        // 已存在于词典的合法复合词绝不拆分
+        assert_eq!(lex.segment_runon("software"), None);
+        assert_eq!(lex.segment_runon("something"), None);
+        assert_eq!(lex.segment_runon("without"), None);
     }
 }

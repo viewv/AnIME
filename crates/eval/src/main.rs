@@ -14,7 +14,8 @@ use std::sync::Arc;
 
 use anime_engine::EngineSession;
 use anime_lexicon::{
-    LayeredLexicon, Lexicon, LexiconCandidate, LexiconProvider, QueryOptions, StaticWordList,
+    ConfusableCandidate, LayeredLexicon, Lexicon, LexiconCandidate, LexiconProvider, QueryOptions,
+    StaticWordList,
 };
 use anime_lm_neural::{NeuralModelConfig, NeuralRuntimeInfo, NeuralSentenceModel, NoopNeuralModel, load_neural_model};
 use anime_lm_ngram::{NgramLanguageModel, NgramModel, NoopNgramModel, UserStore};
@@ -34,6 +35,20 @@ impl LexiconProvider for EvalLexicon {
         match self {
             Self::Smoke(s) => s.query(raw, opts),
             Self::Compiled(l) => l.query(raw, opts),
+        }
+    }
+
+    fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<ConfusableCandidate> {
+        match self {
+            Self::Smoke(s) => s.contextual_confusables(raw, limit),
+            Self::Compiled(l) => l.contextual_confusables(raw, limit),
+        }
+    }
+
+    fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
+        match self {
+            Self::Smoke(s) => s.segment_runon(raw),
+            Self::Compiled(l) => l.segment_runon(raw),
         }
     }
 }

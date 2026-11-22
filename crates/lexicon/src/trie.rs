@@ -9,8 +9,8 @@ use crate::keyboard::{
 
 pub const NO_WORD: u32 = u32::MAX;
 const DEFAULT_BEAM_WIDTH: usize = 64;
-const MAX_COMPLETION_BEAM_NODES: usize = 10;
-const MAX_FUZZY_COMPLETION_COST: f32 = 1.25;
+const MAX_COMPLETION_BEAM_NODES: usize = 16;
+const MAX_FUZZY_COMPLETION_COST: f32 = 1.45;
 const BEAM_EDIT_LAMBDA: f32 = 3.2;
 const MIN_NON_APOSTROPHE_EDIT: f32 = 0.39;
 

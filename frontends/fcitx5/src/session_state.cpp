@@ -468,6 +468,7 @@ void SessionState::onLocalChar(char ch) {
 }
 
 void SessionState::onLocalClosingPunct() {
+    predicted_preedit_.clear();
     last_auto_space_ = false;
     last_commit_was_enter_ = false;
 }

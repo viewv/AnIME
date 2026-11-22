@@ -525,11 +525,12 @@ impl<'m> KvRunner<'m> {
 
         if common >= l {
             // 新候选是前一条已打分候选的严格前缀，所有单步 logprob 均已在手。
+            // 原因：所有候选均覆盖同一段用户输入跨度，必须使用联合对数概率之和；
+            // 若除以子词长度 `l^alpha`，会系统性拉高 `'s`/`'ll`/`'t`/词缀等高条件概率长变体分值。
             for k in 1..l {
                 step_lps.push(*prev_step_lps.get(k)?);
             }
-            let sum: f32 = step_lps.iter().sum();
-            return Some(sum / (l as f32).powf(0.8));
+            return Some(step_lps.iter().sum());
         }
 
         // 重用前 common 步已算过的条件概率；若 common > 0，仅保留 prefix + common - 1，
@@ -595,8 +596,8 @@ impl<'m> KvRunner<'m> {
             .unwrap_or_else(|| toks[..l - 1].to_vec());
         *prev_step_lps = step_lps.clone();
 
-        let sum: f32 = step_lps.iter().sum();
-        Some(sum / (l as f32).powf(0.8))
+        // 同覆盖跨度下比较真实联合对数概率，消除 BPE 子词切分长度对打分的扭曲
+        Some(step_lps.iter().sum())
     }
 
     fn continuations(

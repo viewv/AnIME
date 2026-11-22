@@ -266,8 +266,9 @@ public:
             return;
         }
 
-        // Ctrl/Alt/Super 快捷键一律原样放行给桌面或宿主应用。
+        // Ctrl/Alt/Super 快捷键一律原样放行给桌面或宿主应用，并清除智能尾空格记忆。
         if (norm_key.states().testAny(kNonShiftModMask)) {
+            session_.clearLastAutoSpace();
             return;
         }
 
@@ -402,7 +403,21 @@ public:
                 }
                 return;
             }
-            // 其他控制键或未纳入词内字符的符号直接透传。
+            if (unicode >= 0x21U && unicode <= 0x7EU) {
+                // 组合态下敲击非词内可见符号/标点（如 ? . , ! ; : / ( ) 等）：
+                // 拦截并交由 animed 将当前首选候选与该符号按顺序一并上屏，防止符号抢先落盘到未上屏词前面（如 "?rdp"）。
+                const char ch = static_cast<char>(unicode);
+                const std::string utf8_ch(1, ch);
+                const uint64_t seq = session_.nextSeq();
+                auto line = anime::ipc::encodeKeyChar(seq, utf8_ch, mods);
+                if (line && sendLine(*line)) {
+                    session_.onLocalClosingPunct();
+                    clearIcPanel(ic);
+                    keyEvent.filterAndAccept();
+                }
+                return;
+            }
+            // 其他控制键直接透传。
             return;
         }
 
@@ -431,6 +446,10 @@ public:
             }
             return;
         }
+
+        // 空闲态下任何未拦截的透传按键（如数字 '6'、符号、退格、方向键等）已改变光标前内容，
+        // 必须立即清除 lastAutoSpace，防止随后输入 '.' 时错误触发 delete_before=1 吞掉刚输入的数字。
+        session_.clearLastAutoSpace();
     }
 
 private:

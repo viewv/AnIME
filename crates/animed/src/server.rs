@@ -8,7 +8,9 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use anime_engine::{EngineOutput, EngineSession};
-use anime_lexicon::{LayeredLexicon, LexiconCandidate, LexiconProvider, QueryOptions};
+use anime_lexicon::{
+    ConfusableCandidate, LayeredLexicon, LexiconCandidate, LexiconProvider, QueryOptions,
+};
 use anime_lm_neural::{NeuralCandidate, NeuralSentenceModel};
 use anime_lm_ngram::NgramLanguageModel;
 use anime_protocol::{
@@ -24,6 +26,14 @@ pub struct SharedLexicon(pub Arc<LayeredLexicon>);
 impl LexiconProvider for SharedLexicon {
     fn query(&self, raw: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
         self.0.query(raw, opts)
+    }
+
+    fn contextual_confusables(&self, raw: &str, limit: usize) -> Vec<ConfusableCandidate> {
+        self.0.contextual_confusables(raw, limit)
+    }
+
+    fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
+        self.0.segment_runon(raw)
     }
 }
 
