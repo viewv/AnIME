@@ -659,6 +659,18 @@ class TestNgramKnOrchestrator(unittest.TestCase):
             out = Path(td) / "ex.txt"
             self.assertEqual(build_ngram_kn.write_exclusion_file(texts + ["go"], out), 4)
 
+    def test_extracts_every_dialogue_turn_one_per_line(self):
+        with tempfile.TemporaryDirectory() as td:
+            js = Path(td) / "dialogues_001.json"
+            js.write_text(json.dumps([
+                {"turns": [{"speaker": "USER", "utterance": " I need  a taxi. "},
+                           {"speaker": "SYSTEM", "utterance": "Where to?"},
+                           {"speaker": "USER", "utterance": ""}]},
+            ]), encoding="utf-8")
+            out = Path(td) / "turns.txt"
+            self.assertEqual(build_ngram_kn.extract_dialogue_text([js], out), 2)
+            self.assertEqual(out.read_text(encoding="utf-8"), "I need a taxi.\nWhere to?\n")
+
 
 if __name__ == "__main__":
     unittest.main()

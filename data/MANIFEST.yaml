@@ -62,6 +62,178 @@ sources:
     build_script: "scripts/data_pipeline/build_eval_benchmark.py"
     notes: "与 multiwoz-2.2-test-001 共同构成完整 MultiWOZ 2.2 test 分片"
 
+  - id: multiwoz-2.2-train-001
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 001（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_001.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "895a8109bf01fa5ecf15ccdbd2dfe1628bd923f6b61dcd2e26b10ee5076a1596"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-002
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 002（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_002.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "2f3ea771d4e01cb2780357738cff7f7496b87d34c221cc240df74501312438d3"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-003
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 003（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_003.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "da24961d28486be2d8462ee4d86a809db819d588ba90ae1a783383d95eb85daa"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-004
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 004（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_004.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "30c1172db1071c853b16215d1946de908d68d2b6ff8da7801de307000a179106"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-005
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 005（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_005.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "eaf58716df5de99524b3e0e7edf477b74749512788a6a51f53f2bdd76768d39a"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-006
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 006（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_006.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "8e75fd543b1964bc5e7118085d977f479c98fcdf6d606b971f67a45fb1745c83"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-007
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 007（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_007.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "02323f8298439d713c6d7d226f4bd7ec246ec993ee11911b54f98cb8a598f206"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-008
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 008（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_008.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "1129fbed480352ae304f0ae5b4915c194e9619c43f1577ccb0d450e10d24ea98"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-009
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 009（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_009.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "87d9e43b1ba51a4a4688703da79d3a09b14d8013570545da24c597daa18e2f45"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-010
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 010（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_010.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "e7ad0d5da2909b08197295e45fe4695b9dc2f67d458374b2aab8db5094e97b26"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-011
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 011（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_011.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "82e2d2900a037b866a01d05974734dd419e89b329fe29ef93b35eea96d27feb8"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-012
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 012（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_012.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "b6bf292325db67682dd7b6fafbf1051cc2262e92f7c37cab213e975888594bb2"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-013
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 013（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_013.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "c33fe4b3952c016e1e1645f472a7097f93dfb476a19940fd9386865ef9adf685"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-014
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 014（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_014.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "ce33dbbf93a40d0dcc671a9d6a2ed1f987914f5b5f05f6df493a5b342efda954"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-015
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 015（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_015.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "d895c0439bc2ad89ef1689896e3be630eadebc33dae77b42a426fd16a271718e"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-016
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 016（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_016.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "3e6bc0bca4262022ccbce0d5ce3150e536e7d21aeb9fbdef9e83cced4dfd124b"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-train-017
+    status: ready
+    description: "MultiWOZ 2.2 train 分片 017（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/train/dialogues_017.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "b6ab2cd9b6e8983364526845b7cbec1749338209bf7ac2313c25e1e2226ebab5"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-dev-001
+    status: ready
+    description: "MultiWOZ 2.2 dev 分片 001（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/dev/dialogues_001.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "e7ddb563e4da5766ea820cc826dead77e7ca219c19b761e218d62d9c999a252e"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+  - id: multiwoz-2.2-dev-002
+    status: ready
+    description: "MultiWOZ 2.2 dev 分片 002（真实英文任务型对话，L2 对话领域语料）"
+    source_url: "https://raw.githubusercontent.com/budzianowski/multiwoz/fe0c8e65cfcd8462bd33c86e35f21addc84ca82b/data/MultiWOZ_2.2/dev/dialogues_002.json"
+    version: "2.2-fe0c8e65"
+    license: "MIT"
+    sha256: "ede6a2c17fd6c5846214b8cabc1ef8f7cc8be01cfbacaa162bcafec9e87724e9"
+    build_script: "scripts/data_pipeline/build_ngram_kn.py"
+    notes: "仅用于 L2 训练；与 test 分片对话不重叠，构建时仍按 eval/** 整句与 5-gram 去泄漏"
+
   - id: ngram-corpus
     status: ready
     description: "OpenSLR 11 LibriSpeech 规范化英文语言模型语料（源自 Public Domain Project Gutenberg 书库），统计 2-gram 与 3-gram 概率表（ANIMENGR）"

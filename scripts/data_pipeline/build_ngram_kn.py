@@ -62,6 +62,21 @@ def write_exclusion_file(texts: list[str], out: Path) -> int:
     return len(uniq)
 
 
+def extract_dialogue_text(json_paths: list[Path], out: Path) -> int:
+    """MultiWOZ 风格对话 JSON（`[{"turns": [{"utterance": ...}]}]`）抽取全部轮次文本，每轮一行。"""
+    n = 0
+    with out.open("w", encoding="utf-8") as f:
+        for p in sorted(json_paths):
+            data = json.loads(p.read_text(encoding="utf-8"))
+            for dlg in data if isinstance(data, list) else []:
+                for turn in dlg.get("turns", []):
+                    utt = " ".join(str(turn.get("utterance", "")).split())
+                    if utt:
+                        f.write(utt + "\n")
+                        n += 1
+    return n
+
+
 def write_keep_vocab(lexicon_tsv: Path, out: Path) -> int:
     words: set[str] = set()
     for raw in lexicon_tsv.read_text(encoding="utf-8").splitlines():
@@ -82,6 +97,18 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--librispeech", type=Path, default=DEFAULT_LIBRISPEECH, help="LibriSpeech LM .txt.gz（全量）")
     ap.add_argument("--text", type=Path, action="append", default=[], help="额外纯文本语料（每行一句或一段）")
+    ap.add_argument(
+        "--dialogue-glob",
+        action="append",
+        default=[],
+        help="对话 JSON glob（相对仓库根，如 data/raw/multiwoz-2.2-train-*/dialogues_*.json）；严禁指向 test 分片",
+    )
+    ap.add_argument(
+        "--dialogue-repeat",
+        type=int,
+        default=1,
+        help="对话语料重复喂入次数：领域语料仅约 150 万词，不加权会在计数剪枝中几乎全部被裁掉",
+    )
     ap.add_argument("--lexicon-tsv", type=Path, default=REPO_ROOT / "data/compiled/lexicon.tsv")
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "data/compiled/ngram.animengr.bin")
     ap.add_argument("--stats", type=Path, default=REPO_ROOT / "data/compiled/ngram_stats.json")
@@ -127,6 +154,16 @@ def main(argv: list[str] | None = None) -> int:
         cmd += ["--input", "-"]
     for t in args.text:
         cmd += ["--input", str(t)]
+    dialogue_files = sorted({p for g in args.dialogue_glob for p in REPO_ROOT.glob(g)})
+    if any("-test-" in str(p) for p in dialogue_files):
+        print("refusing to train on MultiWOZ test shards (eval source)", file=sys.stderr)
+        return 1
+    n_turns = 0
+    if dialogue_files:
+        dialogue_txt = args.tmp_dir / "dialogue_turns.txt"
+        n_turns = extract_dialogue_text(dialogue_files, dialogue_txt)
+        print(f"dialogue corpus: {n_turns} turns from {len(dialogue_files)} files x{args.dialogue_repeat}", flush=True)
+        cmd += ["--input", str(dialogue_txt)] * max(1, args.dialogue_repeat)
 
     proc = subprocess.run(cmd, stdin=stdin, check=False)
     if zcat is not None:
@@ -135,7 +172,11 @@ def main(argv: list[str] | None = None) -> int:
         return proc.returncode
     stats = json.loads(args.stats.read_text(encoding="utf-8"))
     stats["eval_exclusion_texts"] = n_ex
-    stats["sources"] = [str(args.librispeech.name)] + [t.name for t in args.text]
+    stats["sources"] = [str(args.librispeech.name)] + [t.name for t in args.text] + [
+        str(p.relative_to(REPO_ROOT)) for p in dialogue_files
+    ]
+    stats["dialogue_turns"] = n_turns
+    stats["dialogue_repeat"] = args.dialogue_repeat
     args.stats.write_text(json.dumps(stats, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(stats, indent=2, ensure_ascii=False))
     return 0

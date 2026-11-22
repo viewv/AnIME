@@ -58,7 +58,11 @@ python3 scripts/data_pipeline/build_eval_benchmark.py \
 
 # 7. 全量语料修正 Kneser-Ney 3-gram（默认 L2 构建路径；约 3–4 分钟，峰值内存约 1.5 GB）
 #    自动以 eval/**/*.tsv 的上下文与全部参考答案做整句 + 5-gram 去泄漏；按 --max-bigrams/--max-trigrams 剪枝
+#    对话领域语料（MultiWOZ 2.2 train/dev，绝不含 test）按 x20 加权喂入
 python3 scripts/data_pipeline/build_ngram_kn.py \
+  --dialogue-glob 'data/raw/multiwoz-2.2-train-*/dialogues_*.json' \
+  --dialogue-glob 'data/raw/multiwoz-2.2-dev-*/dialogues_*.json' \
+  --dialogue-repeat 20 \
   --out data/compiled/ngram.animengr.bin --stats data/compiled/ngram_stats.json
 
 # 7b. 旧版加一平滑构建器（仅小规模测试 / ARPA 导入）。注意 LibriSpeech 语料按字母序排序，

@@ -97,7 +97,7 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [IN PROGRESS] A 全部完成；B 已完成全量 LibriSpeech + 修正 KN 重建与权重重调，**待办**：B1 对话领域语料（MultiWOZ 2.2 train/dev 需下载，等待用户批准）后复测；`negative:clean` top1 96.0% 尚未达 97% 目标。
+- Status: [DONE — 待评审] A/B/C 完成；最终 L2 = 全量 LibriSpeech + MultiWOZ 2.2 train/dev（x20）修正 KN（`data/compiled/kn/ngram_kn_r20.animengr.bin`）。**唯一未达目标**：`negative:clean` top1 95.5% < 97%（剩余误改约半数为源句自身错误，见下）。
 - Changed Files:
   - `.agents/contracts/eval-schema.md`（`||` 多参考、`notes` 标签、`--group-by-tag` 与 `tag:` 门禁）
   - `crates/eval/src/{tsv,metrics,gate,cli,main,report}.rs`
@@ -106,7 +106,7 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
   - `crates/lm-ngram/src/viterbi.rs`（`LM_LAMBDA` 1.25 → 0.85）
   - `scripts/data_pipeline/{build_eval_v2,build_ngram_kn}.py`（新增）、`test_pipeline.py`、`README.md`
   - `eval/benchmarks/core_v2.tsv`、`eval/benchmarks/noise_v1.tsv`（新增；`core_v1.tsv` 未改）
-  - `data/MANIFEST.yaml`（ngram-corpus 构建脚本与注意事项、MultiWOZ test 仅评测用途）
+  - `data/MANIFEST.yaml`（ngram-corpus 构建脚本与注意事项、MultiWOZ test 仅评测用途；新增 17 个 train + 2 个 dev 分片，MIT，SHA256 已校验）
 - Verification Output:
   - **旧 L2 根因**：`librispeech-lm-norm.txt.gz` 按字母序排序，旧 `--max-lines 1000000` 只覆盖以 `A` 开头至 `AH I KNEW IT` 的句子（全量 4041 万行的 2.5%）。
   - **评测集**：`core_v2` 1375 行（剔除 25 条输入即词典词的 prefix；85 条 prefix、146 条 typo_prefix 带多参考）；`noise_v1` 680 行（8 类 `noise:*` 各 60 + `negative:clean` 200，源句排除自带漏撇号的子句）。
@@ -131,4 +131,21 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
   - `negative:clean` 剩余 8 条误改中约 5 条为源句自身错误（`there address`、`it's departure`、`alot`、`naw`、`info`→完整词），真实误判 3 条（`sri→sir`、`then→than`、句末 `too→to`）。
   - 门禁：`core_v1` / `core_v2` `--gate phase3` PASS；`noise_v1 --gate tag:negative:clean.top1>=95` PASS。
   - `make check`（0 warning）/ `make test`（61 passed, 0 failed）/ `make eval` / `make verify-infra`（INFRA OK）/ `python3 scripts/data_pipeline/test_pipeline.py`（17 tests OK）/ `./scripts/verify-boundaries.sh .agents/tasks/task-08-eval-and-l2-rebuild.md`（含 `--base main --tracked-only`）BOUNDARY OK。
-  - 未做：L3（`--features vulkan`）叠加复测；新 L2 尚未替换 `data/compiled/ngram.animengr.bin`（产物位于 worktree `data/compiled/kn/`，合入后按 README 第 7 步重建即可）。
+  - **B1 对话领域语料**（经用户批准下载 MultiWOZ 2.2 train 001–017 + dev 001–002，185 MB，同 commit `fe0c8e65`，MIT）：抽取 128,300 轮 / 1,694,071 词（USER + SYSTEM）。去泄漏丢弃约 35% 对话句（与 test 分片共享 5-gram 的模板化表达）；领域语料仅占 0.2%，按 `--dialogue-repeat` 加权以免被计数剪枝裁光。x20 与 x60 结果一致（全部对话三元组均越过 k_tri=11 阈值），取 x20：3,595,316 二元组 + 6,804,410 三元组，172,248,413 bytes，构建 215 s；加载 0.49 s，稳态 RSS 287 MB，峰值 437 MB。`LM_LAMBDA` 在 0.75–0.85 平坦最优，维持 0.85。
+  - **最终对比（旧 L2 → 纯 LibriSpeech KN → +对话 x20）**：
+
+    | 集合 / 指标 | 旧 L2 | LibriSpeech KN | **+MultiWOZ x20（最终）** |
+    |---|---|---|---|
+    | core_v2 sentence top1 / top5 | 69.0 / 87.5% | 80.5 / 91.0% | **88.0 / 94.5%** |
+    | core_v2 context_realword top1 | 84.5% | 89.0% | **92.5%** |
+    | core_v2 TOTAL top1 / top5 | 78.9 / 95.1% | 81.2 / 95.6% | **82.8 / 96.1%** |
+    | core_v2 exact / typo_simple / typo_phonetic / prefix / typo_prefix | 99.0 / 92.5 / 69.0 / 82.9 / 56.0% | 同左 | 同左 |
+    | noise_v1 `negative:clean` top1 | 89.5% | 96.0% | 95.5% |
+    | noise_v1 realword_edit / space_shift top1 | 30.0 / 18.3% | 30.0 / 30.0% | **38.3 / 40.0%** |
+    | eval_large_open（9888）sentence / context_realword top1 | 65.5 / 80.3% | 71.1 / 84.7% | **86.1 / 94.1%** |
+    | 非 MultiWOZ 来源子集（114 条手写 sentence + context_realword）top1 | 80.7% | 88.6% | **89.5%** |
+    | core_v2 单键 p50 / p99 / max | 66 / 861 / 2198 us | 69 / 634 / 1580 us | 61 / 593 / 2090 us |
+
+  - **领域偏置提示**：core / eval_large_open 的 sentence、context_realword 样本均源自 MultiWOZ test，与新增训练语料同领域（已保证零 5-gram 重叠），其增幅高估了通用场景收益；非 MultiWOZ 子集（+8.8pp）更接近通用提升，且对话加权未造成通用文本退化。
+  - 门禁（最终模型）：`core_v1` / `core_v2` `--gate phase3` PASS；`noise_v1 --gate tag:negative:clean.top1>=95` PASS。
+  - 未做：L3（`--features vulkan`）叠加复测；新 L2 尚未替换 `data/compiled/ngram.animengr.bin`（产物位于 worktree `data/compiled/kn/`，合入后按 README 第 7 步加 `--dialogue-glob` / `--dialogue-repeat 20` 重建）。
