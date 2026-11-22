@@ -8,14 +8,14 @@ allowed_paths:
   - "crates/engine/tests/**"
   - "crates/lm-ngram/src/viterbi.rs"
   - "crates/lm-ngram/src/lib.rs"
+  - "crates/animed/src/server.rs"
+  - "crates/eval/src/main.rs"
   - ".agents/tasks/task-09-sentence-recall.md"
   - "ROADMAP.md"
 forbidden_paths:
   - ".agents/contracts/**"
   - "crates/protocol/**"
   - "crates/lm-neural/**"
-  - "crates/animed/**"
-  - "crates/eval/**"
   - "eval/**"
   - "scripts/**"
   - "data/MANIFEST.yaml"
@@ -62,7 +62,7 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - 不改 `protocol` / IPC 语义；单词模式与前缀补全行为保持不变（由 `core_v2` 的 prefix / typo_* 类别守护）。
 
 ## Blocked (必须跨界或改契约时立即暂停：写出明确原因 + 申请修改的文件路径；无阻塞留 None)
-- None
+- **[已批准 2026-11-22] 新增 trait 方法需在两个包装器中转发**：P1 在 `LexiconProvider` 新增带默认空实现的 `closed_token_neighbors`；`crates/animed/src/server.rs`（`SharedLexicon`）与 `crates/eval/src/main.rs`（`EvalLexicon`）各自包了一层且未转发，真实守护进程与评测器都拿到空默认实现（实测指标零变化）。用户批准**仅**在这两个文件各加一个与 `segment_runon` 相同模式的转发方法，已加入 `allowed_paths`；`crates/animed`、`crates/eval` 其余文件仍不在白名单内。
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
 - Status: [PENDING]

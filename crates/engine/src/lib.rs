@@ -12,7 +12,7 @@ use anime_protocol::{
     Candidate, CandidateKind, CommitAction, ContextText, EngineConfig, KeyInput, PreeditState,
 };
 
-use crate::confusables::expand_slot_confusables;
+use crate::confusables::{expand_closed_token_neighbors, expand_slot_confusables};
 
 const MAX_CONTEXT_BEFORE_CHARS: usize = 256;
 const MAX_TOKEN_LEX_CACHE: usize = 64;
@@ -38,6 +38,7 @@ pub struct EngineSession<L, N, M> {
     // 在单次预编辑组合内按完整词槽缓存 L1 结果：多词输入时前序未变词槽无需每击重算 400 us 模糊束搜索，
     // 兼顾退格回退命中，并在配置变更、重置或提交选词后立即清空。
     token_lex_cache: HashMap<String, Vec<LexiconCandidate>>,
+    neighbor_cache: HashMap<String, Vec<LexiconCandidate>>,
 }
 
 impl<L, N, M> EngineSession<L, N, M>
@@ -60,6 +61,7 @@ where
             revision: 0,
             last_auto_space: false,
             token_lex_cache: HashMap::with_capacity(16),
+            neighbor_cache: HashMap::with_capacity(16),
         }
     }
 
@@ -542,6 +544,18 @@ where
         hits
     }
 
+    fn closed_neighbors_cached(&mut self, token: &str) -> Vec<LexiconCandidate> {
+        if let Some(cached) = self.neighbor_cache.get(token) {
+            return cached.clone();
+        }
+        let hits = self.lexicon.closed_token_neighbors(token, 12);
+        if self.neighbor_cache.len() >= MAX_TOKEN_LEX_CACHE {
+            self.neighbor_cache.clear();
+        }
+        self.neighbor_cache.insert(token.to_string(), hits.clone());
+        hits
+    }
+
     /// 若当前处于句首自动大写上下文（且用户原始输入首字符并非大写），
     /// 在写入 `user.db` 学习前将句首第一个词还原为词典原始大小写（如 "Now" -> "now"），
     /// 同时保留真正的专有名词与第一人称（如 "I"、"Monday"）。
@@ -807,6 +821,10 @@ where
                     });
                 }
                 expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true);
+                if is_closed_word {
+                    let neighbors = self.closed_neighbors_cached(tok);
+                    expand_closed_token_neighbors(&neighbors, tok, has_exact_hit, &mut slot_cands);
+                }
                 // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
                 slot_cands.sort_by(|a, b| {
                     b.lex_score
@@ -1289,6 +1307,9 @@ mod tests {
                 ("happy", 130),
                 ("think", 210),
                 ("its", 380),
+                ("this", 900),
+                ("is", 1200),
+                ("great", 250),
                 ("it's", 340),
                 ("raining", 80),
                 ("how", 350),
@@ -1751,6 +1772,60 @@ mod tests {
             EngineOutput::State(st) => assert!(st.passthrough),
             other => panic!("expected passthrough State for '.' after digit 6, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn closed_token_neighbors_recover_leading_drop_but_keep_clean_words() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("i", 7.0),
+                ("want", 6.0),
+                ("to", 7.4),
+                ("of", 7.5),
+                ("or", 6.6),
+                ("go", 6.2),
+                ("home", 5.8),
+                ("at", 6.9),
+                ("the", 7.7),
+                ("he", 6.7),
+                ("end", 5.6),
+                ("said", 6.1),
+                ("hen", 2.5),
+            ],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![("i", 900), ("want", 400), ("to", 1500), ("go", 300), ("home", 200), ("at", 600),
+                 ("the", 3000), ("he", 900), ("end", 150), ("said", 300), ("of", 1700), ("or", 400)],
+            vec![("i", "want", 300), ("want", "to", 280), ("to", "go", 200), ("go", "home", 120),
+                 ("at", "the", 400), ("the", "end", 120), ("he", "said", 200)],
+            vec![("i", "want", "to", 200), ("want", "to", "go", 150), ("at", "the", "end", 100)],
+        );
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+
+        // 单字母非词 o 已被空格闭合：一次编辑近邻召回 to，由 L2 选中
+        let st = feed_text(&mut sess, "i want o go home");
+        assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "i want to go home");
+
+        // 真词 he 在明确语境下翻为 the
+        sess.reset();
+        let st = feed_text(&mut sess, "at he end");
+        assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "at the end");
+
+        // 无反向证据时保留用户键入的真词
+        sess.reset();
+        let st = feed_text(&mut sess, "he said");
+        assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "he said");
+
+        // 罕见但合法的原词（Zipf < 3）不展开真词近邻，即便 L2 偏好常见近邻 he
+        sess.reset();
+        let st = feed_text(&mut sess, "hen said");
+        assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "hen said");
+
+        // 正在输入的末尾 token 不走闭合近邻（单词模式前缀行为不变）
+        sess.reset();
+        let st = feed_text(&mut sess, "o");
+        assert!(st.candidates.iter().all(|c| c.text.to_ascii_lowercase() != "to"));
     }
 
     #[test]

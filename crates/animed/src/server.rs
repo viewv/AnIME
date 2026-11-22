@@ -35,6 +35,10 @@ impl LexiconProvider for SharedLexicon {
     fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
         self.0.segment_runon(raw)
     }
+
+    fn closed_token_neighbors(&self, raw: &str, limit: usize) -> Vec<LexiconCandidate> {
+        self.0.closed_token_neighbors(raw, limit)
+    }
 }
 
 #[derive(Clone)]

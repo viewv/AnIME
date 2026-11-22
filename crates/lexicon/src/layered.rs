@@ -533,6 +533,10 @@ impl LexiconProvider for LayeredLexicon {
         self.base.contextual_confusables(raw, limit)
     }
 
+    fn closed_token_neighbors(&self, raw: &str, limit: usize) -> Vec<LexiconCandidate> {
+        self.base.closed_token_neighbors(raw, limit)
+    }
+
     fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
         let trimmed = raw.trim();
         if self.has_exact_lower(&trimmed.to_ascii_lowercase()) {

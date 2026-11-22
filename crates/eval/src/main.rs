@@ -51,6 +51,13 @@ impl LexiconProvider for EvalLexicon {
             Self::Compiled(l) => l.segment_runon(raw),
         }
     }
+
+    fn closed_token_neighbors(&self, raw: &str, limit: usize) -> Vec<LexiconCandidate> {
+        match self {
+            Self::Smoke(s) => s.closed_token_neighbors(raw, limit),
+            Self::Compiled(l) => l.closed_token_neighbors(raw, limit),
+        }
+    }
 }
 
 enum EvalNgram {
