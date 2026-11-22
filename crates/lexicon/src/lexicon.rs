@@ -739,7 +739,140 @@ impl Lexicon {
                 }
             }
         }
-        best.map(|st| st.words)
+        if let Some(st) = best {
+            return Some(st.words);
+        }
+
+        // 2-segment 容错连打切分回退（Typo-Tolerant Run-on Segmentation）：
+        // 当精确子词 DP 未命中（例如 "takeyearys" 中左半段 "take" 是精确高频词，右半段 "yearys" 是 "years" 的拼错，
+        // 或左半段带 1 键邻键拼错、右半段是精确高频词），枚举切分点 p \in 2..=(n-3)：
+        // 要求一侧为精确高频词（log_freq >= -3.35），另一侧在 Trie 模糊搜索中存在低编辑代价高频纠错（edit_cost <= 0.90, log_freq >= -3.80）。
+        if (6..=20).contains(&n) {
+            let mut best_fuzzy: Option<(f32, Vec<String>)> = None;
+            for p in 2..=(n - 2) {
+                let left_lower = &lower[..p];
+                let right_lower = &lower[p..];
+                let left_raw = &trimmed[..p];
+                let right_raw = &trimmed[p..];
+
+                // Case A: 左半段精确命中高频词（如 "take" / "it" / "that"），右半段带单次拼写错误（如 "yearys" -> "years"）
+                if right_lower.len() >= 3 {
+                    let left_exact: Option<(String, f32)> = if p == 2 && left_lower == "im" {
+                        Some(("I'm".to_string(), -2.30))
+                    } else if let Some(rule) =
+                        lookup_contraction(left_lower).filter(|r| !r.collides_with_word)
+                    {
+                        Some((rule.expanded.to_string(), rule.assumed_log_freq))
+                    } else if let Some(&wid) = self.exact_by_lower.get(left_lower) {
+                        let slot = &self.words[wid as usize];
+                        let min_left = if p == 2 { -2.85 } else { -3.45 };
+                        if !slot.is_proper_or_mixed && slot.log_freq >= min_left {
+                            Some((slot.word.clone(), slot.log_freq))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+
+                    if let Some((l_word, l_freq)) = left_exact {
+                        if let Some((r_word, r_freq, r_cost)) =
+                            self.best_single_typo_subword(right_lower, right_raw)
+                        {
+                            let avg_freq = (l_freq + r_freq) * 0.5;
+                            let score = l_freq + r_freq - EDIT_LAMBDA * r_cost - SPLIT_BOUNDARY_PENALTY;
+                            if avg_freq >= -3.45
+                                && best_fuzzy.as_ref().is_none_or(|(bs, _)| score > *bs)
+                            {
+                                let l_fmt = apply_input_casing(
+                                    left_raw,
+                                    &l_word,
+                                    l_word.bytes().any(|b| b.is_ascii_uppercase()),
+                                );
+                                best_fuzzy = Some((score, vec![l_fmt, r_word]));
+                            }
+                        }
+                    }
+                }
+
+                // Case B: 右半段精确命中高频词（如 "would" / "the" / "years"），左半段带单次拼写错误（如 "takr" -> "take"）
+                if left_lower.len() >= 3 && right_lower.len() >= 2 {
+                    let right_exact: Option<(String, f32)> =
+                        if let Some(&wid) = self.exact_by_lower.get(right_lower) {
+                            let slot = &self.words[wid as usize];
+                            let min_right = if right_lower.len() == 2 { -2.85 } else { -3.45 };
+                            if !slot.is_proper_or_mixed && slot.log_freq >= min_right {
+                                Some((slot.word.clone(), slot.log_freq))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        };
+
+                    if let Some((r_word, r_freq)) = right_exact {
+                        if let Some((l_word, l_freq, l_cost)) =
+                            self.best_single_typo_subword(left_lower, left_raw)
+                        {
+                            let avg_freq = (l_freq + r_freq) * 0.5;
+                            let score = l_freq + r_freq - EDIT_LAMBDA * l_cost - SPLIT_BOUNDARY_PENALTY;
+                            if avg_freq >= -3.45
+                                && best_fuzzy.as_ref().is_none_or(|(bs, _)| score > *bs)
+                            {
+                                best_fuzzy = Some((score, vec![l_word, r_word]));
+                            }
+                        }
+                    }
+                }
+            }
+            if let Some((_, words)) = best_fuzzy {
+                return Some(words);
+            }
+        }
+        None
+    }
+
+    /// 供连打容错切分使用的子词级轻量模糊检索：在编辑代价 `<= 0.90`（1 次邻键替换或单字母多敲/漏敲/转置）内
+    /// 寻找最高频的合法普通词（`log_freq >= -3.65`）。
+    fn best_single_typo_subword(
+        &self,
+        sub_lower: &str,
+        sub_raw: &str,
+    ) -> Option<(String, f32, f32)> {
+        if !(3..=12).contains(&sub_lower.len()) {
+            return None;
+        }
+        let mut best: Option<(String, f32, f32, f32)> = None;
+        if let Some(records) = self.misspellings.get(sub_lower) {
+            for rec in records {
+                let slot = &self.words[rec.word_id as usize];
+                if !slot.is_proper_or_mixed && slot.log_freq >= -3.65 {
+                    let cost = 0.65_f32;
+                    let rank = slot.log_freq - EDIT_LAMBDA * cost;
+                    if best.as_ref().is_none_or(|b| rank > b.3) {
+                        let formatted =
+                            apply_input_casing(sub_raw, &slot.word, slot.is_proper_or_mixed);
+                        best = Some((formatted, slot.log_freq, cost, rank));
+                    }
+                }
+            }
+        }
+        let (hits, _) = self.trie.fuzzy_search_with_width(sub_lower, 0.90, 0, 24);
+        for hit in hits {
+            if hit.edit_cost == 0.0 || hit.edit_cost > 0.90 {
+                continue;
+            }
+            let slot = &self.words[hit.word_id as usize];
+            if slot.is_proper_or_mixed || slot.log_freq < -3.65 {
+                continue;
+            }
+            let rank = slot.log_freq - EDIT_LAMBDA * hit.edit_cost;
+            if best.as_ref().is_none_or(|b| rank > b.3) {
+                let formatted = apply_input_casing(sub_raw, &slot.word, slot.is_proper_or_mixed);
+                best = Some((formatted, slot.log_freq, hit.edit_cost, rank));
+            }
+        }
+        best.map(|(w, freq, cost, _)| (w, freq, cost))
     }
 }
 

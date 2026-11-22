@@ -621,6 +621,10 @@ mod tests {
                 ("know", 6.5),
                 ("thank", 6.0),
                 ("you", 7.3),
+                ("it", 7.3),
+                ("would", 6.8),
+                ("take", 6.6),
+                ("years", 6.7),
             ],
             Vec::new(),
         );
@@ -643,6 +647,14 @@ mod tests {
         assert_eq!(
             lex.segment_runon("thankyou"),
             Some(vec!["thank".to_string(), "you".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("itwould"),
+            Some(vec!["it".to_string(), "would".to_string()])
+        );
+        assert_eq!(
+            lex.segment_runon("takeyearys"),
+            Some(vec!["take".to_string(), "years".to_string()])
         );
         // 已存在于词典的合法复合词绝不拆分
         assert_eq!(lex.segment_runon("software"), None);

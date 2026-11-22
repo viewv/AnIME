@@ -38,8 +38,8 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
 7. **新功能记录 — 智能连打分词 / 漏空格自动切分（Smart Run-on Word Segmentation）**：
    - **场景与目标**：用户快速盲打时常漏敲一个或多个空格，产生粘连词（如 `Ilikethe software thatlikes me`、`witha`、`ofthe`、`dontknow`、`thankyou`）。需要引擎自动识别粘连串并切分补齐空格，输出 `I like the software that likes me`。
    - **算法设计**：
-     1. 对非精确命中词典（或内部含大写驼峰边界如 `Ilike`）的 token（长度 $\ge 3$），基于 `CompactTrie` + 缩写表做 $O(L^2)$ 动态规划切分（最多切分为 $2 \sim 4$ 个连续合法高频词，单字母段仅允许 `a` / `I`，耗时 `< 10 us`）；
-     2. 单 token 模式下将最优切分短语作为高优候选注入；多词整句模式下，对高置信粘连 token 直接展开为多个词槽送入 L2 2/3-gram Viterbi 与 L3 `SmolLM2` 联合解码，同时保证合法复合词（如 `something`、`software`、`without`、`database`）因自身具备 `Exact` 命中绝不被误拆。
+     1. 对非精确命中词典（或内部含大写驼峰边界如 `Ilike`）的 token（长度 $\ge 3$），基于 `CompactTrie` + 缩写表做 $O(L^2)$ 动态规划切分（最多切分为 $2 \sim 4$ 个连续合法高频词，单字母段仅允许 `a` / `I`，耗时 `< 10 us`）；当精确子词 DP 未命中时，进一步支持 **2-段带错连打切分回退（Typo-Tolerant Run-on Segmentation）**（如 `takeyearys` $\rightarrow$ `["take", "years"]`：一侧精确高频词 + 另一侧编辑代价 $\le 0.90$ 的高频纠错词）；
+     2. 单 token 模式下将最优切分短语作为高优候选注入；多词整句模式下，对高置信粘连 token 直接展开为多个词槽，与句中其他单词邻键改错槽位（如 `wht` $\rightarrow$ `why` / `what`）一并送入 L2 2/3-gram Viterbi 与 L3 `SmolLM2` 联合解码，同时保证合法复合词（如 `something`、`software`、`without`、`database`）因自身具备 `Exact` 命中绝不被误拆。
 
 ## Constraints (局部硬约束)
 - 仅改动 `allowed_paths` 内文件，保持工作区 `unsafe_code = "forbid"`，零平台专有依赖，默认 `make test` 全绿且 0 warnings。
@@ -73,8 +73,8 @@ acceptance_cmd: "cargo test --workspace && ./scripts/verify-boundaries.sh .agent
   - Data pipeline & provenance (`python3 scripts/data_pipeline/fetch_sources.py --verify-only` & `build_lexicon.py --cmudict data/raw/cmudict/cmudict.dict`): `MANIFEST OK: 10 个数据源全部通过开源协议与格式校验`; rebuilt `data/compiled/lexicon.animelex.bin` (`120000 words, 57117 misspellings, 56318 entries populated with CMUdict ARPAbet phonetics`).
   - Offline workspace (`make check && make test && make eval && make verify-infra`): all exit 0 with 0 warnings (`engine`: 13 unit + 1 integration, `lexicon`: 12 unit + 2 integration, `lm-neural`: 5, `lm-ngram`: 5, `protocol`: 4, `animed`: 4, `eval`: 7; `INFRA OK`).
   - Smart Run-on Word Segmentation (`segment_runon`) & live bug regression tests:
-    - `crates/lexicon::tests::segment_runon_token_splits_concatenated_words_and_preserves_compounds`: `"Ilikethe"` -> `["I", "like", "the"]`, `"thatlikes"` -> `["that", "likes"]`, `"dontknow"` -> `["don't", "know"]`, `"witha"` -> `["with", "a"]`, `"thankyou"` -> `["thank", "you"]`, while `"software"` / `"something"` / `"without"` return `None`.
-    - `crates/engine::tests::smart_runon_word_segmentation_in_single_and_sentence_mode`: `"Ilikethe"` -> `"I like the"` (#1), `"dontknow"` -> `"don't know"` (#1), and `"Ilikethe software thatlikes me"` -> `"I like the software that likes me"` (#1).
+    - `crates/lexicon::tests::segment_runon_token_splits_concatenated_words_and_preserves_compounds`: `"Ilikethe"` -> `["I", "like", "the"]`, `"thatlikes"` -> `["that", "likes"]`, `"dontknow"` -> `["don't", "know"]`, `"witha"` -> `["with", "a"]`, `"thankyou"` -> `["thank", "you"]`, `"itwould"` -> `["it", "would"]`, `"takeyearys"` -> `["take", "years"]`, while `"software"` / `"something"` / `"without"` return `None`.
+    - `crates/engine::tests::smart_runon_word_segmentation_in_single_and_sentence_mode`: `"Ilikethe"` -> `"I like the"` (#1), `"dontknow"` -> `"don't know"` (#1), `"Ilikethe software thatlikes me"` -> `"I like the software that likes me"` (#1), and `"wht itwould takeyearys of the working to have new"` -> `"why it would take years of the working to have new"` / `"what it would take years of the working to have new"`.
     - Release L1+L2 end-to-end eval (`cargo test --release -p anime-engine --test real_l1_l2_eval`): `core_v1` keystroke latency `p50=149 us, p99=555 us` (Layered `p50=150 us, p99=536 us`, `eval_large_open` `p50=229 us, p99=556 us`), all 7 category accuracy and latency gates PASS.
   - Release L1 latency gate (`cargo test --release -p anime-lexicon --test real_lexicon_eval -- --nocapture`): 120K CMUdict `ANIMELEX` loaded in `294 ms`; `core_v1` `p50=382 us, p99=538 us` (Layered `p50=399 us, p99=574 us`; `eval_large_open` `p50=364 us, p99=494 us` < `1000 us` gate).
   - Vulkan release rebuild (`make engine-vulkan && cargo build --release -p anime-eval --features vulkan`): exit 0 with 0 warnings.

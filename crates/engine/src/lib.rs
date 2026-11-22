@@ -1042,12 +1042,16 @@ fn should_expand_runon_token(tok: &str, is_closed_word: bool, hits: &[LexiconCan
     if is_with_article {
         return true;
     }
-    // 对纯小写无驼峰边界的词条：若词典已召回常规拼写纠错或读音纠错，
-    // 优先走单词纠错，仅当词典完全未命中或最接近单字候选的编辑距离较大（edit_cost > 2.25，即至少 3 处非邻键改动，如 thatlikes / ilikethe / dontknow）时才触发连打分词。
-    if hits.iter().any(|h| {
-        (h.kind == LexiconMatchKind::TypoCorrection && h.edit_cost <= 2.25)
-            || (h.kind == LexiconMatchKind::PhoneticCorrection && h.edit_cost <= 2.5)
-    }) {
+    // 对纯小写无驼峰边界的词条：
+    // - 只要存在单步邻键或单次增删转置以内的拼写纠错（edit_cost <= 1.25，如 "wht->why"、"teh->the"、"recieve->receive"），
+    //   必定优先作为单词纠错，绝不拆碎；
+    // - 若词长 >= 7 且最接近单字纠错的编辑代价已超过 1.25（如 "itwould" 对 "would" 的 edit_cost = 2.0，
+    //   或 "thatlikes"、"takeyearys"、"dontknow"），允许尝试连打分词（由 segment_runon 的高频词均值门槛做二次把关）；
+    // - 若词长 < 7（非 witha 类），只要词典能召回任何单字纠错/补全，均不拆分以守住短词延迟与准确率。
+    if hits
+        .iter()
+        .any(|h| h.kind == LexiconMatchKind::TypoCorrection && h.edit_cost <= 1.25)
+    {
         return false;
     }
     if tok.len() < 7 && !hits.is_empty() {
@@ -1764,6 +1768,16 @@ mod tests {
                 ("a", 7.4),
                 ("don't", 6.6),
                 ("know", 6.5),
+                ("why", 6.8),
+                ("it", 7.3),
+                ("would", 6.8),
+                ("take", 6.6),
+                ("years", 6.7),
+                ("of", 7.5),
+                ("working", 6.2),
+                ("to", 7.5),
+                ("have", 7.1),
+                ("new", 6.8),
             ],
             Vec::new(),
         );
@@ -1780,6 +1794,16 @@ mod tests {
                 ("a", 850),
                 ("don't", 420),
                 ("know", 410),
+                ("why", 450),
+                ("it", 800),
+                ("would", 500),
+                ("take", 420),
+                ("years", 430),
+                ("of", 900),
+                ("working", 320),
+                ("to", 900),
+                ("have", 700),
+                ("new", 500),
             ],
             vec![
                 ("I", "like", 260),
@@ -1790,6 +1814,16 @@ mod tests {
                 ("likes", "me", 190),
                 ("with", "a", 210),
                 ("don't", "know", 230),
+                ("why", "it", 220),
+                ("it", "would", 260),
+                ("would", "take", 240),
+                ("take", "years", 230),
+                ("years", "of", 240),
+                ("of", "the", 220),
+                ("the", "working", 180),
+                ("working", "to", 170),
+                ("to", "have", 250),
+                ("have", "new", 190),
             ],
             Vec::<(&str, &str, &str, u32)>::new(),
         );
@@ -1812,6 +1846,16 @@ mod tests {
             "I like the software that likes me",
             "expected segmented sentence at top-1, got: {:?}",
             st_sent.candidates
+        );
+
+        // 4. 整句同时包含单词邻键改错（wht->why）、精确连打（itwould->it would）与带错连打（takeyearys->take years）
+        sess.reset();
+        let st_mixed = feed_text(&mut sess, "wht itwould takeyearys of the working to have new");
+        assert_eq!(
+            st_mixed.candidates[0].text,
+            "why it would take years of the working to have new",
+            "expected joint typo-correction + runon segmentation at top-1, got: {:?}",
+            st_mixed.candidates
         );
     }
 }
