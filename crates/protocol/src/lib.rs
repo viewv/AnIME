@@ -1,5 +1,13 @@
 //! 平台无关领域类型与 IPC 契约模型（遵守 .agents/contracts/core-api.md 与 ipc-protocol.md）。
 
+pub mod ipc;
+mod json;
+
+pub use crate::ipc::{
+    IpcRequest, IpcResponse, MAX_IPC_LINE_BYTES, ProtocolError, decode_request_line,
+    decode_response_line, encode_request_line, encode_response_line, extract_seq_best_effort,
+};
+
 pub const PROTOCOL_VERSION: u32 = 1;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,6 +31,19 @@ impl CandidateKind {
             Self::Sentence => "Sentence",
             Self::Continuation => "Continuation",
             Self::Raw => "Raw",
+        }
+    }
+
+    pub fn from_str_name(raw: &str) -> Option<Self> {
+        match raw {
+            "Exact" => Some(Self::Exact),
+            "Completion" => Some(Self::Completion),
+            "TypoCorrection" => Some(Self::TypoCorrection),
+            "PhoneticCorrection" => Some(Self::PhoneticCorrection),
+            "Sentence" => Some(Self::Sentence),
+            "Continuation" => Some(Self::Continuation),
+            "Raw" => Some(Self::Raw),
+            _ => None,
         }
     }
 }
@@ -122,5 +143,225 @@ mod tests {
         assert_eq!(CandidateKind::Sentence.as_str(), "Sentence");
         assert_eq!(CandidateKind::Continuation.as_str(), "Continuation");
         assert_eq!(CandidateKind::Raw.as_str(), "Raw");
+    }
+
+    #[test]
+    fn ipc_requests_and_responses_roundtrip_all_contract_variants() {
+        let high_seq = (1u64 << 58) + 777;
+        let requests = vec![
+            IpcRequest::Hello {
+                client: "fcitx5-anime".into(),
+                protocol_version: PROTOCOL_VERSION,
+                session_id: Some("wayland-1".into()),
+            },
+            IpcRequest::Key {
+                seq: high_seq,
+                key: KeyInput::Char('q'),
+                mods: 2,
+            },
+            IpcRequest::Key {
+                seq: 2,
+                key: KeyInput::Space,
+                mods: 0,
+            },
+            IpcRequest::Key {
+                seq: 3,
+                key: KeyInput::Backspace,
+                mods: 0,
+            },
+            IpcRequest::Key {
+                seq: 4,
+                key: KeyInput::Enter,
+                mods: 0,
+            },
+            IpcRequest::Key {
+                seq: 5,
+                key: KeyInput::Escape,
+                mods: 0,
+            },
+            IpcRequest::Key {
+                seq: 6,
+                key: KeyInput::Digit(9),
+                mods: 0,
+            },
+            IpcRequest::Select { seq: 7, index: 0 },
+            IpcRequest::Context {
+                before: "Line1\nThank you for \"your\" \t".into(),
+                after: "\\end".into(),
+            },
+            IpcRequest::Privacy { enabled: true },
+            IpcRequest::Reset { seq: 8 },
+            IpcRequest::Config(EngineConfig {
+                space_commits: true,
+                smart_spacing: false,
+                max_candidates: 7,
+                enable_phonetic: true,
+                enable_neural: false,
+            }),
+            IpcRequest::Ping { id: None },
+            IpcRequest::Ping { id: Some(99) },
+            IpcRequest::Shutdown,
+        ];
+
+        for req in requests {
+            let wire = encode_request_line(&req).expect("encode request");
+            assert!(!wire.contains('\n') && !wire.contains('\r'));
+            let decoded = decode_request_line(&wire).expect("decode request");
+            assert_eq!(decoded, req);
+        }
+
+        // Phase 0 pong 精确格式（不输出 "id"）
+        let phase0_pong = IpcResponse::Pong {
+            version: "0.1.0".into(),
+            id: None,
+        };
+        assert_eq!(
+            encode_response_line(&phase0_pong).expect("encode pong"),
+            r#"{"type":"pong","version":"0.1.0"}"#
+        );
+
+        let responses = vec![
+            IpcResponse::HelloAck {
+                protocol_version: PROTOCOL_VERSION,
+                version: "0.1.0".into(),
+                capabilities: vec!["l1-fuzzy".into(), "l2-ngram".into(), "stdio".into()],
+            },
+            IpcResponse::State(PreeditState {
+                seq: high_seq,
+                revision: 1,
+                preedit: "appie".into(),
+                cursor: 5,
+                candidates: vec![
+                    Candidate {
+                        text: "apple".into(),
+                        kind: CandidateKind::TypoCorrection,
+                        comment: Some("typo".into()),
+                        score: -1.25,
+                        consumed_chars: 5,
+                        trailing_space: true,
+                    },
+                    Candidate {
+                        text: "appie".into(),
+                        kind: CandidateKind::Raw,
+                        comment: None,
+                        score: -999.0,
+                        consumed_chars: 5,
+                        trailing_space: false,
+                    },
+                ],
+                passthrough: false,
+                final_l3: true,
+            }),
+            IpcResponse::Commit(CommitAction {
+                seq: 43,
+                text: "apple ".into(),
+                delete_before: 1,
+                remaining_preedit: "pie".into(),
+                candidates: vec![],
+            }),
+            phase0_pong,
+            IpcResponse::Pong {
+                version: "0.1.0".into(),
+                id: Some(99),
+            },
+            IpcResponse::Error {
+                seq: Some(12),
+                code: "invalid_field".into(),
+                message: "bad\nmsg".into(),
+            },
+            IpcResponse::Error {
+                seq: None,
+                code: "invalid_json".into(),
+                message: "eof".into(),
+            },
+        ];
+
+        for resp in responses {
+            let wire = encode_response_line(&resp).expect("encode response");
+            assert!(!wire.contains('\n') && !wire.contains('\r'));
+            let decoded = decode_response_line(&wire).expect("decode response");
+            assert_eq!(decoded, resp);
+        }
+    }
+
+    #[test]
+    fn ipc_validates_unicode_limits_errors_and_best_effort_seq() {
+        // UTF-16 代理对与控制转义解码
+        let req = decode_request_line(
+            r#"{"type":"context","before":"Hi \uD83D\uDE00\n\t\\","after":""}"#,
+        )
+        .expect("decode surrogate");
+        assert_eq!(
+            req,
+            IpcRequest::Context {
+                before: "Hi 😀\n\t\\".into(),
+                after: "".into(),
+            }
+        );
+
+        // context 的 after 可选，ping 的 id 可选
+        assert_eq!(
+            decode_request_line(r#"{"type":"context","before":"go "}"#).unwrap(),
+            IpcRequest::Context {
+                before: "go ".into(),
+                after: "".into(),
+            }
+        );
+
+        // 超过 64 KiB、未转义换行、深层嵌套、缺失字段与非法字段拒绝
+        let huge = format!(r#"{{"type":"ping","pad":"{}"}}"#, "a".repeat(MAX_IPC_LINE_BYTES));
+        assert!(matches!(
+            decode_request_line(&huge),
+            Err(ProtocolError::LineTooLarge { .. })
+        ));
+        assert!(matches!(
+            decode_request_line("{\"type\":\"ping\",\n\"id\":1}"),
+            Err(ProtocolError::ContainsUnescapedNewline)
+        ));
+        let deep = format!("{}1{}", "[".repeat(40), "]".repeat(40));
+        assert!(matches!(
+            decode_request_line(&deep),
+            Err(ProtocolError::InvalidJson(_))
+        ));
+        assert!(matches!(
+            decode_request_line(r#"{"type":"key","seq":1,"key":"char","text":"ab"}"#),
+            Err(ProtocolError::InvalidField { field: "text", .. })
+        ));
+        assert!(matches!(
+            decode_request_line(r#"{"type":"key","seq":1,"key":"digit","text":"x"}"#),
+            Err(ProtocolError::InvalidField { field: "text", .. })
+        ));
+        assert!(matches!(
+            decode_request_line(r#"{"type":"wat"}"#),
+            Err(ProtocolError::UnknownMessageType(_))
+        ));
+
+        assert_eq!(
+            extract_seq_best_effort(r#"{"type":"key","seq":42,"bad"#),
+            Some(42)
+        );
+
+        // 超长候选列表自动裁剪至 <= 64 KiB
+        let big_cands: Vec<Candidate> = (0..1000)
+            .map(|i| Candidate {
+                text: format!("word_{i}_{}", "x".repeat(60)),
+                kind: CandidateKind::Completion,
+                comment: Some("long-comment".into()),
+                score: -(i as f32),
+                consumed_chars: 5,
+                trailing_space: true,
+            })
+            .collect();
+        let line = encode_response_line(&IpcResponse::State(PreeditState {
+            seq: 1,
+            revision: 0,
+            preedit: "word".into(),
+            cursor: 4,
+            candidates: big_cands,
+            passthrough: false,
+            final_l3: true,
+        }))
+        .expect("shrinks to fit 64 KiB");
+        assert!(line.len() <= MAX_IPC_LINE_BYTES);
     }
 }

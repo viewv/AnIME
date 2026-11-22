@@ -1,11 +1,18 @@
-//! 平台无关英文输入法会话状态机：管理预编辑区、多路候选融合、数字选词、部分选词与智能空格。
+//! 平台无关英文输入法会话状态机：管理预编辑区、多路候选融合、句首大写、易混词与上下文重排、
+//! 数字/部分选词、智能空格/标点回删、`seq`/`revision` 抗过期控制与 L3 异步结果合并。
+
+mod confusables;
 
 use anime_lexicon::{LexiconProvider, QueryOptions};
+use anime_lm_neural::{NeuralCandidate, NeuralSentenceModel};
 use anime_lm_ngram::{LatticeSlot, NgramModel, SlotCandidate};
-use anime_lm_neural::NeuralSentenceModel;
 use anime_protocol::{
     Candidate, CandidateKind, CommitAction, ContextText, EngineConfig, KeyInput, PreeditState,
 };
+
+use crate::confusables::expand_slot_confusables;
+
+const MAX_CONTEXT_BEFORE_CHARS: usize = 256;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EngineOutput {
@@ -23,6 +30,7 @@ pub struct EngineSession<L, N, M> {
     preedit: String,
     candidates: Vec<Candidate>,
     seq: u64,
+    revision: u32,
     last_auto_space: bool,
 }
 
@@ -43,6 +51,7 @@ where
             preedit: String::new(),
             candidates: Vec::new(),
             seq: 0,
+            revision: 0,
             last_auto_space: false,
         }
     }
@@ -53,6 +62,7 @@ where
 
     pub fn set_config(&mut self, config: EngineConfig) {
         self.config = config;
+        self.revision = 0;
         self.recompute_candidates();
     }
 
@@ -61,6 +71,7 @@ where
             before: before.into(),
             after: after.into(),
         };
+        self.revision = 0;
         self.recompute_candidates();
     }
 
@@ -76,6 +87,26 @@ where
         self.privacy
     }
 
+    pub fn seq(&self) -> u64 {
+        self.seq
+    }
+
+    pub fn revision(&self) -> u32 {
+        self.revision
+    }
+
+    pub fn lexicon(&self) -> &L {
+        &self.lexicon
+    }
+
+    pub fn ngram(&self) -> &N {
+        &self.ngram
+    }
+
+    pub fn neural(&self) -> &M {
+        &self.neural
+    }
+
     pub fn preedit(&self) -> &str {
         &self.preedit
     }
@@ -89,7 +120,13 @@ where
     }
 
     pub fn reset(&mut self) -> PreeditState {
-        self.seq = self.seq.saturating_add(1);
+        let next_seq = self.seq.saturating_add(1);
+        self.reset_with_seq(next_seq)
+    }
+
+    pub fn reset_with_seq(&mut self, seq: u64) -> PreeditState {
+        self.seq = seq;
+        self.revision = 0;
         self.preedit.clear();
         self.candidates.clear();
         self.last_auto_space = false;
@@ -97,7 +134,13 @@ where
     }
 
     pub fn handle_key(&mut self, key: KeyInput) -> EngineOutput {
-        self.seq = self.seq.saturating_add(1);
+        let next_seq = self.seq.saturating_add(1);
+        self.handle_key_with_seq(next_seq, key)
+    }
+
+    pub fn handle_key_with_seq(&mut self, seq: u64, key: KeyInput) -> EngineOutput {
+        self.seq = seq;
+        self.revision = 0;
         match key {
             KeyInput::Char(ch) => self.handle_char(ch),
             KeyInput::Space => self.handle_space(),
@@ -120,6 +163,9 @@ where
                     let raw = std::mem::take(&mut self.preedit);
                     self.candidates.clear();
                     self.last_auto_space = false;
+                    self.ngram
+                        .learn_commit(&self.context.before, &raw, self.privacy);
+                    append_context_before(&mut self.context.before, &raw, false);
                     EngineOutput::Commit(CommitAction {
                         seq: self.seq,
                         text: raw,
@@ -158,7 +204,13 @@ where
     }
 
     pub fn select(&mut self, index: usize) -> Option<CommitAction> {
-        self.seq = self.seq.saturating_add(1);
+        let next_seq = self.seq.saturating_add(1);
+        self.select_with_seq(next_seq, index)
+    }
+
+    pub fn select_with_seq(&mut self, seq: u64, index: usize) -> Option<CommitAction> {
+        self.seq = seq;
+        self.revision = 0;
         if self.preedit.is_empty() || index >= self.candidates.len() {
             return None;
         }
@@ -168,10 +220,103 @@ where
         }
     }
 
+    pub fn snapshot_state(&self, passthrough: bool, final_l3: bool) -> PreeditState {
+        PreeditState {
+            seq: self.seq,
+            revision: self.revision,
+            cursor: self.preedit.chars().count(),
+            preedit: self.preedit.clone(),
+            candidates: self.candidates.clone(),
+            passthrough,
+            final_l3,
+        }
+    }
+
+    /// 合并异步 L3 神经重排与续写预测：若 `expected_seq != self.seq` 则严格丢弃过期结果。
+    pub fn apply_neural_rerank(
+        &mut self,
+        expected_seq: u64,
+        reranked: &[NeuralCandidate],
+        continuations: &[NeuralCandidate],
+    ) -> Option<PreeditState> {
+        if expected_seq != self.seq || self.preedit.is_empty() {
+            return None;
+        }
+
+        self.revision = self.revision.saturating_add(1);
+        let total_chars = self.preedit.chars().count();
+
+        self.candidates
+            .retain(|c| c.kind != CandidateKind::Continuation);
+
+        let mut primary: Vec<Candidate> = Vec::with_capacity(self.candidates.len());
+        let mut partial: Vec<Candidate> = Vec::new();
+        for mut c in self.candidates.drain(..) {
+            if c.kind == CandidateKind::Raw && c.consumed_chars == total_chars {
+                continue;
+            }
+            if c.consumed_chars < total_chars {
+                partial.push(c);
+                continue;
+            }
+            if let Some(nr) = reranked
+                .iter()
+                .find(|r| !r.is_continuation && r.text.eq_ignore_ascii_case(&c.text))
+            {
+                c.score += nr.score;
+            }
+            primary.push(c);
+        }
+
+        primary.sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
+
+        let mut continuation_cands: Vec<Candidate> = Vec::new();
+        for nc in continuations {
+            let trimmed = nc.text.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            if primary
+                .iter()
+                .chain(continuation_cands.iter())
+                .any(|c| c.text.eq_ignore_ascii_case(trimmed))
+            {
+                continue;
+            }
+            continuation_cands.push(Candidate {
+                text: trimmed.to_string(),
+                kind: CandidateKind::Continuation,
+                comment: Some("✦".into()),
+                score: nc.score,
+                consumed_chars: total_chars,
+                trailing_space: self.config.smart_spacing,
+            });
+        }
+        continuation_cands.sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
+
+        self.candidates = primary;
+        self.candidates.extend(continuation_cands);
+        self.candidates.extend(partial);
+        self.ensure_raw_and_limit(total_chars);
+
+        Some(self.snapshot_state(false, true))
+    }
+
+    fn is_l3_pending(&self) -> bool {
+        self.config.enable_neural
+            && self.config.max_candidates > 0
+            && !self.preedit.is_empty()
+            && self.neural.backend_name() != "noop"
+    }
+
     fn handle_char(&mut self, ch: char) -> EngineOutput {
         if self.preedit.is_empty() {
             if self.config.smart_spacing && self.last_auto_space && is_closing_punct(ch) {
                 self.last_auto_space = false;
+                let trimmed_len = self.context.before.trim_end_matches(' ').len();
+                self.context.before.truncate(trimmed_len);
+                let mut ch_buf = [0u8; 4];
+                append_context_before(&mut self.context.before, ch.encode_utf8(&mut ch_buf), false);
                 return EngineOutput::Commit(CommitAction {
                     seq: self.seq,
                     text: ch.to_string(),
@@ -182,6 +327,8 @@ where
             }
             if !is_word_char(ch) {
                 self.last_auto_space = false;
+                let mut ch_buf = [0u8; 4];
+                append_context_before(&mut self.context.before, ch.encode_utf8(&mut ch_buf), false);
                 return EngineOutput::State(self.current_state(true));
             }
         }
@@ -192,7 +339,7 @@ where
             self.recompute_candidates();
             EngineOutput::State(self.current_state(false))
         } else {
-            // 正在组合时遇到标点，先透传标点或按未来契约扩展；此处保持可预期状态。
+            // 正在组合时遇到非词字符先透传给宿主应用
             EngineOutput::State(self.current_state(true))
         }
     }
@@ -213,7 +360,7 @@ where
             return EngineOutput::State(self.current_state(false));
         }
 
-        // 默认保留词间空格在预编辑区中，支持 "i wnt to eat an appie" 这类多词组合。
+        // 默认保留词间空格在预编辑区中，支持 "i wnt to eat an appie" 这类多词组合
         if !self.preedit.ends_with(' ') {
             self.preedit.push(' ');
             self.recompute_candidates();
@@ -233,10 +380,17 @@ where
 
         let add_space =
             self.config.smart_spacing && cand.trailing_space && remaining.is_empty();
-        let mut commit_text = cand.text;
+        let mut commit_text = cand.text.clone();
         if add_space {
             commit_text.push(' ');
         }
+
+        // 无论完整上屏还是部分选词，都向前推进上下文窗口，使剩余 preedit 立即获得准确上文
+        append_context_before(
+            &mut self.context.before,
+            &cand.text,
+            add_space || !remaining.is_empty(),
+        );
 
         self.last_auto_space = add_space;
         self.preedit = remaining.clone();
@@ -254,12 +408,12 @@ where
     fn current_state(&self, passthrough: bool) -> PreeditState {
         PreeditState {
             seq: self.seq,
-            revision: 0,
+            revision: self.revision,
             cursor: self.preedit.chars().count(),
             preedit: self.preedit.clone(),
             candidates: self.candidates.clone(),
             passthrough,
-            final_l3: true,
+            final_l3: passthrough || self.preedit.is_empty() || !self.is_l3_pending(),
         }
     }
 
@@ -281,18 +435,49 @@ where
             enable_phonetic: self.config.enable_phonetic,
             ..QueryOptions::default()
         };
-        let prev_ctx_word = last_context_word(&self.context.before);
+        let sentence_start = context_starts_sentence(&self.context.before);
+        let has_prev_word_ctx = !sentence_start && last_context_word(&self.context.before).is_some();
 
         if tokens.len() == 1 {
             let (tok, _, _) = &tokens[0];
             let lex_hits = self.lexicon.query(tok, &opts);
+            let mut kind_by_lower: Vec<(String, CandidateKind)> = Vec::with_capacity(lex_hits.len());
+            let mut slot_cands: Vec<SlotCandidate> = Vec::with_capacity(lex_hits.len() + 4);
             for hit in lex_hits {
-                let lm_bonus = self.ngram.score_word(prev_ctx_word, &hit.word);
+                kind_by_lower.push((hit.word.to_ascii_lowercase(), hit.kind.into()));
+                slot_cands.push(SlotCandidate {
+                    word: hit.word,
+                    lex_score: hit.score,
+                });
+            }
+
+            expand_slot_confusables(tok, &mut slot_cands, has_prev_word_ctx);
+
+            for sc in slot_cands {
+                let low = sc.word.to_ascii_lowercase();
+                let kind = kind_by_lower
+                    .iter()
+                    .find(|(k, _)| k == &low)
+                    .map(|(_, kind)| *kind)
+                    .unwrap_or(CandidateKind::TypoCorrection);
+                let lm_bonus = self.ngram.score_in_context(&self.context.before, &sc.word);
+                let text = if sentence_start {
+                    capitalize_first_ascii(&sc.word)
+                } else {
+                    sc.word
+                };
+                if self
+                    .candidates
+                    .iter()
+                    .any(|c| c.consumed_chars == total_chars && c.text == text)
+                {
+                    continue;
+                }
                 self.candidates.push(Candidate {
-                    text: hit.word,
-                    kind: hit.kind.into(),
+                    text,
+                    kind,
                     comment: None,
-                    score: hit.score + lm_bonus,
+                    score: sc.lex_score + lm_bonus,
                     consumed_chars: total_chars,
                     trailing_space: self.config.smart_spacing,
                 });
@@ -316,6 +501,7 @@ where
                         lex_score: -50.0,
                     });
                 }
+                expand_slot_confusables(tok, &mut slot_cands, true);
                 slots.push(LatticeSlot {
                     raw_token: tok.clone(),
                     start_char: *start_char,
@@ -328,8 +514,20 @@ where
                 self.ngram
                     .decode_lattice(&self.context.before, &slots, self.config.max_candidates);
             for s in sentences {
+                let text = if sentence_start {
+                    capitalize_first_ascii(&s.text)
+                } else {
+                    s.text
+                };
+                if self
+                    .candidates
+                    .iter()
+                    .any(|c| c.consumed_chars == total_chars && c.text == text)
+                {
+                    continue;
+                }
                 self.candidates.push(Candidate {
-                    text: s.text,
+                    text,
                     kind: CandidateKind::Sentence,
                     comment: Some("sentence".into()),
                     score: s.score,
@@ -338,11 +536,26 @@ where
                 });
             }
 
-            // 同时保留首个词条的部分选词候选，便于用户只确认句首词。
+            // 同时保留首个词条的部分选词候选，便于用户只确认句首词
             let (first_tok, _, first_end) = &tokens[0];
-            for hit in self.lexicon.query(first_tok, &QueryOptions { limit: 2, ..opts }) {
+            for hit in self
+                .lexicon
+                .query(first_tok, &QueryOptions { limit: 2, ..opts })
+            {
+                let text = if sentence_start {
+                    capitalize_first_ascii(&hit.word)
+                } else {
+                    hit.word
+                };
+                if self
+                    .candidates
+                    .iter()
+                    .any(|c| c.consumed_chars == *first_end && c.text == text)
+                {
+                    continue;
+                }
                 self.candidates.push(Candidate {
-                    text: hit.word,
+                    text,
                     kind: hit.kind.into(),
                     comment: Some("partial".into()),
                     score: hit.score - 1.0,
@@ -350,13 +563,6 @@ where
                     trailing_space: false,
                 });
             }
-        }
-
-        if self.config.enable_neural && self.neural.backend_name() != "noop" {
-            let cands_text: Vec<String> = self.candidates.iter().map(|c| c.text.clone()).collect();
-            let _reranked = self
-                .neural
-                .rerank_sentences(&self.context.before, &self.preedit, &cands_text);
         }
 
         self.ensure_raw_and_limit(total_chars);
@@ -390,6 +596,47 @@ where
             trailing_space: false,
         });
     }
+}
+
+fn append_context_before(before: &mut String, committed: &str, trailing_space: bool) {
+    if !committed.is_empty() {
+        before.push_str(committed);
+    }
+    if trailing_space && !before.ends_with(' ') {
+        before.push(' ');
+    }
+    let count = before.chars().count();
+    if count > MAX_CONTEXT_BEFORE_CHARS {
+        let skip = count - MAX_CONTEXT_BEFORE_CHARS;
+        if let Some((byte_idx, _)) = before.char_indices().nth(skip) {
+            before.drain(..byte_idx);
+        }
+    }
+}
+
+fn context_starts_sentence(before: &str) -> bool {
+    if before.is_empty() {
+        return false;
+    }
+    if before.ends_with('\n') || before.ends_with('\r') {
+        return true;
+    }
+    let trimmed = before.trim_end_matches([' ', '\t']);
+    trimmed.ends_with('.') || trimmed.ends_with('!') || trimmed.ends_with('?')
+}
+
+fn capitalize_first_ascii(s: &str) -> String {
+    let mut chars = s.chars();
+    let Some(first) = chars.next() else {
+        return String::new();
+    };
+    if !first.is_ascii_lowercase() {
+        return s.to_string();
+    }
+    let mut out = String::with_capacity(s.len());
+    out.push(first.to_ascii_uppercase());
+    out.push_str(chars.as_str());
+    out
 }
 
 fn split_char_spans(input: &str) -> Vec<(String, usize, usize)> {
@@ -433,9 +680,9 @@ fn is_closing_punct(ch: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anime_lexicon::StaticWordList;
+    use anime_lexicon::{Lexicon, StaticWordList};
     use anime_lm_neural::NoopNeuralModel;
-    use anime_lm_ngram::NoopNgramModel;
+    use anime_lm_ngram::{NgramLanguageModel, NoopNgramModel};
 
     fn make_session() -> EngineSession<StaticWordList, NoopNgramModel, NoopNeuralModel> {
         EngineSession::new(
@@ -445,8 +692,8 @@ mod tests {
         )
     }
 
-    fn feed_text(
-        sess: &mut EngineSession<StaticWordList, NoopNgramModel, NoopNeuralModel>,
+    fn feed_text<L: LexiconProvider, N: NgramModel, M: NeuralSentenceModel>(
+        sess: &mut EngineSession<L, N, M>,
         s: &str,
     ) -> PreeditState {
         let mut last = None;
@@ -480,7 +727,7 @@ mod tests {
             other => panic!("expected Commit, got {other:?}"),
         }
 
-        // 紧接着按句点自动回删刚才附加的智能尾空格。
+        // 紧接着按句点自动回删刚才附加的智能尾空格
         match sess.handle_key(KeyInput::Char('.')) {
             EngineOutput::Commit(c) => {
                 assert_eq!(c.delete_before, 1);
@@ -558,5 +805,228 @@ mod tests {
         assert!(sess.is_privacy());
         sess.set_privacy(false);
         assert!(!sess.is_privacy());
+    }
+
+    #[test]
+    fn context_realword_sentence_caps_shorthand_and_privacy_with_l2_lm() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("go", 6.2),
+                ("from", 6.8),
+                ("form", 5.8),
+                ("here", 6.1),
+                ("fill", 5.4),
+                ("out", 6.2),
+                ("the", 7.7),
+                ("over", 6.3),
+                ("there", 6.5),
+                ("their", 6.5),
+                ("hope", 5.8),
+                ("your", 6.7),
+                ("you're", 6.1),
+                ("happy", 5.6),
+                ("think", 6.3),
+                ("its", 6.6),
+                ("it's", 6.55),
+                ("raining", 4.6),
+                ("how", 6.6),
+                ("are", 7.0),
+                ("you", 7.1),
+                ("r", 3.2),
+                ("u", 3.3),
+                ("this", 6.9),
+                ("is", 7.1),
+                ("great", 6.0),
+                ("secretword", 2.0),
+            ],
+            Vec::new(),
+        );
+
+        let lm = NgramLanguageModel::from_counts(
+            vec![
+                ("go", 200),
+                ("from", 500),
+                ("form", 300),
+                ("here", 350),
+                ("fill", 90),
+                ("out", 220),
+                ("the", 900),
+                ("over", 240),
+                ("there", 480),
+                ("their", 460),
+                ("i", 700),
+                ("hope", 140),
+                ("your", 450),
+                ("you're", 220),
+                ("happy", 130),
+                ("think", 210),
+                ("its", 380),
+                ("it's", 340),
+                ("raining", 80),
+                ("how", 350),
+                ("are", 600),
+                ("you", 650),
+                ("r", 5),
+                ("u", 5),
+            ],
+            vec![
+                ("go", "from", 90),
+                ("from", "here", 120),
+                ("out", "the", 85),
+                ("the", "form", 70),
+                ("over", "there", 130),
+                ("hope", "you're", 80),
+                ("you're", "happy", 70),
+                ("think", "it's", 110),
+                ("it's", "raining", 60),
+                ("<bos>", "how", 160),
+                ("how", "are", 150),
+                ("are", "you", 145),
+            ],
+            vec![
+                ("go", "from", "here", 70),
+                ("out", "the", "form", 65),
+                ("hope", "you're", "happy", 55),
+                ("think", "it's", "raining", 50),
+                ("<bos>", "how", "are", 120),
+                ("how", "are", "you", 115),
+            ],
+        );
+
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+
+        // 1. 句首自动大写（空 context 不触发大写，仅句末标点后触发）
+        sess.set_context("Hello. ", "");
+        let st = feed_text(&mut sess, "this is great");
+        assert_eq!(st.candidates[0].text, "This is great");
+
+        // 2. 多词真词消歧 + 文本简写展开
+        sess.reset_with_seq(10);
+        sess.set_context("", "");
+        assert_eq!(
+            feed_text(&mut sess, "go form here").candidates[0].text,
+            "go from here"
+        );
+
+        sess.reset_with_seq(20);
+        assert_eq!(feed_text(&mut sess, "hw r u").candidates[0].text, "how are you");
+
+        sess.reset_with_seq(30);
+        sess.set_context("over ", "");
+        assert_eq!(feed_text(&mut sess, "their").candidates[0].text, "there");
+
+        sess.reset_with_seq(40);
+        sess.set_context("fill out the ", "");
+        assert_eq!(feed_text(&mut sess, "from").candidates[0].text, "form");
+
+        sess.reset_with_seq(50);
+        sess.set_context("I hope ", "");
+        assert_eq!(
+            feed_text(&mut sess, "your happy").candidates[0].text,
+            "you're happy"
+        );
+
+        sess.reset_with_seq(60);
+        sess.set_context("I think ", "");
+        assert_eq!(
+            feed_text(&mut sess, "its raining").candidates[0].text,
+            "it's raining"
+        );
+
+        // 3. privacy=true 时 Enter 原样提交与数字选词均不记入个人学习库
+        sess.reset_with_seq(70);
+        sess.set_privacy(true);
+        feed_text(&mut sess, "secretword");
+        let _ = sess.handle_key_with_seq(71, KeyInput::Enter);
+        assert_eq!(sess.ngram().user_store().word_freq("secretword"), 0);
+
+        // 4. space_commits=true 时空格直接提交第 1 候选
+        sess.set_privacy(false);
+        sess.set_config(EngineConfig {
+            space_commits: true,
+            ..EngineConfig::default()
+        });
+        feed_text(&mut sess, "form");
+        match sess.handle_key_with_seq(80, KeyInput::Space) {
+            EngineOutput::Commit(cm) => {
+                assert_eq!(cm.seq, 80);
+                assert_eq!(cm.text, "form ");
+                assert_eq!(sess.ngram().user_store().word_freq("form"), 1);
+            }
+            other => panic!("expected space_commits Commit, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn neural_rerank_respects_seq_invariants_and_bumps_revision() {
+        struct MockNeural;
+        impl NeuralSentenceModel for MockNeural {
+            fn backend_name(&self) -> &'static str {
+                "mock-l3"
+            }
+            fn rerank_sentences(&self, _: &str, _: &str, _: &[String]) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+            fn predict_continuations(&self, _: &str, _: &str, _: usize) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+        }
+
+        let mut sess = EngineSession::new(
+            StaticWordList::smoke_default(),
+            NoopNgramModel,
+            MockNeural,
+        );
+        let st = match sess.handle_key_with_seq(100, KeyInput::Char('t')) {
+            EngineOutput::State(s) => s,
+            _ => panic!("expected State"),
+        };
+        assert_eq!(st.seq, 100);
+        assert_eq!(st.revision, 0);
+        assert!(!st.final_l3);
+
+        // 过期 seq 必须严格丢弃
+        assert!(
+            sess.apply_neural_rerank(
+                99,
+                &[],
+                &[NeuralCandidate {
+                    text: "tomorrow".into(),
+                    score: 10.0,
+                    is_continuation: true,
+                }]
+            )
+            .is_none()
+        );
+        assert_eq!(sess.revision(), 0);
+
+        // 匹配 seq=100 时升版至 revision=1, final_l3=true 并保留 Raw 兜底
+        let pushed = sess
+            .apply_neural_rerank(
+                100,
+                &[NeuralCandidate {
+                    text: "to".into(),
+                    score: 15.0,
+                    is_continuation: false,
+                }],
+                &[NeuralCandidate {
+                    text: "the moon".into(),
+                    score: 4.0,
+                    is_continuation: true,
+                }],
+            )
+            .expect("apply matching seq");
+        assert_eq!(pushed.seq, 100);
+        assert_eq!(pushed.revision, 1);
+        assert!(pushed.final_l3);
+        assert_eq!(pushed.candidates[0].text, "to");
+        assert!(pushed
+            .candidates
+            .iter()
+            .any(|c| c.kind == CandidateKind::Continuation && c.text == "the moon"));
+        assert!(pushed
+            .candidates
+            .iter()
+            .any(|c| c.kind == CandidateKind::Raw && c.text == "t"));
     }
 }
