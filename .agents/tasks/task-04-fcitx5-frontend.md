@@ -28,6 +28,23 @@ acceptance_cmd: "cmake -S frontends/fcitx5 -B frontends/fcitx5/build && cmake --
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [DONE]
 - Changed Files:
+  - `frontends/fcitx5/CMakeLists.txt`
+  - `frontends/fcitx5/README.md`
+  - `frontends/fcitx5/src/ipc_protocol.h`
+  - `frontends/fcitx5/src/ipc_protocol.cpp`
+  - `frontends/fcitx5/src/session_state.h`
+  - `frontends/fcitx5/src/session_state.cpp`
+  - `frontends/fcitx5/src/ipc_client.h`
+  - `frontends/fcitx5/src/ipc_client.cpp`
+  - `frontends/fcitx5/src/anime_candidate.h`
+  - `frontends/fcitx5/src/anime_candidate.cpp`
+  - `frontends/fcitx5/src/anime_engine.cpp`
+  - `frontends/fcitx5/tests/fcitx5_frontend_test.cpp`
 - Verification Output:
+  - Clean C++20 build (`cmake -S frontends/fcitx5 -B frontends/fcitx5/build && cmake --build frontends/fcitx5/build --clean-first -j4`): exited 0 with 0 warnings under `-Wall -Wextra`, producing `libanime.so` and `anime_fcitx5_tests`.
+  - CTest (`ctest --test-dir frontends/fcitx5/build --output-on-failure -V`): `1/1` passed (`ALL FCITX5 FRONTEND UNIT TESTS PASSED`, 0.01s).
+  - Live Unix Socket E2E (`./frontends/fcitx5/build/anime_fcitx5_tests --live-socket ...` against `target/release/animed` with 0700/0600 permissions & real compiled assets): `LIVE SOCKET E2E OK: hello_ack(v0.1.0), preedit='i wnt appie', commit='I want appeared '`, closing `.` `delete_before=1`, `Enter` raw `"foobar"`, and `reset`.
+  - Rust workspace regression (`make check && make test`): 0 warnings, all 39 tests across 7 crates passed.
+  - Boundary guard (`./scripts/verify-boundaries.sh .agents/tasks/task-04-fcitx5-frontend.md`): `BOUNDARY OK (task-04-fcitx5-frontend): 已检查 12 个文件，零越界`.
