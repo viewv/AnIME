@@ -2,6 +2,7 @@
 #define ANIME_FCITX5_ANIME_CANDIDATE_H
 
 #include "ipc_protocol.h"
+#include "session_state.h"
 
 #include <fcitx/candidatelist.h>
 
@@ -18,6 +19,7 @@ class AnimeCandidateWord final : public fcitx::CandidateWord {
 public:
     AnimeCandidateWord(const ipc::Candidate &cand,
                        size_t index,
+                       bool show_comment,
                        CandidateSelectCallback on_select);
 
     void select(fcitx::InputContext *inputContext) const override;
@@ -29,6 +31,7 @@ private:
 
 std::unique_ptr<fcitx::CommonCandidateList> buildCandidateList(
     const std::vector<ipc::Candidate> &candidates,
+    const CandidatePresentationOptions &options,
     CandidateSelectCallback on_select);
 
 }  // namespace anime

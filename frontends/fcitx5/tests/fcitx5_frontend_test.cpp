@@ -282,6 +282,52 @@ void testShiftTapStateMachine() {
     expect(!d.onKeyRelease(kShiftL, true, false), "Ctrl+Shift cancels tap");
 }
 
+void testCandidatePresentationAdaptiveLayout() {
+    CandidatePresentationOptions opts;
+
+    // 1. 短单词列表保持默认布局与 9 项同页
+    std::vector<Candidate> short_words{
+        Candidate{"apple", CandidateKind::TypoCorrection, "typo", -1.0F, 5, true},
+        Candidate{"apply", CandidateKind::Exact, std::nullopt, -1.2F, 5, true},
+        Candidate{"appie", CandidateKind::Raw, "raw", -9.0F, 5, false},
+    };
+    const auto short_plan = decideCandidatePresentation(short_words, opts);
+    expect(!short_plan.is_long_mode && short_plan.layout == ResolvedLayout::Default &&
+               short_plan.page_size == 9,
+           "short words keep default layout and 9 per page");
+
+    // 2. 多词整句列表自动切换竖排与每页 5 条
+    std::vector<Candidate> sentences;
+    for (int i = 0; i < 8; ++i) {
+        sentences.push_back(Candidate{"I want to test the",
+                                      CandidateKind::Sentence,
+                                      "sentence",
+                                      -1.0F - static_cast<float>(i),
+                                      18,
+                                      true});
+    }
+    sentences.push_back(Candidate{"I wanto to test the", CandidateKind::Raw, "raw", -99.0F, 18, false});
+    const auto long_plan = decideCandidatePresentation(sentences, opts);
+    expect(long_plan.is_long_mode && long_plan.layout == ResolvedLayout::Vertical &&
+               long_plan.page_size == 5,
+           "sentence candidates switch to vertical layout with page_size 5");
+
+    // 3. 手动偏好覆盖生效
+    CandidatePresentationOptions force_horiz = opts;
+    force_horiz.layout = LayoutPreference::Horizontal;
+    force_horiz.long_page_size = 4;
+    const auto horiz_plan = decideCandidatePresentation(sentences, force_horiz);
+    expect(horiz_plan.layout == ResolvedLayout::Horizontal && horiz_plan.page_size == 4,
+           "horizontal override preserves custom long page size");
+
+    // 4. 注释精简规则：Sentence 的冗余 "sentence" 省略，typo/raw 保留，关闭后清空
+    expect(formatCandidateComment(sentences[0], true).empty(),
+           "redundant 'sentence' comment hidden");
+    expect(formatCandidateComment(short_words[0], true) == "typo", "typo comment preserved");
+    expect(formatCandidateComment(short_words[0], false).empty(),
+           "comments hidden when disabled");
+}
+
 void testSocketPermissionsAndClientFraming() {
     char dir_tmpl[] = "/tmp/anime-cpp-test-XXXXXX";
     char *dir = ::mkdtemp(dir_tmpl);
@@ -479,7 +525,33 @@ int runLiveSocketE2E(const std::string &sock_path) {
         });
     expect(std::get<CommitAction>(ent_resp).text == "foobar", "live Enter commits raw foobar");
 
-    // 5. Reset 清理验证
+    // 5. 测试 config 热切换 smart_spacing=false：选词上屏不再自动追加空格
+    EngineConfig no_space_cfg;
+    no_space_cfg.smart_spacing = false;
+    expect(client.enqueueLine(*encodeConfig(no_space_cfg)), "send smart_spacing=false");
+    expect(client.enqueueLine(*encodeContext("Say ", "")), "send context");
+    for (char c : std::string_view("hello")) {
+        const uint64_t seq = st.nextSeq();
+        st.onLocalChar(c);
+        auto r = send_and_wait(*encodeKeyChar(seq, std::string_view(&c, 1)),
+                               [seq](const IpcResponse &resp) {
+                                   const auto *s = std::get_if<PreeditState>(&resp);
+                                   return s && s->seq == seq;
+                               });
+        expect(st.acceptState(std::get<PreeditState>(r)), "accept hello char");
+    }
+    const uint64_t ns_sel_seq = st.nextSeq();
+    st.onLocalSelect(0);
+    auto ns_cm_resp = send_and_wait(*encodeSelect(ns_sel_seq, 0), [ns_sel_seq](const IpcResponse &resp) {
+        const auto *c = std::get_if<CommitAction>(&resp);
+        return c && c->seq == ns_sel_seq;
+    });
+    const auto &ns_cm = std::get<CommitAction>(ns_cm_resp);
+    expect(!ns_cm.text.empty() && ns_cm.text.back() != ' ',
+           "smart_spacing=false commits without trailing space");
+    expect(client.enqueueLine(*encodeConfig(EngineConfig{})), "restore default config");
+
+    // 6. Reset 清理验证
     const uint64_t rst_seq = st.nextSeq();
     st.onLocalReset(rst_seq);
     auto rst_resp = send_and_wait(*encodeReset(rst_seq), [rst_seq](const IpcResponse &resp) {
@@ -489,7 +561,7 @@ int runLiveSocketE2E(const std::string &sock_path) {
     expect(std::get<PreeditState>(rst_resp).preedit.empty(), "live reset clears preedit");
 
     std::cout << "LIVE SOCKET E2E OK: hello_ack(v" << ack.version << "), preedit='" << phrase
-              << "', commit='" << cm.text << "'\n";
+              << "', commit='" << cm.text << "', no_space_commit='" << ns_cm.text << "'\n";
     return 0;
 }
 
@@ -503,6 +575,7 @@ int main(int argc, char **argv) {
     testSessionStateAntiStalenessAndConcurrency();
     testSurroundingUtf8Truncation();
     testShiftTapStateMachine();
+    testCandidatePresentationAdaptiveLayout();
     testSocketPermissionsAndClientFraming();
     std::cout << "ALL FCITX5 FRONTEND UNIT TESTS PASSED\n";
     return 0;

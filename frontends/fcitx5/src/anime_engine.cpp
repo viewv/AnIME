@@ -5,6 +5,7 @@
 // 严禁在此文件内实现任何词典查找、纠错算法或语言模型计算。
 
 #include "anime_candidate.h"
+#include "anime_config.h"
 #include "ipc_client.h"
 #include "ipc_protocol.h"
 #include "session_state.h"
@@ -21,12 +22,14 @@
 #include <fcitx/instance.h>
 #include <fcitx/surroundingtext.h>
 #include <fcitx/text.h>
+#include <fcitx-config/iniparser.h>
 #include <fcitx-utils/capabilityflags.h>
 #include <fcitx-utils/event.h>
 #include <fcitx-utils/eventloopinterface.h>
 #include <fcitx-utils/key.h>
 #include <fcitx-utils/keysym.h>
 #include <fcitx-utils/log.h>
+#include <fcitx-utils/standardpaths.h>
 
 #include <algorithm>
 #include <ctime>
@@ -96,7 +99,21 @@ public:
                 }
             }));
 
+        reloadConfig();
         tryConnect();
+    }
+
+    const fcitx::Configuration *getConfig() const override { return &addon_config_; }
+
+    void setConfig(const fcitx::RawConfig &config) override {
+        addon_config_.load(config, true);
+        fcitx::safeSaveAsIni(addon_config_, fcitx::StandardPathsType::PkgConfig, "conf/anime.conf");
+        applyConfigToEngine();
+    }
+
+    void reloadConfig() override {
+        fcitx::readAsIni(addon_config_, fcitx::StandardPathsType::PkgConfig, "conf/anime.conf");
+        applyConfigToEngine();
     }
 
     ~AnimeEngine() override {
@@ -305,19 +322,70 @@ public:
                 }
                 return;
             }
+            if (sym == FcitxKey_Page_Down || sym == FcitxKey_Page_Up) {
+                if (auto cand_list = ic->inputPanel().candidateList()) {
+                    if (auto *pageable = cand_list->toPageable();
+                        pageable && (pageable->hasPrev() || pageable->hasNext())) {
+                        if (sym == FcitxKey_Page_Down && pageable->hasNext()) {
+                            pageable->next();
+                        } else if (sym == FcitxKey_Page_Up && pageable->hasPrev()) {
+                            pageable->prev();
+                        }
+                        ic->updateUserInterface(fcitx::UserInterfaceComponent::InputPanel);
+                        keyEvent.filterAndAccept();
+                        return;
+                    }
+                }
+            }
+            if (sym == FcitxKey_Down || sym == FcitxKey_Up) {
+                if (auto cand_list = ic->inputPanel().candidateList()) {
+                    if (auto *movable = cand_list->toCursorMovable()) {
+                        if (sym == FcitxKey_Down) {
+                            movable->nextCandidate();
+                        } else {
+                            movable->prevCandidate();
+                        }
+                        ic->updateUserInterface(fcitx::UserInterfaceComponent::InputPanel);
+                        keyEvent.filterAndAccept();
+                        return;
+                    }
+                }
+            }
             if (sym >= FcitxKey_1 && sym <= FcitxKey_9 && !raw_key.isKeyPad() &&
                 !norm_key.states().test(fcitx::KeyState::Shift)) {
                 const auto digit = static_cast<uint8_t>(sym - FcitxKey_0);
-                const size_t idx = static_cast<size_t>(digit - 1U);
+                const size_t local_idx = static_cast<size_t>(digit - 1U);
                 const bool has_inflight_state =
                     session_.lastAppliedSeq() < session_.lastSentSeq();
+                auto cand_list = ic->inputPanel().candidateList();
+                if (!has_inflight_state && cand_list) {
+                    if (const auto *common =
+                            dynamic_cast<const fcitx::CommonCandidateList *>(cand_list.get())) {
+                        const int cur_size = common->size();
+                        if (local_idx >= static_cast<size_t>(std::max(0, cur_size))) {
+                            keyEvent.filterAndAccept();
+                            return;
+                        }
+                        const int page = std::max(0, common->currentPage());
+                        const int page_size = std::max(1, common->pageSize());
+                        const size_t global_idx =
+                            static_cast<size_t>(page) * static_cast<size_t>(page_size) + local_idx;
+                        const uint64_t seq = session_.nextSeq();
+                        auto line = anime::ipc::encodeSelect(seq, global_idx);
+                        if (line && sendLine(*line)) {
+                            session_.onLocalSelect(global_idx);
+                            keyEvent.filterAndAccept();
+                        }
+                        return;
+                    }
+                }
                 const uint64_t seq = session_.nextSeq();
                 auto line = anime::ipc::encodeKeyDigit(seq, digit, mods);
                 if (line && sendLine(*line)) {
-                    // 组合态主键盘 1-9 一律消费（防快击首包未归或候选少于 9 项时数字漏进应用）；
+                    // 组合态主键盘 1-9 一律消费（防快击首包未归或候选不足时数字漏进应用）；
                     // 仅当索引有效或仍有更早期状态在途时推进本地乐观预编辑。
-                    if (idx < session_.candidates().size() || has_inflight_state) {
-                        session_.onLocalSelect(idx);
+                    if (local_idx < session_.candidates().size() || has_inflight_state) {
+                        session_.onLocalSelect(local_idx);
                     }
                     keyEvent.filterAndAccept();
                 }
@@ -492,7 +560,9 @@ private:
 
         if (!candidates.empty()) {
             ic->inputPanel().setCandidateList(anime::buildCandidateList(
-                candidates, [this](fcitx::InputContext *target_ic, size_t idx) {
+                candidates,
+                ui_options_,
+                [this](fcitx::InputContext *target_ic, size_t idx) {
                     selectCandidateByUi(target_ic, idx);
                 }));
         } else {
@@ -723,11 +793,32 @@ private:
         }
     }
 
+    void applyConfigToEngine() {
+        config_ = anime::toEngineConfig(addon_config_);
+        ui_options_ = anime::toPresentationOptions(addon_config_);
+        if (!config_.smart_spacing) {
+            session_.clearLastAutoSpace();
+        }
+        if (ipc_.isConnected()) {
+            if (auto cfg = anime::ipc::encodeConfig(config_)) {
+                sendLine(*cfg);
+            }
+        }
+        if (auto *ic = active_ic_.get(); ic && ic->hasFocus() && !session_.confirmedPreedit().empty()) {
+            renderIcPanel(ic,
+                          session_.confirmedPreedit(),
+                          session_.confirmedCursor(),
+                          session_.candidates());
+        }
+    }
+
     fcitx::Instance *instance_;
     fcitx::FactoryFor<AnimeContextState> factory_;
+    fcitx::AnimeConfig addon_config_;
     anime::ipc::IpcClient ipc_;
     anime::SessionState session_;
     anime::ipc::EngineConfig config_;
+    anime::CandidatePresentationOptions ui_options_;
     fcitx::TrackableObjectReference<fcitx::InputContext> active_ic_;
     std::unique_ptr<fcitx::EventSourceIO> io_event_;
     std::vector<std::unique_ptr<fcitx::EventSourceIO>> stale_io_events_;

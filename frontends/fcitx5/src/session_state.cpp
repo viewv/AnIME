@@ -207,6 +207,73 @@ bool isClosingPunctuation(uint32_t cp) {
     }
 }
 
+std::string_view formatCandidateComment(const ipc::Candidate &cand, bool show_comments) {
+    if (!show_comments || !cand.comment || cand.comment->empty()) {
+        return {};
+    }
+    if (cand.kind == ipc::CandidateKind::Continuation && *cand.comment == "\xE2\x9C\xA6") {
+        return "next";
+    }
+    if (cand.kind == ipc::CandidateKind::Sentence && *cand.comment == "sentence") {
+        return {};
+    }
+    return *cand.comment;
+}
+
+CandidatePresentationPlan decideCandidatePresentation(
+    const std::vector<ipc::Candidate> &candidates,
+    const CandidatePresentationOptions &opts) {
+    CandidatePresentationPlan plan;
+    const size_t max_cap = std::clamp(opts.max_candidates, size_t{1}, size_t{9});
+    const size_t inspect_count = std::min(candidates.size(), max_cap);
+
+    bool has_multiword = false;
+    size_t max_single_chars = 0;
+    size_t total_display_chars = 0;
+
+    for (size_t i = 0; i < inspect_count; ++i) {
+        const auto &cand = candidates[i];
+        if (cand.kind == ipc::CandidateKind::Sentence ||
+            cand.text.find(' ') != std::string::npos) {
+            has_multiword = true;
+        }
+        const size_t text_chars = countUtf8Chars(cand.text);
+        max_single_chars = std::max(max_single_chars, text_chars);
+
+        // 估算本项在横排条中的显示列宽：序号 "N. " (3) + 文本字符数 + 可选注释
+        total_display_chars += text_chars + 3;
+        const auto comment = formatCandidateComment(cand, opts.show_comments);
+        if (!comment.empty()) {
+            total_display_chars += 1 + countUtf8Chars(comment);
+        }
+    }
+
+    plan.is_long_mode =
+        (has_multiword && (max_single_chars >= 12 || total_display_chars >= 44)) ||
+        total_display_chars >= 64;
+
+    switch (opts.layout) {
+        case LayoutPreference::Horizontal:
+            plan.layout = ResolvedLayout::Horizontal;
+            break;
+        case LayoutPreference::Vertical:
+            plan.layout = ResolvedLayout::Vertical;
+            break;
+        case LayoutPreference::Auto:
+            plan.layout =
+                plan.is_long_mode ? ResolvedLayout::Vertical : ResolvedLayout::Default;
+            break;
+    }
+
+    if (plan.is_long_mode) {
+        const size_t min_long = std::min<size_t>(3, max_cap);
+        plan.page_size = std::clamp(opts.long_page_size, min_long, max_cap);
+    } else {
+        plan.page_size = max_cap;
+    }
+    return plan;
+}
+
 void ShiftTapDetector::onKeyPress(uint32_t sym,
                                   bool is_shift_sym,
                                   bool has_non_shift_mods,

@@ -31,6 +31,42 @@ bool isAsciiLetter(uint32_t cp);
 bool isComposingWordChar(uint32_t cp);
 bool isClosingPunctuation(uint32_t cp);
 
+enum class LayoutPreference {
+    Auto,
+    Horizontal,
+    Vertical,
+};
+
+enum class ResolvedLayout {
+    Default,
+    Horizontal,
+    Vertical,
+};
+
+struct CandidatePresentationOptions {
+    LayoutPreference layout = LayoutPreference::Auto;
+    size_t max_candidates = 9;
+    size_t long_page_size = 5;
+    bool show_comments = true;
+};
+
+struct CandidatePresentationPlan {
+    ResolvedLayout layout = ResolvedLayout::Default;
+    size_t page_size = 9;
+    bool is_long_mode = false;
+};
+
+// 统一候选注释展示规则：保留 typo/phonetic/raw/next 等有效区分标签，
+// 自动隐藏冗余的 "sentence" 重复标签以减轻视觉噪音并缩小横排占用宽度。
+std::string_view formatCandidateComment(const ipc::Candidate &cand, bool show_comments);
+
+// 长句/宽候选自适应排版决策（纯逻辑，零 Fcitx5 依赖）：
+// Auto 模式下，一旦出现多词整句/短语候选或候选条总展示宽度过大，自动切为竖排并限制每页显示条数，
+// 防止横排候选框超出屏幕。
+CandidatePresentationPlan decideCandidatePresentation(
+    const std::vector<ipc::Candidate> &candidates,
+    const CandidatePresentationOptions &opts);
+
 // 单按 Shift 切换直通状态机：
 // 只有在无其他修饰键、非长按自动连发、且中间未按任何其他键的情况下按下并释放同一 Shift 键才触发切换。
 class ShiftTapDetector {
@@ -88,6 +124,8 @@ public:
 
     bool shouldSendPrivacy(bool enabled) const;
     void markPrivacySent(bool enabled);
+
+    void clearLastAutoSpace() { last_auto_space_ = false; }
 
 private:
     uint64_t last_sent_seq_ = 0;
