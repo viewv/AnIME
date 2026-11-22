@@ -85,6 +85,11 @@ pub trait LexiconProvider: Send + Sync {
     fn segment_runon(&self, _raw: &str) -> Option<Vec<String>> {
         None
     }
+
+    /// 已被空格闭合的 token 的一次编辑近邻词（整句模式召回补充，见 `Lexicon::closed_token_neighbors`）。
+    fn closed_token_neighbors(&self, _raw: &str, _limit: usize) -> Vec<LexiconCandidate> {
+        Vec::new()
+    }
 }
 
 /// Phase 0 最小只读词表桩：仅做精确与前缀匹配，用于验证引擎主链路与测试基线。
@@ -396,6 +401,37 @@ mod tests {
 
         // 首字母大写输入继承
         assert_eq!(lex.query("Appie", &opts)[0].word, "Apple");
+    }
+
+    #[test]
+    fn closed_token_neighbors_recover_leading_drop_and_realword_edits() {
+        let lex = Lexicon::from_tsv_str(
+            "the\t7.7\nto\t7.4\nthat\t7.0\nhe\t6.7\nthis\t6.9\nis\t7.2\nyou\t7.1\n\
+             so\t6.5\nhat\t4.6\nwant\t6.0\nhis\t6.3\nzymurgy\t1.5\n",
+            4.0,
+        )
+        .expect("valid tsv");
+        let words = |raw: &str| -> Vec<String> {
+            lex.closed_token_neighbors(raw, 8).into_iter().map(|c| c.word).collect()
+        };
+        // 单字母 / 两字母非词：首位漏敲与邻键替换（Trie 束搜索对其编辑预算为 0）
+        assert!(words("o").contains(&"to".to_string()));
+        assert!(words("o").contains(&"so".to_string()));
+        assert!(words("ou").contains(&"you".to_string()));
+        // 真词的一次编辑真词近邻
+        assert!(words("he").contains(&"the".to_string()));
+        assert!(words("hat").contains(&"that".to_string()));
+        assert!(words("is").contains(&"his".to_string()));
+        // 两次编辑（is -> this）不在一次编辑近邻范围内
+        assert!(!words("is").contains(&"this".to_string()));
+        assert!(words("wan").contains(&"want".to_string()));
+        // 长尾词不进入近邻、原词自身不返回、空串安全
+        assert!(!words("zymurg").contains(&"zymurgy".to_string()));
+        assert!(!words("he").contains(&"he".to_string()));
+        assert!(words("").is_empty());
+        let to = lex.closed_token_neighbors("o", 8).into_iter().find(|c| c.word == "to").unwrap();
+        assert_eq!(to.kind, LexiconMatchKind::TypoCorrection);
+        assert!(to.edit_cost > 0.0 && to.score < to.log_freq);
     }
 
     #[test]

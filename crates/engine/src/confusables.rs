@@ -10,6 +10,21 @@ use anime_lm_ngram::SlotCandidate;
 
 const SHORTHAND_RELATIVE_PENALTY: f32 = 0.8;
 
+/// 闭合真词的一次编辑近邻（he->the、hat->that、is->this）相对用户原词的先验分差（Why）：
+/// 用户已敲出合法真词时必须默认保留原词，只有上下文给出明确证据才翻转。基础分差约等于一个
+/// 低代价易混词（1.25–1.45），再按编辑物理代价递增；近邻比原词更常见时追加顺风惩罚，
+/// 防止高频功能词（the/to/that）在无语境时吞掉用户原词。
+const REALWORD_NEIGHBOR_BASE_PENALTY: f32 = 2.8;
+const REALWORD_NEIGHBOR_COST_WEIGHT: f32 = 1.0;
+const REALWORD_NEIGHBOR_SURPLUS_WEIGHT: f32 = 0.35;
+/// 非词 token（o、ou、nd）的近邻按 L1 自然分（log_freq - λ·cost）参与，但不得超过槽内最佳分，
+/// 避免一次编辑的高频词压过该槽已有的低代价纠错。
+const NONWORD_NEIGHBOR_CAP_MARGIN: f32 = 0.2;
+const MAX_CLOSED_NEIGHBORS: usize = 6;
+/// 用户敲出的真词过于罕见（Zipf < 3）时不展开真词近邻：这类词往往有意为之（专名、术语），
+/// 且 L2 对其统计稀薄，LM 概率对比会系统性偏向常见近邻而误改用户原词。
+const REALWORD_NEIGHBOR_MIN_RAW_LOG_FREQ: f32 = -6.0;
+
 const SHORTHAND_PAIRS: &[(&str, &str)] = &[
     ("hw", "how"),
     ("r", "are"),
@@ -53,6 +68,42 @@ fn upsert_slot_candidate(cands: &mut Vec<SlotCandidate>, word: String, target_sc
             word,
             lex_score: target_score,
         });
+    }
+}
+
+/// 为整句模式中已闭合的 token 补充一次编辑近邻候选（召回入口见 `LexiconProvider::closed_token_neighbors`）。
+pub(crate) fn expand_closed_token_neighbors(
+    neighbors: &[anime_lexicon::LexiconCandidate],
+    raw_token: &str,
+    raw_is_word: bool,
+    cands: &mut Vec<SlotCandidate>,
+) {
+    let slot_max = cands
+        .iter()
+        .map(|c| c.lex_score)
+        .fold(f32::NEG_INFINITY, f32::max);
+    let anchor = if slot_max.is_finite() { slot_max } else { 0.0 };
+    // 精确词基准分为 log_freq + EXACT_BONUS(6.5)，据此还原原词词频
+    let raw_log_freq = (anchor - 6.5).clamp(-8.5, -1.0);
+    if raw_is_word && raw_log_freq < REALWORD_NEIGHBOR_MIN_RAW_LOG_FREQ {
+        return;
+    }
+    for nb in neighbors.iter().take(MAX_CLOSED_NEIGHBORS) {
+        if nb.word.eq_ignore_ascii_case(raw_token) {
+            continue;
+        }
+        let target = if raw_is_word {
+            let surplus = (nb.log_freq - raw_log_freq).clamp(0.0, 2.0);
+            anchor
+                - REALWORD_NEIGHBOR_BASE_PENALTY
+                - REALWORD_NEIGHBOR_COST_WEIGHT * nb.edit_cost
+                - REALWORD_NEIGHBOR_SURPLUS_WEIGHT * surplus
+        } else if slot_max.is_finite() {
+            nb.score.min(slot_max - NONWORD_NEIGHBOR_CAP_MARGIN)
+        } else {
+            nb.score
+        };
+        upsert_slot_candidate(cands, match_raw_casing(raw_token, &nb.word), target);
     }
 }
 

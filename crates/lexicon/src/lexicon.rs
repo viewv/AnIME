@@ -10,7 +10,10 @@ use crate::format::{
     load_animelex_file, load_wordlist_file, parse_animelex_bytes, parse_wordlist_tsv,
     zipf_to_log_freq,
 };
-use crate::keyboard::{APOSTROPHE_SKIP_COST, weighted_damerau_levenshtein};
+use crate::keyboard::{
+    APOSTROPHE_SKIP_COST, TRANSPOSITION_COST, deletion_cost, insertion_cost, substitution_cost,
+    weighted_damerau_levenshtein,
+};
 use crate::phonetic::PhoneticIndex;
 use crate::trie::CompactTrie;
 use crate::{LexiconCandidate, LexiconMatchKind, LexiconProvider, QueryOptions};
@@ -27,6 +30,13 @@ const TYPO_COMPLETION_PENALTY: f32 = 0.45;
 const PHONETIC_LAMBDA: f32 = 2.3;
 const PHONETIC_BONUS: f32 = 0.5;
 const MAX_FUZZY_QUERY_LEN: usize = 40;
+/// 闭合 token 近邻召回只针对常见词：一次编辑能"撞上"的长尾词极多，放开会把噪声塞进词格。
+/// 短目标（<= 3 字母）更容易被任意编辑命中，因此门槛更高（Zipf >= 5.0 对 Zipf >= 4.0）。
+const NEIGHBOR_MIN_LOG_FREQ: f32 = -5.0;
+const NEIGHBOR_MIN_SHORT_LOG_FREQ: f32 = -4.0;
+/// 替换只接受物理相邻或读音相近的键（查表代价上限），远键替换在快打中极少发生。
+const NEIGHBOR_MAX_SUB_COST: f32 = 0.75;
+const MAX_NEIGHBOR_TOKEN_LEN: usize = 16;
 
 #[derive(Debug, Clone)]
 struct WordSlot {
@@ -567,6 +577,104 @@ impl Lexicon {
 
     /// 对未精确命中词典的疑似漏空格粘连词（如 `Ilikethe`、`thatlikes`、`dontknow`、`witha`）
     /// 执行 $O(L^2)$ 词频动态规划切分（最多 4 段，耗时 < 10 us），返回切分后的规范词序列。
+    /// 已被空格闭合的 token 的一次编辑近邻（整句模式专用召回入口）。
+    ///
+    /// 与 Trie 模糊束搜索互补：束搜索为"正在输入的前缀"设计，短词编辑预算极低且禁止首字母漏敲，
+    /// 以免刚敲一个 `o` 就弹出纠错；闭合后的词已有上下文与 L2 把关，可以放开召回：
+    /// 首位漏敲（`o -> to`、`he -> the`、`hat -> that`）、多敲、QWERTY 邻键替换与相邻换位。
+    /// 直接枚举编辑串查哈希（约 60×len 次），不走 Trie，代价沿用 `keyboard.rs` 物理距离模型。
+    pub fn closed_token_neighbors(&self, raw: &str, limit: usize) -> Vec<LexiconCandidate> {
+        let lower = raw.trim().to_ascii_lowercase();
+        let n = lower.len();
+        if n == 0
+            || n > MAX_NEIGHBOR_TOKEN_LEN
+            || limit == 0
+            || !lower.bytes().all(|b| b.is_ascii_lowercase() || b == b'\'')
+        {
+            return Vec::new();
+        }
+        let b = lower.as_bytes();
+        let mut best: HashMap<u32, f32> = HashMap::new();
+        let mut consider = |cand: &[u8], cost: f32| {
+            let Ok(s) = std::str::from_utf8(cand) else { return };
+            if s == lower {
+                return;
+            }
+            let Some(&id) = self.exact_by_lower.get(s) else { return };
+            let slot = &self.words[id as usize];
+            let min_lf = if s.len() <= 3 {
+                NEIGHBOR_MIN_SHORT_LOG_FREQ
+            } else {
+                NEIGHBOR_MIN_LOG_FREQ
+            };
+            if slot.log_freq < min_lf || (slot.is_proper_or_mixed && slot.word != "I") {
+                return;
+            }
+            let e = best.entry(id).or_insert(f32::INFINITY);
+            if cost < *e {
+                *e = cost;
+            }
+        };
+        let mut buf: Vec<u8> = Vec::with_capacity(n + 1);
+        // 用户漏敲了目标词中的一个字符（含首字母）
+        for p in 0..=n {
+            for c in b'a'..=b'z' {
+                buf.clear();
+                buf.extend_from_slice(&b[..p]);
+                buf.push(c);
+                buf.extend_from_slice(&b[p..]);
+                consider(&buf, deletion_cost(c, p.checked_sub(1).map(|i| b[i])));
+            }
+        }
+        // 用户多敲了一个字符
+        if n >= 2 {
+            for p in 0..n {
+                buf.clear();
+                buf.extend_from_slice(&b[..p]);
+                buf.extend_from_slice(&b[p + 1..]);
+                let prev = p.checked_sub(1).map(|i| b[i]);
+                consider(&buf, insertion_cost(b[p], prev, b.get(p + 1).copied()));
+            }
+        }
+        // 邻键替换与相邻换位
+        for p in 0..n {
+            for c in b'a'..=b'z' {
+                if c == b[p] {
+                    continue;
+                }
+                let cost = substitution_cost(b[p], c);
+                if cost <= NEIGHBOR_MAX_SUB_COST {
+                    buf.clear();
+                    buf.extend_from_slice(b);
+                    buf[p] = c;
+                    consider(&buf, cost);
+                }
+            }
+            if p + 1 < n && b[p] != b[p + 1] {
+                buf.clear();
+                buf.extend_from_slice(b);
+                buf.swap(p, p + 1);
+                consider(&buf, TRANSPOSITION_COST);
+            }
+        }
+        let mut out: Vec<LexiconCandidate> = best
+            .into_iter()
+            .map(|(id, cost)| {
+                let slot = &self.words[id as usize];
+                LexiconCandidate {
+                    word: apply_input_casing(raw.trim(), &slot.word, slot.is_proper_or_mixed),
+                    kind: LexiconMatchKind::TypoCorrection,
+                    edit_cost: cost,
+                    log_freq: slot.log_freq,
+                    score: slot.log_freq - EDIT_LAMBDA * cost,
+                }
+            })
+            .collect();
+        out.sort_by(|x, y| y.score.total_cmp(&x.score).then_with(|| x.word.cmp(&y.word)));
+        out.truncate(limit);
+        out
+    }
+
     pub fn segment_runon_token(&self, raw: &str) -> Option<Vec<String>> {
         const MAX_RUNON_LEN: usize = 32;
         const MAX_SEGMENTS: usize = 4;
@@ -887,5 +995,9 @@ impl LexiconProvider for Lexicon {
 
     fn segment_runon(&self, raw: &str) -> Option<Vec<String>> {
         self.segment_runon_token(raw)
+    }
+
+    fn closed_token_neighbors(&self, raw: &str, limit: usize) -> Vec<LexiconCandidate> {
+        Lexicon::closed_token_neighbors(self, raw, limit)
     }
 }
