@@ -21,6 +21,9 @@
 
 ## Phase 3：专用模型蒸馏微调、桌面自启打包、macOS IMKit 移植与公开发布
 
+- **Task 08（评测修复与 L2 重建，`.agents/tasks/task-08-eval-and-l2-rebuild.md`，优先于 Task 07）**：评测引入多参考答案、`core_v2`、真实打字噪声集 `noise_v1` 与干净整句反例集；用全量 LibriSpeech + 对话领域洁净语料与修正 Kneser-Ney 重建 `ANIMENGR`，并提供可复用的评测去泄漏过滤器。
+- **Task 09（整句模式 L1 召回重构，待建任务单）**：闭合 token 放开短词编辑与漏首字母、真词按键近邻候选，空格作为可出错字符的区间词格（统一 `segment_runon`）。
+- **可挂载领域词典**：技术 / 开源专名词库作为独立可挂载词典层（复用 L1 分层词典），不并入基础词库。
 - **Task 07（端侧小模型蒸馏与重排微调，`.agents/tasks/task-07-neural-distillation.md`）**：使用公开语料、合成物理键盘/读音/连打噪声、L1+L2 词格难负例与 `SmolLM2-1.7B` 教师软标签，微调/蒸馏输入法专用的 `SmolLM2-135M / 360M` GGUF 模型，将整句与真词消歧准确率推向 `1.7B` 水平。
 - 在不改动 Rust 核心的前提下实现 `frontends/macos/`（macOS IMKit `IMKInputController`）。
 - 完善 Linux 守护进程自启（`systemd --user` / 前端按需拉起）、设置界面、跨发行版打包与发布文档，正式公开仓库。
