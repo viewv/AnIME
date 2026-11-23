@@ -110,5 +110,22 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
     结论：未经训练的模型看不懂模板，看到键入原文后倾向"照抄"——干净句保留 +1.3–2pp，但真词纠错大幅下降（75 -> 55）、整体略降；模板本身不带来收益，必须微调。纠错模板打分整句候选（而非差异后缀），前缀更长，360M p50 85 -> 128 ms，P3 需优化（候选按 token 共享前缀已复用，可再做差异化打分或批量解码）。
   - **P1 数据集**：`train.jsonl` 407,485 条 / `val.jsonl` 19,925 条（约 1,400 万 token，字符 p50 131 / p99 301）；来源 MultiWOZ 38%、oasst assistant 50%、oasst prompter 12%（prompter 仅 2.2 万子句，×6 变体）；照抄 31.3% + 新词照抄 8.9%、邻键 17.0%、多错误 14.1%、真实错拼 5.5%、漏首字母 / 漏空格 / 空格错位 / 多空格 / 真词各约 4–5%；去泄漏丢弃 79,193 子句；LibriSpeech 默认不用（全小写会教坏专名大小写）。
   - **P1 数据集 v2（2026-11-23，加入学术文本）**：用户批准 arXiv 元数据后，`build_l3_sft.py` 新增 `arxiv` 来源（task-14 `data/compiled/arxiv_cs/train.jsonl`，子句上限 15 万，上文为同一摘要前一子句；指向 `heldout.jsonl` 时拒绝运行），`--extra-eval-tsv` 把尚未合入本分支的 `ood_academic_v1.tsv` 与 task-14 复核表加入去泄漏参照。重建结果：`train.jsonl` 552,108 条 / `val.jsonl` 20,000 条（128 MB）；来源 oasst assistant 37.4%、MultiWOZ 28.1%、**arXiv 25.3%**、oasst prompter 9.2%；照抄 30.2% + 新词照抄 12.5%（arXiv 术语多，新词照抄占其 23%）、多错误 13.6%；去泄漏丢弃 80,968 子句。上传包已刷新（train.jsonl sha256 前缀 3863fb5d）。
-  - **P2 第一轮（run1，T4，2026-11-23）作废**：训练 2,157 步 / 3.5 h / 约 4.5 计算点，loss 0.53 -> 0.08、eval_loss 0.074，Colab 端内存模型成对胜率 ~100%；但 transformers 5.22 下 `save_model` 与 checkpoint 写出的是**未训练的基座权重**（`final/model.safetensors` 与 SmolLM2-360M 的 norm 权重 max|diff| = 0.0，checkpoint-500 同样），导出的 GGUF 与基座逐字节一致，本机评测表现即基座 + 纠错模板（ood_dev novel 82.7% 来自 task-15 原样候选 + 照抄偏好，noise_v2 79.5 -> 71.0、core_v2 83.6 -> 72.5 退化）。修复：锁定 transformers==4.57.6；每次存档与最终保存后 `verify_weights_trained` 校验"已保存 = 内存模型 且 != 基座"，失败立即中止。无效模型移至 `data/compiled/models/invalid-run1/`（文件名含 anime-l3，避免被自动识别）。
+  - **P2 第一轮 run1（T4，2026-11-23）**：2,157 步 / 3.5 h / 约 4.5 计算点，loss 0.53 -> 0.08、eval_loss 0.074。首次导出的 GGUF 与基座逐字节相同——根因是本脚本 `export_base_tokenizer` 遍历拷贝了整个 HF 缓存快照目录，把基座 `model.safetensors` 覆盖到导出目录（**不是** transformers 5.x 的问题；此前误判已更正）。已修复为文件名白名单 + 存档 / 最终保存 / 转换前三处 `verify_weights_trained`；从 Drive 上未受影响的 `checkpoint-2157` 用 `--export-only --export-from` 重新导出（norm 权重 max|diff| ≈ 1e-2），`anime-l3-360m-v1.Q4_K_M.gguf` sha256 0573818a…、Q8_0 70b985ca…。另锁定 transformers==4.57.6（脚本按 4.x 验证）。
+  - **融合修复**：纠错模型对正确答案给出约 0 的对数概率、对乱改候选 -20 ~ -40，均值中心化使"正确改写"与"照抄"同时截断到 +4.5 打平；`Correction` 风格改用以最优分为锚点的 `normalize_rerank_scores_top`（noise_v2 前 400 行 75.0 -> 83.2）。纠错模型只在整句上训练，单 token 输入（词补全 / 单词纠错）跳过 L3（core_v2 prefix 60.0 -> 82.9）。
+  - **run1 评测**（引擎含 task-15 原样候选，去泄漏 L2，top1 % (95% CI)）：
+
+    | 集合 | L1+L2 | + 通用 360M | **+ anime-l3 v1 Q4** |
+    |---|---|---|---|
+    | ood_dev_v1 TOTAL | 66.9 | 71.8 | **84.2 (82–86)** |
+    | ood_dev negative:clean / novel | 88.7 / 50.0 | 90.7 / 62.7 | **100.0 / 100.0** |
+    | ood_dev multi / space_shift / leading_drop | 32.0 / 58.3 / 53.3 | 32.0 / 66.7 / 61.7 | 44.0 / 88.3 / 75.0 |
+    | ood_academic_v1 TOTAL | 59.3 | 63.0 | **76.2 (74–79)** |
+    | ood_academic clean / novel | 88.0 / 70.7 | 91.7 / 67.3 | 99.7 / 100.0 |
+    | ood_tm2_v1 TOTAL | 67.2 | 68.2 | **74.3 (71–78)** |
+    | noise_v2 TOTAL | 78.7 | 79.5 | **83.3 (81–85)** |
+    | core_v2 TOTAL（跳过单 token 后） | 83.1 | 83.6 | **72.4** |
+    | realword_edit（dev / acad / noise_v2） | 61.7 / 43.3 / 73.3 | 73.3 / 60.0 / 84.0 | 58.3 / 51.7 / 62.7 |
+
+    Q8_0 与 Q4_K_M 指标在 CI 内一致（ood_dev 84.0 / academic 76.2）；L3 推理 p50 约 100 ms（通用 82 ms），按键延迟 p99 <= 4.7 ms。
+  - **v1 已知缺陷（需 v2 数据修复后重训）**：(1) 训练数据中**带错样本的键入原文一律被小写**，只有照抄样本保留大写 → 模型学到"原文含大写即照抄"，用户句首按 Shift 时不纠错（core_v2 `Do tbey have an entfance fee` 原样保留），core_v2 sentence 90.0 -> 62.5；(2) 真词纠错只有单编辑距离样本，缺 their/there/they're、your/you're、its/it's、to/too、then/than、form/from 等同音 / 易混词，core_v2 context_realword 95.0 -> 46.0、各集 realword_edit 下降。
   - Rust 与 Python 模板黄金测试逐字节一致；`make check`（0 warning）/ `make test`（69 passed）/ `./scripts/verify-boundaries.sh` BOUNDARY OK。
