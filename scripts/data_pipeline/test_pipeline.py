@@ -805,6 +805,24 @@ class TestOodDevBuilder(unittest.TestCase):
 
 
 class TestL3Sft(unittest.TestCase):
+    def test_arxiv_units_chain_context_and_cap(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "train.jsonl"
+            p.write_text(json.dumps({"id": "2501.00001", "cats": ["cs.CL"],
+                                     "abstract": "We propose a new method. It improves recall on hard queries."}) + "\n")
+            units = list(build_l3_sft.arxiv_units(p, 10))
+            self.assertEqual([u[3] for u in units], ["We propose a new method", "It improves recall on hard queries"])
+            self.assertEqual(units[0][2], "")
+            self.assertEqual(units[1][2], "We propose a new method")
+            self.assertTrue(all(u[0] == "arxiv:2501.00001" and u[1] == "arxiv" for u in units))
+            self.assertEqual(len(list(build_l3_sft.arxiv_units(p, 1))), 1)
+
+    def test_refuses_arxiv_heldout_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            ho = Path(td) / "heldout.jsonl"
+            ho.write_text("")
+            self.assertEqual(build_l3_sft.main(["--arxiv", str(ho), "--out-dir", str(Path(td) / "o")]), 1)
+
     def test_template_matches_rust_golden(self):
         # 与 crates/lm-neural/src/prompt.rs::correction_template_matches_training_golden 逐字节一致
         self.assertEqual(build_l3_sft.build_correction_prompt("  Can you  help me ", "i want o  go"),

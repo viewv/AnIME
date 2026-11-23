@@ -49,7 +49,7 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - **生成模式（停顿时，后续阶段）**：从同一前缀贪心 / 小束生成整句，作为额外候选，突破 L1+L2 召回上限（多错误、空格错误）。
 
 ### 训练数据（`scripts/data_pipeline/build_l3_sft.py`，可复现，固定 seed）
-- **干净文本源**（均已登记 MANIFEST，许可在白名单内）：oasst1 训练树（已排除 ood_dev 留出树，prompter 为主、assistant 为辅）、MultiWOZ 2.2 train / dev、LibriSpeech（小比例，只防遗忘）。Taskmaster 全部不用（ood_tm2 评测领域）；CC-BY-SA 来源（Wikipedia 错拼表等）不进入模型训练。
+- **干净文本源**（均已登记 MANIFEST，许可在白名单内）：arXiv CS 摘要训练侧（task-14，元数据 CC0，按论文留出的评测论文不进入，约 25%）、oasst1 训练树（已排除 ood_dev 留出树，prompter 为主、assistant 为辅）、MultiWOZ 2.2 train / dev、LibriSpeech（小比例，只防遗忘）。Taskmaster 全部不用（ood_tm2 评测领域）；CC-BY-SA 来源（Wikipedia 错拼表等）不进入模型训练。
 - **上文**：对话 / 会话中的前一轮或前一句（截断 ≤ 48 token），约 30% 样本留空上文。
 - **噪声**：复用 `build_eval_v2` / `build_eval_v3` 的 8 类单错误算子 + `noise:multi` 多错误 + crate-ci typos（MIT）真实错拼对；按开发者 / 口语场景设定比例。
 - **照抄样本 >= 35%**：`typed == 目标`，其中含词典外新词 / 专名 / 技术词的干净句单独加权（教模型不误改新词）。
@@ -79,6 +79,7 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 
 ## 验收目标（L1+L2+新 L3 vs L1+L2+通用 360M，`ngram` = 去泄漏 L2）
 - `ood_dev_v1` TOTAL >= 72%（66.4%）、`negative:novel` >= 60%（24.7%）、`negative:clean` 不低于 L1+L2。
+- `ood_academic_v1`（task-14，学术写作）TOTAL >= 66%（58.6%）、`negative:novel` >= 60%（34.0%）。
 - `ood_tm2_v1` TOTAL >= 74%（69.8%）；`noise_v2` 与 `core_v2` 不退化；各集合 `negative:clean` 不低于 L1+L2。
 - L3 延迟不劣于当前通用 360M（GPU 优化另行处理）；GGUF `Q4_K_M` <= 300 MB。
 - 报告 Wilson 95% 置信区间；所有数字基于去泄漏 L2 与冻结评测集。
@@ -94,8 +95,8 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [IN PROGRESS] P0–P1 完成、P2 训练材料就绪（`data/compiled/l3_upload/AnIME_l3/`），等待用户在 Colab 训练。
-- Changed Files（截至 P2 准备）：`crates/lm-neural/src/{config,lib,prompt,llama_backend}.rs`（`PromptStyle`、纠错模板打分、键入原文传入推理线程）、`crates/eval/src/{cli,main}.rs`（`--l3-prompt`）、`scripts/data_pipeline/build_l3_sft.py`、`scripts/data_pipeline/colab/train_l3_correction.{py,ipynb}`、`scripts/data_pipeline/test_pipeline.py`（32 tests）。
+- Status: [IN PROGRESS] P0–P1 完成（P1 已加入 arXiv 学术文本重建为 v2）、P2 训练材料就绪（`data/compiled/l3_upload/AnIME_l3/`），等待用户在 Colab 训练。
+- Changed Files（截至 P2 准备）：`crates/lm-neural/src/{config,lib,prompt,llama_backend}.rs`（`PromptStyle`、纠错模板打分、键入原文传入推理线程）、`crates/eval/src/{cli,main}.rs`（`--l3-prompt`）、`scripts/data_pipeline/build_l3_sft.py`、`scripts/data_pipeline/colab/train_l3_correction.{py,ipynb}`、`scripts/data_pipeline/test_pipeline.py`（34 tests）。
 - Verification Output：
   - **P0 零训练基线**（去泄漏 L2，L1+L2+L3，top1）：
 
@@ -108,4 +109,5 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 
     结论：未经训练的模型看不懂模板，看到键入原文后倾向"照抄"——干净句保留 +1.3–2pp，但真词纠错大幅下降（75 -> 55）、整体略降；模板本身不带来收益，必须微调。纠错模板打分整句候选（而非差异后缀），前缀更长，360M p50 85 -> 128 ms，P3 需优化（候选按 token 共享前缀已复用，可再做差异化打分或批量解码）。
   - **P1 数据集**：`train.jsonl` 407,485 条 / `val.jsonl` 19,925 条（约 1,400 万 token，字符 p50 131 / p99 301）；来源 MultiWOZ 38%、oasst assistant 50%、oasst prompter 12%（prompter 仅 2.2 万子句，×6 变体）；照抄 31.3% + 新词照抄 8.9%、邻键 17.0%、多错误 14.1%、真实错拼 5.5%、漏首字母 / 漏空格 / 空格错位 / 多空格 / 真词各约 4–5%；去泄漏丢弃 79,193 子句；LibriSpeech 默认不用（全小写会教坏专名大小写）。
+  - **P1 数据集 v2（2026-11-23，加入学术文本）**：用户批准 arXiv 元数据后，`build_l3_sft.py` 新增 `arxiv` 来源（task-14 `data/compiled/arxiv_cs/train.jsonl`，子句上限 15 万，上文为同一摘要前一子句；指向 `heldout.jsonl` 时拒绝运行），`--extra-eval-tsv` 把尚未合入本分支的 `ood_academic_v1.tsv` 与 task-14 复核表加入去泄漏参照。重建结果：`train.jsonl` 552,108 条 / `val.jsonl` 20,000 条（128 MB）；来源 oasst assistant 37.4%、MultiWOZ 28.1%、**arXiv 25.3%**、oasst prompter 9.2%；照抄 30.2% + 新词照抄 12.5%（arXiv 术语多，新词照抄占其 23%）、多错误 13.6%；去泄漏丢弃 80,968 子句。上传包已刷新（train.jsonl sha256 前缀 3863fb5d）。
   - Rust 与 Python 模板黄金测试逐字节一致；`make check`（0 warning）/ `make test`（69 passed）/ `./scripts/verify-boundaries.sh` BOUNDARY OK。

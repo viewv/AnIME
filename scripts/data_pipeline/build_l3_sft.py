@@ -6,6 +6,7 @@
 
 - 干净文本：oasst1 训练树（剔除 ood_dev 留出树）、MultiWOZ 2.2 train / dev（LibriSpeech 默认不用：全小写会教坏专名大小写）；
   按标点切成 2–16 词子句（输入法预编辑里不含标点），上文取同一会话中的前一子句 / 父消息末尾。
+- 学术文本：arXiv CS 摘要（元数据 CC0，task-14 `build_arxiv_text.py` 训练侧，按论文 ID 留出的论文不进入），子句上限控制占比；
 - 噪声：约 35% 照抄（含词典外新词的子句一律照抄，教模型不误改新词；照抄样本一半把原文小写，
   兼学大小写恢复）、约 45% 单错误、约 20% 多错误；噪声只作用于词典词。
 - 去泄漏：与 `eval/**` 全部参考文本及上文做整句 + 5-gram 过滤（归一化口径与 anime-ngram-build 一致）。
@@ -189,6 +190,22 @@ def multiwoz_units(paths: list[Path]) -> Iterator[tuple[str, str, str, str]]:
                     prev = text
 
 
+def arxiv_units(path: Path, max_clauses: int) -> Iterator[tuple[str, str, str, str]]:
+    """arXiv CS 摘要（build_arxiv_text.py 的 train.jsonl，留出论文已排除）；上文为同一摘要的前一子句。"""
+    n = 0
+    with path.open(encoding="utf-8") as f:
+        for line in f:
+            paper = json.loads(line)
+            prev = ""
+            for c in clauses(paper["abstract"]):
+                if n >= max_clauses:
+                    return
+                text = " ".join(c)
+                yield f"arxiv:{paper['id']}", "arxiv", prev, text
+                prev = text
+                n += 1
+
+
 def librispeech_units(gz_path: Path, per_100k: int) -> Iterator[tuple[str, str, str, str]]:
     with gzip.open(gz_path, "rt", encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -295,11 +312,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--librispeech", type=Path, default=REPO_ROOT / "data/raw/ngram-corpus/librispeech-lm-norm.txt.gz")
     ap.add_argument("--librispeech-per-100k", type=int, default=0,
                     help="LibriSpeech 抽样比例（每 10 万行）；默认 0：其文本全小写无标点，会教模型把专名改成小写")
+    ap.add_argument("--arxiv", type=Path, default=REPO_ROOT / "data/compiled/arxiv_cs/train.jsonl",
+                    help="build_arxiv_text.py 的训练侧摘要（绝不能指向 heldout.jsonl）")
+    ap.add_argument("--arxiv-clauses", type=int, default=150_000, help="arXiv 子句上限，控制学术文本占比")
+    ap.add_argument("--extra-eval-tsv", type=Path, action="append", default=[],
+                    help="额外去泄漏参照（尚未合入本分支 eval/ 的评测集，如 ood_academic_v1.tsv）")
     ap.add_argument("--typos-csv", type=Path, default=REPO_ROOT / "data/raw/crate-ci-typos/words.csv")
     ap.add_argument("--out-dir", type=Path, default=REPO_ROOT / "data/compiled/l3_sft")
     ap.add_argument("--identity-rate", type=float, default=0.35)
     ap.add_argument("--multi-rate", type=float, default=0.20)
-    ap.add_argument("--variants", default="oasst_prompter=6,multiwoz=2,oasst_assistant=1,librispeech=1",
+    ap.add_argument("--variants", default="oasst_prompter=6,multiwoz=2,oasst_assistant=1,arxiv=1,librispeech=1",
                     help="各来源每个干净子句生成的样本数：用户提问最接近真实键入，加权；志愿者长回答文风正式，降权")
     ap.add_argument("--max-per-source", type=int, default=0, help="每个来源最多子句数（0 = 不限，调试用）")
     ap.add_argument("--seed", type=int, default=20261123)
@@ -310,7 +332,7 @@ def main(argv: list[str] | None = None) -> int:
     lex = load_lexicon(args.lexicon_tsv)
     realword_vocab = load_realword_vocab(args.lexicon_tsv)
     real_typos = load_real_typos(args.typos_csv, lex)
-    leak = LeakFilter(collect_eval_texts(eval_tsv_paths(REPO_ROOT)))
+    leak = LeakFilter(collect_eval_texts(eval_tsv_paths(REPO_ROOT) + args.extra_eval_tsv))
     print(f"eval leak reference: {len(leak.sentences)} sentences, {len(leak.ngrams)} 5-grams; real typos for {len(real_typos)} words", flush=True)
 
     sources = []
@@ -322,6 +344,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if woz:
         sources.append(multiwoz_units(woz))
+    if "heldout" in args.arxiv.name:
+        print("refusing arXiv held-out papers (eval source)", file=sys.stderr)
+        return 1
+    if args.arxiv.exists() and args.arxiv_clauses > 0:
+        sources.append(arxiv_units(args.arxiv, args.arxiv_clauses))
     if args.librispeech.exists() and args.librispeech_per_100k > 0:
         sources.append(librispeech_units(args.librispeech, args.librispeech_per_100k))
 
