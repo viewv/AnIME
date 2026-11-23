@@ -135,8 +135,8 @@ def _load_check_tensors(path: Path) -> dict:
 def verify_weights_trained(saved_dir: Path, base: str, model=None) -> None:
     """保存的权重必须 (a) 与内存中的训练后模型一致 (b) 与基座不同。
 
-    Why: transformers 5.x 下 save_model / checkpoint 写出的是未训练的基座权重（2026-11-23 实测，
-    训练 loss 0.07 但导出 GGUF 与基座逐字节相同），导出前必须校验，否则白训一轮。
+    Why: run1（2026-11-23）训练 loss 0.07，但导出的 GGUF 与基座逐字节相同（导出时基座权重覆盖了
+    训练权重，见 export_base_tokenizer），本地评测才发现；存档、最终保存与转换前都必须校验。
     """
     from huggingface_hub import snapshot_download
 
@@ -161,16 +161,23 @@ def verify_weights_trained(saved_dir: Path, base: str, model=None) -> None:
             raise SystemExit(msg + " -> saved weights are still the base model (training not persisted)")
 
 
+TOKENIZER_FILES = ("tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt", "special_tokens_map.json")
+
+
 def export_base_tokenizer(hf_dir: Path, base: str) -> None:
+    """把基座的原始 tokenizer 文件放进导出目录（词表从未改动）。
+
+    Why: snapshot_download 返回的是整个本地缓存快照目录，里面还有加载模型时下载的基座
+    model.safetensors / config.json；run1 曾因遍历拷贝整个目录，用基座权重覆盖了训练好的权重。
+    只按文件名白名单拷贝。
+    """
     from huggingface_hub import snapshot_download
 
-    src = Path(snapshot_download(base, allow_patterns=[
-        "tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt", "special_tokens_map.json"]))
-    for f in ("tokenizer.json", "tokenizer_config.json"):
-        (hf_dir / f).unlink(missing_ok=True)
-    for f in src.iterdir():
-        if f.is_file():
-            (hf_dir / f.name).write_bytes(f.read_bytes())
+    src = Path(snapshot_download(base, allow_patterns=list(TOKENIZER_FILES)))
+    for name in TOKENIZER_FILES:
+        (hf_dir / name).unlink(missing_ok=True)
+        if (src / name).is_file():
+            (hf_dir / name).write_bytes((src / name).read_bytes())
 
 
 def export_gguf(hf_dir: Path, out_dir: Path, name: str, work: Path, base: str) -> None:
@@ -183,6 +190,7 @@ def export_gguf(hf_dir: Path, out_dir: Path, name: str, work: Path, base: str) -
     # 5.x 保存的 tokenizer_config.json（extra_special_tokens 为 list -> AttributeError）。
     # 词表从未改动，导出时直接换回基座的原始 tokenizer 文件，转换器只依赖仓库自带的 gguf-py。
     export_base_tokenizer(hf_dir, base)
+    verify_weights_trained(hf_dir, base)  # 转换前再确认一次：导出目录里必须是训练后的权重
     f16 = out_dir / f"{name}.F16.gguf"
     subprocess.run([sys.executable, str(llama / "convert_hf_to_gguf.py"), str(hf_dir), "--outtype", "f16", "--outfile", str(f16)], check=True)
     build = llama / "build"
@@ -210,8 +218,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--eval-samples", type=int, default=400)
     ap.add_argument("--smoke", action="store_true", help="冒烟：2000 条样本、50 步、快速导出验证全流程")
     ap.add_argument("--export", action="store_true", help="训练结束后转换并量化 GGUF")
-    ap.add_argument("--export-only", action="store_true", help="跳过训练，直接导出 out-dir/final")
-    ap.add_argument("--allow-transformers5", action="store_true", help="允许 transformers 5.x（已知 checkpoint 保存失效，仅供实验）")
+    ap.add_argument("--export-only", action="store_true", help="跳过训练，直接导出 out-dir/final（或 --export-from）")
+    ap.add_argument("--export-from", type=Path, default=None, help="--export-only 时改从该目录（如某个 checkpoint）导出")
+    ap.add_argument("--allow-transformers5", action="store_true", help="允许 transformers 5.x（未按 5.x 验证）")
     args = ap.parse_args(argv)
 
     import torch
@@ -219,15 +228,25 @@ def main(argv: list[str] | None = None) -> int:
     from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainerCallback, TrainingArguments
 
     if int(transformers.__version__.split(".")[0]) >= 5 and not args.allow_transformers5:
-        # 5.x 的 save_model / checkpoint 会写出未训练的基座权重（见 verify_weights_trained）
-        raise SystemExit(f"transformers {transformers.__version__} unsupported: pip install 'transformers==4.57.6' "
-                         "(or pass --allow-transformers5 to experiment)")
+        # 训练脚本按 4.x 编写与验证（5.x 去掉了 group_by_length 等参数）；锁定版本保证可复现
+        raise SystemExit(f"transformers {transformers.__version__} unverified: pip install 'transformers==4.57.6' "
+                         "(or pass --allow-transformers5)")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     final_dir = args.out_dir / "final"
     if args.export_only:
-        verify_weights_trained(final_dir, args.base)
-        export_gguf(final_dir, args.out_dir, args.name, Path("/tmp/l3_export"), args.base)
+        src_dir = final_dir
+        if args.export_from:
+            # checkpoint 目录含优化器状态，只拷模型文件到干净目录再导出
+            import shutil
+
+            final_dir.mkdir(parents=True, exist_ok=True)
+            for f in ("config.json", "generation_config.json", "model.safetensors"):
+                if (args.export_from / f).is_file():
+                    shutil.copy(args.export_from / f, final_dir / f)
+            log(f"export from {args.export_from}")
+        verify_weights_trained(src_dir, args.base)
+        export_gguf(src_dir, args.out_dir, args.name, Path("/tmp/l3_export"), args.base)
         return 0
 
     gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"

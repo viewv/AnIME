@@ -19,7 +19,8 @@ use crate::config::{
 };
 use crate::prompt::{
     build_continuation_plan, build_correction_prompt, correction_target,
-    extract_clean_continuation_word, normalize_rerank_scores, split_prefix_and_candidates,
+    extract_clean_continuation_word, normalize_rerank_scores, normalize_rerank_scores_top,
+    split_prefix_and_candidates,
 };
 use crate::{NeuralCandidate, NeuralSentenceModel};
 
@@ -254,11 +255,16 @@ impl NeuralSentenceModel for LlamaNeuralModel {
         if candidates.len() < 2 {
             return Vec::new();
         }
-        // 通用模型对"无上文的单词候选"只有词频信号，不值得一次推理；纠错模型看得到键入原文，单词也要判
+        // 通用模型对"无上文的单词候选"只有词频信号，不值得一次推理。
         if self.prompt_style == PromptStyle::Generic
             && context_before.trim().is_empty()
             && !candidates.iter().any(|c| c.trim().contains(' '))
         {
+            return Vec::new();
+        }
+        // 纠错模型只在整句子句上训练过：单 token 输入（词补全 `authentica`、单词纠错）上它偏好
+        // "改动最小"的候选（authentic、communicate），core_v2 prefix 82.9 -> 60.0；交给 L1+L2 排序。
+        if self.prompt_style == PromptStyle::Correction && !preedit.trim().contains(' ') {
             return Vec::new();
         }
         let (reply_tx, reply_rx) = mpsc::sync_channel(1);
@@ -550,7 +556,10 @@ impl<'m> KvRunner<'m> {
         if std::env::var_os("ANIME_L3_DEBUG").is_some() {
             eprintln!("[l3-debug] prefix_tokens={} pairs={:?}", prefix_len, pairs);
         }
-        normalize_rerank_scores(&pairs, self.cfg.rerank_weight)
+        match self.cfg.prompt_style {
+            PromptStyle::Correction => normalize_rerank_scores_top(&pairs, self.cfg.rerank_weight),
+            PromptStyle::Generic => normalize_rerank_scores(&pairs, self.cfg.rerank_weight),
+        }
     }
 
     fn score_multi_token_candidate(

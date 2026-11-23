@@ -13,7 +13,7 @@ pub use llama_backend::LlamaNeuralModel;
 pub use prompt::{
     CORRECTION_END_MARK, build_correction_prompt, correction_target,
     ContinuationPlan, build_continuation_plan, extract_clean_continuation_word,
-    normalize_rerank_scores, split_prefix_and_candidates, trim_context_tail,
+    normalize_rerank_scores, normalize_rerank_scores_top, split_prefix_and_candidates, trim_context_tail,
 };
 
 #[derive(Debug, Clone, PartialEq)]

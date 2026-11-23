@@ -233,6 +233,33 @@ pub fn normalize_rerank_scores(scored: &[(String, f32)], weight: f32) -> Vec<Neu
         .collect()
 }
 
+/// 纠错风格的打分融合：以最高分为锚点，最优候选 +4.5，其余按与最优的差距递减（下限 -4.5）。
+///
+/// Why: 纠错模型对正确答案打出接近 0 的对数概率，对乱改候选打出 -20 ~ -40；若沿用均值中心化，
+/// 均值被乱改候选拉低，"正确改写"与"照抄原文"都远高于均值、同时被截断到 +4.5 而打平，
+/// 模型偏好被丢弃，退回 L1+L2 原序（run1 实测 noise_v2 因此退化）。
+pub fn normalize_rerank_scores_top(scored: &[(String, f32)], weight: f32) -> Vec<NeuralCandidate> {
+    let best = scored
+        .iter()
+        .map(|(_, s)| *s)
+        .filter(|s| s.is_finite())
+        .fold(f32::NEG_INFINITY, f32::max);
+    if !best.is_finite() || scored.iter().filter(|(_, s)| s.is_finite()).count() < 2 {
+        return Vec::new();
+    }
+    scored
+        .iter()
+        .filter(|(_, s)| s.is_finite())
+        .map(|(text, s)| NeuralCandidate {
+            text: text.clone(),
+            score: ((*s - best) * weight + RERANK_CLAMP).clamp(-RERANK_CLAMP, RERANK_CLAMP),
+            is_continuation: false,
+        })
+        .collect()
+}
+
+const RERANK_CLAMP: f32 = 4.5;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -297,6 +324,23 @@ mod tests {
         assert!(extract_clean_continuation_word("bad\nline", true).is_none());
         assert!(extract_clean_continuation_word("no_leading_space", true).is_none());
         assert!(extract_clean_continuation_word(" a", true).is_none());
+    }
+
+    #[test]
+    fn normalize_top_keeps_preference_between_near_best_candidates() {
+        // 均值中心化会让前两名同时截断到 +4.5；以最优为锚点必须保留它们的差距
+        let scored = [
+            ("fix".to_string(), -0.03),
+            ("copy".to_string(), -14.3),
+            ("junk1".to_string(), -37.0),
+            ("junk2".to_string(), -30.0),
+        ];
+        let mean = normalize_rerank_scores(&scored, 1.6);
+        assert!((mean[0].score - mean[1].score).abs() < 1e-4, "mean-centering saturates both");
+        let top = normalize_rerank_scores_top(&scored, 1.6);
+        assert!((top[0].score - 4.5).abs() < 1e-4);
+        assert!(top[0].score - top[1].score > 4.0);
+        assert!(top.iter().all(|c| c.score >= -4.5 && c.score <= 4.5));
     }
 
     #[test]
