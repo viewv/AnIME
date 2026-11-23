@@ -452,6 +452,10 @@ impl<'m> KvRunner<'m> {
         }
         let target_slice = &candidates[..eval_limit];
         let prompt = build_correction_prompt(context_before, typed);
+        // 排查用：ANIME_L3_DEBUG=1 时把纠错提示与各候选原始打分打到 stderr（不影响结果）
+        if std::env::var_os("ANIME_L3_DEBUG").is_some() {
+            eprintln!("[l3-debug] prompt={prompt:?}");
+        }
         let suffixes: Vec<String> = target_slice.iter().map(|c| correction_target(c)).collect();
         // 模板上文已按字符截断，这里放宽 token 上限，保证 <|typed|> 与 <|fix|> 标记完整保留
         let cap = (self.cfg.n_ctx as usize / 2).max(self.cfg.max_context_tokens);
@@ -543,6 +547,9 @@ impl<'m> KvRunner<'m> {
             })
             .collect();
 
+        if std::env::var_os("ANIME_L3_DEBUG").is_some() {
+            eprintln!("[l3-debug] prefix_tokens={} pairs={:?}", prefix_len, pairs);
+        }
         normalize_rerank_scores(&pairs, self.cfg.rerank_weight)
     }
 

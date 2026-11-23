@@ -21,6 +21,8 @@ HEARTBEAT_S = 20
 ROOT = "/content/AnIME_l3"
 args = shlex.split(os.environ.get("ANIME_TRAIN_ARGS", "--smoke --out-dir /content/AnIME_l3/smoke_out"))
 log_path = os.environ.get("ANIME_TRAIN_LOG", f"{ROOT}/train.log")
+# 训练脚本只支持 transformers 4.x（5.x 的保存路径会写出基座权重）；Colab 默认已是 5.x
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "transformers==4.57.6"], check=True)
 cmd = [sys.executable, f"{ROOT}/train_l3_correction.py", "--data-dir", f"{ROOT}/data", *args]
 print("launch:", " ".join(cmd), flush=True)
 with open(log_path, "w") as log:

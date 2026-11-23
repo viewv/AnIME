@@ -116,6 +116,51 @@ def quick_eval(model, tokenizer, val_rows: list[dict], n: int, device) -> dict:
     return {k: round(100 * v[0] / v[1], 1) for k, v in sorted(wins.items()) if v[1]}
 
 
+CHECK_KEYS = ("model.norm.weight", "model.layers.0.input_layernorm.weight", "model.layers.10.self_attn.q_proj.weight")
+
+
+def _load_check_tensors(path: Path) -> dict:
+    from safetensors import safe_open
+
+    files = [path] if path.is_file() else sorted(path.glob("*.safetensors"))
+    out = {}
+    for f in files:
+        with safe_open(str(f), framework="pt") as h:
+            for k in CHECK_KEYS:
+                if k in h.keys():
+                    out[k] = h.get_tensor(k).float()
+    return out
+
+
+def verify_weights_trained(saved_dir: Path, base: str, model=None) -> None:
+    """保存的权重必须 (a) 与内存中的训练后模型一致 (b) 与基座不同。
+
+    Why: transformers 5.x 下 save_model / checkpoint 写出的是未训练的基座权重（2026-11-23 实测，
+    训练 loss 0.07 但导出 GGUF 与基座逐字节相同），导出前必须校验，否则白训一轮。
+    """
+    from huggingface_hub import snapshot_download
+
+    saved = _load_check_tensors(saved_dir)
+    base_dir = Path(snapshot_download(base, allow_patterns=["*.safetensors"]))
+    ref = _load_check_tensors(base_dir)
+    missing = [k for k in CHECK_KEYS if k not in saved or k not in ref]
+    if missing:
+        raise SystemExit(f"weight check: tensors missing {missing} in {saved_dir}")
+    for k in CHECK_KEYS:
+        d_base = float((saved[k] - ref[k]).abs().max())
+        msg = f"weight check {k}: max|saved-base|={d_base:.3e}"
+        if model is not None:
+            live = dict(model.named_parameters()).get(k)
+            if live is not None:
+                d_live = float((saved[k] - live.detach().float().cpu()).abs().max())
+                msg += f", max|saved-live|={d_live:.3e}"
+                if d_live > 1e-3:
+                    raise SystemExit(msg + " -> saved weights differ from the trained model")
+        log(msg)
+        if d_base < 1e-6:
+            raise SystemExit(msg + " -> saved weights are still the base model (training not persisted)")
+
+
 def export_base_tokenizer(hf_dir: Path, base: str) -> None:
     from huggingface_hub import snapshot_download
 
@@ -166,15 +211,22 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--smoke", action="store_true", help="冒烟：2000 条样本、50 步、快速导出验证全流程")
     ap.add_argument("--export", action="store_true", help="训练结束后转换并量化 GGUF")
     ap.add_argument("--export-only", action="store_true", help="跳过训练，直接导出 out-dir/final")
+    ap.add_argument("--allow-transformers5", action="store_true", help="允许 transformers 5.x（已知 checkpoint 保存失效，仅供实验）")
     args = ap.parse_args(argv)
 
     import torch
     import transformers
-    from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments
+    from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainerCallback, TrainingArguments
+
+    if int(transformers.__version__.split(".")[0]) >= 5 and not args.allow_transformers5:
+        # 5.x 的 save_model / checkpoint 会写出未训练的基座权重（见 verify_weights_trained）
+        raise SystemExit(f"transformers {transformers.__version__} unsupported: pip install 'transformers==4.57.6' "
+                         "(or pass --allow-transformers5 to experiment)")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     final_dir = args.out_dir / "final"
     if args.export_only:
+        verify_weights_trained(final_dir, args.base)
         export_gguf(final_dir, args.out_dir, args.name, Path("/tmp/l3_export"), args.base)
         return 0
 
@@ -248,12 +300,19 @@ def main(argv: list[str] | None = None) -> int:
     if dropped:
         log(f"TrainingArguments does not accept {dropped}; ignored")
     targs = TrainingArguments(**{k: v for k, v in targ_kwargs.items() if k in targ_params})
+    class VerifyCheckpoint(TrainerCallback):
+        """每次存档后立即校验权重已更新，避免在失效的保存路径上跑完整轮。"""
+
+        def on_save(self, a, state, control, **kw):
+            verify_weights_trained(Path(a.output_dir) / f"checkpoint-{state.global_step}", args.base, kw.get("model"))
+
     trainer = Trainer(
         model=model,
         args=targs,
         train_dataset=FeatDS(train_feats),
         eval_dataset=FeatDS(val_feats),
         data_collator=Collator(pad_id),
+        callbacks=[VerifyCheckpoint()],
     )
     ckpts = sorted((args.out_dir / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[1]))
     resume = str(ckpts[-1]) if ckpts and not args.smoke else None
@@ -262,6 +321,7 @@ def main(argv: list[str] | None = None) -> int:
 
     trainer.save_model(str(final_dir))
     tokenizer.save_pretrained(str(final_dir))
+    verify_weights_trained(final_dir, args.base, model)
     device = next(model.parameters()).device
     report = {
         "eval_loss": trainer.evaluate().get("eval_loss"),
