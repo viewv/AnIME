@@ -94,6 +94,18 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
-- Changed Files:
-- Verification Output:
+- Status: [IN PROGRESS] P0–P1 完成、P2 训练材料就绪（`data/compiled/l3_upload/AnIME_l3/`），等待用户在 Colab 训练。
+- Changed Files（截至 P2 准备）：`crates/lm-neural/src/{config,lib,prompt,llama_backend}.rs`（`PromptStyle`、纠错模板打分、键入原文传入推理线程）、`crates/eval/src/{cli,main}.rs`（`--l3-prompt`）、`scripts/data_pipeline/build_l3_sft.py`、`scripts/data_pipeline/colab/train_l3_correction.{py,ipynb}`、`scripts/data_pipeline/test_pipeline.py`（32 tests）。
+- Verification Output：
+  - **P0 零训练基线**（去泄漏 L2，L1+L2+L3，top1）：
+
+    | 模型 / 模板 | ood_dev TOTAL | clean | novel | multi | realword | ood_tm2 TOTAL | L3 p50 |
+    |---|---|---|---|---|---|---|---|
+    | 360M 通用模板 | 66.4 | 88.7 | 24.7 | 36.0 | 75.0 | 70.0 | 85 ms |
+    | 360M 纠错模板 | 65.2 | 90.3 | 25.3 | 34.0 | 55.0 | 69.7 | 128 ms |
+    | 1.7B 通用模板 | 66.8 | 90.0 | 24.0 | 36.0 | 71.7 | 70.8 | 145–339 ms |
+    | 1.7B 纠错模板 | 66.0 | 91.3 | 25.3 | 35.0 | 55.0 | 69.3 | 455 ms |
+
+    结论：未经训练的模型看不懂模板，看到键入原文后倾向"照抄"——干净句保留 +1.3–2pp，但真词纠错大幅下降（75 -> 55）、整体略降；模板本身不带来收益，必须微调。纠错模板打分整句候选（而非差异后缀），前缀更长，360M p50 85 -> 128 ms，P3 需优化（候选按 token 共享前缀已复用，可再做差异化打分或批量解码）。
+  - **P1 数据集**：`train.jsonl` 407,485 条 / `val.jsonl` 19,925 条（约 1,400 万 token，字符 p50 131 / p99 301）；来源 MultiWOZ 38%、oasst assistant 50%、oasst prompter 12%（prompter 仅 2.2 万子句，×6 变体）；照抄 31.3% + 新词照抄 8.9%、邻键 17.0%、多错误 14.1%、真实错拼 5.5%、漏首字母 / 漏空格 / 空格错位 / 多空格 / 真词各约 4–5%；去泄漏丢弃 79,193 子句；LibriSpeech 默认不用（全小写会教坏专名大小写）。
+  - Rust 与 Python 模板黄金测试逐字节一致；`make check`（0 warning）/ `make test`（69 passed）/ `./scripts/verify-boundaries.sh` BOUNDARY OK。
