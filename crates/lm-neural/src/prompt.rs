@@ -101,6 +101,33 @@ pub fn split_prefix_and_candidates(
     (final_prefix, formatted)
 }
 
+/// 专用纠错模型的提示模板（训练数据构建脚本 `scripts/data_pipeline/build_l3_sft.py` 必须逐字节一致）：
+///
+/// ```text
+/// <|ctx|> {上文}\n<|typed|> {键入原文}\n<|fix|> {目标文本}<|end|>
+/// ```
+///
+/// 原因注释：标记均为普通文本（不新增特殊 token），GGUF 与分词器零改动即可加载微调权重；
+/// 目标末尾带 `<|end|>`，使不同长度的整句候选在同一终止条件下比较联合概率，避免短候选占便宜。
+pub const CORRECTION_CTX_MARK: &str = "<|ctx|>";
+pub const CORRECTION_TYPED_MARK: &str = "<|typed|>";
+pub const CORRECTION_FIX_MARK: &str = "<|fix|>";
+pub const CORRECTION_END_MARK: &str = "<|end|>";
+/// 上文只保留末尾若干字符，保证模板标记永不被 token 截断吃掉。
+pub const CORRECTION_MAX_CONTEXT_CHARS: usize = 160;
+
+pub fn build_correction_prompt(context_before: &str, typed: &str) -> String {
+    let ctx = trim_context_tail(context_before, CORRECTION_MAX_CONTEXT_CHARS);
+    let ctx = ctx.split_whitespace().collect::<Vec<_>>().join(" ");
+    let typed = typed.split_whitespace().collect::<Vec<_>>().join(" ");
+    format!("{CORRECTION_CTX_MARK} {ctx}\n{CORRECTION_TYPED_MARK} {typed}\n{CORRECTION_FIX_MARK}")
+}
+
+pub fn correction_target(candidate: &str) -> String {
+    let cand = candidate.split_whitespace().collect::<Vec<_>>().join(" ");
+    format!(" {cand}{CORRECTION_END_MARK}")
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContinuationPlan {
     pub prompt: String,
@@ -244,6 +271,15 @@ mod tests {
         );
         assert_eq!(partial_prefix, "we see");
         assert_eq!(partial_cands, vec![" the", " the bug"]);
+    }
+
+    #[test]
+    fn correction_template_matches_training_golden() {
+        // 与 scripts/data_pipeline/test_pipeline.py::TestL3Sft 中的黄金样例逐字节一致
+        let prompt = build_correction_prompt("  Can you  help me ", "i want o  go");
+        assert_eq!(prompt, "<|ctx|> Can you help me\n<|typed|> i want o go\n<|fix|>");
+        assert_eq!(correction_target(" I want to go "), " I want to go<|end|>");
+        assert_eq!(build_correction_prompt("", "hello"), "<|ctx|> \n<|typed|> hello\n<|fix|>");
     }
 
     #[test]

@@ -7,10 +7,11 @@ mod prompt;
 
 use std::sync::Arc;
 
-pub use config::{NeuralError, NeuralModelConfig, NeuralRuntimeInfo, validate_gguf_header};
+pub use config::{NeuralError, NeuralModelConfig, NeuralRuntimeInfo, PromptStyle, validate_gguf_header};
 #[cfg(feature = "llama")]
 pub use llama_backend::LlamaNeuralModel;
 pub use prompt::{
+    CORRECTION_END_MARK, build_correction_prompt, correction_target,
     ContinuationPlan, build_continuation_plan, extract_clean_continuation_word,
     normalize_rerank_scores, split_prefix_and_candidates, trim_context_tail,
 };

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import gzip
+from collections import Counter
 import io
 import json
 import random
@@ -23,6 +24,7 @@ if str(SCRIPT_DIR) not in sys.path:
 import build_eval_benchmark  # noqa: E402
 import build_eval_v2  # noqa: E402
 import build_eval_v3  # noqa: E402
+import build_l3_sft  # noqa: E402
 import replay_local_log  # noqa: E402
 import build_ngram_kn  # noqa: E402
 import build_oasst_text  # noqa: E402
@@ -800,6 +802,43 @@ class TestOodDevBuilder(unittest.TestCase):
         rows = build_eval_v3.build_novel_negatives(novel, 5, set(), "t")
         self.assertTrue(rows and all(r[4] == "negative:novel" and r[2] == r[3] for r in rows))
         self.assertEqual(build_eval_v3.build_novel_negatives(novel, 5, {" ".join(novel[0]).lower()}, "t"), rows[1:])
+
+
+class TestL3Sft(unittest.TestCase):
+    def test_template_matches_rust_golden(self):
+        # 与 crates/lm-neural/src/prompt.rs::correction_template_matches_training_golden 逐字节一致
+        self.assertEqual(build_l3_sft.build_correction_prompt("  Can you  help me ", "i want o  go"),
+                         "<|ctx|> Can you help me\n<|typed|> i want o go\n<|fix|>")
+        self.assertEqual(build_l3_sft.correction_target(" I want to go "), " I want to go<|end|>")
+        self.assertEqual(build_l3_sft.build_correction_prompt("", "hello"), "<|ctx|> \n<|typed|> hello\n<|fix|>")
+        long_ctx = "word " * 60 + "finalword"
+        trimmed = build_l3_sft._trim_context_tail(long_ctx, 160)
+        self.assertLessEqual(len(trimmed), 160)
+        self.assertTrue(trimmed.endswith("finalword") and not trimmed.startswith(" "))
+
+    def test_leak_filter_uses_ngram_build_normalization(self):
+        lf = build_l3_sft.LeakFilter(["I'd like to book a table for two"])
+        self.assertTrue(lf.is_leak("i'd LIKE to book a table for two"))
+        self.assertTrue(lf.is_leak("Hello. like to book a table tonight"))  # 共享 5-gram
+        self.assertFalse(lf.is_leak("book a table"))
+        self.assertEqual(build_l3_sft.normalize_sentences("It's 2 PM, ok?"), [["it's"], ["pm"], ["ok"]])
+
+    def test_clauses_and_examples(self):
+        self.assertEqual(build_l3_sft.clauses("Hi there! How do I install numpy, please?"),
+                         [["Hi", "there"], ["How", "do", "I", "install", "numpy"]])
+        lex = {w: (w, 5.0) for w in "how do i install the package please want to go home".split()}
+        rng = random.Random(3)
+        typed, target, tag = build_l3_sft.make_example("", "How do I install numpy", rng, lex, set(), {}, 0.0, 0.0)
+        self.assertEqual((target, tag), ("How do I install numpy", "identity_novel"))
+        self.assertIn(typed, {"How do I install numpy", "how do i install numpy"})
+        seen = Counter()
+        for seed in range(60):
+            ex = build_l3_sft.make_example("", "i want to go home please", random.Random(seed), lex, set(), {}, 0.3, 0.2)
+            self.assertIsNotNone(ex)
+            seen[ex[2].split("_")[0]] += 1
+            if not ex[2].startswith("identity"):
+                self.assertNotEqual(ex[0], ex[1])
+        self.assertTrue(seen["identity"] > 5 and sum(v for k, v in seen.items() if k != "identity") > 20)
 
 
 if __name__ == "__main__":

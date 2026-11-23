@@ -14,10 +14,12 @@ use llama_cpp_2::model::LlamaModel;
 use llama_cpp_2::token::LlamaToken;
 use llama_cpp_2::{LlamaBackendDeviceType, LogOptions, send_logs_to_tracing};
 
-use crate::config::{NeuralError, NeuralModelConfig, NeuralRuntimeInfo, validate_gguf_header};
+use crate::config::{
+    NeuralError, NeuralModelConfig, NeuralRuntimeInfo, PromptStyle, validate_gguf_header,
+};
 use crate::prompt::{
-    build_continuation_plan, extract_clean_continuation_word, normalize_rerank_scores,
-    split_prefix_and_candidates,
+    build_continuation_plan, build_correction_prompt, correction_target,
+    extract_clean_continuation_word, normalize_rerank_scores, split_prefix_and_candidates,
 };
 use crate::{NeuralCandidate, NeuralSentenceModel};
 
@@ -43,6 +45,7 @@ fn global_backend(verbose_logs: bool) -> Result<&'static LlamaBackend, NeuralErr
 enum WorkerRequest {
     Rerank {
         context_before: String,
+        typed: String,
         candidates: Vec<String>,
         reply: SyncSender<Vec<NeuralCandidate>>,
     },
@@ -60,6 +63,7 @@ enum WorkerRequest {
 /// 全程复用 GPU KV-Cache 与 prefill logits。
 pub struct LlamaNeuralModel {
     info: NeuralRuntimeInfo,
+    prompt_style: PromptStyle,
     tx: SyncSender<WorkerRequest>,
     worker: Option<JoinHandle<()>>,
 }
@@ -154,10 +158,16 @@ impl LlamaNeuralModel {
                     match req {
                         WorkerRequest::Rerank {
                             context_before,
+                            typed,
                             candidates,
                             reply,
                         } => {
-                            let res = runner.rerank(&context_before, &candidates);
+                            let res = match runner.cfg.prompt_style {
+                                PromptStyle::Generic => runner.rerank(&context_before, &candidates),
+                                PromptStyle::Correction => {
+                                    runner.rerank_correction(&context_before, &typed, &candidates)
+                                }
+                            };
                             let _ = reply.send(res);
                         }
                         WorkerRequest::Continuations {
@@ -202,6 +212,7 @@ impl LlamaNeuralModel {
         };
 
         Ok(Self {
+            prompt_style: config.prompt_style,
             info: NeuralRuntimeInfo {
                 backend_name,
                 model_name,
@@ -237,17 +248,22 @@ impl NeuralSentenceModel for LlamaNeuralModel {
     fn rerank_sentences(
         &self,
         context_before: &str,
-        _preedit: &str,
+        preedit: &str,
         candidates: &[String],
     ) -> Vec<NeuralCandidate> {
         if candidates.len() < 2 {
             return Vec::new();
         }
-        if context_before.trim().is_empty() && !candidates.iter().any(|c| c.trim().contains(' ')) {
+        // 通用模型对"无上文的单词候选"只有词频信号，不值得一次推理；纠错模型看得到键入原文，单词也要判
+        if self.prompt_style == PromptStyle::Generic
+            && context_before.trim().is_empty()
+            && !candidates.iter().any(|c| c.trim().contains(' '))
+        {
             return Vec::new();
         }
         let (reply_tx, reply_rx) = mpsc::sync_channel(1);
         let req = WorkerRequest::Rerank {
+            typed: preedit.to_string(),
             context_before: context_before.to_string(),
             candidates: candidates.to_vec(),
             reply: reply_tx,
@@ -419,7 +435,37 @@ impl<'m> KvRunner<'m> {
         }
         let target_slice = &candidates[..eval_limit];
         let (prefix_str, suffixes) = split_prefix_and_candidates(context_before, target_slice);
+        let prefix_toks = self.tokenize_with_bos(&prefix_str, self.cfg.max_context_tokens);
+        self.score_candidates(prefix_toks, target_slice, &suffixes)
+    }
 
+    /// 专用纠错模型：`score(c) = Σ log P(c + <|end|> | 上文, 键入原文)`，所有候选共享同一模板前缀 KV。
+    fn rerank_correction(
+        &mut self,
+        context_before: &str,
+        typed: &str,
+        candidates: &[String],
+    ) -> Vec<NeuralCandidate> {
+        let eval_limit = candidates.len().min(self.cfg.max_rerank_candidates);
+        if eval_limit < 2 || typed.trim().is_empty() {
+            return Vec::new();
+        }
+        let target_slice = &candidates[..eval_limit];
+        let prompt = build_correction_prompt(context_before, typed);
+        let suffixes: Vec<String> = target_slice.iter().map(|c| correction_target(c)).collect();
+        // 模板上文已按字符截断，这里放宽 token 上限，保证 <|typed|> 与 <|fix|> 标记完整保留
+        let cap = (self.cfg.n_ctx as usize / 2).max(self.cfg.max_context_tokens);
+        let prefix_toks = self.tokenize_with_bos(&prompt, cap);
+        self.score_candidates(prefix_toks, target_slice, &suffixes)
+    }
+
+    fn score_candidates(
+        &mut self,
+        prefix_toks: Vec<LlamaToken>,
+        target_slice: &[String],
+        suffixes: &[String],
+    ) -> Vec<NeuralCandidate> {
+        let eval_limit = target_slice.len();
         let vocab = self.model.vocab();
         let mut tokenized: Vec<(usize, Vec<LlamaToken>)> = Vec::with_capacity(eval_limit);
         for (orig_idx, suffix) in suffixes.iter().enumerate() {
@@ -435,7 +481,6 @@ impl<'m> KvRunner<'m> {
             return Vec::new();
         }
 
-        let prefix_toks = self.tokenize_with_bos(&prefix_str, self.cfg.max_context_tokens);
         if prefix_toks.is_empty() || !self.ensure_prefix_kv(&prefix_toks) {
             return Vec::new();
         }

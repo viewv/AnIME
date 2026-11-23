@@ -36,6 +36,8 @@ pub struct CliArgs {
     pub model_path: Option<String>,
     pub gpu_layers: u32,
     pub rerank_weight: Option<f32>,
+    /// 强制 L3 提示风格（`generic` / `correction`）；缺省按模型文件名推断。
+    pub l3_prompt: Option<String>,
     pub max_samples: Option<usize>,
     pub help: bool,
 }
@@ -57,6 +59,7 @@ impl Default for CliArgs {
             model_path: None,
             gpu_layers: 999,
             rerank_weight: None,
+            l3_prompt: None,
             max_samples: None,
             help: false,
         }
@@ -79,6 +82,7 @@ Options:
   --ngram <PATH>            Load compiled .animengr.bin n-gram asset
   --model <PATH>            Load L3 GGUF model for neural reranking benchmark
   --gpu-layers <N>          GPU layers for L3 offload (default: 999; 0 = force CPU)
+  --l3-prompt <generic|correction>  Force the L3 prompt style (default: inferred from model file name)
   --rerank-weight <F32>     Override L3 rerank fusion weight (default: library default)
   --max-samples <N>         Evaluate at most N rows from TSV
   -h, --help                Show this help message"
@@ -159,6 +163,15 @@ where
                 cfg.gpu_layers = val
                     .parse::<u32>()
                     .map_err(|_| format!("invalid --gpu-layers integer '{val}'"))?;
+            }
+            "--l3-prompt" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--l3-prompt requires generic|correction".to_string())?;
+                if val != "generic" && val != "correction" {
+                    return Err(format!("invalid --l3-prompt '{val}' (expected generic|correction)"));
+                }
+                cfg.l3_prompt = Some(val.to_string());
             }
             "--rerank-weight" => {
                 let val = iter
