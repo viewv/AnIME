@@ -95,7 +95,7 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [IN PROGRESS] P0–P1 完成（P1 已加入 arXiv 学术文本重建为 v2）、P2 训练材料就绪（`data/compiled/l3_upload/AnIME_l3/`），等待用户在 Colab 训练。
+- Status: [P3 完成 — 待评审] v2 模型 `anime-l3-360m-v2.Q4_K_M.gguf` 已评测并登记 MANIFEST；core_v2 `context_realword` 与 L3 推理延迟两项未达标（见下）。未合并 main。
 - Changed Files（截至 P2 准备）：`crates/lm-neural/src/{config,lib,prompt,llama_backend}.rs`（`PromptStyle`、纠错模板打分、键入原文传入推理线程）、`crates/eval/src/{cli,main}.rs`（`--l3-prompt`）、`scripts/data_pipeline/build_l3_sft.py`、`scripts/data_pipeline/colab/train_l3_correction.{py,ipynb}`、`scripts/data_pipeline/test_pipeline.py`（34 tests）。
 - Verification Output：
   - **P0 零训练基线**（去泄漏 L2，L1+L2+L3，top1）：
@@ -128,4 +128,23 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 
     Q8_0 与 Q4_K_M 指标在 CI 内一致（ood_dev 84.0 / academic 76.2）；L3 推理 p50 约 100 ms（通用 82 ms），按键延迟 p99 <= 4.7 ms。
   - **v1 已知缺陷（需 v2 数据修复后重训）**：(1) 训练数据中**带错样本的键入原文一律被小写**，只有照抄样本保留大写 → 模型学到"原文含大写即照抄"，用户句首按 Shift 时不纠错（core_v2 `Do tbey have an entfance fee` 原样保留），core_v2 sentence 90.0 -> 62.5；(2) 真词纠错只有单编辑距离样本，缺 their/there/they're、your/you're、its/it's、to/too、then/than、form/from 等同音 / 易混词，core_v2 context_realword 95.0 -> 46.0、各集 realword_edit 下降。
+  - **P2 第二轮 run2 = v2（T4，2026-11-23/24）**：数据 v2（带错样本 50% 保留原文大小写、新增同音 / 易混真词互换 `confusable` 13k 条，共 554,345 / 20,074 条），2,166 步 / 2.5 h / 约 3 计算点，eval_loss 0.072；存档、最终保存、转换前三处权重校验全部通过。冒烟验证：`Do tbey have an entfance fee` 正确改写得分 -0.04（v1 照抄 -0.03 / 改写 -8.0）。Colab 合计约 11 计算点（余 189.2）。
+  - **P3 全量评测**（引擎 = main 含 task-15 原样候选 + task-16 易混真词分差；去泄漏 L2 3fcbf1b9；top1 % (95% CI)）：
+
+    | 集合 / 指标 | L1+L2 | + 通用 360M | + v1 | **+ v2 Q4** |
+    |---|---|---|---|---|
+    | ood_dev TOTAL | 66.9 | 71.8 | 84.1 | **83.8 (81–86)** |
+    | ood_dev clean / novel | 88.7 / 50.0 | 90.7 / 62.7 | 100 / 100 | **100 / 100** |
+    | ood_dev multi / space_shift / leading_drop | 32.0 / 58.3 / 53.3 | 32.0 / 66.7 / 61.7 | 44.0 / 88.3 / 75.0 | 43.0 / 88.3 / 76.7 |
+    | ood_academic TOTAL | 59.3 | 63.0 | 76.2 | **75.8 (73–78)** |
+    | ood_academic clean / novel | 88.0 / 70.7 | 91.7 / 67.3 | 99.7 / 100 | 99.7 / 99.3 |
+    | ood_tm2 TOTAL | 67.2 | 68.2 | 74.3 | **74.3 (71–78)** |
+    | noise_v2 TOTAL | 78.7 | 79.5 | 83.2 | **84.2 (82–86)** |
+    | core_v2 TOTAL | 83.1 | 83.6 | 72.4 | **81.5 (79–83)** |
+    | core_v2 sentence / context_realword | 89.0 / 93.5 | 90.0 / 95.0 | 62.5 / 46.0 | **94.0 / 77.5** |
+    | realword_edit（dev / acad / noise_v2） | 61.7 / 43.3 / 73.3 | 73.3 / 60.0 / 84.0 | 56.7 / 51.7 / 62.0 | 53.3 / 53.3 / 67.3 |
+
+    Q8_0 与 Q4_K_M 在 CI 内一致（ood_dev 83.8 / academic 76.0）。按键延迟 p50 0.4–0.6 ms、p99 <= 4.4 ms；单次 max 偶发 22.5 ms（同一批次 L1+L2 15.2 ms、通用 17.0 ms，均为 L3 并发推理时的抖动，非本改动引入，记录待查）。L3 推理 p50 124 ms（通用 87 ms）。
+  - **验收对照**：ood_dev TOTAL >= 72 ✅（83.8）、novel >= 60 ✅（100）、clean 不低于 L1+L2 ✅；ood_academic >= 66 ✅（75.8）、novel >= 60 ✅；ood_tm2 >= 74 ✅（74.3）；noise_v2 不退化 ✅（+4.7）；Q4_K_M <= 300 MB ✅（270.6 MB）。**未达标**：core_v2 TOTAL 81.5 < 通用 83.6（`context_realword` 77.5 vs 95.0：带上文的单词级真词纠错仍偏向照抄；`realword_edit` 各集低于通用模型）；L3 推理 p50 124 ms > 通用 87 ms（整句候选打分，GPU 优化按用户意见另行处理）。
+  - 部署：本机 `~/.local/bin/animed`（task-07 + main）当前加载 v1（systemd drop-in `animed.service.d/l3-correction.conf` 指定 `ANIME_NEURAL_MODEL`）；是否切换 v2 由用户决定。
   - Rust 与 Python 模板黄金测试逐字节一致；`make check`（0 warning）/ `make test`（69 passed）/ `./scripts/verify-boundaries.sh` BOUNDARY OK。

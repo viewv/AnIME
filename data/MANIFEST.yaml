@@ -330,3 +330,13 @@ sources:
     sha256: "dea222da084144f5cb7c146e0a94eef105dbecfc497a335aa2ac8e1e2c247462"
     build_script: "scripts/data_pipeline/build_arxiv_text.py"
     notes: "arXiv Terms of Use：描述性元数据（标题、摘要、作者、分类）按 CC0 1.0 使用；只抓元数据不抓全文，限速 >= 3 s / 请求单连接（fetch_arxiv_oai.py）。sha256 锁定的是逐页 SHA256 清单 data/raw/arxiv-cs/arxiv-cs.dat。仅保留主分类 cs.* 论文；按 arXiv ID CRC32 留出 10% 论文专供 eval/benchmarks/ood_academic_v1.tsv，其余（train.jsonl）供 L3 纠错模型训练与 L2 混合，训练侧按 eval/** 整句与 5-gram 去泄漏。"
+
+  - id: anime-l3-360m-v2-q4_k_m
+    status: ready
+    description: "AnIME 条件纠错 L3 v2：SmolLM2-360M 全参数监督微调（上文 + 键入原文 -> 目标文本），Q4_K_M GGUF（270,589,984 bytes）"
+    source_url: "https://huggingface.co/HuggingFaceTB/SmolLM2-360M"
+    version: "anime-l3-v2-run2-ckpt2166"
+    license: "Apache-2.0"
+    sha256: "6b25c47185d2d9c2623250cff26d397661f676d1da8f0d2a7e7595ab59e5e87c"
+    build_script: "scripts/data_pipeline/colab/train_l3_correction.py"
+    notes: "本地训练产物，不从 source_url 下载（source_url 为基座）。基座 HuggingFaceTB/SmolLM2-360M（Apache-2.0）；训练数据 scripts/data_pipeline/build_l3_sft.py v2（oasst1 Apache-2.0 训练树、MultiWOZ 2.2 train/dev MIT、arXiv CS 元数据 CC0 训练侧、crate-ci/typos MIT 错拼），按 eval/** 整句 + 5-gram 去泄漏；554,345 条 / 1 epoch / lr 1e-4 cosine / batch 16x16 / fp16 / T4 2.5 h；transformers 4.57.6；导出 llama.cpp 51831d47。Q8_0 sha256 970573dea1c590f3033955c6fc8b0283e63546d6a6ce8842a50fca95c72aca01。文件名须含 anime-l3（PromptStyle::detect 据此启用纠错模板）。"
