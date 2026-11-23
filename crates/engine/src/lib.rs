@@ -648,7 +648,7 @@ where
                             },
                         );
                     }
-                    expand_slot_confusables(&self.lexicon, &sub_word, &mut sub_cands, true);
+                    expand_slot_confusables(&self.lexicon, &sub_word, &mut sub_cands, true, false);
                     sub_cands.sort_by(|a, b| {
                         b.lex_score
                             .total_cmp(&a.lex_score)
@@ -700,7 +700,7 @@ where
                 lex_score: -50.0,
             });
         }
-        expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true);
+        expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true, false);
         if is_closed_word {
             let neighbors = self.closed_neighbors_cached(tok);
             expand_closed_token_neighbors(&neighbors, tok, has_exact_hit, &mut slot_cands);
@@ -972,7 +972,7 @@ where
                 });
             }
 
-            expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, has_prev_word_ctx);
+            expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, has_prev_word_ctx, true);
             slot_cands.sort_by(|a, b| {
                 b.lex_score
                     .total_cmp(&a.lex_score)
@@ -2472,5 +2472,69 @@ mod tests {
         assert_eq!(top1("i watched YouTubr about it"), "i watched YouTube about it");
         // 纯小写的词典外 token 不领先。
         assert_ne!(top1("i asked chatgpt about it"), "i asked chatgpt about it");
+    }
+
+    #[test]
+    fn word_mode_keeps_exact_word_against_adjacent_key_confusable() {
+        // fast/vast 只差 f/v 直接邻键替换；L2 是与词频无关的 PMI 提升，罕见词 vast 的偶见搭配
+        // ("type vast"、"the vast") 会拿到比 fast 更高的提升，不得因此翻掉用户已敲出的 fast。
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("fast", 5.1),
+                ("vast", 4.5),
+                ("type", 5.0),
+                ("to", 7.4),
+                ("the", 7.7),
+                ("from", 6.8),
+                ("form", 5.8),
+                ("fill", 5.4),
+                ("out", 6.2),
+            ],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![
+                ("fast", 120),
+                ("vast", 25),
+                ("type", 110),
+                ("to", 1500),
+                ("the", 2000),
+                ("from", 600),
+                ("form", 90),
+                ("fill", 60),
+                ("out", 300),
+            ],
+            vec![
+                ("to", "type", 40),
+                ("type", "fast", 2),
+                ("type", "vast", 2),
+                ("the", "fast", 4),
+                ("the", "vast", 20),
+                ("out", "the", 80),
+                ("the", "form", 60),
+            ],
+            vec![
+                ("to", "type", "vast", 2),
+                ("fill", "out", "the", 50),
+                ("out", "the", "form", 50),
+            ],
+        );
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+        for (seq, ctx) in [(10, "type "), (20, "to type "), (30, "the ")] {
+            sess.reset_with_seq(seq);
+            sess.set_context(ctx, "");
+            let st = feed_text(&mut sess, "fast");
+            assert_eq!(st.candidates[0].text, "fast", "ctx={ctx:?} {:?}", st.candidates);
+            assert!(
+                st.candidates.iter().take(5).any(|c| c.text == "vast"),
+                "vast must stay selectable: {:?}",
+                st.candidates
+            );
+        }
+
+        // 读音 / 换位类易混词仍由上下文翻盘。
+        sess.reset_with_seq(40);
+        sess.set_context("fill out the ", "");
+        assert_eq!(feed_text(&mut sess, "from").candidates[0].text, "form");
     }
 }
