@@ -53,16 +53,34 @@ VAL_PER_100 = 5
 
 # 单错误类型分布：偏向开发者 / 口语快打中常见的邻键、空格与漏首字母
 SINGLE_NOISE_WEIGHTS = {
-    "adjacent_key": 0.18,
-    "real_typo": 0.13,
-    "leading_drop": 0.12,
-    "space_shift": 0.12,
-    "space_missing": 0.12,
-    "space_extra": 0.10,
-    "realword_edit": 0.10,
-    "boundary_gemination": 0.08,
+    "adjacent_key": 0.17,
+    "real_typo": 0.12,
+    "leading_drop": 0.11,
+    "space_shift": 0.11,
+    "space_missing": 0.11,
+    "space_extra": 0.09,
+    "realword_edit": 0.09,
+    "confusable": 0.10,
+    "boundary_gemination": 0.07,
     "contraction": 0.05,
 }
+
+# 带错样本保留原文大小写的概率。Why（v1 缺陷）：噪声算子输出全小写，只有照抄样本带大写，
+# 模型学到"键入原文含大写 -> 照抄"，用户句首按 Shift 时完全不纠错（core_v2 sentence 90 -> 62.5）。
+NOISY_KEEP_CASE_RATE = 0.5
+
+# 同音 / 易混真词组（v1 缺陷：真词纠错只有单编辑距离样本，their/there、your/you're 等无法纠正）。
+# 组内任意两词互换都可能是输入错误；必须靠上文判断，因此这类样本总是尽量带上文。
+CONFUSABLE_GROUPS = (
+    ("their", "there", "they're"), ("your", "you're"), ("its", "it's"), ("to", "too", "two"),
+    ("then", "than"), ("form", "from"), ("of", "off"), ("lose", "loose"), ("affect", "effect"),
+    ("accept", "except"), ("weather", "whether"), ("were", "where", "we're"), ("whose", "who's"),
+    ("quite", "quiet"), ("advice", "advise"), ("hear", "here"), ("know", "no"), ("new", "knew"),
+    ("right", "write"), ("buy", "by"), ("peace", "piece"), ("week", "weak"), ("passed", "past"),
+    ("sight", "site"), ("principal", "principle"), ("brake", "break"), ("wear", "where"),
+    ("now", "know"), ("though", "through", "thought"), ("an", "and"), ("is", "its"), ("on", "one"),
+)
+CONFUSABLE = {w: tuple(x for x in g if x != w) for g in CONFUSABLE_GROUPS for w in g}
 
 _SPLIT_RE = re.compile(r"[.!?,;:()\[\]{}\"]+|\s-\s")
 
@@ -263,7 +281,32 @@ def noise_realword(toks: list[str], rng: random.Random, realword_vocab: set[str]
     return None
 
 
+def noise_confusable(toks: list[str], rng: random.Random) -> str | None:
+    idx = [i for i, w in enumerate(toks) if w.lower() in CONFUSABLE]
+    if not idx:
+        return None
+    i = rng.choice(idx)
+    out = [w.lower() for w in toks]
+    out[i] = rng.choice(CONFUSABLE[toks[i].lower()])
+    return " ".join(out)
+
+
+def restore_case(noisy: str, toks: list[str]) -> str:
+    """把噪声算子的全小写输出按原文大小写还原：原样保留的词恢复原词形，句首大写则首字母大写。"""
+    # 只从非句首词取大小写（专名 / 缩写）；句首词的大写只是句首规则，不能推广到句中同形词（You -> you）
+    cased = {}
+    for t in toks[1:]:
+        if t != t.lower():
+            cased.setdefault(t.lower(), t)
+    out = [cased.get(w, w) for w in noisy.split(" ")]
+    if out and toks and toks[0][:1].isupper() and out[0][:1].islower():
+        out[0] = out[0][:1].upper() + out[0][1:]
+    return " ".join(out)
+
+
 def make_noisy(toks: list[str], ntype: str, rng: random.Random, lex, realword_vocab, real_typos) -> str | None:
+    if ntype == "confusable":
+        return noise_confusable(toks, rng)
     if ntype == "real_typo":
         return noise_real_typo(toks, rng, real_typos)
     if ntype == "realword_edit":
@@ -297,6 +340,8 @@ def make_example(ctx: str, text: str, rng: random.Random, lex, realword_vocab, r
     for attempt in (ntype, "adjacent_key"):
         noisy = make_noisy(toks, attempt, rng, lex, realword_vocab, real_typos)
         if noisy and noisy.lower() != text.lower() and "  " not in noisy:
+            if rng.random() < NOISY_KEEP_CASE_RATE:
+                noisy = restore_case(noisy, toks)
             return noisy, text, attempt
     return None
 

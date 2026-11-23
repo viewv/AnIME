@@ -806,6 +806,32 @@ class TestOodDevBuilder(unittest.TestCase):
 
 
 class TestL3Sft(unittest.TestCase):
+    def test_restore_case_keeps_user_capitals(self):
+        toks = "Do they have an entrance fee at Cambridge".split()
+        self.assertEqual(build_l3_sft.restore_case("do tbey have an entfance fee at cambridge", toks),
+                         "Do tbey have an entfance fee at Cambridge")
+        # 句首 You 的大写不推广到句中的 you
+        self.assertEqual(build_l3_sft.restore_case("you could try two help you", "You could try to help you".split()),
+                         "You could try two help you")
+        # 首词被改动时仍按原句首大写
+        self.assertEqual(build_l3_sft.restore_case("o they have", "Do they have".split()), "O they have")
+
+    def test_confusable_swaps_within_group(self):
+        rng = random.Random(0)
+        for _ in range(20):
+            out = build_l3_sft.noise_confusable("I left my keys over there".split(), rng)
+            self.assertIn(out.split()[-1], ("their", "they're"))
+        self.assertIsNone(build_l3_sft.noise_confusable("hello world".split(), rng))
+
+    def test_noisy_examples_sometimes_keep_case(self):
+        lex = {w: (w, 5.0) for w in "do they have an entrance fee".split()}
+        cased = 0
+        for seed in range(200):
+            ex = build_l3_sft.make_example("", "Do they have an entrance fee", random.Random(seed), lex, set(), {}, 0.0, 0.0)
+            if ex and not ex[2].startswith("identity") and ex[0][:1].isupper():
+                cased += 1
+        self.assertTrue(30 < cased < 170, cased)
+
     def test_arxiv_units_chain_context_and_cap(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "train.jsonl"
