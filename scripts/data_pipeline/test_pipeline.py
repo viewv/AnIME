@@ -28,6 +28,7 @@ import build_l3_sft  # noqa: E402
 import replay_local_log  # noqa: E402
 import build_ngram_kn  # noqa: E402
 import build_oasst_text  # noqa: E402
+import build_arxiv_text  # noqa: E402
 import build_lexicon  # noqa: E402
 import build_misspellings  # noqa: E402
 import build_ngram  # noqa: E402
@@ -857,6 +858,52 @@ class TestL3Sft(unittest.TestCase):
             if not ex[2].startswith("identity"):
                 self.assertNotEqual(ex[0], ex[1])
         self.assertTrue(seen["identity"] > 5 and sum(v for k, v in seen.items() if k != "identity") > 20)
+
+
+class TestArxivText(unittest.TestCase):
+    def test_academic_clauses_drop_case_conflicts(self):
+        lex = {w: (w, 5.0) for w in "we use the dl model of nielsen for training data".split()}
+        texts = ["We use the DL model for training data. We use the model of Nielsen for data. We use the model for training data."]
+        std_old, _ = build_eval_v3.dev_clauses(texts, lex)
+        std_new, _ = build_eval_v3.dev_clauses(texts, lex, keep_source_case=True)
+        self.assertIn("We use the dl model for training data", [" ".join(c) for c in std_old])
+        self.assertEqual([" ".join(c) for c in std_new], ["We use the model for training data"])
+
+    def test_clean_abstract_flattens_latex(self):
+        raw = "We study $O(n^2)$ \\emph{sparse} attention~\\cite{vaswani}. See https://x.org/a for code."
+        out = build_arxiv_text.clean_abstract(raw)
+        self.assertNotIn("$", out)
+        self.assertNotIn("\\", out)
+        self.assertNotIn("http", out)
+        self.assertIn("sparse attention", out)
+        self.assertIn(" ; ", out)
+
+    def test_heldout_split_is_deterministic_and_about_ten_percent(self):
+        ids = [f"2501.{i:05d}" for i in range(5000)]
+        held = [i for i in ids if build_arxiv_text.is_heldout(i)]
+        self.assertEqual(held, [i for i in ids if build_arxiv_text.is_heldout(i)])
+        self.assertTrue(350 <= len(held) <= 650, len(held))
+
+    def test_only_primary_cs_and_split_disjoint(self):
+        rec = """<record><metadata><arXiv xmlns="http://arxiv.org/OAI/arXiv/"><id>{id}</id>
+<categories>{cats}</categories><abstract>{abs}</abstract></arXiv></metadata></record>"""
+        body = " ".join(["we propose a simple method for robust retrieval"] * 4)
+        recs = [rec.format(id=f"2501.{i:05d}", cats="cs.CL cs.LG", abs=body) for i in range(200)]
+        recs.append(rec.format(id="2501.99999", cats="quant-ph cs.NA", abs=body))
+        xml = ('<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"><ListRecords>'
+               + "".join(recs) + "</ListRecords></OAI-PMH>")
+        with tempfile.TemporaryDirectory() as td:
+            raw, out = Path(td) / "raw", Path(td) / "out"
+            raw.mkdir()
+            with gzip.open(raw / "page-00000.xml.gz", "wt") as f:
+                f.write(xml)
+            self.assertEqual(build_arxiv_text.main(["--raw-dir", str(raw), "--out-dir", str(out)]), 0)
+            tr = [json.loads(l)["id"] for l in (out / "train.jsonl").read_text().splitlines()]
+            ho = [json.loads(l)["id"] for l in (out / "heldout.jsonl").read_text().splitlines()]
+            self.assertEqual(len(tr) + len(ho), 200)
+            self.assertFalse(set(tr) & set(ho))
+            self.assertNotIn("2501.99999", tr + ho)
+            self.assertTrue(all(build_arxiv_text.is_heldout(i) for i in ho))
 
 
 if __name__ == "__main__":

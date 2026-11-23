@@ -51,6 +51,8 @@ pub struct EngineSession<L, N, M> {
     neighbor_cache: HashMap<String, Vec<LexiconCandidate>>,
     slot_cache: HashMap<(String, bool), (Vec<LatticeSlot>, Vec<LexiconCandidate>)>,
     exact_probe_cache: HashMap<String, Option<f32>>,
+    /// 按 token 缓存"大小写意图"判定：驼峰词需额外探测近邻规范词形，每击对整句所有 token 重算会吃掉同步预算。
+    verbatim_lead_cache: HashMap<String, bool>,
     /// 最近一次上屏实际写入个人学习库的（句首归一化后）文本，供宿主用同一文本同步 L1 动态层。
     last_learned_text: Option<String>,
 }
@@ -78,6 +80,7 @@ where
             neighbor_cache: HashMap::with_capacity(16),
             slot_cache: HashMap::with_capacity(32),
             exact_probe_cache: HashMap::with_capacity(64),
+            verbatim_lead_cache: HashMap::with_capacity(16),
             last_learned_text: None,
         }
     }
@@ -90,6 +93,7 @@ where
         self.config = config;
         self.revision = 0;
         self.token_lex_cache.clear();
+        self.verbatim_lead_cache.clear();
         self.recompute_candidates();
     }
 
@@ -160,6 +164,7 @@ where
         self.preedit.clear();
         self.candidates.clear();
         self.token_lex_cache.clear();
+        self.verbatim_lead_cache.clear();
         self.last_auto_space = false;
         self.current_state(false)
     }
@@ -195,6 +200,7 @@ where
                     let raw = std::mem::take(&mut self.preedit);
                     self.candidates.clear();
                     self.token_lex_cache.clear();
+                    self.verbatim_lead_cache.clear();
                     self.last_auto_space = false;
                     self.learn(&learn_text);
                     append_context_before(&mut self.context.before, &raw, false);
@@ -214,6 +220,7 @@ where
                     self.preedit.clear();
                     self.candidates.clear();
                     self.token_lex_cache.clear();
+                    self.verbatim_lead_cache.clear();
                     self.last_auto_space = false;
                     EngineOutput::State(self.current_state(false))
                 }
@@ -458,6 +465,7 @@ where
             self.preedit.clear();
             self.candidates.clear();
             self.token_lex_cache.clear();
+            self.verbatim_lead_cache.clear();
             self.last_auto_space = false;
 
             EngineOutput::Commit(CommitAction {
@@ -524,6 +532,7 @@ where
         self.last_auto_space = add_space;
         self.preedit = remaining.clone();
         self.token_lex_cache.clear();
+        self.verbatim_lead_cache.clear();
         self.recompute_candidates();
 
         EngineOutput::Commit(CommitAction {
@@ -1077,6 +1086,7 @@ where
                     trailing_space: self.config.smart_spacing,
                 });
             }
+            self.insert_verbatim_sentence(&tokens, sentence_start, total_chars);
 
             // 同时保留首个词条的部分选词候选，便于用户只确认句首词
             let (_, _, first_end) = &tokens[0];
@@ -1105,6 +1115,130 @@ where
         }
 
         self.ensure_raw_and_limit(total_chars);
+    }
+
+    /// 整句模式下把用户原样输入（仅句首按惯例首字母大写，其余保留用户大小写）作为整句候选放进固定窗口位。
+    ///
+    /// Why：L1 会把词典外新词（`ChatGPT`、`UBI`）就近纠成词典词，L2 词格因此永远解码不出原句；
+    /// 末位 Raw 兜底又会被 L3 调度按 `CandidateKind::Raw` 过滤掉。若原样句不在 L3 的前
+    /// `max_rerank_candidates` 条整句候选里，纠错 L3 就只能在错误改写之间挑选，无法选择"照抄"。
+    /// 因此它以 `Sentence` 类型、介于相邻候选之间的分数插在第 `VERBATIM_SLOT` 位：不抢 top-1，
+    /// L3 的加性重排分数足以在模型确信原句时把它提到首位；仅当 `verbatim_should_lead` 成立时领先。
+    fn insert_verbatim_sentence(
+        &mut self,
+        tokens: &[(String, usize, usize)],
+        sentence_start: bool,
+        total_chars: usize,
+    ) {
+        let joined = tokens
+            .iter()
+            .map(|(t, _, _)| t.as_str())
+            .collect::<Vec<_>>()
+            .join(" ");
+        let text = if sentence_start {
+            capitalize_first_ascii(&joined)
+        } else {
+            joined
+        };
+        let promote = self.verbatim_should_lead(tokens);
+        let slot = if promote { 0 } else { VERBATIM_SLOT };
+
+        // 此时候选全部是整句候选（部分选词稍后追加），按分数降序。
+        let existing = self
+            .candidates
+            .iter()
+            .position(|c| c.consumed_chars == total_chars && c.text == text);
+        if let Some(idx) = existing {
+            if idx <= slot {
+                return;
+            }
+            self.candidates.remove(idx);
+        }
+        let n = self.candidates.len();
+        let pos = slot.min(n);
+        let score = if n == 0 {
+            0.0
+        } else if pos == 0 {
+            self.candidates[0].score + VERBATIM_LEAD_MARGIN
+        } else if pos < n {
+            0.5 * (self.candidates[pos - 1].score + self.candidates[pos].score)
+        } else {
+            self.candidates[n - 1].score - VERBATIM_LEAD_MARGIN
+        };
+        self.candidates.insert(
+            pos,
+            Candidate {
+                text,
+                kind: CandidateKind::Sentence,
+                comment: Some("verbatim".into()),
+                score,
+                consumed_chars: total_chars,
+                trailing_space: self.config.smart_spacing,
+            },
+        );
+    }
+
+    /// 原样句是否直接领先（top-1）：存在"带显式大小写意图的词典外 token"时。
+    ///
+    /// Why：大小写是唯一几乎不会被错拼制造出来的意图信号。词中大写（`ChatGPT`、`UBI`、`GPUs`）的
+    /// 词典外 token，L1 的就近纠错几乎都是改写成无关词典词（`Chapter`、`UP`、`Cups`），保留原样更好；
+    /// 纯小写的词典外 token（`roleplay`、`numpy`）与普通错拼无法区分，只进窗口、交给 L3 判断。
+    /// - 全大写缩写（可带复数 `s`）一律领先：3–5 位大写串几乎都与某个已知缩写只差一次编辑，
+    ///   "附近有大写词典词"不携带信息，而 L1 对缩写错拼本就几乎修不回来；
+    /// - 驼峰词若 L1 能召回编辑代价 <= 1.25、且词典规范词形本身含词中大写的近邻（`YouTubr -> YouTube`），
+    ///   视为已知驼峰词的错拼，不领先。规范词形必须按小写重新查一次：L1 会把输入的大小写形状
+    ///   镜像到候选上（`HVLP -> HELP`），不能直接看候选文本。
+    fn verbatim_should_lead(&mut self, tokens: &[(String, usize, usize)]) -> bool {
+        tokens.iter().any(|(tok, _, _)| self.token_signals_cased_intent(tok))
+    }
+
+    fn token_signals_cased_intent(&mut self, tok: &str) -> bool {
+        let word = tok.trim_matches(|c: char| !c.is_ascii_alphanumeric());
+        if !word.chars().skip(1).any(|c| c.is_ascii_uppercase()) {
+            return false;
+        }
+        if let Some(&cached) = self.verbatim_lead_cache.get(tok) {
+            return cached;
+        }
+        let opts = QueryOptions {
+            limit: self.config.max_candidates,
+            enable_phonetic: self.config.enable_phonetic,
+            ..QueryOptions::default()
+        };
+        let leads = if self.exact_log_freq(word, &opts).is_some() {
+            false
+        } else if word
+            .strip_suffix('s')
+            .unwrap_or(word)
+            .chars()
+            .all(|c| !c.is_ascii_lowercase())
+        {
+            true
+        } else {
+            let exact_probe = QueryOptions {
+                limit: 3,
+                enable_phonetic: false,
+                max_edit_cost: 0.0,
+            };
+            let near: Vec<String> = self
+                .query_lexicon_cached(tok, &opts)
+                .iter()
+                .filter(|h| h.edit_cost <= VERBATIM_NEAR_EDIT_COST)
+                .map(|h| h.word.to_ascii_lowercase())
+                .collect();
+            !near.iter().any(|low| {
+                self.lexicon
+                    .query(low, &exact_probe)
+                    .into_iter()
+                    .find(|h| h.kind == LexiconMatchKind::Exact)
+                    .is_some_and(|h| h.word.chars().skip(1).any(|c| c.is_ascii_uppercase()))
+            })
+        };
+        if self.verbatim_lead_cache.len() >= MAX_TOKEN_LEX_CACHE {
+            self.verbatim_lead_cache.clear();
+        }
+        self.verbatim_lead_cache.insert(tok.to_string(), leads);
+        leads
     }
 
     fn ensure_raw_and_limit(&mut self, total_chars: usize) {
@@ -1152,6 +1286,14 @@ fn append_context_before(before: &mut String, committed: &str, trailing_space: b
         }
     }
 }
+
+/// 原样句在整句候选中的默认位置（0 基）：紧跟 top-1 之后。不抢 top-1，但给 L3 的先验最强：
+/// 评测中第 1 / 2 / 4 位对 L1+L2 Top-1 完全相同，而通用 SmolLM2 重排下第 1 位的新词句 Top-1 最高、噪声标签逐行不变。
+const VERBATIM_SLOT: usize = 1;
+/// 原样句领先或垫底时与相邻候选的分差：只决定次序，远小于 L3 重排的加性分数（±4.5 量级）。
+const VERBATIM_LEAD_MARGIN: f32 = 0.01;
+/// 判定"驼峰词错拼"的近邻编辑代价上限，与 `should_expand_runon_token` 的单步纠错门槛一致。
+const VERBATIM_NEAR_EDIT_COST: f32 = 1.25;
 
 fn context_starts_sentence(before: &str) -> bool {
     if before.is_empty() {
@@ -2206,5 +2348,129 @@ mod tests {
             "expected joint typo-correction + runon segmentation at top-1, got: {:?}",
             st_mixed.candidates
         );
+    }
+
+    #[test]
+    fn verbatim_sentence_enters_rerank_window_and_l3_can_choose_it() {
+        struct MockNeural;
+        impl NeuralSentenceModel for MockNeural {
+            fn backend_name(&self) -> &'static str {
+                "mock-l3"
+            }
+            fn rerank_sentences(&self, _: &str, _: &str, _: &[String]) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+            fn predict_continuations(&self, _: &str, _: &str, _: usize) -> Vec<NeuralCandidate> {
+                Vec::new()
+            }
+        }
+
+        // 纯小写的词典外词 `chatgpt` 与错拼无法区分：L1 就近纠成 `chapter`，原样句只进窗口不领先。
+        let lex = Lexicon::from_word_zipfs(
+            vec![("i", 7.5), ("asked", 5.5), ("chapter", 5.0), ("about", 6.5), ("it", 7.0)],
+            Vec::new(),
+        );
+        let mut sess = EngineSession::new(lex, NoopNgramModel, MockNeural);
+        let mut last = None;
+        for (idx, ch) in "i asked chatgpt about it".chars().enumerate() {
+            let key = if ch == ' ' {
+                KeyInput::Space
+            } else {
+                KeyInput::Char(ch)
+            };
+            if let EngineOutput::State(st) = sess.handle_key_with_seq((idx + 1) as u64, key) {
+                last = Some(st);
+            }
+        }
+        let st = last.expect("state");
+        let full: Vec<&Candidate> = st
+            .candidates
+            .iter()
+            .filter(|c| c.consumed_chars == st.preedit.chars().count() && c.kind != CandidateKind::Raw)
+            .collect();
+        let pos = full
+            .iter()
+            .position(|c| c.text == "i asked chatgpt about it")
+            .expect("verbatim sentence must be offered");
+        assert!(pos > 0, "verbatim must not be forced to top-1: {:?}", st.candidates);
+        assert!(pos < 6, "verbatim must sit inside the default L3 rerank window");
+        assert_eq!(full[pos].kind, CandidateKind::Sentence);
+        assert_eq!(full[pos].comment.as_deref(), Some("verbatim"));
+        // 原样句已作为整句候选出现，不再重复追加 Raw 兜底项。
+        assert!(!st.candidates.iter().any(|c| c.kind == CandidateKind::Raw));
+
+        let top1 = full[0].text.clone();
+        let pushed = sess
+            .apply_neural_rerank(
+                st.seq,
+                &[
+                    NeuralCandidate {
+                        text: "i asked chatgpt about it".into(),
+                        score: 2.0,
+                        is_continuation: false,
+                    },
+                    NeuralCandidate {
+                        text: top1.clone(),
+                        score: -2.0,
+                        is_continuation: false,
+                    },
+                ],
+                &[],
+            )
+            .expect("apply neural rerank");
+        assert_eq!(pushed.candidates[0].text, "i asked chatgpt about it");
+        assert!(pushed.candidates.iter().any(|c| c.text == top1));
+    }
+
+    #[test]
+    fn verbatim_sentence_capitalizes_only_at_sentence_start_and_skips_single_word() {
+        let mut sess = make_session();
+        sess.set_context("Done. ", "");
+        let st = feed_text(&mut sess, "teh qzx");
+        assert!(
+            st.candidates
+            .iter()
+            .any(|c| c.text == "Teh qzx" && c.kind == CandidateKind::Sentence),
+            "{:?}",
+            st.candidates
+        );
+
+        let mut single = make_session();
+        let st = feed_text(&mut single, "qzx");
+        assert!(!st
+            .candidates
+            .iter()
+            .any(|c| c.comment.as_deref() == Some("verbatim")));
+    }
+
+    #[test]
+    fn verbatim_leads_only_for_cased_out_of_lexicon_tokens() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("i", 7.5),
+                ("asked", 5.5),
+                ("chapter", 5.0),
+                ("about", 6.5),
+                ("it", 7.0),
+                ("up", 6.8),
+                ("watched", 5.2),
+                ("YouTube", 4.7),
+                ("cups", 4.5),
+            ],
+            Vec::new(),
+        );
+        let top1 = |input: &str| {
+            let mut sess = EngineSession::new(lex.clone(), NoopNgramModel, NoopNeuralModel);
+            let st = feed_text(&mut sess, input);
+            st.candidates[0].text.clone()
+        };
+        // 驼峰 / 全大写 / 复数缩写的词典外 token：大小写即意图，原样句领先。
+        assert_eq!(top1("i asked ChatGPT about it"), "i asked ChatGPT about it");
+        assert_eq!(top1("i asked UBI about it"), "i asked UBI about it");
+        assert_eq!(top1("i asked GPUs about it"), "i asked GPUs about it");
+        // 已知驼峰词的错拼仍交给 L1 纠正。
+        assert_eq!(top1("i watched YouTubr about it"), "i watched YouTube about it");
+        // 纯小写的词典外 token 不领先。
+        assert_ne!(top1("i asked chatgpt about it"), "i asked chatgpt about it");
     }
 }

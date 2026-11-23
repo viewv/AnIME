@@ -27,6 +27,8 @@
 - **Task 11（L2 语料扩展，`.agents/tasks/task-11-l2-corpus-expansion.md`）**：许可合规的日常与技术领域语料调研与接入。
 - **Task 12（用户词典准入门槛与大小写双态共存，`.agents/tasks/task-12-user-lexicon-casing.md`）**：治理 `user_words` 与 L1 动态层低门槛入库及大小写互斥覆盖问题（根治 `So → SO` 粘连污染，支持 `Linux`/`linux`、`macOS`/`macos` 等大小写双词形共存与输入大小写意图保护）。
 - **Task 13（开发者风格评测集 `ood_dev_v1`，`.agents/tasks/task-13-ood-dev-eval.md`）**：oasst1 按对话树留出的现代 / 技术英文提问，含 `negative:novel` 新词保护指标；LibriSpeech 文学集 `ood_v1` 降级为仅参考，不作门禁。
+- **Task 14（学术写作评测集 `ood_academic_v1`，`.agents/tasks/task-14-academic-eval.md`）**：arXiv CS 论文标题 / 摘要元数据（CC0，OAI-PMH 有限抓取），按论文 ID 留出 10% 构建学术评测集（含 `negative:novel` 术语保护），其余论文供 Task 07 L3 纠错模型训练与后续 L2 混合；L1 可挂载学术词库另行处理。
+- **Task 15（整句原样候选，`.agents/tasks/task-15-verbatim-candidate.md`）**：整句模式始终把用户原样输入（保留大小写）作为 `Sentence` 候选放在第 2 位、L3 重排窗口内，使 L3 能在"照抄"与"纠错"间选择；含词中大写的词典外 token（`ChatGPT` / `UBI` / `GPUs`，排除已知驼峰词错拼）时原样句直接领先。`negative:novel` L1+L2 Top-1 22.7→50.0（ood_dev）/ 32.0→70.7（ood_academic），噪声标签逐行不变。
 - **可挂载领域词典**：技术 / 开源专名词库作为独立可挂载词典层（复用 L1 分层词典），不并入基础词库。
 - **Task 07（专用整句条件纠错 L3 模型，`.agents/tasks/task-07-neural-distillation.md`，2026-11-23 重写）**：以"上文 + 用户实际键入原文 → 目标文本"格式，在用户 Colab 上全参数微调 SmolLM2-360M（合成噪声 + 照抄样本 + 新词保护，零泄漏），导出 GGUF 接入 `lm-neural`；替代原 1.7B 软标签蒸馏方案。
 - 在不改动 Rust 核心的前提下实现 `frontends/macos/`（macOS IMKit `IMKInputController`）。
