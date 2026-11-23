@@ -320,3 +320,13 @@ sources:
     sha256: "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
     build_script: "scripts/data_pipeline/build_lexicon.py"
     notes: "官方 BSD-2-Clause 开源美式英语音素词典，写入 ANIMELEX phonetic 字段用于数据驱动的同音与近音词发现"
+
+  - id: arxiv-cs
+    status: ready
+    description: "arXiv CS 论文元数据（标题 / 摘要，OAI-PMH metadataPrefix=arXiv、set=cs、from=2025-01-01，前 65,000 条记录 / 50 页），学术写作文本"
+    source_url: "https://oaipmh.arxiv.org/oai"
+    version: "oai-cs-from2025-01-01-65k"
+    license: "CC0-1.0"
+    sha256: "dea222da084144f5cb7c146e0a94eef105dbecfc497a335aa2ac8e1e2c247462"
+    build_script: "scripts/data_pipeline/build_arxiv_text.py"
+    notes: "arXiv Terms of Use：描述性元数据（标题、摘要、作者、分类）按 CC0 1.0 使用；只抓元数据不抓全文，限速 >= 3 s / 请求单连接（fetch_arxiv_oai.py）。sha256 锁定的是逐页 SHA256 清单 data/raw/arxiv-cs/arxiv-cs.dat。仅保留主分类 cs.* 论文；按 arXiv ID CRC32 留出 10% 论文专供 eval/benchmarks/ood_academic_v1.tsv，其余（train.jsonl）供 L3 纠错模型训练与 L2 混合，训练侧按 eval/** 整句与 5-gram 去泄漏。"

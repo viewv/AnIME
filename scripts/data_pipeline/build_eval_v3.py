@@ -8,6 +8,8 @@
   5-gram 从 L2 训练语料中剔除；新增后必须重建 L2。
 - ood_tm2_v1：Google Taskmaster-2（CC BY 4.0）food-ordering / music / sports / movies 领域 USER 话轮，
   日常口语任务对话（非 MultiWOZ 订酒店领域）；同样包含干净反例、单错误与多错误样本。
+- ood_academic_v1：arXiv CS 论文摘要（元数据 CC0，`build_arxiv_text.py` 按论文 ID 留出），学术写作文本；
+  与 ood_dev_v1 同一方法（含 `negative:novel` 新词 / 术语句）。
 - 反例复核：`--review-file` 为人工裁决表（`sentence<TAB>exclude|keep<TAB>reason`），标为 exclude 的
   源句（自身有拼写/语法错误）不进入任何集合。裁决流程：先用 `--emit-negative-candidates` 导出候选，
   以当前引擎评测，只复核引擎改动了的句子（分歧裁决），未被改动的候选直接保留。
@@ -116,8 +118,18 @@ DEV_MAX_NOVEL_TOKENS = 2
 _DEV_SPLIT_RE = re.compile(r"[.!?,;:()\"]+")
 
 
-def dev_clauses(texts: list[str], lex) -> tuple[list[list[str]], list[list[str]]]:
-    """切出 (全部为常见词典词的子句, 含 1–2 个词典外新词的子句)；新词保留原始大小写，不参与加噪。"""
+def arxiv_heldout_abstracts(path: Path) -> list[str]:
+    """build_arxiv_text.py 的留出论文摘要（已清洗 LaTeX）。"""
+    with open(path, encoding="utf-8") as f:
+        return [json.loads(line)["abstract"] for line in f if line.strip()]
+
+
+def dev_clauses(texts: list[str], lex, keep_source_case: bool = False) -> tuple[list[list[str]], list[list[str]]]:
+    """切出 (全部为常见词典词的子句, 含 1–2 个词典外新词的子句)；新词保留原始大小写，不参与加噪。
+
+    keep_source_case（学术文本）：词典词的原文大小写与词典词形冲突时（`Nielsen` / `DL` 而词典只有小写）
+    整句丢弃——否则期望答案会被改写成 `nielsen` / `dl`。ood_dev_v1 已冻结，保持旧行为。
+    """
     standard: list[list[str]] = []
     novel: list[list[str]] = []
     seen: set[str] = set()
@@ -138,6 +150,10 @@ def dev_clauses(texts: list[str], lex) -> tuple[list[list[str]], list[list[str]]
                 hit = lex.get(t.lower())
                 if hit is not None and hit[1] >= DEV_KNOWN_MIN_ZIPF:
                     canon = hit[0]
+                    rest = t if i > 0 else t[1:]
+                    if keep_source_case and t != canon and rest != rest.lower():
+                        n_novel = DEV_MAX_NOVEL_TOKENS + 1
+                        break
                     norm.append(t[0] + canon[1:] if i == 0 and t[0].isupper() and canon.lower() == t.lower() else canon)
                 else:
                     n_novel += 1
@@ -271,6 +287,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dev-multi", type=int, default=100)
     ap.add_argument("--dev-negatives", type=int, default=300)
     ap.add_argument("--dev-novel", type=int, default=150)
+    ap.add_argument("--arxiv-heldout", type=Path, default=REPO_ROOT / "data/compiled/arxiv_cs/heldout.jsonl")
+    ap.add_argument("--out-ood-academic", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_academic_v1.tsv")
     ap.add_argument("--out-ood-tm2", type=Path, default=REPO_ROOT / "eval/benchmarks/ood_tm2_v1.tsv")
     ap.add_argument("--emit-negative-candidates", type=Path, default=None,
                     help="额外导出全部干净候选（未经复核）为评测 TSV，用于分歧裁决")
@@ -295,6 +313,8 @@ def main(argv: list[str] | None = None) -> int:
     tm2 = clauses_from_texts(taskmaster_user_texts(args.taskmaster_json), lex)
     dev_std, dev_novel = dev_clauses(heldout_prompter_paragraphs(args.oasst), lex) if args.oasst.exists() else ([], [])
     libri = librispeech_holdout_clauses(args.librispeech, lex)
+    acad_std, acad_novel = dev_clauses(arxiv_heldout_abstracts(args.arxiv_heldout), lex, keep_source_case=True) if args.arxiv_heldout.exists() else ([], [])
+    print(f"arxiv_heldout clauses: {len(acad_std)}+{len(acad_novel)}novel")
     print(f"source clauses: multiwoz={len(woz)} librispeech_holdout={len(libri)} taskmaster2={len(tm2)} oasst_dev={len(dev_std)}+{len(dev_novel)}novel review_excluded={len(excluded)}")
 
     noise_rows, noise_stats, woz_cands = build_rows(
@@ -314,6 +334,12 @@ def main(argv: list[str] | None = None) -> int:
         args.dev_negatives, excluded, seed_tag=f"{args.seed}:dev",
     )
     novel_rows = build_novel_negatives(dev_novel, args.dev_novel, excluded, f"{args.seed}:dev")
+    acad_rows, acad_stats, acad_cands = build_rows(
+        acad_std, lex, realword_vocab, random.Random(args.seed + 4), args.dev_per_type, args.dev_multi,
+        args.dev_negatives, excluded, seed_tag=f"{args.seed}:acad",
+    )
+    acad_novel_rows = build_novel_negatives(acad_novel, args.dev_novel, excluded, f"{args.seed}:acad")
+    acad_stats["negative_novel"] = len(acad_novel_rows)
     dev_stats["negative_novel"] = len(novel_rows)
     header_common = f"seed={args.seed}；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核"
     write_tsv(args.out_noise, noise_rows, [
@@ -336,9 +362,15 @@ def main(argv: list[str] | None = None) -> int:
             "negative:novel = 含词典外新词的干净句；留出树不进入 L2 训练（build_oasst_text.py）；" + header_common,
         ])
         print(f"ood_dev_v1: {len(dev_rows) + len(novel_rows)} rows {dict(sorted(dev_stats.items()))}")
+    if acad_rows:
+        write_tsv(args.out_ood_academic, acad_rows + acad_novel_rows, [
+            "AnIME ood_academic_v1：arXiv CS 论文摘要（arXiv 元数据 CC0 1.0）按论文 ID 留出（build_arxiv_text.py），学术写作文本",
+            "negative:novel = 含词典外术语 / 新词的干净句；留出论文不进入任何训练；" + header_common,
+        ])
+        print(f"ood_academic_v1: {len(acad_rows) + len(acad_novel_rows)} rows {dict(sorted(acad_stats.items()))}")
     if args.emit_negative_candidates:
-        cands = [("sentence", "", s, s, "negative:clean") for s in woz_cands + libri_cands + tm2_cands + dev_cands]
-        cands += [(r[0], r[1], r[2], r[3], "negative:novel") for r in novel_rows]
+        cands = [("sentence", "", s, s, "negative:clean") for s in woz_cands + libri_cands + tm2_cands + dev_cands + acad_cands]
+        cands += [(r[0], r[1], r[2], r[3], "negative:novel") for r in novel_rows + acad_novel_rows]
         write_tsv(args.emit_negative_candidates, cands, ["未复核的干净反例候选（仅用于分歧裁决，勿入库）"])
     print(f"noise_v2: {len(noise_rows)} rows {dict(sorted(noise_stats.items()))}")
     print(f"ood_v1: {len(ood_rows)} rows {dict(sorted(ood_stats.items()))}")
