@@ -45,6 +45,30 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [DONE — 待评审] `ood_academic_v1` 已生成并复核；arXiv 训练侧文本已供 task-07 L3 训练集使用。
 - Changed Files:
-- Verification Output:
+  - `scripts/data_pipeline/fetch_arxiv_oai.py`（新增）：OAI-PMH 有限抓取（`set=cs`、`from=2025-01-01`、上限 65,000 条、3.5 s / 请求、503 Retry-After、断点续传），逐页 SHA256 清单 `arxiv-cs.dat`。
+  - `scripts/data_pipeline/build_arxiv_text.py`（新增）：只保留主分类 cs.*，清洗 LaTeX 公式 / 命令 / URL（公式改为子句断点），不输出标题；按 arXiv ID CRC32 留出 10%。
+  - `scripts/data_pipeline/build_eval_v3.py`：新增 `ood_academic_v1`（与 ood_dev_v1 同法，seed + 4）；`dev_clauses(keep_source_case=True)` 丢弃原文大小写与词典词形冲突的子句（`Nielsen` / `DL` 否则会被期望答案改写成小写）。
+  - `scripts/data_pipeline/test_pipeline.py`（33 tests）、`data/MANIFEST.yaml`（`arxiv-cs`，CC0-1.0）、`eval/benchmarks/ood_academic_v1.tsv`（新增，1030 行）、`eval/review/negative_review.tsv`（追加 144 条裁决，6 条剔除）、`ROADMAP.md`。
+- Verification Output：
+  - 抓取：50 页 / 65,000 条记录，原始 39 MB；主分类 cs.* 54,585 篇 → 训练侧 49,160 篇、留出 5,425 篇（非主分类 cs 10,407 篇丢弃）。
+  - 留出论文切出 26,505 条常见词子句 + 8,908 条新词 / 术语子句；`ood_academic_v1`：8 类单错误各 60、`noise:multi` 100、`negative:clean` 300、`negative:novel` 150。
+  - 复核 4 轮收敛（剔除残片、源句缺撇号 `VRs potential` / `users perceptions`、用词错误 `interested information`、公式残留变量 `n`）；既有冻结评测集（noise_v2 / ood_v1 / ood_tm2_v1 / ood_dev_v1）重新生成后逐字节不变。
+  - `make check && make test && make eval && make verify-infra && verify-boundaries`：全部通过（BOUNDARY OK task-14，8 个文件零越界）。
+  - **基线（去泄漏 L2 sha256 3fcbf1b9，top1，95% CI）**：
+
+    | 指标 | L1+L2 | L1+L2 Top-5 | L1+L2+通用 SmolLM2-360M |
+    |---|---|---|---|
+    | TOTAL | **53.7%（50.6–56.7）** | 69.0% | 58.6%（55.6–61.6） |
+    | negative:clean | 88.0 | 97.0 | 90.7 |
+    | **negative:novel** | **32.0** | 34.7 | 34.0 |
+    | noise:multi | 20.0 | 37.0 | 25.0 |
+    | realword_edit | 43.3 | 81.7 | 58.3 |
+    | space_missing / space_shift | 35.0 / 48.3 | 63.3 / 86.7 | 45.0 / 65.0 |
+    | leading_drop / boundary_gemination | 53.3 / 45.0 | 65.0 / 71.7 | 55.0 / 53.3 |
+    | contraction | 1.7 | 16.7 | 1.7 |
+
+    L3 推理 p50 76 ms；按键延迟 p50 / p99 / max = 0.38 / 3.3 / 15.6 ms（契约内）。
+  - **结论**：学术文本是所有评测集中最弱的领域（低于 ood_dev 62.9%）。干净句中 12% 被误改，几乎全是术语与缩写（`LLMs -> Me`、`GPUs -> Cups`、`Cholesky -> Closely`、`HuggingFace -> Hygienics`、`interpretability -> interoperability`、`datasets -> data sets`），新词句仅 32% 原样保留。通用 L3 只带来 +4.9pp，Top-5 上限 69.0% 说明召回同样不足 → L1 可挂载学术词库（缩写 / 术语 / 复数缩写）与 task-07 纠错 L3 都是必要的。
+  - **已知偏差**：`noise:contraction` 在学术文本中几乎全是所有格（`models ability -> model's ability`），单复数所有格（`model's` / `models'`）本身有歧义，该子项仅作参考；含连字符的子句（`state-of-the-art`）被 `ALPHA_WORD_RE` 整句排除，连字符复合词尚未覆盖。

@@ -1,0 +1,1033 @@
+# AnIME ood_academic_v1：arXiv CS 论文摘要（arXiv 元数据 CC0 1.0）按论文 ID 留出（build_arxiv_text.py），学术写作文本
+# negative:novel = 含词典外术语 / 新词的干净句；留出论文不进入任何训练；seed=20261123；由 scripts/data_pipeline/build_eval_v3.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核
+# category	context	input	expected	notes
+sentence		geometric consistency s ensured by the easily learned sparse seed points	Geometric consistency is ensured by the easily learned sparse seed points	noise:leading_drop
+sentence		which considers the optimal ode correspondence across networks	which considers the optimal node correspondence across networks	noise:leading_drop
+sentence		for enhancing he joint semantic representations	for enhancing the joint semantic representations	noise:leading_drop
+sentence		can be a significant challenge or students	can be a significant challenge for students	noise:leading_drop
+sentence		structural determinants f binding affinity	structural determinants of binding affinity	noise:leading_drop
+sentence		the selection f soft labeling method is less important	the selection of soft labeling method is less important	noise:leading_drop
+sentence		embedding preparation can ary	embedding preparation can vary	noise:leading_drop
+sentence		states f learners across exercises	states of learners across exercises	noise:leading_drop
+sentence		to reduce the computational ost brought by this optimization process for each token	To reduce the computational cost brought by this optimization process for each token	noise:leading_drop
+sentence		including attacks that manipulate data integrity feedback nd block resources	including attacks that manipulate data integrity feedback and block resources	noise:leading_drop
+sentence		ur attack consists of two steps	Our attack consists of two steps	noise:leading_drop
+sentence		uch as code completion	such as code completion	noise:leading_drop
+sentence		would like to now	would like to know	noise:leading_drop
+sentence		including supporting he preferences of the majority	including supporting the preferences of the majority	noise:leading_drop
+sentence		which ncurs heavy computation cost	which incurs heavy computation cost	noise:leading_drop
+sentence		the arge number of antennas increases power consumption	the large number of antennas increases power consumption	noise:leading_drop
+sentence		reducing he artifacts on generated images	reducing the artifacts on generated images	noise:leading_drop
+sentence		predicts noise pairs by evaluating oss distributions	predicts noise pairs by evaluating loss distributions	noise:leading_drop
+sentence		this paper expands n this idea by combining the theory that	This paper expands on this idea by combining the theory that	noise:leading_drop
+sentence		ay lead to copyright issues	may lead to copyright issues	noise:leading_drop
+sentence		nd can be expressed by a transformer with	and can be expressed by a transformer with	noise:leading_drop
+sentence		thereby bridging these wo paradigms	thereby bridging these two paradigms	noise:leading_drop
+sentence		researchers examine documents f varying lengths	Researchers examine documents of varying lengths	noise:leading_drop
+sentence		in the era f immersive consumer electronics	In the era of immersive consumer electronics	noise:leading_drop
+sentence		a risp boundary between these concepts has proven elusive	a crisp boundary between these concepts has proven elusive	noise:leading_drop
+sentence		and integrate compressed features with language prompts or semantic relevance assessment	and integrate compressed features with language prompts for semantic relevance assessment	noise:leading_drop
+sentence		n an era where economies and societies are deeply integrated into cyberspace	In an era where economies and societies are deeply integrated into cyberspace	noise:leading_drop
+sentence		encouraging the development of models hat can serve diverse global populations effectively	encouraging the development of models that can serve diverse global populations effectively	noise:leading_drop
+sentence		this aper proposes a localization algorithm that does not require additional hardware	this paper proposes a localization algorithm that does not require additional hardware	noise:leading_drop
+sentence		existing methods ften employ uniform quantization configurations	existing methods often employ uniform quantization configurations	noise:leading_drop
+sentence		we release he resultant models	We release the resultant models	noise:leading_drop
+sentence		to provide a reference of what might he target entity be like	to provide a reference of what might the target entity be like	noise:leading_drop
+sentence		spell ut the experimental paradigms required to test whether a behavior exhibits these capacities	spell out the experimental paradigms required to test whether a behavior exhibits these capacities	noise:leading_drop
+sentence		based on her impulsive reactions and response o a situation in the game	based on her impulsive reactions and response to a situation in the game	noise:leading_drop
+sentence		such s particle filters	such as particle filters	noise:leading_drop
+sentence		we build these maps autonomously sing standard exploration	We build these maps autonomously using standard exploration	noise:leading_drop
+sentence		when he expected experience has a strong focus on improvisation	When the expected experience has a strong focus on improvisation	noise:leading_drop
+sentence		our findings reveal how his integrated approach enables novice users to overcome creative barriers	Our findings reveal how this integrated approach enables novice users to overcome creative barriers	noise:leading_drop
+sentence		as compared to conventional federated learning odels	as compared to conventional federated learning models	noise:leading_drop
+sentence		comparing he outcomes with numerical simulations	comparing the outcomes with numerical simulations	noise:leading_drop
+sentence		depending on the age rank score of the analyzed libraries	depending on the page rank score of the analyzed libraries	noise:leading_drop
+sentence		his improves by a factor of	This improves by a factor of	noise:leading_drop
+sentence		and exact ine completion	and exact line completion	noise:leading_drop
+sentence		also called inference rees	also called inference trees	noise:leading_drop
+sentence		the key parameters f fluency	The key parameters of fluency	noise:leading_drop
+sentence		where edge capacities and travel imes change over time	where edge capacities and travel times change over time	noise:leading_drop
+sentence		hese results indicate privacy risks for entrepreneurs	These results indicate privacy risks for entrepreneurs	noise:leading_drop
+sentence		emphasising he issues of standard setting	emphasising the issues of standard setting	noise:leading_drop
+sentence		it first transforms historical ata into pure noise through a diffusion process	It first transforms historical data into pure noise through a diffusion process	noise:leading_drop
+sentence		he success comes at a cost	the success comes at a cost	noise:leading_drop
+sentence		our results show that participants performed he tasks	Our results show that participants performed the tasks	noise:leading_drop
+sentence		it demonstrates remarkable improvements cross diverse datasets and tasks	it demonstrates remarkable improvements across diverse datasets and tasks	noise:leading_drop
+sentence		benefiting impact assessments and adaptation lans	benefiting impact assessments and adaptation plans	noise:leading_drop
+sentence		hile existing prediction techniques can achieve favorable performance when there is sufficient training data	While existing prediction techniques can achieve favorable performance when there is sufficient training data	noise:leading_drop
+sentence		especially n complex sequential tasks	especially in complex sequential tasks	noise:leading_drop
+sentence		inks connecting nodes with similar features	links connecting nodes with similar features	noise:leading_drop
+sentence		aces significant challenges due to the heavy communication overhead of transmitting large model updates	faces significant challenges due to the heavy communication overhead of transmitting large model updates	noise:leading_drop
+sentence		where efficient and safe navigation relies on understanding decentralized human coordination or collision avoidance	where efficient and safe navigation relies on understanding decentralized human coordination for collision avoidance	noise:leading_drop
+sentence		the integration f additional	the integration of additional	noise:leading_drop
+sentence		influence the dvice and recommendations they offer to users	influence the advice and recommendations they offer to users	noise:leading_drop
+sentence		existing models encounter challenges uch as poor editing quality	existing models encounter challenges such as poor editing quality	noise:boundary_gemination
+sentence		before conducting pose stimation	Before conducting pose estimation	noise:boundary_gemination
+sentence		particularly in adverse nvironments	particularly in adverse environments	noise:boundary_gemination
+sentence		yet heir ability to compose different objects	yet their ability to compose different objects	noise:boundary_gemination
+sentence		this causes ignificant difficulties in leveraging the probabilistic timing behaviours	This causes significant difficulties in leveraging the probabilistic timing behaviours	noise:boundary_gemination
+sentence		can generate xistential threats to humanity	can generate existential threats to humanity	noise:boundary_gemination
+sentence		but hey suffer from high computational complexity	but they suffer from high computational complexity	noise:boundary_gemination
+sentence		reducing air traffic ontroller workload and fuel consumption	reducing air traffic controller workload and fuel consumption	noise:boundary_gemination
+sentence		models for use as urrogate models to rapidly predict the water stage	models for use as surrogate models to rapidly predict the water stage	noise:boundary_gemination
+sentence		through extensive xperiments and mathematical proofs	Through extensive experiments and mathematical proofs	noise:boundary_gemination
+sentence		during the valuation on different datasets	During the evaluation on different datasets	noise:boundary_gemination
+sentence		over the last wo decades	Over the last two decades	noise:boundary_gemination
+sentence		we mploy two strategies	we employ two strategies	noise:boundary_gemination
+sentence		unlike xplicit hate speech	Unlike explicit hate speech	noise:boundary_gemination
+sentence		raises increasingly pressing concerns about heir safe deployment	raises increasingly pressing concerns about their safe deployment	noise:boundary_gemination
+sentence		extensive xperiments on three benchmark datasets	Extensive experiments on three benchmark datasets	noise:boundary_gemination
+sentence		we xpose a far more severe vulnerability	we expose a far more severe vulnerability	noise:boundary_gemination
+sentence		in this paper we take the position that ools for tracking adoption of	In this paper we take the position that tools for tracking adoption of	noise:boundary_gemination
+sentence		it provides context and helps listeners understand the nvironment	It provides context and helps listeners understand the environment	noise:boundary_gemination
+sentence		we release our code and ata at	We release our code and data at	noise:boundary_gemination
+sentence		based policy has hown robust capability in planning tasks	based policy has shown robust capability in planning tasks	noise:boundary_gemination
+sentence		either equire data curation	either require data curation	noise:boundary_gemination
+sentence		for the xtended version	For the extended version	noise:boundary_gemination
+sentence		we propose a unified framework that covers everal recent methods and their novel variants	we propose a unified framework that covers several recent methods and their novel variants	noise:boundary_gemination
+sentence		despite the remarkable mpirical success of foundation models	Despite the remarkable empirical success of foundation models	noise:boundary_gemination
+sentence		reliable stimation of the confidence intervals for the predicted values remains a challenge	reliable estimation of the confidence intervals for the predicted values remains a challenge	noise:boundary_gemination
+sentence		future research should focus on oise suppression	Future research should focus on noise suppression	noise:boundary_gemination
+sentence		we xplore censorship behavior in other languages	we explore censorship behavior in other languages	noise:boundary_gemination
+sentence		our results hed light on the relative performance of two beam control strategies	Our results shed light on the relative performance of two beam control strategies	noise:boundary_gemination
+sentence		a classification algorithm based on long short term emory	a classification algorithm based on long short term memory	noise:boundary_gemination
+sentence		sourced from survey questions and ebate websites	sourced from survey questions and debate websites	noise:boundary_gemination
+sentence		we valuate it with three large language models on three datasets	We evaluate it with three large language models on three datasets	noise:boundary_gemination
+sentence		we discuss everal promising research frontiers and challenges	we discuss several promising research frontiers and challenges	noise:boundary_gemination
+sentence		the problems that obacco workshops encounter include poor curing	The problems that tobacco workshops encounter include poor curing	noise:boundary_gemination
+sentence		associated with a trained eep neural network	associated with a trained deep neural network	noise:boundary_gemination
+sentence		despite advances in areas uch as the personalization of robots	Despite advances in areas such as the personalization of robots	noise:boundary_gemination
+sentence		complex motions by combining multiple nergy terms corresponding to textual descriptions	complex motions by combining multiple energy terms corresponding to textual descriptions	noise:boundary_gemination
+sentence		for a target ask by optimally using the information from	for a target task by optimally using the information from	noise:boundary_gemination
+sentence		grounded in measurement heory from the social sciences	grounded in measurement theory from the social sciences	noise:boundary_gemination
+sentence		we observe a substantial prevalence of profanity and misogynistic ontent across various topics	we observe a substantial prevalence of profanity and misogynistic content across various topics	noise:boundary_gemination
+sentence		further efinement is needed to enhance text structure understanding	further refinement is needed to enhance text structure understanding	noise:boundary_gemination
+sentence		extend this framework through ierarchical memory allocation	extend this framework through hierarchical memory allocation	noise:boundary_gemination
+sentence		with most yielding similar esults	with most yielding similar results	noise:boundary_gemination
+sentence		where the objective is to achieve robust generalization from inimal annotated samples	where the objective is to achieve robust generalization from minimal annotated samples	noise:boundary_gemination
+sentence		such as those involving external control of ile names or paths	such as those involving external control of file names or paths	noise:boundary_gemination
+sentence		achieving statistically uniform randomness that better preserves ystem dynamics	achieving statistically uniform randomness that better preserves system dynamics	noise:boundary_gemination
+sentence		while this pace simplifies handling the line process	While this space simplifies handling the line process	noise:boundary_gemination
+sentence		the proposed scheme xhibits noteworthy flexibility in balancing power consumption and latency	the proposed scheme exhibits noteworthy flexibility in balancing power consumption and latency	noise:boundary_gemination
+sentence		are notoriously hard to understand and difficult o defend	are notoriously hard to understand and difficult to defend	noise:boundary_gemination
+sentence		the proposed algorithm correctly reproduces the traffic haracteristics	the proposed algorithm correctly reproduces the traffic characteristics	noise:boundary_gemination
+sentence		and ata scaling trends hold across domains	and data scaling trends hold across domains	noise:boundary_gemination
+sentence		we conclude the paper with several observations that can direct future research and evelopments	We conclude the paper with several observations that can direct future research and developments	noise:boundary_gemination
+sentence		yet often compromise ither accuracy or performance	yet often compromise either accuracy or performance	noise:boundary_gemination
+sentence		which are ither provided or inferred from private data	which are either provided or inferred from private data	noise:boundary_gemination
+sentence		a benchmark that argets visual reasoning while deliberately minimizing reliance on specialized knowledge	a benchmark that targets visual reasoning while deliberately minimizing reliance on specialized knowledge	noise:boundary_gemination
+sentence		enabling efficient adaptation without necessitating the retraining of the ntire model	enabling efficient adaptation without necessitating the retraining of the entire model	noise:boundary_gemination
+sentence		primary experiments and analysis are also provided to interpret the ffectiveness of	Primary experiments and analysis are also provided to interpret the effectiveness of	noise:boundary_gemination
+sentence		an innovative autonomous driving simulation system based on eural reconstruction	an innovative autonomous driving simulation system based on neural reconstruction	noise:boundary_gemination
+sentence		the ye diagram aperture	the eye diagram aperture	noise:boundary_gemination
+sentence		combined with optimized ata mixtures	Combined with optimized data mixtures	noise:boundary_gemination
+sentence		especiallyu nder challenging scenarios	especially under challenging scenarios	noise:space_shift
+sentence		the use of largel anguage model	The use of large language model	noise:space_shift
+sentence		posing obstacles to them odel training and performance	posing obstacles to the model training and performance	noise:space_shift
+sentence		distinct from the mos trelevant competitors	Distinct from the most relevant competitors	noise:space_shift
+sentence		we detail thosec hanges and provide some examples	We detail those changes and provide some examples	noise:space_shift
+sentence		generalizin gprevious results on weighted algebraic recognition over commutative rings	generalizing previous results on weighted algebraic recognition over commutative rings	noise:space_shift
+sentence		apart from highlightingt he high variance in performance over long time horizons	Apart from highlighting the high variance in performance over long time horizons	noise:space_shift
+sentence		without relying on captured motio ntrajectories	without relying on captured motion trajectories	noise:space_shift
+sentence		have attracted broa dattention in various applications	have attracted broad attention in various applications	noise:space_shift
+sentence		contrary to previousc laims in the literature	contrary to previous claims in the literature	noise:space_shift
+sentence		thereby establishing a new baseline for thisa rea of research	thereby establishing a new baseline for this area of research	noise:space_shift
+sentence		network remains the benchmarkf or this task	network remains the benchmark for this task	noise:space_shift
+sentence		our key finding sreveal	Our key findings reveal	noise:space_shift
+sentence		including the desire to regulatee motions and the availability to engage in interventions	including the desire to regulate emotions and the availability to engage in interventions	noise:space_shift
+sentence		population codes facilitate fast and accurate pos eestimation	population codes facilitate fast and accurate pose estimation	noise:space_shift
+sentence		along with presentingv arious methods attempt to tackle this problem from different perspectives	along with presenting various methods attempt to tackle this problem from different perspectives	noise:space_shift
+sentence		hindering their ability to fully harness graph information for learning optimaln ode representations	hindering their ability to fully harness graph information for learning optimal node representations	noise:space_shift
+sentence		which is shown to provide moreb iologically plausible patterns	which is shown to provide more biologically plausible patterns	noise:space_shift
+sentence		and a steering wheel an dpedals	and a steering wheel and pedals	noise:space_shift
+sentence		we prov ethat our method achieves a superior convergence rate over prior works	We prove that our method achieves a superior convergence rate over prior works	noise:space_shift
+sentence		performance on mode lsimulation	performance on model simulation	noise:space_shift
+sentence		and maintains robust performance across diverse manipulatio nscenarios	and maintains robust performance across diverse manipulation scenarios	noise:space_shift
+sentence		energy efficiency research has focused on reducing energy consumption at the hardwarel evel and	energy efficiency research has focused on reducing energy consumption at the hardware level and	noise:space_shift
+sentence		represented by largel anguage models	represented by large language models	noise:space_shift
+sentence		we study whether these inferences can instead be derived by analogy to knowni nferences	We study whether these inferences can instead be derived by analogy to known inferences	noise:space_shift
+sentence		the estimated gaze is used to augment video representations withi nproposed model	The estimated gaze is used to augment video representations within proposed model	noise:space_shift
+sentence		as pixel generationp rovides a unified perception interface	as pixel generation provides a unified perception interface	noise:space_shift
+sentence		andg eneralize across various types of differential equations and neural operators	and generalize across various types of differential equations and neural operators	noise:space_shift
+sentence		we explore an alternate strateg yfor removing this	we explore an alternate strategy for removing this	noise:space_shift
+sentence		our findings indicate that hallucinations also arise fromi nterference from instruction tokens during decoding	our findings indicate that hallucinations also arise from interference from instruction tokens during decoding	noise:space_shift
+sentence		the growin gpenetration of internet services	The growing penetration of internet services	noise:space_shift
+sentence		in frequency divisio nduplex	In frequency division duplex	noise:space_shift
+sentence		to leverage digitalt echnologies without extensive technical expertise	to leverage digital technologies without extensive technical expertise	noise:space_shift
+sentence		delivering significant performance and energ ysavings over traditional platforms	delivering significant performance and energy savings over traditional platforms	noise:space_shift
+sentence		driving the need for intelligent automation to preserv escientific rigor	driving the need for intelligent automation to preserve scientific rigor	noise:space_shift
+sentence		limitin gtheir applicability and widespread adoption	limiting their applicability and widespread adoption	noise:space_shift
+sentence		auctionm echanisms with budget pacing are commonly employed to implement such ad systems	Auction mechanisms with budget pacing are commonly employed to implement such ad systems	noise:space_shift
+sentence		fromt raining data to reasoning mechanisms	from training data to reasoning mechanisms	noise:space_shift
+sentence		to delve intot his phenomenon	To delve into this phenomenon	noise:space_shift
+sentence		collect from useri nteractions is a crucial source of training data	collect from user interactions is a crucial source of training data	noise:space_shift
+sentence		molecular graph neura lnetworks	Molecular graph neural networks	noise:space_shift
+sentence		demonstratet he effectiveness of our proposed methods	demonstrate the effectiveness of our proposed methods	noise:space_shift
+sentence		thereb yleading to significant performance improvements	thereby leading to significant performance improvements	noise:space_shift
+sentence		in order to validate oura pproach	In order to validate our approach	noise:space_shift
+sentence		including maintaining specific properties of clinicalo utcomes	including maintaining specific properties of clinical outcomes	noise:space_shift
+sentence		the experiments demonstrat ethat our approach can significantly improve versatility	The experiments demonstrate that our approach can significantly improve versatility	noise:space_shift
+sentence		where it enables synchronization of transactionp ools among peers and facilitates block dissemination	where it enables synchronization of transaction pools among peers and facilitates block dissemination	noise:space_shift
+sentence		segmentation of vide oobjects in complex scenarios is highly challenging	Segmentation of video objects in complex scenarios is highly challenging	noise:space_shift
+sentence		and exploring how model design differences influencet he encoding of biases	and exploring how model design differences influence the encoding of biases	noise:space_shift
+sentence		andt his scheme can also ensure privacy	and this scheme can also ensure privacy	noise:space_shift
+sentence		we conduct a user study analyzing how players interacted witha nd experienced the system	we conduct a user study analyzing how players interacted with and experienced the system	noise:space_shift
+sentence		into the surgicals cene for rinsing and diluting the contaminant	into the surgical scene for rinsing and diluting the contaminant	noise:space_shift
+sentence		we show that it is more efficient to design neuron sthat mimic the	We show that it is more efficient to design neurons that mimic the	noise:space_shift
+sentence		are being released andg aining traction	are being released and gaining traction	noise:space_shift
+sentence		we devise a robus tand universal proactive protection technique	we devise a robust and universal proactive protection technique	noise:space_shift
+sentence		especially ones fromc ognitive sciences	especially ones from cognitive sciences	noise:space_shift
+sentence		both human an dartificial	both human and artificial	noise:space_shift
+sentence		the parameters we stud yare the number of voters	The parameters we study are the number of voters	noise:space_shift
+sentence		requires no additionalm odule	requires no additional module	noise:space_shift
+sentence		we demonstrate the superiority of ou rmethod in extensive experiments	We demonstrate the superiority of our method in extensive experiments	noise:space_shift
+sentence		and the signal to interfere nce noise ratio	and the signal to interference noise ratio	noise:space_extra
+sentence		with a proba bility of at least	with a probability of at least	noise:space_extra
+sentence		through extensive experiments ac ross diverse datasets	Through extensive experiments across diverse datasets	noise:space_extra
+sentence		where neural radiance fiel ds	where neural radiance fields	noise:space_extra
+sentence		or reduced resource utilization relative to the baseline mod els	or reduced resource utilization relative to the baseline models	noise:space_extra
+sentence		we evaluate our prop osed architecture on a synthetic data set	We evaluate our proposed architecture on a synthetic data set	noise:space_extra
+sentence		a novel strategy designed to address the pa rameter search space challenge in edge devices	a novel strategy designed to address the parameter search space challenge in edge devices	noise:space_extra
+sentence		an adversari al pattern detection module	an adversarial pattern detection module	noise:space_extra
+sentence		achieve good performance and sp eed	achieve good performance and speed	noise:space_extra
+sentence		gives rise to a challenging practical probl em	gives rise to a challenging practical problem	noise:space_extra
+sentence		extensive experiments on benchmark datas ets validate the effectiveness of our approach	Extensive experiments on benchmark datasets validate the effectiveness of our approach	noise:space_extra
+sentence		despite knowledge sh aring and management being viewed as important by practitioners	Despite knowledge sharing and management being viewed as important by practitioners	noise:space_extra
+sentence		including natural la nguage understanding	including natural language understanding	noise:space_extra
+sentence		to support researchers and foster the development of more reliable biometric sy stems and datasets	To support researchers and foster the development of more reliable biometric systems and datasets	noise:space_extra
+sentence		the impa ct of the discriminatory bias has attracted attention	the impact of the discriminatory bias has attracted attention	noise:space_extra
+sentence		this deficiency typic ally leads to a conspicuously distorted global map	This deficiency typically leads to a conspicuously distorted global map	noise:space_extra
+sentence		as well as high computational and storage co sts	as well as high computational and storage costs	noise:space_extra
+sentence		throu gh approaches such as systems thinking	through approaches such as systems thinking	noise:space_extra
+sentence		diver se and novel ideas	diverse and novel ideas	noise:space_extra
+sentence		to def end against different types of model stealing simultaneously	to defend against different types of model stealing simultaneously	noise:space_extra
+sentence		they are annotated with natural lan guage	They are annotated with natural language	noise:space_extra
+sentence		taking into account fa ctors like terrain irregularities	taking into account factors like terrain irregularities	noise:space_extra
+sentence		exhi biting significant computational capabilities	exhibiting significant computational capabilities	noise:space_extra
+sentence		for classifying the depre ssion severity	For classifying the depression severity	noise:space_extra
+sentence		emo tion recognition from speech data	emotion recognition from speech data	noise:space_extra
+sentence		we propose a def ensive framework	we propose a defensive framework	noise:space_extra
+sentence		such prefere nces can subtly influence user investment decisions	Such preferences can subtly influence user investment decisions	noise:space_extra
+sentence		and cold start delays under varying lo ads	and cold start delays under varying loads	noise:space_extra
+sentence		which presents signif icant challenges due to labeled data scarcity	which presents significant challenges due to labeled data scarcity	noise:space_extra
+sentence		demonstrating that the proposed pla tform enhances both training data diversity and model fairness	demonstrating that the proposed platform enhances both training data diversity and model fairness	noise:space_extra
+sentence		documenti ng the functionality of software units with code comments	Documenting the functionality of software units with code comments	noise:space_extra
+sentence		both strategies show similar transitions between exploratory and exploitative beha viors as environmental uncertainty changes	Both strategies show similar transitions between exploratory and exploitative behaviors as environmental uncertainty changes	noise:space_extra
+sentence		our results sh ows a positive learning gain	Our results shows a positive learning gain	noise:space_extra
+sentence		we conduct extensive experiments to identify key fa ctors that influence test errors in transformers	we conduct extensive experiments to identify key factors that influence test errors in transformers	noise:space_extra
+sentence		no extra overhead is in troduced during inference	no extra overhead is introduced during inference	noise:space_extra
+sentence		suggesting the effectiveness of social netw ork features for identifying influential brokers	suggesting the effectiveness of social network features for identifying influential brokers	noise:space_extra
+sentence		comp uting plays a critical role in	computing plays a critical role in	noise:space_extra
+sentence		res ults demonstrate that dynamic policies significantly improve traffic flow	Results demonstrate that dynamic policies significantly improve traffic flow	noise:space_extra
+sentence		thr ough a user study	Through a user study	noise:space_extra
+sentence		we propose a sparse feature fusion sc heme	we propose a sparse feature fusion scheme	noise:space_extra
+sentence		by clus tering user representations	By clustering user representations	noise:space_extra
+sentence		we introduce a no vel task	we introduce a novel task	noise:space_extra
+sentence		the optimal solution within this distribution is hig hly probable	The optimal solution within this distribution is highly probable	noise:space_extra
+sentence		we introduce a query graph to represent the decomposition of the qu ery	we introduce a query graph to represent the decomposition of the query	noise:space_extra
+sentence		sp anning scientific domains like healthcare	spanning scientific domains like healthcare	noise:space_extra
+sentence		ens uring consistency with the current measurements	ensuring consistency with the current measurements	noise:space_extra
+sentence		to model such phen omena	To model such phenomena	noise:space_extra
+sentence		the core contribut ion of this work is this novel framework	The core contribution of this work is this novel framework	noise:space_extra
+sentence		this limitation leads to suboptimal estimation of deformation fiel ds	This limitation leads to suboptimal estimation of deformation fields	noise:space_extra
+sentence		such as allowing more detailed characterization of movement impairments and responses to interve ntions	such as allowing more detailed characterization of movement impairments and responses to interventions	noise:space_extra
+sentence		anomaly detection is crucial for ensuring the stability and reliability of web ser vice systems	Anomaly detection is crucial for ensuring the stability and reliability of web service systems	noise:space_extra
+sentence		which limits the ir applicability in practical scenarios	which limits their applicability in practical scenarios	noise:space_extra
+sentence		while these architectures redu ce design and verification efforts	While these architectures reduce design and verification efforts	noise:space_extra
+sentence		covering three mainstream scanning dev ices	covering three mainstream scanning devices	noise:space_extra
+sentence		after answering each in put query	After answering each input query	noise:space_extra
+sentence		a feature extraction module is introduced for learning preliminary features from the input ima ges	a feature extraction module is introduced for learning preliminary features from the input images	noise:space_extra
+sentence		generic text rew riting is a prevalent large language model	Generic text rewriting is a prevalent large language model	noise:space_extra
+sentence		wh ich we humans do implicitly	which we humans do implicitly	noise:space_extra
+sentence		we exp lore a novel dataset discovery problem	we explore a novel dataset discovery problem	noise:space_extra
+sentence		to minimize mission viol ations	to minimize mission violations	noise:space_extra
+sentence		and understand socialand emotional aspects of humans	and understand social and emotional aspects of humans	noise:space_missing
+sentence		this finding challenges those in prior workusing synthetic videos	This finding challenges those in prior work using synthetic videos	noise:space_missing
+sentence		whilecombining their favorable properties	while combining their favorable properties	noise:space_missing
+sentence		which can be costly and difficultto obtain at scale	which can be costly and difficult to obtain at scale	noise:space_missing
+sentence		leading toinconsistent behavior	leading to inconsistent behavior	noise:space_missing
+sentence		incomparable tounambiguous ones	incomparable to unambiguous ones	noise:space_missing
+sentence		a comprehensive theoretical framework remainsunderdeveloped	a comprehensive theoretical framework remains underdeveloped	noise:space_missing
+sentence		achieve comparableor even superior performance to those trained on full datasets	achieve comparable or even superior performance to those trained on full datasets	noise:space_missing
+sentence		existing inverse game approaches often struggle toaccount for behavioral uncertainty and measurement noise	Existing inverse game approaches often struggle to account for behavioral uncertainty and measurement noise	noise:space_missing
+sentence		and thedata site paradigm	and the data site paradigm	noise:space_missing
+sentence		and time information toimprove next location prediction accuracy	and time information to improve next location prediction accuracy	noise:space_missing
+sentence		and potentialapplications across rehabilitation	and potential applications across rehabilitation	noise:space_missing
+sentence		are known to process information using a proficient internal languageconsistently	are known to process information using a proficient internal language consistently	noise:space_missing
+sentence		and maximizing modelaccuracy	and maximizing model accuracy	noise:space_missing
+sentence		be a sentenceof	be a sentence of	noise:space_missing
+sentence		weget more information than just	we get more information than just	noise:space_missing
+sentence		and the role of regulatory frameworks in mitigating financialcybersecurity risks	and the role of regulatory frameworks in mitigating financial cybersecurity risks	noise:space_missing
+sentence		which scales withsequence length and number of requests	which scales with sequence length and number of requests	noise:space_missing
+sentence		symmetricwith respect to candidates	symmetric with respect to candidates	noise:space_missing
+sentence		improving upon the best existingmethods by	improving upon the best existing methods by	noise:space_missing
+sentence		can still be broken by gradient leakage attack via parameterinversion techniques	can still be broken by gradient leakage attack via parameter inversion techniques	noise:space_missing
+sentence		relevant to warehouse and parcelsystems	relevant to warehouse and parcel systems	noise:space_missing
+sentence		ensuring that theprediction sets contain the true label with a specified probability	ensuring that the prediction sets contain the true label with a specified probability	noise:space_missing
+sentence		the scheme effectively prevents replayand impersonation attacks	the scheme effectively prevents replay and impersonation attacks	noise:space_missing
+sentence		we proposetwo architectures	We propose two architectures	noise:space_missing
+sentence		wepresent a dynamic version	we present a dynamic version	noise:space_missing
+sentence		suchas personal identifiers	such as personal identifiers	noise:space_missing
+sentence		andtranslation prisms while maintaining computational efficiency	and translation prisms while maintaining computational efficiency	noise:space_missing
+sentence		where the union of edgesacross any	where the union of edges across any	noise:space_missing
+sentence		this is often acomplex choice	This is often a complex choice	noise:space_missing
+sentence		which is theset of sizes of their finite models	which is the set of sizes of their finite models	noise:space_missing
+sentence		such asstring normalization	such as string normalization	noise:space_missing
+sentence		one promisingapplication is investment recommendation	One promising application is investment recommendation	noise:space_missing
+sentence		we identify configuration optimizations tomitigate these issues	We identify configuration optimizations to mitigate these issues	noise:space_missing
+sentence		to achieve precise depth estimation for both dynamic objects andstatic backgrounds	to achieve precise depth estimation for both dynamic objects and static backgrounds	noise:space_missing
+sentence		toinvestigate whether attention among visual tokens is necessary	To investigate whether attention among visual tokens is necessary	noise:space_missing
+sentence		to evaluateand guide the evolutionary process	to evaluate and guide the evolutionary process	noise:space_missing
+sentence		as a resultof the proposed novel structure	As a result of the proposed novel structure	noise:space_missing
+sentence		with a particularfocus on access and handover procedures	with a particular focus on access and handover procedures	noise:space_missing
+sentence		when facedwith changes beyond the modeled uncertainties	When faced with changes beyond the modeled uncertainties	noise:space_missing
+sentence		which mayresult in better system performance on downstream tasks for men	which may result in better system performance on downstream tasks for men	noise:space_missing
+sentence		assessingeach on metrics such as latency	assessing each on metrics such as latency	noise:space_missing
+sentence		during the activelearning loop	During the active learning loop	noise:space_missing
+sentence		alleviate the increasing workload ofpathologists	alleviate the increasing workload of pathologists	noise:space_missing
+sentence		we fully characterize the problem by providing lower bounds ofapproximation	we fully characterize the problem by providing lower bounds of approximation	noise:space_missing
+sentence		albeit with slightly longertraining times	albeit with slightly longer training times	noise:space_missing
+sentence		oursurvey also identifies critical challenges and suggests promising future research directions	Our survey also identifies critical challenges and suggests promising future research directions	noise:space_missing
+sentence		this approach offers greatergenerality	This approach offers greater generality	noise:space_missing
+sentence		code and videoare available at	Code and video are available at	noise:space_missing
+sentence		this articlebears a historical dimension	This article bears a historical dimension	noise:space_missing
+sentence		aligning closelywith human evaluations	aligning closely with human evaluations	noise:space_missing
+sentence		along withoutput blending	along with output blending	noise:space_missing
+sentence		the graph maynot be connected in each round	the graph may not be connected in each round	noise:space_missing
+sentence		the influence of thesequence element at time	the influence of the sequence element at time	noise:space_missing
+sentence		they collect and sharewebpage content	they collect and share webpage content	noise:space_missing
+sentence		and efficient training with two casestudies	and efficient training with two case studies	noise:space_missing
+sentence		treat neural network weights as randomvariables	treat neural network weights as random variables	noise:space_missing
+sentence		the design could better improve the consistency betweenbody parts	The design could better improve the consistency between body parts	noise:space_missing
+sentence		we identified a research gap in the currentstate of the art	We identified a research gap in the current state of the art	noise:space_missing
+sentence		humans typically employa more efficient strategy	humans typically employ a more efficient strategy	noise:space_missing
+sentence		to vurther this aim	To further this aim	noise:adjacent_key
+sentence		which confirms the practical viability of the approach that ibcorporates simultaneous localization and mapping	which confirms the practical viability of the approach that incorporates simultaneous localization and mapping	noise:adjacent_key
+sentence		to enrich the dwtaset	To enrich the dataset	noise:adjacent_key
+sentence		despite numeroud efforts to mitigate their biases	Despite numerous efforts to mitigate their biases	noise:adjacent_key
+sentence		in the lide sciences	In the life sciences	noise:adjacent_key
+sentence		we categorize this contamination into three distinctive jodes	we categorize this contamination into three distinctive modes	noise:adjacent_key
+sentence		preserving conteol flow clarity	preserving control flow clarity	noise:adjacent_key
+sentence		many traffic features exhibit overlapping ranges in normal snd malware datasets	Many traffic features exhibit overlapping ranges in normal and malware datasets	noise:adjacent_key
+sentence		becoming a piving knowledge graph	becoming a living knowledge graph	noise:adjacent_key
+sentence		such as pdriodic biometrics verification	such as periodic biometrics verification	noise:adjacent_key
+sentence		by aligning the output domains of sensitive and anchor concepts through adversarial tfaining	By aligning the output domains of sensitive and anchor concepts through adversarial training	noise:adjacent_key
+sentence		thus provjding much better sensitivity	thus providing much better sensitivity	noise:adjacent_key
+sentence		the riss of large	The rise of large	noise:adjacent_key
+sentence		generally suffice for a browd range of tasks	generally suffice for a broad range of tasks	noise:adjacent_key
+sentence		making energy kptimization critical as power costs rival hardware expenses	making energy optimization critical as power costs rival hardware expenses	noise:adjacent_key
+sentence		ranging from bealthcare to finance	ranging from healthcare to finance	noise:adjacent_key
+sentence		at each tike step	At each time step	noise:adjacent_key
+sentence		to buide a learner in mastering action skills	To guide a learner in mastering action skills	noise:adjacent_key
+sentence		to analyze and detect ihsider threat sentiment within job site reviews	to analyze and detect insider threat sentiment within job site reviews	noise:adjacent_key
+sentence		particulsrly in scenarios with limited and insufficient data	particularly in scenarios with limited and insufficient data	noise:adjacent_key
+sentence		we kbserve that the	we observe that the	noise:adjacent_key
+sentence		when orompted to judge the same event	when prompted to judge the same event	noise:adjacent_key
+sentence		thwreby enhancing the performance of the unsupervised object detection task	thereby enhancing the performance of the unsupervised object detection task	noise:adjacent_key
+sentence		effectively addressing a broad spectrum of racy patterns in ckmplex code contexts	effectively addressing a broad spectrum of racy patterns in complex code contexts	noise:adjacent_key
+sentence		thereby achieving an effective resolution of the dipemma	thereby achieving an effective resolution of the dilemma	noise:adjacent_key
+sentence		visual large language modele	visual large language models	noise:adjacent_key
+sentence		and express intentions intuitively wuile avoiding unnecessary distractions	and express intentions intuitively while avoiding unnecessary distractions	noise:adjacent_key
+sentence		ensuring theu align with the distribution of valid designs	ensuring they align with the distribution of valid designs	noise:adjacent_key
+sentence		this digid setup can lead to suboptimal performance	This rigid setup can lead to suboptimal performance	noise:adjacent_key
+sentence		and recovery under a single cosine annealing learning rate schedulr	and recovery under a single cosine annealing learning rate schedule	noise:adjacent_key
+sentence		but relies on sparse rewards provided only after compoete code evaluation	but relies on sparse rewards provided only after complete code evaluation	noise:adjacent_key
+sentence		to answwr the question	To answer the question	noise:adjacent_key
+sentence		as irrelevant or noisy docyments degrade performance	as irrelevant or noisy documents degrade performance	noise:adjacent_key
+sentence		and can genrrate layouts from an open caption set	and can generate layouts from an open caption set	noise:adjacent_key
+sentence		carotid atherosclerosis represents a significant healtj risk	Carotid atherosclerosis represents a significant health risk	noise:adjacent_key
+sentence		integrating the influence of hwbits and biases	integrating the influence of habits and biases	noise:adjacent_key
+sentence		each fault is resolved within a fided time	Each fault is resolved within a fixed time	noise:adjacent_key
+sentence		by exploiting recent advancrs in large language models	by exploiting recent advances in large language models	noise:adjacent_key
+sentence		deciding whwther to consume	deciding whether to consume	noise:adjacent_key
+sentence		uhtrained pilots are supported by autonomous obstacle avoidance	untrained pilots are supported by autonomous obstacle avoidance	noise:adjacent_key
+sentence		which motivates the use of real graph datasets for benchmarking decentralized algorighms	which motivates the use of real graph datasets for benchmarking decentralized algorithms	noise:adjacent_key
+sentence		and areas for documentation improvenent	and areas for documentation improvement	noise:adjacent_key
+sentence		to provide mefical advice to the public	to provide medical advice to the public	noise:adjacent_key
+sentence		and is best in several settinvs	and is best in several settings	noise:adjacent_key
+sentence		determining the optimal safety deoth remains an unresolved challenge	determining the optimal safety depth remains an unresolved challenge	noise:adjacent_key
+sentence		thr code is at	The code is at	noise:adjacent_key
+sentence		although this reaearch is in the early stages	Although this research is in the early stages	noise:adjacent_key
+sentence		ahat is a good notion of	what is a good notion of	noise:adjacent_key
+sentence		our system can still maintain robust and accurate localization withput any distinction	our system can still maintain robust and accurate localization without any distinction	noise:adjacent_key
+sentence		this paper investigates the challehges	This paper investigates the challenges	noise:adjacent_key
+sentence		if i post sometging on a message board	if I post something on a message board	noise:adjacent_key
+sentence		this synergy provifes a robust	This synergy provides a robust	noise:adjacent_key
+sentence		the proposed method fuses color data and relative spatial coordinates from underwater imagds	The proposed method fuses color data and relative spatial coordinates from underwater images	noise:adjacent_key
+sentence		thr former excels at detecting irregular patterns or structures	The former excels at detecting irregular patterns or structures	noise:adjacent_key
+sentence		leading to significant fonancial losses and consumer distrust	leading to significant financial losses and consumer distrust	noise:adjacent_key
+sentence		emphasizing rheir impact on healthcare	emphasizing their impact on healthcare	noise:adjacent_key
+sentence		at yhe time of this publication	At the time of this publication	noise:adjacent_key
+sentence		we illustrate the applicability of our framework by carrying out a fsw case studies	We illustrate the applicability of our framework by carrying out a few case studies	noise:adjacent_key
+sentence		but there is a risk of faultt outputs	but there is a risk of faulty outputs	noise:adjacent_key
+sentence		but they aee often mixed with ambiguous	but they are often mixed with ambiguous	noise:adjacent_key
+context_realword	Through interviews and 	person development	persona development	noise:realword_edit persona->person
+context_realword	our algorithm 	admit a unified regret analysis	admits a unified regret analysis	noise:realword_edit admits->admit
+context_realword	information generation 	sand information synthesis	and information synthesis	noise:realword_edit and->sand
+context_realword	autonomous manager for radio dynamic 	ones	zones	noise:realword_edit zones->ones
+context_realword	These models employ guided sampling 	go incorporate specific traffic preferences and enhance scenario realism	to incorporate specific traffic preferences and enhance scenario realism	noise:realword_edit to->go
+context_realword	graph neural networks 	an optimization	and optimization	noise:realword_edit and->an
+context_realword	and proposes 	jew evaluation criteria	new evaluation criteria	noise:realword_edit new->jew
+context_realword	The proposed method features two key 	innovation	innovations	noise:realword_edit innovations->innovation
+context_realword	These approaches 	fan be effective	can be effective	noise:realword_edit can->fan
+context_realword	Instead of developing a 	dedicate accelerator	dedicated accelerator	noise:realword_edit dedicated->dedicate
+context_realword	existing models have limited editing skills 	rue to the biased synthesis process	due to the biased synthesis process	noise:realword_edit due->rue
+context_realword	and analyze 	heir individual and synergistic impacts on tool utilization	their individual and synergistic impacts on tool utilization	noise:realword_edit their->heir
+context_realword	ensuring quality 	though multiple techniques	through multiple techniques	noise:realword_edit through->though
+context_realword	most configurations can achieve higher throughput than standard transformers 	whole maintaining competitive performance	while maintaining competitive performance	noise:realword_edit while->whole
+context_realword	We make 	pour code publicly available at	our code publicly available at	noise:realword_edit our->pour
+context_realword	to blindly prepare the initial cluster 	stats	state	noise:realword_edit state->stats
+context_realword	and limiting the capacity to 	endure consistency and quality across the entire body	ensure consistency and quality across the entire body	noise:realword_edit ensure->endure
+context_realword	our model is able to edit 	bases	bass	noise:realword_edit bass->bases
+context_realword	we refine 	he surface reconstruction by formulating a weighted least squares problem	the surface reconstruction by formulating a weighted least squares problem	noise:realword_edit the->he
+context_realword	so expanding or tuning 	difficult demands expensive human effort and evaluations quickly saturate	difficulty demands expensive human effort and evaluations quickly saturate	noise:realword_edit difficulty->difficult
+context_realword	systems struggle with context 	an intent understanding	and intent understanding	noise:realword_edit and->an
+context_realword	This methodology 	follow the following three steps	follows the following three steps	noise:realword_edit follows->follow
+context_realword	for a larger class 	or so called	of so called	noise:realword_edit of->or
+context_realword	We introduce the problem and construct a scheme that provides anonymity with theoretical 	guarantee	guarantees	noise:realword_edit guarantees->guarantee
+context_realword	such as chunk number 	an chunk window size	and chunk window size	noise:realword_edit and->an
+context_realword	making it highly suitable for aerospace 	an defense applications	and defense applications	noise:realword_edit and->an
+context_realword	Fruitful research directions implied 	buy our framework include	by our framework include	noise:realword_edit by->buy
+context_realword	Detecting anomalies in energy consumption data is crucial 	foe identifying energy waste	for identifying energy waste	noise:realword_edit for->foe
+context_realword	a biotic environment is a 	est of interacting distinct ecological and environmental processes	set of interacting distinct ecological and environmental processes	noise:realword_edit set->est
+context_realword	one would 	he able to eliminate forgetting	be able to eliminate forgetting	noise:realword_edit be->he
+context_realword	While these robust 	approached provide valuable insights	approaches provide valuable insights	noise:realword_edit approaches->approached
+context_realword	capable of handling large 	graph	graphs	noise:realword_edit graphs->graph
+context_realword	selects network parameters 	wit large variance to be inferred through posterior distributions	with large variance to be inferred through posterior distributions	noise:realword_edit with->wit
+context_realword	is the number of model 	parameter	parameters	noise:realword_edit parameters->parameter
+context_realword	that stem from these 	belief	beliefs	noise:realword_edit beliefs->belief
+context_realword	existing approaches 	tail to form persistent memories for generalizing interaction reasoning to new scenes	fail to form persistent memories for generalizing interaction reasoning to new scenes	noise:realword_edit fail->tail
+context_realword	Rather than treating these 	advance as isolated milestones	advances as isolated milestones	noise:realword_edit advances->advance
+context_realword	This automation 	eliminate manual intervention	eliminates manual intervention	noise:realword_edit eliminates->eliminate
+context_realword	only one aspect changes at a time from among 	he following	the following	noise:realword_edit the->he
+context_realword	Students worked 	on small groups	in small groups	noise:realword_edit in->on
+context_realword	especially in the sparse and 	mixer representations	mixed representations	noise:realword_edit mixed->mixer
+context_realword	and easy 	go implement	to implement	noise:realword_edit to->go
+context_realword	these algorithms 	arse compared based on numerical stability	are compared based on numerical stability	noise:realword_edit are->arse
+context_realword	To validate 	he strategies	the strategies	noise:realword_edit the->he
+context_realword	Four expert 	workshop assess and interpret these quantitative findings	workshops assess and interpret these quantitative findings	noise:realword_edit workshops->workshop
+context_realword	missing finer patterns and overlooking detailed information 	on subsequent behaviors of users	in subsequent behaviors of users	noise:realword_edit in->on
+context_realword	covering diverse constraint 	typed	types	noise:realword_edit types->typed
+context_realword	based models to effectively capture and apply visual transformations 	rom minimal examples	from minimal examples	noise:realword_edit from->rom
+context_realword	faster than 	he most effective baseline while being more effective	the most effective baseline while being more effective	noise:realword_edit the->he
+context_realword	which is more generic and fundamental 	tor mitigating memorization	for mitigating memorization	noise:realword_edit for->tor
+context_realword	barely visible against 	he background	the background	noise:realword_edit the->he
+context_realword	To guide practical 	application	applications	noise:realword_edit applications->application
+context_realword	We believe 	pour work	our work	noise:realword_edit our->pour
+context_realword	particularly excelling in recall 	metric	metrics	noise:realword_edit metrics->metric
+context_realword	have significantly advanced audio understanding but introduce critical security 	risk	risks	noise:realword_edit risks->risk
+context_realword	demonstrating the feasibility of 	out approach	our approach	noise:realword_edit our->out
+context_realword	Our simulation results 	arse generally consistent with our theoretical results	are generally consistent with our theoretical results	noise:realword_edit are->arse
+context_realword	their performance drops 	ads the dialogue progresses	as the dialogue progresses	noise:realword_edit as->ads
+context_realword	yields higher planning reliability and 	reduce execution time	reduced execution time	noise:realword_edit reduced->reduce
+context_realword	we consider a discrete ubiquitous sensing system where 	he sensing target has	the sensing target has	noise:realword_edit the->he
+sentence		of the teachers feature space	of the teacher's feature space	noise:contraction
+sentence		the belief in ones motor capacity	the belief in one's motor capacity	noise:contraction
+sentence		while local peoples unofficial stories remain invisible	while local people's unofficial stories remain invisible	noise:contraction
+sentence		as well as the game boards spatial configurations	as well as the game board's spatial configurations	noise:contraction
+sentence		we develop an image enhancement module to enhance the models robustness against severe noise	we develop an image enhancement module to enhance the model's robustness against severe noise	noise:contraction
+sentence		would depend on the users expertise	would depend on the user's expertise	noise:contraction
+sentence		each iteration directly targets the students learning deficiencies	Each iteration directly targets the student's learning deficiencies	noise:contraction
+sentence		optimizing the models ability to learn from limited data	optimizing the model's ability to learn from limited data	noise:contraction
+sentence		how can we estimate the probability of a binary property of the models output	how can we estimate the probability of a binary property of the model's output	noise:contraction
+sentence		such as how closely an explanation aligns with a models decision process	such as how closely an explanation aligns with a model's decision process	noise:contraction
+sentence		to articulate the harm of violating ones epistemic autonomy	To articulate the harm of violating one's epistemic autonomy	noise:contraction
+sentence		we introduce a novel technique that takes in the users brush strokes	We introduce a novel technique that takes in the user's brush strokes	noise:contraction
+sentence		we systematically evaluate the models adherence to these principles	we systematically evaluate the model's adherence to these principles	noise:contraction
+sentence		potentially influencing peoples perceptions	potentially influencing people's perceptions	noise:contraction
+sentence		inspired by the brains efficiency	Inspired by the brain's efficiency	noise:contraction
+sentence		for improving large language models context processing ability toward reasoning tasks	for improving large language model's context processing ability toward reasoning tasks	noise:contraction
+sentence		in regard to the users rating of and their behavior during the interaction	in regard to the user's rating of and their behavior during the interaction	noise:contraction
+sentence		providing explicit guidance for the models reasoning process	providing explicit guidance for the model's reasoning process	noise:contraction
+sentence		which encompass those stemming from the drivers intention	which encompass those stemming from the driver's intention	noise:contraction
+sentence		these results underline the importance of recognizing the readers point of view	These results underline the importance of recognizing the reader's point of view	noise:contraction
+sentence		this targeted training minimizes interference with the models existing knowledge base	This targeted training minimizes interference with the model's existing knowledge base	noise:contraction
+sentence		the systems novel approach to data collection	The system's novel approach to data collection	noise:contraction
+sentence		defined as the loss in principals utility	defined as the loss in principal's utility	noise:contraction
+sentence		would depend on the users preferences	would depend on the user's preferences	noise:contraction
+sentence		significantly enhancing the models capacity to handle diverse rainfall conditions	significantly enhancing the model's capacity to handle diverse rainfall conditions	noise:contraction
+sentence		training the students intrinsic preference distribution to align with the teachers	training the student's intrinsic preference distribution to align with the teacher's	noise:contraction
+sentence		serves banks customers in an increasingly complex digital environment	serves bank's customers in an increasingly complex digital environment	noise:contraction
+sentence		we evaluated the systems feasibility in a field study	We evaluated the system's feasibility in a field study	noise:contraction
+sentence		but also pushes the limits of the models reasoning ability	but also pushes the limits of the model's reasoning ability	noise:contraction
+sentence		to segment both the students description and the code	to segment both the student's description and the code	noise:contraction
+sentence		the models architecture is designed to be lightweight and scalable	The model's architecture is designed to be lightweight and scalable	noise:contraction
+sentence		thereby enhancing the representation power of the models learning process	thereby enhancing the representation power of the model's learning process	noise:contraction
+sentence		correct the models reasoning	correct the model's reasoning	noise:contraction
+sentence		as the systems processing practices and accuracy are kept secret by law	as the system's processing practices and accuracy are kept secret by law	noise:contraction
+sentence		misinformation continues to pose a significant challenge in todays information ecosystem	Misinformation continues to pose a significant challenge in today's information ecosystem	noise:contraction
+sentence		they complement benchmarks by assessing the agents ability to identify knowledge gaps	They complement benchmarks by assessing the agent's ability to identify knowledge gaps	noise:contraction
+sentence		this integration has substantially improved the models predictive accuracy	This integration has substantially improved the model's predictive accuracy	noise:contraction
+sentence		hindering the models performance across diverse tasks	hindering the model's performance across diverse tasks	noise:contraction
+sentence		making it challenging to accurately recover the programs logic	making it challenging to accurately recover the program's logic	noise:contraction
+sentence		change detection has essential significance for the regions development	Change detection has essential significance for the region's development	noise:contraction
+sentence		nuanced understanding and the systems domain knowledge	nuanced understanding and the system's domain knowledge	noise:contraction
+sentence		and confines the judge models role to challenging cases	and confines the judge model's role to challenging cases	noise:contraction
+sentence		this challenges a models generalization and adaptability	This challenges a model's generalization and adaptability	noise:contraction
+sentence		we show that liberals and conservatives largely mirrored each others use of hostile expressions	We show that liberals and conservatives largely mirrored each other's use of hostile expressions	noise:contraction
+sentence		this increases the models cognitive burden and degrades both efficiency and accuracy	This increases the model's cognitive burden and degrades both efficiency and accuracy	noise:contraction
+sentence		constraining the models capacity	constraining the model's capacity	noise:contraction
+sentence		preliminary data collection has demonstrated the systems ability to accurately classify various equestrian activities	Preliminary data collection has demonstrated the system's ability to accurately classify various equestrian activities	noise:contraction
+sentence		the sampling proportions of these different domains significantly impact the models performance	the sampling proportions of these different domains significantly impact the model's performance	noise:contraction
+sentence		fleeting nonverbal cues that reveal an individuals genuine emotional state	fleeting nonverbal cues that reveal an individual's genuine emotional state	noise:contraction
+sentence		which depicts the systems behavior without any observational input	which depicts the system's behavior without any observational input	noise:contraction
+sentence		a birds head and wings treated as a single concept	a bird's head and wings treated as a single concept	noise:contraction
+sentence		showcasing the potential to utilize our systems depth estimations to navigate even complex scenarios	showcasing the potential to utilize our system's depth estimations to navigate even complex scenarios	noise:contraction
+sentence		patient experience and care quality are crucial for a hospitals sustainability and reputation	Patient experience and care quality are crucial for a hospital's sustainability and reputation	noise:contraction
+sentence		thereby improving the models ability to handle diverse linguistic phenomena	thereby improving the model's ability to handle diverse linguistic phenomena	noise:contraction
+sentence		offer a more faithful view of the models latent reasoning process	offer a more faithful view of the model's latent reasoning process	noise:contraction
+sentence		users race or response length	user's race or response length	noise:contraction
+sentence		given the authors lack of familiarity with the subject	Given the author's lack of familiarity with the subject	noise:contraction
+sentence		which enhances the models discrimination capability	which enhances the model's discrimination capability	noise:contraction
+sentence		to facilitate the evaluation of the models capability	To facilitate the evaluation of the model's capability	noise:contraction
+sentence		gradually shifting from the students initial distribution towards the teachers distribution	gradually shifting from the student's initial distribution towards the teacher's distribution	noise:contraction
+sentence		hile auctions deliver satisfactoryav erage effectiveness	While auctions deliver satisfactory average effectiveness	noise:multi
+sentence		we present a defense against gradient inversion attacks infederated le arning	we present a defense against gradient inversion attacks in federated learning	noise:multi
+sentence		possiblydue to differen ces in farm structure and practices	possibly due to differences in farm structure and practices	noise:multi
+sentence		showing that hese bounds are tight fo rmore capable wiretap channels	showing that these bounds are tight for more capable wiretap channels	noise:multi
+sentence		in combination withdqta augmentation	in combination with data augmentation	noise:multi
+sentence		a dataset of win dturbine sueface images	A dataset of wind turbine surface images	noise:multi
+sentence		to explore their experiences with abuseon a varjety of social platforms	to explore their experiences with abuse on a variety of social platforms	noise:multi
+sentence		incluring maintaining specific properties f clinical outcomes	including maintaining specific properties of clinical outcomes	noise:multi
+sentence		several open challenges nd researc hopportunities are outlined	several open challenges and research opportunities are outlined	noise:multi
+sentence		a common qpproach is o minimizet he	a common approach is to minimize the	noise:multi
+sentence		rendering both trai ning and inference xpensive	rendering both training and inference expensive	noise:multi
+sentence		highlighting difficulties inmaintaining accurate classifjcation under oisy conditions	highlighting difficulties in maintaining accurate classification under noisy conditions	noise:multi
+sentence		but may be relevant in ot her parts of th eorld	but may be relevant in other parts of the world	noise:multi
+sentence		proposee regulatory and fu nding strategies	proposes regulatory and funding strategies	noise:multi
+sentence		to tackle tn edataset distribution gap	To tackle the dataset distribution gap	noise:multi
+sentence		me chanism o ennance feature extraction	mechanism to enhance feature extraction	noise:multi
+sentence		resultingh igj frequency degradation	resulting high frequency degradation	noise:multi
+sentence		even when that probability is to osmall to estimate byrandom sampling	even when that probability is too small to estimate by random sampling	noise:multi
+sentence		link predictionm rthods outperform overall	link prediction methods outperform overall	noise:multi
+sentence		aiming to segm ent specific target objects in remote sensijg	aiming to segment specific target objects in remote sensing	noise:multi
+sentence		which is hown to provide more biologicallyplausible patterns	which is shown to provide more biologically plausible patterns	noise:multi
+sentence		head direcgly to thef eature	head directly to the feature	noise:multi
+sentence		we als olresent an extension of this work	We also present an extension of this work	noise:multi
+sentence		andthat hey can be numerated in time	and that they can be enumerated in time	noise:multi
+sentence		particularly hose involvingf eaturematching	particularly those involving feature matching	noise:multi
+sentence		we cane nhance memory retentionby learning extensive data and taking adequate rest	we can enhance memory retention by learning extensive data and taking adequate rest	noise:multi
+sentence		practitioners often refrain from advanced priv acy mechanisms to preventu tipity losses	practitioners often refrain from advanced privacy mechanisms to prevent utility losses	noise:multi
+sentence		leveragingt emporal continuity across video frames o improve robustness in dynamic surgical sce nes	leveraging temporal continuity across video frames to improve robustness in dynamic surgical scenes	noise:multi
+sentence		which n turn enables more accurate classific ation	which in turn enables more accurate classification	noise:multi
+sentence		and scaling laws ear criticalpoints	and scaling laws near critical points	noise:multi
+sentence		this treaming edge coloring problem has been studied by severalworks in recent years	This streaming edge coloring problem has been studied by several works in recent years	noise:multi
+sentence		andtherefore addresses informational and computationalc hallenges	and therefore addresses informational and computational challenges	noise:multi
+sentence		e show that when the lengths of trainingand testing prompts are sufficiently large	We show that when the lengths of training and testing prompts are sufficiently large	noise:multi
+sentence		such that th edim ension of	such that the dimension of	noise:multi
+sentence		which demands ultra re liablelow latency communications	which demands ultra reliable low latency communications	noise:multi
+sentence		deko nstrating he effectiveness of our framework	demonstrating the effectiveness of our framework	noise:multi
+sentence		share a co mmona lgebraic property	share a common algebraic property	noise:multi
+sentence		he maino bjective of this work is to show	The main objective of this work is to show	noise:multi
+sentence		it runsu nder fh eir own brand	it runs under their own brand	noise:multi
+sentence		tobalznce the induced communication	To balance the induced communication	noise:multi
+sentence		nd istributed dp with secure aggregation	and distributed DP with secure aggregation	noise:multi
+sentence		based on wor derdor ate	Based on word error rate	noise:multi
+sentence		gives strongfprmalg uarantees	gives strong formal guarantees	noise:multi
+sentence		and other for ms of alse information	and other forms of false information	noise:multi
+sentence		based onthe strategkc wisdom and operational strategy	Based on the strategic wisdom and operational strategy	noise:multi
+sentence		with noimpact on accuracy or search runtimw	with no impact on accuracy or search runtime	noise:multi
+sentence		while presenc ehas trad itionally been measured through subjective questionnaires	While presence has traditionally been measured through subjective questionnaires	noise:multi
+sentence		st ate of thew orld	state of the world	noise:multi
+sentence		this limi tationprecludes their deployment in practical	This limitation precludes their deployment in practical	noise:multi
+sentence		the robustnes sand perform ance of the	The robustness and performance of the	noise:multi
+sentence		problem and is tightl ysecuee	problem and is tightly secure	noise:multi
+sentence		based on h eobservations	Based on the observations	noise:multi
+sentence		illystrating how they model re use	illustrating how they model reuse	noise:multi
+sentence		negatives fromthe cprpus	negatives from the corpus	noise:multi
+sentence		the wei ghts of a neutal network	the weights of a neural network	noise:multi
+sentence		have achieved remarkable pe rformance but face depllymentchallenges due to their quadratic computational complexity	have achieved remarkable performance but face deployment challenges due to their quadratic computational complexity	noise:multi
+sentence		and even more so if they can be connected to asco re	and even more so if they can be connected to a score	noise:multi
+sentence		are designe dfor elational databases and texts	are designed for relational databases and texts	noise:multi
+sentence		ased framework that incorporates three core stra tegies	based framework that incorporates three core strategies	noise:multi
+sentence		it bec omes challenging for a robot o efficiently navigate to a specific instance	it becomes challenging for a robot to efficiently navigate to a specific instance	noise:multi
+sentence		priv acy of endu sers	privacy of end users	noise:multi
+sentence		ensuring hey do not inadvertently perpetuatw cultural offenses is critical	ensuring they do not inadvertently perpetuate cultural offenses is critical	noise:multi
+sentence		ssays andnews articles	essays and news articles	noise:multi
+sentence		when considering a game we hqven ever played	When considering a game we have never played	noise:multi
+sentence		a straightforward yet effective automated testing methid hat	a straightforward yet effective automated testing method that	noise:multi
+sentence		asks whether aninput distances pace n	asks whether an input distance space on	noise:multi
+sentence		heir translation is hamperedby a lack of research on adequate validation	their translation is hampered by a lack of research on adequate validation	noise:multi
+sentence		different and more complicated techniques compared to the in ary case	different and more complicated techniques compared to the binary case	noise:multi
+sentence		hat achieveminimum fistance	that achieve minimum distance	noise:multi
+sentence		images with newly created polygonal annotations fo rinstancesegmentation	images with newly created polygonal annotations for instance segmentation	noise:multi
+sentence		the closer theapproxination is to the origin al text	The closer the approximation is to the original text	noise:multi
+sentence		establishing new benchmarks for obustness and efficiency in heterogebeous graph processing	establishing new benchmarks for robustness and efficiency in heterogeneous graph processing	noise:multi
+sentence		whi ch confirmsthe superiority of th eproposed models	which confirms the superiority of the proposed models	noise:multi
+sentence		reactorh as an unusual design for a olten salt reactor technology	reactor has an unusual design for a molten salt reactor technology	noise:multi
+sentence		bridging the gap between computationalanalysis and huma nintuition in materials research	bridging the gap between computational analysis and human intuition in materials research	noise:multi
+sentence		to prompt targeted questioning from student sand drive ngagement	To prompt targeted questioning from students and drive engagement	noise:multi
+sentence		this paper proposes an original ap roach	This paper proposes an original approach	noise:multi
+sentence		and further discussed and visualized the modality imbalance problem uring themodel transfer	and further discussed and visualized the modality imbalance problem during the model transfer	noise:multi
+sentence		membranepotential smoothing facilitates forward propagation of information and backward propagation of tradients	membrane potential smoothing facilitates forward propagation of information and backward propagation of gradients	noise:multi
+sentence		many propose dalgorithmsrely on traditional data nining techniques	many proposed algorithms rely on traditional data mining techniques	noise:multi
+sentence		hav edemonstrated remarkable capabolities in natural language processing	have demonstrated remarkable capabilities in natural language processing	noise:multi
+sentence		where thw two phasesre split across separate machines	where the two phases are split across separate machines	noise:multi
+sentence		and then leverage natural language asa medium for using this information	and then leverage natural language as a medium for fusing this information	noise:multi
+sentence		without he need for model retra ining	without the need for model retraining	noise:multi
+sentence		an dthis sche me canalso ensure privacy	and this scheme can also ensure privacy	noise:multi
+sentence		this strategyo ftenrequires exces sive sampling and costly scoring	this strategy often requires excessive sampling and costly scoring	noise:multi
+sentence		are e ing released an dgaining traction	are being released and gaining traction	noise:multi
+sentence		umans continuously make nea disco veries	Humans continuously make new discoveries	noise:multi
+sentence		our coce nd datasets are available on	Our code and datasets are available on	noise:multi
+sentence		they generalize both xet erministic parity	They generalize both deterministic parity	noise:multi
+sentence		which shortens the forwar dand reverse pr ocesses to	which shortens the forward and reverse processes to	noise:multi
+sentence		unsupervised learning oals iffer from downstream tasks	Unsupervised learning goals differ from downstream tasks	noise:multi
+sentence		the difference betweenthe three age groups was ignificant	The difference between the three age groups was significant	noise:multi
+sentence		e introduce a newparadigm	we introduce a new paradigm	noise:multi
+sentence		to denotethe total number of pi eces in all f the	to denote the total number of pieces in all of the	noise:multi
+sentence		we explore a more practical and chaolengingscenario	we explore a more practical and challenging scenario	noise:multi
+sentence		and istherefore a viable framswork for decentralized collision avoidance planning	and is therefore a viable framework for decentralized collision avoidance planning	noise:multi
+sentence		such asmanipulating mode loutput length or style to game win rates	such as manipulating model output length or style to game win rates	noise:multi
+sentence		and a pronouncedd ependency on skiloed operators	and a pronounced dependency on skilled operators	noise:multi
+sentence		these observations are often assumed to be rea dily available without any cost	these observations are often assumed to be readily available without any cost	noise:multi
+sentence		our algorithm has a decoding complexity of	our algorithm has a decoding complexity of	negative:clean
+sentence		The rise of large	The rise of large	negative:clean
+sentence		have been widely used in language processing applications	have been widely used in language processing applications	negative:clean
+sentence		a fully concurrent garbage collector	a fully concurrent garbage collector	negative:clean
+sentence		have emerged as powerful tools capable of tackling complex problems across diverse domains	have emerged as powerful tools capable of tackling complex problems across diverse domains	negative:clean
+sentence		existing research lacks a full	existing research lacks a full	negative:clean
+sentence		where weights can represent priority	where weights can represent priority	negative:clean
+sentence		showing significant performance gains over static prompt tuning approaches	showing significant performance gains over static prompt tuning approaches	negative:clean
+sentence		At each time step	At each time step	negative:clean
+sentence		We attribute the misinterpretation of scene information to a key factor	We attribute the misinterpretation of scene information to a key factor	negative:clean
+sentence		We investigate this by	We investigate this by	negative:clean
+sentence		Extensive experiments across tasks such as sentiment analysis	Extensive experiments across tasks such as sentiment analysis	negative:clean
+sentence		provides a balance between data utility and privacy	provides a balance between data utility and privacy	negative:clean
+sentence		less attention is given to training data selection	less attention is given to training data selection	negative:clean
+sentence		While solutions exist for specific tasks	While solutions exist for specific tasks	negative:clean
+sentence		that is crucial for targeted marketing campaigns	that is crucial for targeted marketing campaigns	negative:clean
+sentence		and external scientific languages	and external scientific languages	negative:clean
+sentence		developed based on artificial intelligence	developed based on artificial intelligence	negative:clean
+sentence		We investigate the relationship between the	We investigate the relationship between the	negative:clean
+sentence		and runs efficiently on commodity hardware in a small resource budget	and runs efficiently on commodity hardware in a small resource budget	negative:clean
+sentence		Through rigorous evaluation across multiple datasets	Through rigorous evaluation across multiple datasets	negative:clean
+sentence		as the limited capacity of the implicit memory leads to memory decay	as the limited capacity of the implicit memory leads to memory decay	negative:clean
+sentence		has been applied to edge training for connected vehicles	has been applied to edge training for connected vehicles	negative:clean
+sentence		To improve this situation	To improve this situation	negative:clean
+sentence		have achieved advanced performance in various downstream tasks	have achieved advanced performance in various downstream tasks	negative:clean
+sentence		Individuals with higher trust in government favor regulation	Individuals with higher trust in government favor regulation	negative:clean
+sentence		Inspired by this finding	Inspired by this finding	negative:clean
+sentence		providing detailed text guidance needed for making complex	providing detailed text guidance needed for making complex	negative:clean
+sentence		To address this critical language gap in medical QA	To address this critical language gap in medical QA	negative:clean
+sentence		particularly in terms of the criteria for document selection	particularly in terms of the criteria for document selection	negative:clean
+sentence		a correct detection occurs when all comprising base units are detected as vulnerable	a correct detection occurs when all comprising base units are detected as vulnerable	negative:clean
+sentence		including dual masking strategies	including dual masking strategies	negative:clean
+sentence		the exchange of contact information	the exchange of contact information	negative:clean
+sentence		The dataset and associated code are available at	The dataset and associated code are available at	negative:clean
+sentence		and visual quality compared to the baseline method	and visual quality compared to the baseline method	negative:clean
+sentence		trained for mathematical reasoning	trained for mathematical reasoning	negative:clean
+sentence		a morphologically rich language	a morphologically rich language	negative:clean
+sentence		we have developed robust protection against sequential key recovery attacks	we have developed robust protection against sequential key recovery attacks	negative:clean
+sentence		such as extended reality	such as extended reality	negative:clean
+sentence		which are limited in attention adaptation or require additional supervision	which are limited in attention adaptation or require additional supervision	negative:clean
+sentence		these methods are inadequate for addressing network security issues	these methods are inadequate for addressing network security issues	negative:clean
+sentence		As platforms become the active recruiter	As platforms become the active recruiter	negative:clean
+sentence		training details and the annotated dataset are made publicly available at	training details and the annotated dataset are made publicly available at	negative:clean
+sentence		and we discuss implications for inclusive video learning tools	and we discuss implications for inclusive video learning tools	negative:clean
+sentence		even when employing various combinations of guides	even when employing various combinations of guides	negative:clean
+sentence		and design an effective algorithm	and design an effective algorithm	negative:clean
+sentence		which directly probe models with ethically sensitive or controversial questions	which directly probe models with ethically sensitive or controversial questions	negative:clean
+sentence		the sampler is imposed with a sampling rate constraint	the sampler is imposed with a sampling rate constraint	negative:clean
+sentence		enabling model training across multiple clients without centralized data collection	enabling model training across multiple clients without centralized data collection	negative:clean
+sentence		thus greatly facilitating scaling and transfer to other technology nodes	thus greatly facilitating scaling and transfer to other technology nodes	negative:clean
+sentence		ensuring their safety and reliability has become a critical task in software testing	ensuring their safety and reliability has become a critical task in software testing	negative:clean
+sentence		By systematically mapping the phenotypic space	By systematically mapping the phenotypic space	negative:clean
+sentence		we may prefer protein sequences with high stability	we may prefer protein sequences with high stability	negative:clean
+sentence		considering the energy constraints and mobility of vehicles	considering the energy constraints and mobility of vehicles	negative:clean
+sentence		One way to correct this drift is to use absolute navigation solutions	One way to correct this drift is to use absolute navigation solutions	negative:clean
+sentence		investment in data collection for robotics has grown across both industrial and academic labs	investment in data collection for robotics has grown across both industrial and academic labs	negative:clean
+sentence		module is introduced to provide explicit spatial context	module is introduced to provide explicit spatial context	negative:clean
+sentence		they still face challenges such as high computational demands and privacy concerns	they still face challenges such as high computational demands and privacy concerns	negative:clean
+sentence		catering to various stakeholders	catering to various stakeholders	negative:clean
+sentence		Despite the considerable performance improvements of face recognition algorithms in recent years	Despite the considerable performance improvements of face recognition algorithms in recent years	negative:clean
+sentence		systems and closely approach the theoretical lower bound on the total transmit power	systems and closely approach the theoretical lower bound on the total transmit power	negative:clean
+sentence		while training only a minimum number of parameters	while training only a minimum number of parameters	negative:clean
+sentence		decide when additional visual evidence is needed	decide when additional visual evidence is needed	negative:clean
+sentence		reducing the need for prompt engineering	reducing the need for prompt engineering	negative:clean
+sentence		while avoiding human biases in model design	while avoiding human biases in model design	negative:clean
+sentence		while snapshot planning accounts for current delays but not future ones	while snapshot planning accounts for current delays but not future ones	negative:clean
+sentence		Existing diffusion models struggle with scaling beyond their training resolutions	Existing diffusion models struggle with scaling beyond their training resolutions	negative:clean
+sentence		we conduct extensive experiments on three datasets	we conduct extensive experiments on three datasets	negative:clean
+sentence		or inaccessible load points	or inaccessible load points	negative:clean
+sentence		Transformed images suffer from distortion that reduces feature discrimination	Transformed images suffer from distortion that reduces feature discrimination	negative:clean
+sentence		despite their growing relevance	despite their growing relevance	negative:clean
+sentence		while widely used in shape analysis	while widely used in shape analysis	negative:clean
+sentence		and linguistic capacity across heterogeneous tasks	and linguistic capacity across heterogeneous tasks	negative:clean
+sentence		To investigate the validity of this structural claim	To investigate the validity of this structural claim	negative:clean
+sentence		In such a grid graph	In such a grid graph	negative:clean
+sentence		This contrasts with previous work	This contrasts with previous work	negative:clean
+sentence		achieving higher accuracy and recall across varying anomaly rates	achieving higher accuracy and recall across varying anomaly rates	negative:clean
+sentence		which act as a reasoning catalyst	which act as a reasoning catalyst	negative:clean
+sentence		robots can serve as platforms to acquire such data	robots can serve as platforms to acquire such data	negative:clean
+sentence		recover the correct mapping between the vertices with the help of the graph structure	recover the correct mapping between the vertices with the help of the graph structure	negative:clean
+sentence		For these kinds of settings	For these kinds of settings	negative:clean
+sentence		freezing the main architecture and optimizing a small number of prompts for efficient adaptation	freezing the main architecture and optimizing a small number of prompts for efficient adaptation	negative:clean
+sentence		both indoor and outdoor	both indoor and outdoor	negative:clean
+sentence		Increasing urbanization rate causes an urban heat island	Increasing urbanization rate causes an urban heat island	negative:clean
+sentence		these parameters must be tuned to the specific job being run	these parameters must be tuned to the specific job being run	negative:clean
+sentence		while they observed eight different actions performed by two agents	while they observed eight different actions performed by two agents	negative:clean
+sentence		Pruning large language models	Pruning large language models	negative:clean
+sentence		We model the interaction among agents using evolutionary intelligence	We model the interaction among agents using evolutionary intelligence	negative:clean
+sentence		often struggle in such complex scenarios	often struggle in such complex scenarios	negative:clean
+sentence		to their sensitive conversational data	to their sensitive conversational data	negative:clean
+sentence		as they must process entire videos before responding to queries	as they must process entire videos before responding to queries	negative:clean
+sentence		a comparative analysis of the forecasting models	a comparative analysis of the forecasting models	negative:clean
+sentence		We present a significant breakthrough	We present a significant breakthrough	negative:clean
+sentence		As bias accumulates through the model's layers	As bias accumulates through the model's layers	negative:clean
+sentence		As empirical software engineering evolves	As empirical software engineering evolves	negative:clean
+sentence		and accurate matching labels	and accurate matching labels	negative:clean
+sentence		still exhibit limited robustness under realistic noisy conditions	still exhibit limited robustness under realistic noisy conditions	negative:clean
+sentence		It estimates the uncertainty within the paired data	It estimates the uncertainty within the paired data	negative:clean
+sentence		Each layer then progressively expands these sets	Each layer then progressively expands these sets	negative:clean
+sentence		discussing the next diagnostic steps	discussing the next diagnostic steps	negative:clean
+sentence		Sepsis is an organ dysfunction caused by a deregulated immune response to an infection	Sepsis is an organ dysfunction caused by a deregulated immune response to an infection	negative:clean
+sentence		subtly altering the color of water	subtly altering the color of water	negative:clean
+sentence		Unlike traditional locomotion control approaches focusing solely on velocity tracking	Unlike traditional locomotion control approaches focusing solely on velocity tracking	negative:clean
+sentence		guided by the theoretical framework of social determinism	guided by the theoretical framework of social determinism	negative:clean
+sentence		Our approach integrates two innovative modules	Our approach integrates two innovative modules	negative:clean
+sentence		Compared with the foundation model paradigm	Compared with the foundation model paradigm	negative:clean
+sentence		Code will be available under	Code will be available under	negative:clean
+sentence		The code of the proposed benchmark is publicly available at	The code of the proposed benchmark is publicly available at	negative:clean
+sentence		What book should I read next	What book should I read next	negative:clean
+sentence		and which tyre compounds	and which tyre compounds	negative:clean
+sentence		drawing from biology and design theory	drawing from biology and design theory	negative:clean
+sentence		to learn the parameters of the assignment variables in an online setting	to learn the parameters of the assignment variables in an online setting	negative:clean
+sentence		with less opportunity to engage in professional practice due to a reduced employment market	with less opportunity to engage in professional practice due to a reduced employment market	negative:clean
+sentence		This study offers insights into emotional labor	This study offers insights into emotional labor	negative:clean
+sentence		serving as valuable sources of factual information and enhancing various downstream tasks	serving as valuable sources of factual information and enhancing various downstream tasks	negative:clean
+sentence		or have a running time that is nearly	or have a running time that is nearly	negative:clean
+sentence		have raised widespread concerns regarding their potential for malicious use	have raised widespread concerns regarding their potential for malicious use	negative:clean
+sentence		which can help to enhance traffic management	which can help to enhance traffic management	negative:clean
+sentence		where linguistic and acoustic variations dramatically amplify attack success	where linguistic and acoustic variations dramatically amplify attack success	negative:clean
+sentence		and a compute node	and a compute node	negative:clean
+sentence		the need for the secure and convenient identification of users	the need for the secure and convenient identification of users	negative:clean
+sentence		a tendency to overestimate immediate rewards and underestimate future rewards	a tendency to overestimate immediate rewards and underestimate future rewards	negative:clean
+sentence		guaranteeing convergence for a range of loss functions and varying levels of data heterogeneity	guaranteeing convergence for a range of loss functions and varying levels of data heterogeneity	negative:clean
+sentence		retrieves the most relevant candidate questions by integrating semantic and logical features	retrieves the most relevant candidate questions by integrating semantic and logical features	negative:clean
+sentence		To evaluate the models result	To evaluate the models result	negative:clean
+sentence		existing learning approaches still show different aspects of limitations in terms of flexibility	existing learning approaches still show different aspects of limitations in terms of flexibility	negative:clean
+sentence		unlocking their full potential in video analysis and beyond	unlocking their full potential in video analysis and beyond	negative:clean
+sentence		are transforming cognitive assessment and training by offering immersive	are transforming cognitive assessment and training by offering immersive	negative:clean
+sentence		have demonstrated remarkable generalization capabilities across diverse tasks and languages	have demonstrated remarkable generalization capabilities across diverse tasks and languages	negative:clean
+sentence		or pooling all data	or pooling all data	negative:clean
+sentence		and the forum was back online and became even more connected	and the forum was back online and became even more connected	negative:clean
+sentence		we can surprisingly enable the model to handle dynamics	we can surprisingly enable the model to handle dynamics	negative:clean
+sentence		To address this limitation	To address this limitation	negative:clean
+sentence		Local semantic adaptability modulated by cognitive load metrics	Local semantic adaptability modulated by cognitive load metrics	negative:clean
+sentence		especially in higher dimensions	especially in higher dimensions	negative:clean
+sentence		during the execution of the system	during the execution of the system	negative:clean
+sentence		necessitating stringent regulatory oversight and cybersecurity protocols	necessitating stringent regulatory oversight and cybersecurity protocols	negative:clean
+sentence		techniques to identify user activities	techniques to identify user activities	negative:clean
+sentence		and accessibility compared to existing solutions	and accessibility compared to existing solutions	negative:clean
+sentence		all without requiring additional annotated data	all without requiring additional annotated data	negative:clean
+sentence		we propose a cooperative workflow	we propose a cooperative workflow	negative:clean
+sentence		work well for landscape categorization	work well for landscape categorization	negative:clean
+sentence		This paper introduces a series of approaches to mitigate this issue	This paper introduces a series of approaches to mitigate this issue	negative:clean
+sentence		highlighting the need for improvements in artistic image aesthetic assessment	highlighting the need for improvements in artistic image aesthetic assessment	negative:clean
+sentence		threat modeling has also shaped provider choices based on geopolitical considerations	threat modeling has also shaped provider choices based on geopolitical considerations	negative:clean
+sentence		We argue that data systems instead need to be proactive	We argue that data systems instead need to be proactive	negative:clean
+sentence		In the field of artificial intelligence	In the field of artificial intelligence	negative:clean
+sentence		ensuring robustness even under limited data conditions	ensuring robustness even under limited data conditions	negative:clean
+sentence		can be expressed as a deterministic transformation of an exogenous	can be expressed as a deterministic transformation of an exogenous	negative:clean
+sentence		with external information retrieval	with external information retrieval	negative:clean
+sentence		which involves addressing two primary challenges	which involves addressing two primary challenges	negative:clean
+sentence		Synthetic polymeric materials underpin fundamental technologies in the energy	Synthetic polymeric materials underpin fundamental technologies in the energy	negative:clean
+sentence		our granular learning allows discrimination of subtle parts of speech	our granular learning allows discrimination of subtle parts of speech	negative:clean
+sentence		and the fact that the exact mesh of the manipulated object is not known	and the fact that the exact mesh of the manipulated object is not known	negative:clean
+sentence		providing beneficial findings for educational institutions seeking data frugality	providing beneficial findings for educational institutions seeking data frugality	negative:clean
+sentence		Given a small batch of demonstrations with sparse quality labels	Given a small batch of demonstrations with sparse quality labels	negative:clean
+sentence		To predict the water stages more accurately	To predict the water stages more accurately	negative:clean
+sentence		aiming to enhance the verification capabilities	aiming to enhance the verification capabilities	negative:clean
+sentence		from a line chart	from a line chart	negative:clean
+sentence		This framework bridges physical modelling with cryptographic requirements	This framework bridges physical modelling with cryptographic requirements	negative:clean
+sentence		potentially producing harmful content that violates usage policies	potentially producing harmful content that violates usage policies	negative:clean
+sentence		this survey gives a comprehensive roadmap to building introspective	this survey gives a comprehensive roadmap to building introspective	negative:clean
+sentence		Against the backdrop of intensified climate change leading to frequent extreme weather events	Against the backdrop of intensified climate change leading to frequent extreme weather events	negative:clean
+sentence		facilitating the design and evaluation of methods for agent control utilizing large language models	facilitating the design and evaluation of methods for agent control utilizing large language models	negative:clean
+sentence		provide strong evidence supporting the effectiveness of our method	provide strong evidence supporting the effectiveness of our method	negative:clean
+sentence		Preliminary experiments on real and synthetic datasets demonstrate the effectiveness of our method	Preliminary experiments on real and synthetic datasets demonstrate the effectiveness of our method	negative:clean
+sentence		the model might make	the model might make	negative:clean
+sentence		both in standard mission settings and in scenarios involving observation loss	both in standard mission settings and in scenarios involving observation loss	negative:clean
+sentence		while consistently exploring the full parameter space during training	while consistently exploring the full parameter space during training	negative:clean
+sentence		It focuses on the contribution from syntactic knowledge	It focuses on the contribution from syntactic knowledge	negative:clean
+sentence		This hinders comprehension of anatomical structure content	This hinders comprehension of anatomical structure content	negative:clean
+sentence		central nervous system signals	central nervous system signals	negative:clean
+sentence		Trust in government and perceived risks significantly predict preferences for both soft	Trust in government and perceived risks significantly predict preferences for both soft	negative:clean
+sentence		Current sign language machine translation systems rely on recognizing hand movements	Current sign language machine translation systems rely on recognizing hand movements	negative:clean
+sentence		The techniques of previous works for the linear case are inherently limited to it	The techniques of previous works for the linear case are inherently limited to it	negative:clean
+sentence		increasingly being leveraged to enhance these systems	increasingly being leveraged to enhance these systems	negative:clean
+sentence		applications proliferate and support transportation	applications proliferate and support transportation	negative:clean
+sentence		resemblance to the input image	resemblance to the input image	negative:clean
+sentence		proofs of concept and pilots	proofs of concept and pilots	negative:clean
+sentence		Extensive experiments have been performed to verify the superiority of the proposed method	Extensive experiments have been performed to verify the superiority of the proposed method	negative:clean
+sentence		providing a refined privacy analysis that yields significantly tighter bounds than prior results	providing a refined privacy analysis that yields significantly tighter bounds than prior results	negative:clean
+sentence		they fall short in capturing the complex	they fall short in capturing the complex	negative:clean
+sentence		The framework offers a scalable and transferable approach for urban analysis	The framework offers a scalable and transferable approach for urban analysis	negative:clean
+sentence		Based on this insight	Based on this insight	negative:clean
+sentence		and pruning feature to avoid additional memory copy kernels	and pruning feature to avoid additional memory copy kernels	negative:clean
+sentence		relying heavily on creativity to produce narratives that are novel	relying heavily on creativity to produce narratives that are novel	negative:clean
+sentence		leading to complex systems prone to errors	leading to complex systems prone to errors	negative:clean
+sentence		This performance surpasses that of previous studies and commercial services	This performance surpasses that of previous studies and commercial services	negative:clean
+sentence		offering guidance for automakers	offering guidance for automakers	negative:clean
+sentence		one dedicated to plasticity and the other to stability	one dedicated to plasticity and the other to stability	negative:clean
+sentence		Such data systems do as they are told	Such data systems do as they are told	negative:clean
+sentence		structural determinants of binding affinity	structural determinants of binding affinity	negative:clean
+sentence		can be a significant challenge for students	can be a significant challenge for students	negative:clean
+sentence		generating a set of diverse predictions	generating a set of diverse predictions	negative:clean
+sentence		facilitating efficient allocation of responsibilities among the agents	facilitating efficient allocation of responsibilities among the agents	negative:clean
+sentence		aims to develop an effective separation method regardless of the microphone array geometry	aims to develop an effective separation method regardless of the microphone array geometry	negative:clean
+sentence		misinformation emerged as a critical area requiring enhanced contextual defenses	misinformation emerged as a critical area requiring enhanced contextual defenses	negative:clean
+sentence		we leverage the control barrier function to guide exploration	we leverage the control barrier function to guide exploration	negative:clean
+sentence		which introduce single points of failure and scalability constraints	which introduce single points of failure and scalability constraints	negative:clean
+sentence		where teams of experts collaborate	where teams of experts collaborate	negative:clean
+sentence		Traffic congestion and collisions represent significant economic	Traffic congestion and collisions represent significant economic	negative:clean
+sentence		While traditional reasoning frameworks primarily focus on finding	While traditional reasoning frameworks primarily focus on finding	negative:clean
+sentence		this approach might not be sufficient for tasks like cancer subtype classification	this approach might not be sufficient for tasks like cancer subtype classification	negative:clean
+sentence		which trains a replicated NP layer for each class and	which trains a replicated NP layer for each class and	negative:clean
+sentence		when a network node fails	when a network node fails	negative:clean
+sentence		which is suboptimal compared to the	which is suboptimal compared to the	negative:clean
+sentence		including the spectral norm of matrices	including the spectral norm of matrices	negative:clean
+sentence		sensitivity under approximate differential privacy	sensitivity under approximate differential privacy	negative:clean
+sentence		as well as thorough analyses and insightful interpretations for users	as well as thorough analyses and insightful interpretations for users	negative:clean
+sentence		they face significant challenges	they face significant challenges	negative:clean
+sentence		shared by users who also shared	shared by users who also shared	negative:clean
+sentence		Using a framework called	Using a framework called	negative:clean
+sentence		Computing the permanent of a sparse matrix poses a challenge for compilers	Computing the permanent of a sparse matrix poses a challenge for compilers	negative:clean
+sentence		the optimal weight decay should increase	the optimal weight decay should increase	negative:clean
+sentence		where the content and modes of evaluation are similar	where the content and modes of evaluation are similar	negative:clean
+sentence		and reconstruct the speech signal	and reconstruct the speech signal	negative:clean
+sentence		we dispel this myth	we dispel this myth	negative:clean
+sentence		while requiring less execution time	while requiring less execution time	negative:clean
+sentence		On the previous benchmark dataset	On the previous benchmark dataset	negative:clean
+sentence		and opportunities for active learning	and opportunities for active learning	negative:clean
+sentence		We identified a research gap in the current state of the art	We identified a research gap in the current state of the art	negative:clean
+sentence		community detection under stochastic block models	community detection under stochastic block models	negative:clean
+sentence		machine learning models with sparse weight matrices are widely used in the literature	machine learning models with sparse weight matrices are widely used in the literature	negative:clean
+sentence		Exploration without risks can seem paradoxical	Exploration without risks can seem paradoxical	negative:clean
+sentence		this is not sufficient to guarantee security	this is not sufficient to guarantee security	negative:clean
+sentence		We investigate a joint communication and sensing	We investigate a joint communication and sensing	negative:clean
+sentence		systems on processors with varying speeds	systems on processors with varying speeds	negative:clean
+sentence		opacity such as on copyright status	opacity such as on copyright status	negative:clean
+sentence		resulting in irreversible information loss and often ignoring input instructions	resulting in irreversible information loss and often ignoring input instructions	negative:clean
+sentence		Restoring the missing attributes is expected to benefit downstream graph learning	Restoring the missing attributes is expected to benefit downstream graph learning	negative:clean
+sentence		microphones and classroom conditions	microphones and classroom conditions	negative:clean
+sentence		and moderator pins surrounded by the molten salt fuel	and moderator pins surrounded by the molten salt fuel	negative:clean
+sentence		In the second stage	In the second stage	negative:clean
+sentence		which has a direct impact on operational efficiency and safety at sea	which has a direct impact on operational efficiency and safety at sea	negative:clean
+sentence		in a black box environment	in a black box environment	negative:clean
+sentence		more effective control of hand hygiene	more effective control of hand hygiene	negative:clean
+sentence		a framework to discover new classes within audio datasets by incorporating	a framework to discover new classes within audio datasets by incorporating	negative:clean
+sentence		removing the need for explicit modeling of the candidates	removing the need for explicit modeling of the candidates	negative:clean
+sentence		where errors can lead to substantial maintenance costs or part rejection	where errors can lead to substantial maintenance costs or part rejection	negative:clean
+sentence		which rely heavily on training data	which rely heavily on training data	negative:clean
+sentence		This paper fills this gap by addressing three key questions	This paper fills this gap by addressing three key questions	negative:clean
+sentence		this lower bound can be matched	this lower bound can be matched	negative:clean
+sentence		which we identify as an appropriate measure for reconstruction threats	which we identify as an appropriate measure for reconstruction threats	negative:clean
+sentence		paving the way for more effective deployment of robotic fish in real aquatic environments	paving the way for more effective deployment of robotic fish in real aquatic environments	negative:clean
+sentence		privacy between a user and other users	privacy between a user and other users	negative:clean
+sentence		Advances in foundation modeling have reshaped computational pathology	Advances in foundation modeling have reshaped computational pathology	negative:clean
+sentence		a loss function informed by the structural properties of class distributions	a loss function informed by the structural properties of class distributions	negative:clean
+sentence		light detection and ranging	light detection and ranging	negative:clean
+sentence		and creatively adapting diverse inspirations	and creatively adapting diverse inspirations	negative:clean
+sentence		leading to disparities in care based on demographic factors	leading to disparities in care based on demographic factors	negative:clean
+sentence		sampling converges sharply to the optimal tilted distribution at a rate of	sampling converges sharply to the optimal tilted distribution at a rate of	negative:clean
+sentence		including visual boundary localization and motion correlation fusion	including visual boundary localization and motion correlation fusion	negative:clean
+sentence		ensuring synchronized read and write operations	ensuring synchronized read and write operations	negative:clean
+sentence		and adaptable market dynamics for model testing	and adaptable market dynamics for model testing	negative:clean
+sentence		and saturation in downstream metropolitan areas	and saturation in downstream metropolitan areas	negative:clean
+sentence		possibly due to the lack of enough data needed to effectively update their weights	possibly due to the lack of enough data needed to effectively update their weights	negative:clean
+sentence		we demonstrate the effectiveness of our method	we demonstrate the effectiveness of our method	negative:clean
+sentence		is a mandatory component to build roots of trust for any encryption system	is a mandatory component to build roots of trust for any encryption system	negative:clean
+sentence		below a size constraint	below a size constraint	negative:clean
+sentence		most recommendation engines rely primarily on numerical scores	most recommendation engines rely primarily on numerical scores	negative:clean
+sentence		Motivated by this gap	Motivated by this gap	negative:clean
+sentence		a comprehensive theoretical framework remains underdeveloped	a comprehensive theoretical framework remains underdeveloped	negative:clean
+sentence		is an important task in time series analysis	is an important task in time series analysis	negative:clean
+sentence		and relevant to the course material	and relevant to the course material	negative:clean
+sentence		and exploring how model design differences influence the encoding of biases	and exploring how model design differences influence the encoding of biases	negative:clean
+sentence		including practical challenges and considerations that affect usability and adoption	including practical challenges and considerations that affect usability and adoption	negative:clean
+sentence		The proposed method improved clip classification	The proposed method improved clip classification	negative:clean
+sentence		and connectors embedded into textiles	and connectors embedded into textiles	negative:clean
+sentence		To reduce this behavior	To reduce this behavior	negative:clean
+sentence		as irrelevant or noisy documents degrade performance	as irrelevant or noisy documents degrade performance	negative:clean
+sentence		Traditional approaches rely on hard boundaries	Traditional approaches rely on hard boundaries	negative:clean
+sentence		While existing work has employed the automated code refinement	While existing work has employed the automated code refinement	negative:clean
+sentence		making it possible to quickly locate and mitigate potential faulty solar panels	making it possible to quickly locate and mitigate potential faulty solar panels	negative:clean
+sentence		making them suitable for various applications	making them suitable for various applications	negative:clean
+sentence		codes have nice applications in communication and storage systems	codes have nice applications in communication and storage systems	negative:clean
+sentence		and educational approaches to foster sustainable making	and educational approaches to foster sustainable making	negative:clean
+sentence		we find that the attackers evade the detectors mainly in three ways	we find that the attackers evade the detectors mainly in three ways	negative:clean
+sentence		Weather forecasting is crucial for public safety	Weather forecasting is crucial for public safety	negative:clean
+sentence		is a rigorous standard for protecting individual privacy in data analysis	is a rigorous standard for protecting individual privacy in data analysis	negative:clean
+sentence		By addressing these challenges	By addressing these challenges	negative:clean
+sentence		has attracted considerable interest from researchers	has attracted considerable interest from researchers	negative:clean
+sentence		they still struggle with semantic understanding and complex preference reasoning	they still struggle with semantic understanding and complex preference reasoning	negative:clean
+sentence		the proposed system captures the sequential nature of tactile interactions	the proposed system captures the sequential nature of tactile interactions	negative:clean
+sentence		as they often struggle to provide descriptive text queries	as they often struggle to provide descriptive text queries	negative:clean
+sentence		mitigating newly introduced burdens	mitigating newly introduced burdens	negative:clean
+sentence		the majority of current research focuses on simulating human cognitive behaviors under ideal conditions	the majority of current research focuses on simulating human cognitive behaviors under ideal conditions	negative:clean
+sentence		particularly concerning rotational angles	particularly concerning rotational angles	negative:clean
+sentence		and automated farming operations	and automated farming operations	negative:clean
+sentence		demonstrating substantial engineering application value	demonstrating substantial engineering application value	negative:clean
+sentence		We formulate the adversarial transfer of driving intention as an optimization problem	We formulate the adversarial transfer of driving intention as an optimization problem	negative:clean
+sentence		By addressing challenges like data privacy	By addressing challenges like data privacy	negative:clean
+sentence		Our evaluation showed that considering graph structure improves results	Our evaluation showed that considering graph structure improves results	negative:clean
+sentence		have emerged as transformative technologies	have emerged as transformative technologies	negative:clean
+sentence		It addresses object classification and continuous property variable regression	It addresses object classification and continuous property variable regression	negative:clean
+sentence		is crucial for enhancing their safety and utility	is crucial for enhancing their safety and utility	negative:clean
+sentence		Our objective centers on optimizing the secrecy energy efficiency	Our objective centers on optimizing the secrecy energy efficiency	negative:clean
+sentence		such as failing to challenge stereotypes	such as failing to challenge stereotypes	negative:clean
+sentence		where coolant circulation is disrupted	where coolant circulation is disrupted	negative:clean
+sentence		one particularly crucial aspect is the concept of semantic size	one particularly crucial aspect is the concept of semantic size	negative:clean
+sentence		where facial expressions lead to interpreting implicit emotional evidence	where facial expressions lead to interpreting implicit emotional evidence	negative:clean
+sentence		providing some findings about the failure modes of existing LLMs	providing some findings about the failure modes of existing LLMs	negative:novel
+sentence		which show the effectiveness of CodeCriticBench	which show the effectiveness of CodeCriticBench	negative:novel
+sentence		we propose the sinusoidal time embedding to estimate the oscillating tendency over time	we propose the sinusoidal time embedding to estimate the oscillating tendency over time	negative:novel
+sentence		although models that use SSMax from the beginning of pretraining achieve better length generalization	although models that use SSMax from the beginning of pretraining achieve better length generalization	negative:novel
+sentence		It aims to minimise the required GPUs while limiting the number of migrations	It aims to minimise the required GPUs while limiting the number of migrations	negative:novel
+sentence		to identify layers that are challenging to quantize accurately and allocate additional memory budget	to identify layers that are challenging to quantize accurately and allocate additional memory budget	negative:novel
+sentence		achieving comparable performance to softmax transformers	achieving comparable performance to softmax transformers	negative:novel
+sentence		NeRFs often struggle in large	NeRFs often struggle in large	negative:novel
+sentence		This paper introduces Medalyze	This paper introduces Medalyze	negative:novel
+sentence		The approach employs models such as GPT Neo for generative text	The approach employs models such as GPT Neo for generative text	negative:novel
+sentence		where concept erasure is effective only within the unlearned set	where concept erasure is effective only within the unlearned set	negative:novel
+sentence		Experimental results demonstrate that DepthMatch exhibits high applicability in both indoor and outdoor scenes	Experimental results demonstrate that DepthMatch exhibits high applicability in both indoor and outdoor scenes	negative:novel
+sentence		We prove the following statements about the expressive power of low rank MSO	We prove the following statements about the expressive power of low rank MSO	negative:novel
+sentence		These results establish AWD as a highly efficient alternative to CBMC for bounds checking	These results establish AWD as a highly efficient alternative to CBMC for bounds checking	negative:novel
+sentence		Combined with an LLM inference engine	Combined with an LLM inference engine	negative:novel
+sentence		controlled vocabularies are incorporated and a new class	controlled vocabularies are incorporated and a new class	negative:novel
+sentence		Multimodal retrieval methods have limitations in handling complex	Multimodal retrieval methods have limitations in handling complex	negative:novel
+sentence		this study constructed a comprehensive hemodynamic dataset of intracranial aneurysms	this study constructed a comprehensive hemodynamic dataset of intracranial aneurysms	negative:novel
+sentence		a subset of submodular set functions	a subset of submodular set functions	negative:novel
+sentence		we describe our work on Hashigo	we describe our work on Hashigo	negative:novel
+sentence		Meerkat leverages traceable local updates and forms a virtual path for each client	Meerkat leverages traceable local updates and forms a virtual path for each client	negative:novel
+sentence		followed closely by Pixtral	followed closely by Pixtral	negative:novel
+sentence		performing inference with LLMs is both costly and slow	performing inference with LLMs is both costly and slow	negative:novel
+sentence		making it an attractive alternative for applications where interpretability is paramount	making it an attractive alternative for applications where interpretability is paramount	negative:novel
+sentence		this paper presents GPro	this paper presents GPro	negative:novel
+sentence		methods to SSMs remains largely unexplored	methods to SSMs remains largely unexplored	negative:novel
+sentence		and quadruped locomotion using the proposed framework	and quadruped locomotion using the proposed framework	negative:novel
+sentence		the PLD framework can effectively protect the confidentiality of the transmitted messages	the PLD framework can effectively protect the confidentiality of the transmitted messages	negative:novel
+sentence		which are misclassifications caused by an attack text that is added to an image	which are misclassifications caused by an attack text that is added to an image	negative:novel
+sentence		most existing methods cannot handle high levels of degradations	most existing methods cannot handle high levels of degradations	negative:novel
+sentence		The core of our generalizable approach lies in combining a geometric feature extractor	The core of our generalizable approach lies in combining a geometric feature extractor	negative:novel
+sentence		LiDAR in autonomous perception	LiDAR in autonomous perception	negative:novel
+sentence		can be used for ad measurement while providing different guardrails for safeguarding user privacy	can be used for ad measurement while providing different guardrails for safeguarding user privacy	negative:novel
+sentence		trained through contrastive learning to create a smooth embedding space	trained through contrastive learning to create a smooth embedding space	negative:novel
+sentence		Comprehensive experiments affirm the superiority of our method over baselines	Comprehensive experiments affirm the superiority of our method over baselines	negative:novel
+sentence		many relying on the replay of past exemplars during new task training	many relying on the replay of past exemplars during new task training	negative:novel
+sentence		though further improvements are necessary to fully compete with NVIDIA's robust software ecosystem	though further improvements are necessary to fully compete with NVIDIA's robust software ecosystem	negative:novel
+sentence		which significantly slows down drafters	which significantly slows down drafters	negative:novel
+sentence		that is performant on multiple tasks	that is performant on multiple tasks	negative:novel
+sentence		exploit native FPGA resources with random sparse connectivity	exploit native FPGA resources with random sparse connectivity	negative:novel
+sentence		we consider optimality in terms of the joint probability over the generated response	we consider optimality in terms of the joint probability over the generated response	negative:novel
+sentence		HybridReg is the first work that exploits hybrid motions for robust point cloud registration	HybridReg is the first work that exploits hybrid motions for robust point cloud registration	negative:novel
+sentence		This study proposed a hybrid model of a convolutional neural network	This study proposed a hybrid model of a convolutional neural network	negative:novel
+sentence		We use mutual information neural estimation to calculate a cryptosystem's mutual information leakage	We use mutual information neural estimation to calculate a cryptosystem's mutual information leakage	negative:novel
+sentence		heterophily has been largely ignored	heterophily has been largely ignored	negative:novel
+sentence		We examine LMS grade and login data from a regional comprehensive university	We examine LMS grade and login data from a regional comprehensive university	negative:novel
+sentence		By dynamically activating only a subset of these student SNNs	By dynamically activating only a subset of these student SNNs	negative:novel
+sentence		this distribution is given by the posterior in the case of BNNs	this distribution is given by the posterior in the case of BNNs	negative:novel
+sentence		The key innovation is representing accumulated experiences as natural language embeddings of	The key innovation is representing accumulated experiences as natural language embeddings of	negative:novel
+sentence		Data from the NHANES	Data from the NHANES	negative:novel
+sentence		MTRO addresses the existing limitations by automating the target return configuration process	MTRO addresses the existing limitations by automating the target return configuration process	negative:novel
+sentence		beamformers can produce wideband	beamformers can produce wideband	negative:novel
+sentence		through temporary collaborations such as employment or subcontracting	through temporary collaborations such as employment or subcontracting	negative:novel
+sentence		but which remains underexplored in vision	but which remains underexplored in vision	negative:novel
+sentence		distinguishing between factual and hallucinated content	distinguishing between factual and hallucinated content	negative:novel
+sentence		denotes the total number of rounds for SFL training	denotes the total number of rounds for SFL training	negative:novel
+sentence		Our method consistently outperforms various baselines	Our method consistently outperforms various baselines	negative:novel
+sentence		achieve remarkable performance through pretraining on extensive data	achieve remarkable performance through pretraining on extensive data	negative:novel
+sentence		Researchers have moved beyond simple autoregressive token generation by introducing the concept of	Researchers have moved beyond simple autoregressive token generation by introducing the concept of	negative:novel
+sentence		When the best performing model architecture was applied to the CVD treatment cohort	When the best performing model architecture was applied to the CVD treatment cohort	negative:novel
+sentence		outperforms the previous reconstruction models	outperforms the previous reconstruction models	negative:novel
+sentence		this paper introduces TexRecNet	this paper introduces TexRecNet	negative:novel
+sentence		enabling robust and discriminative node representations	enabling robust and discriminative node representations	negative:novel
+sentence		as well as the ethical challenges thrown up by the misuse of LLMs	as well as the ethical challenges thrown up by the misuse of LLMs	negative:novel
+sentence		a novel model that leverages both sparsity and hierarchy principles	a novel model that leverages both sparsity and hierarchy principles	negative:novel
+sentence		Instead of renting or buying more expensive GPUs	Instead of renting or buying more expensive GPUs	negative:novel
+sentence		their potential to generate untruthful	their potential to generate untruthful	negative:novel
+sentence		we propose the FedRand framework	we propose the FedRand framework	negative:novel
+sentence		invisible watermarking for visual autoregressive	invisible watermarking for visual autoregressive	negative:novel
+sentence		asymptotically unbiased Allan variance parameter estimation	asymptotically unbiased Allan variance parameter estimation	negative:novel
+sentence		we obtain hotspots that are likely to contain OCR errors such as missing symbols	we obtain hotspots that are likely to contain OCR errors such as missing symbols	negative:novel
+sentence		parametrized by transmission rates	parametrized by transmission rates	negative:novel
+sentence		By rearranging the Bellman equation	By rearranging the Bellman equation	negative:novel
+sentence		digital democracy and DAOs	digital democracy and DAOs	negative:novel
+sentence		to integrate the nonlinear characteristics into the deblurring network	to integrate the nonlinear characteristics into the deblurring network	negative:novel
+sentence		FlexRDZ is an online	FlexRDZ is an online	negative:novel
+sentence		RVFL faces challenges when dealing with noise and outliers	RVFL faces challenges when dealing with noise and outliers	negative:novel
+sentence		we propose the Binarized BoxNet	we propose the Binarized BoxNet	negative:novel
+sentence		ProtChatGPT enables users to upload proteins	ProtChatGPT enables users to upload proteins	negative:novel
+sentence		we introduce a generic model proficient in factuality	we introduce a generic model proficient in factuality	negative:novel
+sentence		We leverage psycholinguistic lexicons	We leverage psycholinguistic lexicons	negative:novel
+sentence		where an attacker censors the defender's transactions by bribing block proposers	where an attacker censors the defender's transactions by bribing block proposers	negative:novel
+sentence		The resilient module then categorizes failures and responds with appropriate actions	The resilient module then categorizes failures and responds with appropriate actions	negative:novel
+sentence		LFM focuses on the research	LFM focuses on the research	negative:novel
+sentence		mitigating those instabilities that are commonly associated with the forward Euler method	mitigating those instabilities that are commonly associated with the forward Euler method	negative:novel
+sentence		which builds upon recent progress in pretrained multimodal representations	which builds upon recent progress in pretrained multimodal representations	negative:novel
+sentence		Multiple annotators are involved in the data annotation task	Multiple annotators are involved in the data annotation task	negative:novel
+sentence		generating GDL descriptions from natural language remains a challenging task	generating GDL descriptions from natural language remains a challenging task	negative:novel
+sentence		a revised DSR framework incorporating all five validity types with definitions and examples	a revised DSR framework incorporating all five validity types with definitions and examples	negative:novel
+sentence		In the SCPT phase	In the SCPT phase	negative:novel
+sentence		These findings suggest significant horizontal and vertical differentiation in the LLM market	These findings suggest significant horizontal and vertical differentiation in the LLM market	negative:novel
+sentence		which fully exploits semantic cues for both partitioning and Gaussian kernel optimization	which fully exploits semantic cues for both partitioning and Gaussian kernel optimization	negative:novel
+sentence		applying IPT for artifact reduction	applying IPT for artifact reduction	negative:novel
+sentence		and unceded territories of the Musqueam	and unceded territories of the Musqueam	negative:novel
+sentence		This approach aligns with the evolving field of multimodal representation learning	This approach aligns with the evolving field of multimodal representation learning	negative:novel
+sentence		such as the diagnostic value of nighttime biosignals for hypertension prediction	such as the diagnostic value of nighttime biosignals for hypertension prediction	negative:novel
+sentence		Bengali and Devanagari numerals	Bengali and Devanagari numerals	negative:novel
+sentence		Some prior works even train classifiers to be invariant to the background	Some prior works even train classifiers to be invariant to the background	negative:novel
+sentence		We thus present ExploreSelf	We thus present ExploreSelf	negative:novel
+sentence		we apply Cholesky decomposition followed by quantization of the Cholesky factors	we apply Cholesky decomposition followed by quantization of the Cholesky factors	negative:novel
+sentence		Weight quantization is crucial for reducing the memory footprint of LLMs on devices	Weight quantization is crucial for reducing the memory footprint of LLMs on devices	negative:novel
+sentence		resulting in confident mispredictions	resulting in confident mispredictions	negative:novel
+sentence		plays a pivotal role in blockchains for reaching consensus	plays a pivotal role in blockchains for reaching consensus	negative:novel
+sentence		a novel paradigm that fundamentally rethinks online allocation through three key innovations	a novel paradigm that fundamentally rethinks online allocation through three key innovations	negative:novel
+sentence		and also provides compelling rationales for judgments	and also provides compelling rationales for judgments	negative:novel
+sentence		a mechanism that iteratively adjusts model behavior based on previous outputs	a mechanism that iteratively adjusts model behavior based on previous outputs	negative:novel
+sentence		ARJudge consists of two components	ARJudge consists of two components	negative:novel
+sentence		hindering some practical uses due to user dissatisfaction or safety risks caused by misclassifications	hindering some practical uses due to user dissatisfaction or safety risks caused by misclassifications	negative:novel
+sentence		We propose incorporating stacked intelligent metasurfaces	We propose incorporating stacked intelligent metasurfaces	negative:novel
+sentence		We present an interpretability framework for unsupervised reinforcement learning	We present an interpretability framework for unsupervised reinforcement learning	negative:novel
+sentence		the proposed DMF approach reduces the number of physical sensors required for monitoring	the proposed DMF approach reduces the number of physical sensors required for monitoring	negative:novel
+sentence		PoVF provides a sufficiently fair mechanism	PoVF provides a sufficiently fair mechanism	negative:novel
+sentence		DualComp incorporates three key structural enhancements to handle modality heterogeneity	DualComp incorporates three key structural enhancements to handle modality heterogeneity	negative:novel
+sentence		faces challenges due to public TSGV datasets containing significant temporal biases	faces challenges due to public TSGV datasets containing significant temporal biases	negative:novel
+sentence		we introduce the concept of unsupervised balanced batch dataloading to medical image segmentation	we introduce the concept of unsupervised balanced batch dataloading to medical image segmentation	negative:novel
+sentence		Existing COPP methods can account for the distribution shifts induced by policy switching	Existing COPP methods can account for the distribution shifts induced by policy switching	negative:novel
+sentence		Nash equilibria may not exist	Nash equilibria may not exist	negative:novel
+sentence		allowing for flexible feature aggregation within and across subtrees	allowing for flexible feature aggregation within and across subtrees	negative:novel
+sentence		few consider environmental state perturbations	few consider environmental state perturbations	negative:novel
+sentence		shook up the membership and relationships within the setting's primary pantheon	shook up the membership and relationships within the setting's primary pantheon	negative:novel
+sentence		this article also examines the differentiability of multiple eigenvalues under various symmetry conditions	this article also examines the differentiability of multiple eigenvalues under various symmetry conditions	negative:novel
+sentence		which can be used when designing HDI experiences in wearable fitness trackers	which can be used when designing HDI experiences in wearable fitness trackers	negative:novel
+sentence		We thoroughly discuss how to reformulate the reparameterization trick	We thoroughly discuss how to reformulate the reparameterization trick	negative:novel
+sentence		limiting their effectiveness in evaluating LLMs for RTL generation	limiting their effectiveness in evaluating LLMs for RTL generation	negative:novel
+sentence		we explore the most effective training techniques for adapting LLMs to the telecommunications domain	we explore the most effective training techniques for adapting LLMs to the telecommunications domain	negative:novel
+sentence		Cybercrime has become a global concern	Cybercrime has become a global concern	negative:novel
+sentence		and future research on model interpretability are discussed	and future research on model interpretability are discussed	negative:novel
+sentence		PCDM directly predicts shear wall drawings to focus on similarity	PCDM directly predicts shear wall drawings to focus on similarity	negative:novel
+sentence		along with corresponding SOTA or prevalent baselines	along with corresponding SOTA or prevalent baselines	negative:novel
+sentence		We have applied our approach to the CiaoPP static analyzer	We have applied our approach to the CiaoPP static analyzer	negative:novel
+sentence		Comprehensive evaluations on HotpotQA	Comprehensive evaluations on HotpotQA	negative:novel
+sentence		we introduce a streamable	we introduce a streamable	negative:novel
+sentence		when the destination user decrypts the result	when the destination user decrypts the result	negative:novel
+sentence		orthonormal vectors and updating the Hessenberg matrix	orthonormal vectors and updating the Hessenberg matrix	negative:novel
+sentence		This approach equips trainees to navigate challenging clinical scenarios by providing realistic	This approach equips trainees to navigate challenging clinical scenarios by providing realistic	negative:novel
+sentence		This survey explores recent progress in MPCAs by addressing three key questions	This survey explores recent progress in MPCAs by addressing three key questions	negative:novel
+sentence		limited corpus and simple queries that fail to elicit agentic behavior	limited corpus and simple queries that fail to elicit agentic behavior	negative:novel
+sentence		which reflects the evolvement of the policy learning process	which reflects the evolvement of the policy learning process	negative:novel
+sentence		and do not use sublinear space	and do not use sublinear space	negative:novel
+sentence		and all contextual baselines	and all contextual baselines	negative:novel
+sentence		provide uncorrelated samples from complex distributions	provide uncorrelated samples from complex distributions	negative:novel
+sentence		hindering a holistic framework for all dynamic foregrounds demanded by downstream applications	hindering a holistic framework for all dynamic foregrounds demanded by downstream applications	negative:novel
+sentence		This paper presents NeSyPack	This paper presents NeSyPack	negative:novel
+sentence		By avoiding traditional augmentations	By avoiding traditional augmentations	negative:novel
+sentence		We release the model weights on HuggingFace	We release the model weights on HuggingFace	negative:novel
+sentence		The resulting eigenvectors can be stored for subsequent decoding	The resulting eigenvectors can be stored for subsequent decoding	negative:novel
+sentence		we further incorporate the CDMP algorithm with a theoretically guaranteed	we further incorporate the CDMP algorithm with a theoretically guaranteed	negative:novel
+sentence		is decidable and even in Ackermann	is decidable and even in Ackermann	negative:novel
+sentence		presents a significant challenge in neuroimaging due to the diverse characteristics of these lesions	presents a significant challenge in neuroimaging due to the diverse characteristics of these lesions	negative:novel
+sentence		The lengthy code poses challenges for the performance and efficiency of MLLMs	The lengthy code poses challenges for the performance and efficiency of MLLMs	negative:novel
