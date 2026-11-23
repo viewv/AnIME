@@ -116,13 +116,28 @@ def quick_eval(model, tokenizer, val_rows: list[dict], n: int, device) -> dict:
     return {k: round(100 * v[0] / v[1], 1) for k, v in sorted(wins.items()) if v[1]}
 
 
-def export_gguf(hf_dir: Path, out_dir: Path, name: str, work: Path) -> None:
+def export_base_tokenizer(hf_dir: Path, base: str) -> None:
+    from huggingface_hub import snapshot_download
+
+    src = Path(snapshot_download(base, allow_patterns=[
+        "tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt", "special_tokens_map.json"]))
+    for f in ("tokenizer.json", "tokenizer_config.json"):
+        (hf_dir / f).unlink(missing_ok=True)
+    for f in src.iterdir():
+        if f.is_file():
+            (hf_dir / f.name).write_bytes(f.read_bytes())
+
+
+def export_gguf(hf_dir: Path, out_dir: Path, name: str, work: Path, base: str) -> None:
     llama = work / "llama.cpp"
     if not llama.exists():
         subprocess.run(["git", "clone", "--depth", "1", "https://github.com/ggml-org/llama.cpp", str(llama)], check=True)
     commit = subprocess.run(["git", "-C", str(llama), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     log(f"llama.cpp commit {commit}")
-    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", str(llama / "requirements" / "requirements-convert_hf_to_gguf.txt")], check=False)
+    # 不装 requirements-convert_hf_to_gguf.txt：它会把训练环境的 transformers 降级到 4.x，而 4.x 读不了
+    # 5.x 保存的 tokenizer_config.json（extra_special_tokens 为 list -> AttributeError）。
+    # 词表从未改动，导出时直接换回基座的原始 tokenizer 文件，转换器只依赖仓库自带的 gguf-py。
+    export_base_tokenizer(hf_dir, base)
     f16 = out_dir / f"{name}.F16.gguf"
     subprocess.run([sys.executable, str(llama / "convert_hf_to_gguf.py"), str(hf_dir), "--outtype", "f16", "--outfile", str(f16)], check=True)
     build = llama / "build"
@@ -160,12 +175,13 @@ def main(argv: list[str] | None = None) -> int:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     final_dir = args.out_dir / "final"
     if args.export_only:
-        export_gguf(final_dir, args.out_dir, args.name, Path("/tmp/l3_export"))
+        export_gguf(final_dir, args.out_dir, args.name, Path("/tmp/l3_export"), args.base)
         return 0
 
     gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
     mem_gb = torch.cuda.get_device_properties(0).total_memory / 2**30 if torch.cuda.is_available() else 0
-    bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    # T4（sm_75）上 is_bf16_supported() 也可能返回 True（软件模拟，极慢）；只在 Ampere（sm_80）及以上用 bf16
+    bf16 = torch.cuda.is_available() and torch.cuda.get_device_capability(0)[0] >= 8
     log(f"torch {torch.__version__}, transformers {transformers.__version__}, device {gpu} ({mem_gb:.0f} GB), bf16={bf16}")
 
     tokenizer = AutoTokenizer.from_pretrained(args.base)
@@ -179,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
 
     model = AutoModelForCausalLM.from_pretrained(
         args.base,
-        torch_dtype=torch.bfloat16 if bf16 else torch.float32,
+        dtype=torch.bfloat16 if bf16 else torch.float32,
         attn_implementation="sdpa",
     )
     bs = args.batch_size or (64 if mem_gb >= 70 else 32 if mem_gb >= 35 else 16)
@@ -198,7 +214,10 @@ def main(argv: list[str] | None = None) -> int:
         def __getitem__(self, i):
             return {"input_ids": self.f[i]["input_ids"], "labels": self.f[i]["labels"]}
 
-    targs = TrainingArguments(
+    import inspect
+
+    targ_params = set(inspect.signature(TrainingArguments.__init__).parameters)
+    targ_kwargs = dict(
         output_dir=str(args.out_dir / "checkpoints"),
         num_train_epochs=args.epochs,
         max_steps=50 if args.smoke else -1,
@@ -207,7 +226,6 @@ def main(argv: list[str] | None = None) -> int:
         gradient_accumulation_steps=accum,
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.02,
         weight_decay=0.01,
         bf16=bf16,
         fp16=torch.cuda.is_available() and not bf16,
@@ -221,6 +239,15 @@ def main(argv: list[str] | None = None) -> int:
         report_to=[],
         remove_unused_columns=False,
     )
+    # transformers 5.x 删除了 warmup_ratio（warmup_steps 接受 < 1 的比例）；按签名兼容 4.x / 5.x
+    if "warmup_ratio" in targ_params:
+        targ_kwargs["warmup_ratio"] = 0.02
+    else:
+        targ_kwargs["warmup_steps"] = 0.02
+    dropped = sorted(k for k in targ_kwargs if k not in targ_params)
+    if dropped:
+        log(f"TrainingArguments does not accept {dropped}; ignored")
+    targs = TrainingArguments(**{k: v for k, v in targ_kwargs.items() if k in targ_params})
     trainer = Trainer(
         model=model,
         args=targs,
@@ -231,7 +258,7 @@ def main(argv: list[str] | None = None) -> int:
     ckpts = sorted((args.out_dir / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[1]))
     resume = str(ckpts[-1]) if ckpts and not args.smoke else None
     log(f"batch {bs} x accum {accum}, grad_checkpointing={use_gc}, resume={resume}")
-    trainer.train(resume_from_checkpoint=resume)
+    train_out = trainer.train(resume_from_checkpoint=resume)
 
     trainer.save_model(str(final_dir))
     tokenizer.save_pretrained(str(final_dir))
@@ -246,12 +273,15 @@ def main(argv: list[str] | None = None) -> int:
         "lr": args.lr,
         "epochs": args.epochs,
         "device": gpu,
+        "bf16": bf16,
+        "train_metrics": train_out.metrics,
+        "mean_tokens_per_example": round(sum(len(f["input_ids"]) for f in train_feats) / max(1, len(train_feats)), 1),
     }
     (args.out_dir / "train_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False))
     log(f"report: {json.dumps(report, ensure_ascii=False)}")
 
     if args.export or args.smoke:
-        export_gguf(final_dir, args.out_dir, args.name + ("-smoke" if args.smoke else ""), Path("/tmp/l3_export"))
+        export_gguf(final_dir, args.out_dir, args.name + ("-smoke" if args.smoke else ""), Path("/tmp/l3_export"), args.base)
     return 0
 
 
