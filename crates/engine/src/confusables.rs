@@ -25,6 +25,13 @@ const MAX_CLOSED_NEIGHBORS: usize = 6;
 /// 且 L2 对其统计稀薄，LM 概率对比会系统性偏向常见近邻而误改用户原词。
 const REALWORD_NEIGHBOR_MIN_RAW_LOG_FREQ: f32 = -6.0;
 
+/// 单词模式（单 token + 上文）下“单次 QWERTY 直接邻键替换”易混真词对（fast/vast、life/live、bat/vat）
+/// 的最低先验分差（Why）：这类词对只是手指误触关系而非读音 / 用法混淆，误触在两个方向上同样可能，
+/// 用户已敲出的合法真词没有理由让位于更罕见的邻键词；而单 token 路径叠加的 L2 是与词频无关的
+/// PMI 提升（`score_in_context`），会放大罕见词偶见搭配（"the vast"、"that vast"），
+/// 因此要求 L2 给出至少 3.0 的上下文优势才允许翻盘（"the" 后 vast 的 PMI 提升约 2.4）。
+const ADJACENT_KEY_SINGLE_TOKEN_MIN_PENALTY: f32 = 3.0;
+
 const SHORTHAND_PAIRS: &[(&str, &str)] = &[
     ("hw", "how"),
     ("r", "are"),
@@ -35,6 +42,31 @@ const SHORTHAND_PAIRS: &[(&str, &str)] = &[
     ("thx", "thanks"),
     ("msg", "message"),
 ];
+
+/// 两词等长且仅一处替换，替换双方为 QWERTY 直接邻键且不同为元音（元音互换如 in/on、then/than
+/// 属于拼写 / 用法混淆，不按误触处理）。
+fn is_adjacent_key_substitution(a: &str, b: &str) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff = None;
+    for (x, y) in a.bytes().zip(b.bytes()) {
+        if x != y {
+            if diff.is_some() {
+                return false;
+            }
+            diff = Some((x, y));
+        }
+    }
+    diff.is_some_and(|(x, y)| {
+        anime_lexicon::keyboard::is_direct_neighbor(x, y)
+            && !(is_ascii_vowel(x) && is_ascii_vowel(y))
+    })
+}
+
+fn is_ascii_vowel(b: u8) -> bool {
+    matches!(b.to_ascii_lowercase(), b'a' | b'e' | b'i' | b'o' | b'u')
+}
 
 fn match_raw_casing(raw_token: &str, canonical: &str) -> String {
     let first_upper = raw_token
@@ -108,11 +140,15 @@ pub(crate) fn expand_closed_token_neighbors(
 }
 
 /// 当具备语境或处于多词词格时，为词槽补充数据驱动的易混真词与常见缩写候选。
+///
+/// `single_token` 为真表示单词模式（单 token + 上文）：候选随后只叠加 `score_in_context`
+/// 的 PMI 提升而非词格中的完整条件概率，邻键误触词对改用 `ADJACENT_KEY_SINGLE_TOKEN_MIN_PENALTY`。
 pub(crate) fn expand_slot_confusables<L: LexiconProvider>(
     lexicon: &L,
     raw_token: &str,
     cands: &mut Vec<SlotCandidate>,
     allow_expansion: bool,
+    single_token: bool,
 ) {
     if !allow_expansion {
         return;
@@ -166,6 +202,13 @@ pub(crate) fn expand_slot_confusables<L: LexiconProvider>(
         } else {
             let deficit_relief = (est_base_log_freq - hit.log_freq).clamp(0.0, 1.8) * 0.22;
             (hit.relative_penalty - deficit_relief).max(0.88)
+        };
+        let effective_penalty = if single_token
+            && is_adjacent_key_substitution(&raw_lower, &hit.word.to_ascii_lowercase())
+        {
+            effective_penalty.max(ADJACENT_KEY_SINGLE_TOKEN_MIN_PENALTY)
+        } else {
+            effective_penalty
         };
         let target_score = anchor - effective_penalty;
         upsert_slot_candidate(cands, word, target_score);
