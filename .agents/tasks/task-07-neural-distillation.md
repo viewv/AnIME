@@ -95,7 +95,7 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [P3 完成 — 待评审] v2 模型 `anime-l3-360m-v2.Q4_K_M.gguf` 已评测并登记 MANIFEST；core_v2 `context_realword` 与 L3 推理延迟两项未达标（见下）。未合并 main。
+- Status: [DONE — 用户批准合并] v2 模型 `anime-l3-360m-v2.Q4_K_M.gguf` 已评测、登记 MANIFEST 并部署；已知未达标：core_v2 `context_realword`（真词误用偏照抄，v3 数据配比待定）与 L3 推理 p50 124 ms > 通用 87 ms（GPU 优化另行处理）。
 - Changed Files（截至 P2 准备）：`crates/lm-neural/src/{config,lib,prompt,llama_backend}.rs`（`PromptStyle`、纠错模板打分、键入原文传入推理线程）、`crates/eval/src/{cli,main}.rs`（`--l3-prompt`）、`scripts/data_pipeline/build_l3_sft.py`、`scripts/data_pipeline/colab/train_l3_correction.{py,ipynb}`、`scripts/data_pipeline/test_pipeline.py`（34 tests）。
 - Verification Output：
   - **P0 零训练基线**（去泄漏 L2，L1+L2+L3，top1）：
@@ -146,5 +146,5 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 
     Q8_0 与 Q4_K_M 在 CI 内一致（ood_dev 83.8 / academic 76.0）。按键延迟 p50 0.4–0.6 ms、p99 <= 4.4 ms；单次 max 偶发 22.5 ms（同一批次 L1+L2 15.2 ms、通用 17.0 ms，均为 L3 并发推理时的抖动，非本改动引入，记录待查）。L3 推理 p50 124 ms（通用 87 ms）。
   - **验收对照**：ood_dev TOTAL >= 72 ✅（83.8）、novel >= 60 ✅（100）、clean 不低于 L1+L2 ✅；ood_academic >= 66 ✅（75.8）、novel >= 60 ✅；ood_tm2 >= 74 ✅（74.3）；noise_v2 不退化 ✅（+4.7）；Q4_K_M <= 300 MB ✅（270.6 MB）。**未达标**：core_v2 TOTAL 81.5 < 通用 83.6（`context_realword` 77.5 vs 95.0：带上文的单词级真词纠错仍偏向照抄；`realword_edit` 各集低于通用模型）；L3 推理 p50 124 ms > 通用 87 ms（整句候选打分，GPU 优化按用户意见另行处理）。
-  - 部署：本机 `~/.local/bin/animed`（task-07 + main）当前加载 v1（systemd drop-in `animed.service.d/l3-correction.conf` 指定 `ANIME_NEURAL_MODEL`）；是否切换 v2 由用户决定。
+  - 部署：本机 `~/.local/bin/animed`（task-07 + main，含 task-15~19 与词格前缀束缓存）加载 v2（systemd drop-in `animed.service.d/l3-correction.conf` 指定 `ANIME_NEURAL_MODEL=%h/.local/share/anime/models/anime-l3-360m-v2.Q4_K_M.gguf`；删除该文件即回到通用 SmolLM2-360M）。
   - Rust 与 Python 模板黄金测试逐字节一致；`make check`（0 warning）/ `make test`（69 passed）/ `./scripts/verify-boundaries.sh` BOUNDARY OK。
