@@ -105,6 +105,7 @@ pub(crate) fn expand_closed_token_neighbors(
     cands: &mut Vec<SlotCandidate>,
     p: &ConfusableProfile,
     exact_anchor_bonus: f32,
+    open_token: Option<f32>,
 ) {
     let slot_max = cands
         .iter()
@@ -113,14 +114,24 @@ pub(crate) fn expand_closed_token_neighbors(
     let anchor = if slot_max.is_finite() { slot_max } else { 0.0 };
     // 精确词基准分为 log_freq + EXACT_BONUS(6.5)，据此还原原词词频
     let raw_log_freq = (anchor - exact_anchor_bonus).clamp(-8.5, -1.0);
-    if raw_is_word && raw_log_freq < p.realword_neighbor_min_raw_log_freq {
+    let rare_realword = raw_is_word && raw_log_freq < p.rare_realword_log_freq;
+    if raw_is_word && !rare_realword && raw_log_freq < p.realword_neighbor_min_raw_log_freq {
         return;
     }
+    // 末尾未闭合 token 只为非词与罕见收录词展开：常见真词末词（prices、methods）的近邻多是屈折变体，
+    // L2 难以区分单复数，展开只会把用户正确敲出的词改掉
+    if open_token.is_some() && raw_is_word && !rare_realword {
+        return;
+    }
+    let extra_penalty = open_token.unwrap_or(0.0);
     for nb in neighbors.iter().take(p.max_closed_neighbors) {
         if nb.word.eq_ignore_ascii_case(raw_token) {
             continue;
         }
-        let target = if raw_is_word {
+        let target = if rare_realword {
+            // 罕见收录词多为词典噪声或缩写，比它常见的近邻是常态而非顺风误翻，不叠加频差惩罚
+            anchor - p.rare_realword_base_penalty - p.realword_neighbor_cost_weight * nb.edit_cost
+        } else if raw_is_word {
             let surplus = (nb.log_freq - raw_log_freq).clamp(0.0, 2.0);
             anchor
                 - p.realword_neighbor_base_penalty
@@ -131,7 +142,7 @@ pub(crate) fn expand_closed_token_neighbors(
         } else {
             nb.score
         };
-        upsert_slot_candidate(cands, match_raw_casing(raw_token, &nb.word), target);
+        upsert_slot_candidate(cands, match_raw_casing(raw_token, &nb.word), target - extra_penalty);
     }
 }
 

@@ -96,6 +96,16 @@ pub struct ConfusableProfile {
     pub max_closed_neighbors: usize,
     /// 向 L1 请求的闭合 token 近邻条数。
     pub closed_neighbor_query_limit: usize,
+    /// 收录但低于该词频的"真词"（`ord`、`ven`、`ers`：缩写、姓氏、词典噪声）按疑似错拼处理：
+    /// 照常展开近邻，分差改用 `rare_realword_base_penalty`，不受 `realword_neighbor_min_raw_log_freq` 截断。
+    /// 用户真想打这类词时由 L2 语境与原样候选兜底。`-inf` 关闭。
+    pub rare_realword_log_freq: f32,
+    pub rare_realword_base_penalty: f32,
+    /// 多词预编辑的末尾（未闭合）token 也展开闭合近邻：整句模式按提交键时末词已经完整，
+    /// 末词漏首字母（`train sers -> train users`）否则永远召不回。额外扣 `open_token_neighbor_penalty`，
+    /// 使仍在输入中的前缀优先保留补全。
+    pub open_token_neighbors: bool,
+    pub open_token_neighbor_penalty: f32,
 }
 
 /// 整句空格出错的备选切分（多打 / 错位 / 漏打空格）。
@@ -107,6 +117,15 @@ pub struct SpaceEditProfile {
     pub max_alternatives: usize,
     /// 漏打空格两段切分每个 token 最多保留的切法数。
     pub max_two_way_splits: usize,
+    /// 词频低于该值的收录 token（`gr`、`ing`、`ly`、`alot`）在空格编辑门控中视为非词：
+    /// 词典含大量缩写碎片，`gr eat`、`us ing` 两侧都"是词"时原规则不生成任何备选。`-inf` 关闭。
+    pub rare_side_log_freq: f32,
+    /// 单个备选切分最多叠加几处互不重叠的空格编辑（每处各扣一次 `penalty`）。
+    pub max_edits_per_alternative: usize,
+    /// 每次按键备选切分的总 token 数预算（每个备选都要整句重新解码一次，耗时约与 token 数成正比）：
+    /// 长句（十几个 token、多处可疑边界）超出预算后不再追加备选，单处编辑排在组合编辑之前优先保留，
+    /// 守住单键 max <= 16 ms 的同步路径延迟预算。
+    pub max_alternative_tokens: usize,
 }
 
 /// 无空格连打（`iwanttogo`、`thankyou`）的切分门槛与连打候选分。
@@ -224,11 +243,18 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
         nonword_neighbor_cap_margin: 0.2,
         max_closed_neighbors: 6,
         closed_neighbor_query_limit: 12,
+        rare_realword_log_freq: f32::NEG_INFINITY,
+        rare_realword_base_penalty: 2.8,
+        open_token_neighbors: false,
+        open_token_neighbor_penalty: 0.0,
     },
     space_edits: SpaceEditProfile {
         penalty: 0.75,
         max_alternatives: 8,
         max_two_way_splits: 2,
+        rare_side_log_freq: f32::NEG_INFINITY,
+        max_edits_per_alternative: 1,
+        max_alternative_tokens: usize::MAX,
     },
     runon: RunonProfile {
         part_min_log_freq: -5.0,
@@ -288,7 +314,28 @@ pub const WORD_PROFILE: ModeProfile = ModeProfile {
 };
 
 /// 整句模式（`space_commits = false`）。整句召回轨道只改这里。
-pub const SENTENCE_PROFILE: ModeProfile = BASELINE_PROFILE;
+///
+/// 整句模式受召回限制：正确整句不在候选里时 L3 无从选择。相对基准放开三处召回（task-19），
+/// 误纠由 L2 语境、空格信道代价与原样候选（verbatim）把关：
+/// - 罕见收录词（`ord`、`ven`）与末尾未闭合 token 也展开一次编辑近邻（漏首字母 `ord -> word`）；
+/// - 空格编辑门控把罕见收录碎片（`gr eat`、`us ing`）视为非词，并允许一个备选叠加两处空格编辑。
+pub const SENTENCE_PROFILE: ModeProfile = ModeProfile {
+    confusables: ConfusableProfile {
+        rare_realword_log_freq: -6.0,
+        rare_realword_base_penalty: 1.5,
+        open_token_neighbors: true,
+        open_token_neighbor_penalty: 0.5,
+        ..BASELINE_PROFILE.confusables
+    },
+    space_edits: SpaceEditProfile {
+        rare_side_log_freq: -4.5,
+        max_edits_per_alternative: 2,
+        max_alternatives: 12,
+        max_alternative_tokens: 56,
+        ..BASELINE_PROFILE.space_edits
+    },
+    ..BASELINE_PROFILE
+};
 
 /// 两种模式各一份 profile。
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -433,9 +480,16 @@ profile_fields!(
     confusables.nonword_neighbor_cap_margin,
     confusables.max_closed_neighbors,
     confusables.closed_neighbor_query_limit,
+    confusables.rare_realword_log_freq,
+    confusables.rare_realword_base_penalty,
+    confusables.open_token_neighbors,
+    confusables.open_token_neighbor_penalty,
     space_edits.penalty,
     space_edits.max_alternatives,
     space_edits.max_two_way_splits,
+    space_edits.rare_side_log_freq,
+    space_edits.max_edits_per_alternative,
+    space_edits.max_alternative_tokens,
     runon.part_min_log_freq,
     runon.short_part_min_log_freq,
     runon.rare_exact_log_freq,
@@ -471,7 +525,7 @@ mod tests {
     fn sentence_mode_stays_baseline() {
         let p = ModeProfiles::default();
         assert_eq!(p.word, WORD_PROFILE);
-        assert_eq!(p.sentence, BASELINE_PROFILE);
+        assert_eq!(p.sentence, SENTENCE_PROFILE);
         assert_eq!(*p.for_space_commits(true), WORD_PROFILE);
         assert_eq!(*p.for_space_commits(false), SENTENCE_PROFILE);
         assert!(!BASELINE_PROFILE.lexicon.has_offsets());
