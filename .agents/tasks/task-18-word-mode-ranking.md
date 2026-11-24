@@ -57,18 +57,56 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [IN PROGRESS — 用量上限中断，WIP 已提交；尚未跑完整门禁]
-- 已完成：
-  - `scripts/data_pipeline/build_word_ctx_eval.py` + `eval/benchmarks/word_ctx_v1.tsv`（2300 行：prefix 300、typo_simple 500（omit_early / omit / adjacent / insert / transpose 各 100）、typo_prefix 300、typo_phonetic 300、context_realword 300、negative:clean 400、negative:novel 200；oasst 留出 60% / arXiv 留出 40%）。标签只用已有命名空间（`source:*`、`negative:*`），无需改契约。
-  - L1：`CompactTrie::single_edit_nodes` / `single_edit_search` 穷举单次编辑，`QueryOptions::exhaustive_single_edit` 门控；`LexiconProfile.exhaustive_single_edit`，仅 `WORD_PROFILE = true`（整句模式不变）。`bateria -> bacteria` 无上文时 Top-1（有 `the` 上文时 L2 偏向 material，排第 5）。
-  - `cargo test -p anime-lexicon -p anime-engine` 通过。
-- 基线（--mode word，L1+L2，de-leaked ngram）word_ctx_v1 top1：TOTAL 71.4、exact 79.3（negative:clean 99.2、negative:novel 39.5）、prefix 80.3、typo_simple 88.4（omit early 78.2）、typo_prefix 62.3（omit early 46.2）、typo_phonetic 88.0、context_realword 11.0。core_v2 word TOTAL 80.7。
-- 穷举单编辑后：word_ctx typo_simple 89.0、typo_prefix 63.3、TOTAL 71.7；core_v2 不变 80.7；key p99 约 0.5→0.7 ms。
-- 待办（按收益）：
-  1. **反例复核**：negative:novel 中约 15 行是源句错拼（enlightnement、pople、inteligence、explaination、metioned、relativly、hawe 等），须写入 `eval/review/negative_review.tsv` 并重新生成；negative:clean 3 行失误待裁决。
-  2. **新词保护**：单词模式单 token 路径对 `token_signals_cased_intent` 成立的 token 让原样领先（ChatGPT、LLM、JSON、NumPy 约占 novel 失误一半）；小写新词可把原样放到第 2 位（需权衡 typo top3）。
-  3. **排序**：短的高频读音 / 纠错候选压过合法前缀补全（easie->is、affe->of、towa->to）。网格（--profile）：phonetic_offset=-0.5 → core_v2 82.0 / word_ctx 72.0；completion_offset=0.5 → typo_prefix +2.7 / +6.0；context_weight 1.3 → context_realword 19.0 但 prefix -2.6。query_limit 16/24 无益。
-  4. 短词漏字仍召回不到（paer、usae、loing、appes）：L1 截断（opts.limit）前词频主导，需按编辑类型调整代价或扩大召回后再截断。
-  5. 收尾：`--mode sentence` 在 ood_dev_v1 / noise_v2 逐行 diff、延迟门禁、Wilson CI（脚本见会话笔记）、`make check && make test && make eval && make verify-infra && verify-boundaries`、ROADMAP。
-- Changed Files: `crates/lexicon/src/{trie.rs,lib.rs,lexicon.rs}`、`crates/engine/src/{profile.rs,lib.rs}`、`scripts/data_pipeline/build_word_ctx_eval.py`、`eval/benchmarks/word_ctx_v1.tsv`、本任务单。
-- Verification Output: 仅 lexicon / engine 单测通过；完整门禁未跑。
+- Status: [DONE — 待评审] 已在 `feat/task-18-word-mode-ranking` 本地提交；未合并 main、未推送、未重装 live 守护进程。
+- 评测集：`scripts/data_pipeline/build_word_ctx_eval.py` → `eval/benchmarks/word_ctx_v1.tsv`（2300 行，每行一个词 + 同子句中其前的干净上文）。源句只取留出数据：oasst1 留出树用户提问（`is_heldout_tree`，60%）+ arXiv CS 留出摘要（`heldout.jsonl`，40%），均不进入 L2 训练，因此无需重建 L2。类别：prefix 300（截断前缀非词典词，`||` 列出屈折变体）、typo_simple 500（omit_early / omit / adjacent / insert / transpose 各 100）、typo_prefix 300、typo_phonetic 300（至少一处结构化读音改写 + 一处改写或 a/e/i schwa 互换，DL >= 2）、context_realword 300、exact 600（`negative:clean` 400 + `negative:novel` 200）。标签只用契约已有命名空间（`source:oasst|arxiv`、`negative:clean|novel`），算子 / 位置写在 notes 自由文本，无需改契约。
+- 反例复核（分歧裁决）：只裁决被单词模式 L1+L2 改动的反例；`eval/review/negative_review.tsv` 追加 15 条 exclude（源句错拼：enlightnement、pople、inteligence、explaination、metioned、relativly、hawe、ffiles、potentioal、trustworthyness、empasse、Iccan、tively 片段、`you table`、Radioheads）与 5 条 keep（this/has/are 三条干净词误纠属真实误判；heterogenous、archeologist 为变体拼写）。被排除的子句均不在任何冻结集中（已 grep 确认），冻结集再生成不受影响。
+- 失误根因（基线）：
+  1. **L1 召回**：束搜索按"子树最高词频 - λ·代价"剪枝，不看尚未消费的输入，词首附近漏字在第 2–3 层被挤出束宽（`bateria`、`diersity`、`deonstrated`、`agorithms` 从不召回；词尾同样漏字可召回）。
+  2. **新词被改写**：词典外 token 在单 token 路径没有原样候选（只在末位兜底），`ChatGPT -> Chapters`、`LLM -> LM`、`NumPy -> Bumpy`；`negative:novel` 41.5%。
+  3. **排序**：输入是合法前缀但非词典词时，高频短词的读音 / 拼写纠错经 L2 PMI 压过补全（`easie -> is`、`affe -> of`、`towa -> to`、`arri -> are`）。
+  4. 未修（见遗留）：短词漏字被 L1 截断（`paer`、`usae`、`loing`）；context_realword 11%（保守保留真词，与"不改正确词"冲突）；纯小写新词（`frontend`、`npm`）与错拼无法区分。
+- 修复（全部只在 `WORD_PROFILE` 开启，`SENTENCE_PROFILE == BASELINE_PROFILE`；无词表）：
+  - L1 `CompactTrie::single_edit_nodes` / `single_edit_search`：沿精确前缀路径逐位穷举漏打 / 多打 / QWERTY 替换 / 换位，只走真实子边（O(26·n)），终点可为完整词或前缀（补全展开取 A* 上界前 16 个）；`QueryOptions::exhaustive_single_edit` 门控（默认 false），与束搜索结果合并。`LexiconProfile.exhaustive_single_edit = true`。
+  - `VerbatimProfile.single_token_lead = true`：单 token、非词典词、`token_signals_cased_intent`（与 task-15 整句原样句同一判定，已知驼峰词错拼不领先）时原样以 `Raw` 领先。另有 `single_token_slot: Option<usize>`（默认 None）：把非词典词原样提到第 N 位，novel top3 72.0→100，但 core_v2 typo_prefix top3 82.5→74.0，因此默认关闭，留作可选项。
+  - `LexiconProfile.shorter_correction_penalty = 2.0`：输入是合法前缀、本身不是词典词时，比输入短的拼写 / 读音纠错扣 2.0；`phonetic_offset = -0.5`。网格（`--profile`）：penalty 1/2/4 → core_v2 81.1/81.5/81.6；+ph -0.5 → 82.7；+completion 0.3 → 83.0 但 typo_simple -1，未采用；`query_limit` 16/24、`context_weight` 0.5–1.3、`typo_offset -0.3` 均无净收益。
+- Changed Files: `crates/lexicon/src/{trie.rs,lib.rs,lexicon.rs}`；`crates/engine/src/{profile.rs,lib.rs}`；`scripts/data_pipeline/{build_word_ctx_eval.py,README.md}`；`eval/benchmarks/word_ctx_v1.tsv`（新）；`eval/review/negative_review.tsv`（追加）；`ROADMAP.md`；本任务单。
+- Verification Output:
+  - `make check`：通过；`make test`：15 组 `test result: ok`，81 passed、0 failed（新增 `exhaustive_single_edit_recalls_early_omission_beyond_beam`（关闭时同一查询召回不到，开启后召回且代价 = 漏 c 的 deletion_cost，前缀 `bateri` 可补全）、`word_mode_keeps_cased_novel_token_verbatim`（整句模式单 token 不受影响）、`word_mode_prefers_completion_over_shorter_correction_of_valid_prefix`）；`make eval`（smoke）TOTAL 28.6%（同 main）；`make verify-infra`：`INFRA OK`；`python3 -m unittest`（data_pipeline）33 OK；`./scripts/verify-boundaries.sh .agents/tasks/task-18-word-mode-ranking.md`：`BOUNDARY OK（8 个文件，零越界）`，`--base main --tracked-only`：`BOUNDARY OK（10 个文件）`。
+  - 资产：`data/compiled/lexicon.animelex.bin`，去泄漏 L2 `~/.local/share/anime/ngram.animengr.bin`，无 `--model`。before = 本分支基线提交（main 4d3e775 代码）重编译，after = 本提交；共享 target 下每次构建前 touch 源码，避免复用其他 worktree 的同指纹产物（曾出现过一次）。
+  - **单词模式 Top-1（%，Wilson 95% CI）**，word_ctx_v1（`--mode word`）：
+
+    | 类别 | n | before | after |
+    |---|---|---|---|
+    | TOTAL | 2300 | 71.6 [69.7, 73.4] | 74.9 [73.1, 76.6] |
+    | exact | 600 | 80.0 [76.6, 83.0] | 89.2 [86.4, 91.4] |
+    | negative:clean | 400 | 99.2 [97.8, 99.7] | 99.2 [97.8, 99.7] |
+    | negative:novel | 200 | 41.5 [34.9, 48.4] | 69.0 [62.3, 75.0] |
+    | prefix | 300 | 80.3 [75.5, 84.4] | 82.0 [77.3, 85.9] |
+    | typo_simple | 500 | 88.4 [85.3, 90.9] | 89.8 [86.8, 92.2] |
+    | typo_simple 漏字 / 词首附近 | 142 | 78.2 [70.7, 84.2] | 81.7 [74.5, 87.2] |
+    | typo_prefix | 300 | 62.3 [56.7, 67.6] | 65.3 [59.8, 70.5] |
+    | typo_prefix 漏字 / 词首附近 | 91 | 46.2 [36.3, 56.3] | 50.5 [40.5, 60.6] |
+    | typo_phonetic | 300 | 88.0 [83.8, 91.2] | 87.7 [83.5, 90.9] |
+    | context_realword | 300 | 11.0 [7.9, 15.0] | 11.0 [7.9, 15.0] |
+
+    core_v2（`--mode word`）：
+
+    | 类别 | n | before | after |
+    |---|---|---|---|
+    | TOTAL | 1375 | 80.7 [78.5, 82.7] | 82.7 [80.6, 84.6] |
+    | exact | 200 | 99.0 [96.4, 99.7] | 99.0 [96.4, 99.7] |
+    | prefix | 175 | 82.9 [76.6, 87.7] | 90.9 [85.7, 94.3] |
+    | typo_simple | 200 | 92.5 [88.0, 95.4] | 93.5 [89.2, 96.2] |
+    | typo_prefix | 200 | 56.0 [49.1, 62.7] | 61.0 [54.1, 67.5] |
+    | typo_phonetic | 200 | 69.0 [62.3, 75.0] | 70.5 [63.8, 76.4] |
+    | context_realword | 200 | 84.5 [78.8, 88.9] | 84.5 [78.8, 88.9] |
+    | sentence | 200 | 81.0 [75.0, 85.8] | 80.5 [74.5, 85.4] |
+
+    其他冻结集单词模式（after，仅参考）：noise_v2 46.2、ood_dev_v1 55.2、ood_academic_v1 51.8、ood_tm2_v1 50.3（task-17 基线 45.9 / 51.1 / 46.2 / 50.2）。`bateria -> bacteria` 无上文 Top-1（`the` 上文时 L2 偏向 material，第 5 位）；`easie -> easier` Top-1。
+  - **整句模式不变**：core_v2 / noise_v2 / ood_dev_v1 / ood_academic_v1 / ood_tm2_v1 的 `--mode sentence --dump-rows`（1375 / 1650 / 1030 / 1030 / 600 行，每行 rank + top-5 全文）before 与 after **逐字节相同**；top1 83.1 / 78.7 / 66.9 / 59.3 / 67.2。
+  - **单键延迟**（TOTAL key p50 / p99 / max µs）：单词模式 after：word_ctx_v1 50 / 562 / 959（before 42 / 463 / 727），core_v2 27 / 493 / 712，其余冻结集 p99 <= 410、max <= 1317——全部远低于 3 / 10 / 16 ms。整句模式（代码路径未改、逐行相同）在本机负载 3.6（其他会话并行构建 / 评测）下 p50 <= 0.5 ms、p99 <= 5.8 ms 均达标，但 max 在 before 与 after 两个二进制上都偶发 > 16 ms（ood_dev_v1 before 20.6 / 18.7 ms，after 18.2 / 20.6 ms；noise_v2 before 17.5、after 17.0），属单次系统抖动（task-17 在 main 上也记录过 23.6 ms），不是本任务引入；正式门禁建议在空闲机器上复测整句模式 max。
+- 遗留 / 后续：
+  1. 纯小写新词（`frontend`、`roleplay`、`npm`）仍被改写：L2 词表能证明这些是真实用词，但 `NgramModel` 未暴露 unigram 查询，需要 `crates/lm-ngram` 新接口（跨 crate 任务）；或启用 `verbatim.single_token_slot`（top3 换 top3）。
+  2. 短词漏字（`paer -> paper`、`usae`、`loing`）：L1 截断前由词频主导，需按编辑类型调代价或召回后再截断，会同时影响整句模式，宜单独任务。
+  3. context_realword 11%：单词模式保守保留真词，与用户"不改正确词"的偏好一致，未调。
+  4. `exhaustive_single_edit` 对整句模式召回可能同样有益，由整句召回轨道自行评估（只需改 `SENTENCE_PROFILE`）。

@@ -178,6 +178,8 @@ class Builder:
         self.seed = seed
         self.seen: set[tuple[str, str, str]] = set()
         self.stats: Counter = Counter()
+        # 行 -> 源子句：反例复核按整句裁决（源句本身有错则整句不进入任何行）
+        self.clause_of: dict[tuple[str, str, str], str] = {}
 
     def zipf(self, w: str) -> float:
         hit = self.lex.get(w.lower())
@@ -206,6 +208,7 @@ class Builder:
             return False
         self.seen.add(key)
         rows.append((cat, ctx, inp, exp, note))
+        self.clause_of[key] = " ".join(toks)
         return True
 
     def positions(self, toks: list[str], rng: random.Random, min_len: int, min_zipf: float) -> list[int]:
@@ -302,7 +305,7 @@ class Builder:
                 return True
         return False
 
-    def make_negative(self, cands: list[Row]):
+    def make_negative(self):
         def make(rows, toks, rng, src) -> bool:
             for i in self.positions(toks, rng, 3, MIN_NEGATIVE_ZIPF):
                 w = toks[i]
@@ -310,7 +313,6 @@ class Builder:
                     continue
                 note = f"negative:clean source={src}"
                 if self.emit(rows, "exact", toks, i, w, w, note):
-                    cands.append(rows[-1])
                     return True
             return False
         return make
@@ -353,7 +355,6 @@ def main(argv: list[str] | None = None) -> int:
 
     b = Builder(lex, realword_vocab, excluded, args.seed)
     rows: list[Row] = []
-    neg_cands: list[Row] = []
 
     def split(total: int) -> tuple[int, int]:
         a = round(total * args.arxiv_share)
@@ -366,7 +367,7 @@ def main(argv: list[str] | None = None) -> int:
         ("typo_prefix", args.per_category, b.make_typo_prefix),
         ("typo_phonetic", args.per_category, b.make_phonetic),
         ("context_realword", args.per_category, b.make_realword),
-        ("negative_clean", args.negatives, b.make_negative(neg_cands)),
+        ("negative_clean", args.negatives, b.make_negative()),
     ]
     for tag, total, make in jobs:
         for (src, std, _), quota in zip(sources, split(total)):
@@ -381,7 +382,13 @@ def main(argv: list[str] | None = None) -> int:
         f"seed={args.seed}；由 scripts/data_pipeline/build_word_ctx_eval.py 生成（勿手改），反例经 eval/review/negative_review.tsv 复核",
     ])
     if args.emit_negative_candidates:
-        write_tsv(args.emit_negative_candidates, neg_cands, ["未复核的单词反例候选（仅用于分歧裁决，勿入库）"])
+        # notes 换成源子句，供裁决时按句写入 negative_review.tsv
+        cands = [
+            (r[0], r[1], r[2], r[3], b.clause_of[(r[0], r[1], r[2])])
+            for r in rows
+            if r[4].startswith("negative:")
+        ]
+        write_tsv(args.emit_negative_candidates, cands, ["未复核的单词反例候选（notes = 源子句；仅用于分歧裁决，勿入库）"])
     cats = Counter(r[0] for r in rows)
     print(f"word_ctx_v1: {len(rows)} rows {dict(sorted(cats.items()))}")
     print(json.dumps(dict(sorted(b.stats.items())), ensure_ascii=False))
