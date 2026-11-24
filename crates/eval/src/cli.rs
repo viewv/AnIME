@@ -20,6 +20,30 @@ impl OutputFormat {
     }
 }
 
+/// 回放口径：决定 `EngineConfig.space_commits` 与空格键语义（见 `crates/eval/README.md`）。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum EvalMode {
+    /// 空格留在预编辑区，整串由词格解码（`space_commits = false`，引擎默认）。
+    #[default]
+    Sentence,
+    /// 空格上屏首选（`space_commits = true`），已上屏文本拼接剩余候选后参与排名。
+    Word,
+}
+
+impl EvalMode {
+    fn parse(raw: &str) -> Result<Self, String> {
+        match raw.trim().to_ascii_lowercase().as_str() {
+            "sentence" => Ok(Self::Sentence),
+            "word" => Ok(Self::Word),
+            other => Err(format!("unknown --mode '{other}' (expected word or sentence)")),
+        }
+    }
+
+    pub fn space_commits(self) -> bool {
+        self == Self::Word
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliArgs {
     pub tsv_path: String,
@@ -39,6 +63,9 @@ pub struct CliArgs {
     /// 强制 L3 提示风格（`generic` / `correction`）；缺省按模型文件名推断。
     pub l3_prompt: Option<String>,
     pub max_samples: Option<usize>,
+    pub mode: EvalMode,
+    pub dump_rows: Option<String>,
+    pub profile_overrides: Vec<String>,
     pub help: bool,
 }
 
@@ -61,6 +88,9 @@ impl Default for CliArgs {
             rerank_weight: None,
             l3_prompt: None,
             max_samples: None,
+            mode: EvalMode::Sentence,
+            dump_rows: None,
+            profile_overrides: Vec::new(),
             help: false,
         }
     }
@@ -85,6 +115,11 @@ Options:
   --l3-prompt <generic|correction>  Force the L3 prompt style (default: inferred from model file name)
   --rerank-weight <F32>     Override L3 rerank fusion weight (default: library default)
   --max-samples <N>         Evaluate at most N rows from TSV
+  --mode <word|sentence>    Replay as word mode (space commits top-1, space_commits=true)
+                            or sentence mode (spaces stay in preedit; default)
+  --dump-rows <PATH>        Write one TSV line per row (rank, top-1, top-5) for per-row diffs
+  --profile <MODE.KEY=VAL>  Override a ModeProfile field, MODE = word|sentence|both
+                            (e.g. word.space_edits.penalty=0.9; repeatable; --profile list shows keys)
   -h, --help                Show this help message"
 }
 
@@ -181,6 +216,24 @@ where
                     val.parse::<f32>()
                         .map_err(|_| format!("invalid --rerank-weight float '{val}'"))?,
                 );
+            }
+            "--mode" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--mode requires word or sentence".to_string())?;
+                cfg.mode = EvalMode::parse(&val)?;
+            }
+            "--dump-rows" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--dump-rows requires a path".to_string())?;
+                cfg.dump_rows = Some(val);
+            }
+            "--profile" => {
+                let val = iter
+                    .next()
+                    .ok_or_else(|| "--profile requires MODE.KEY=VALUE or list".to_string())?;
+                cfg.profile_overrides.push(val);
             }
             "--max-samples" => {
                 let val = iter

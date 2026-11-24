@@ -61,6 +61,8 @@ pub struct QueryOptions {
     pub limit: usize,
     pub enable_phonetic: bool,
     pub max_edit_cost: f32,
+    /// 模糊召回额外穷举全部单次编辑（见 `CompactTrie::single_edit_nodes`），不再受束宽限制。
+    pub exhaustive_single_edit: bool,
 }
 
 impl Default for QueryOptions {
@@ -69,6 +71,7 @@ impl Default for QueryOptions {
             limit: 9,
             enable_phonetic: true,
             max_edit_cost: 2.5,
+            exhaustive_single_edit: false,
         }
     }
 }
@@ -742,5 +745,36 @@ mod tests {
         assert_eq!(lex.segment_runon("software"), None);
         assert_eq!(lex.segment_runon("something"), None);
         assert_eq!(lex.segment_runon("without"), None);
+    }
+
+    #[test]
+    fn exhaustive_single_edit_recalls_early_omission_beyond_beam() {
+        // 大量高频 `ba*` / `ma*` 前缀挤占束宽；漏打第 3 个字母的 bateria 只能靠单次编辑穷举召回
+        let mut words: Vec<(String, f32)> = vec![("bacteria".into(), 3.4), ("material".into(), 5.1)];
+        for a in b'a'..=b'z' {
+            for b in b'a'..=b'z' {
+                words.push((format!("b{}{}x", a as char, b as char), 6.5));
+                words.push((format!("t{}{}y", a as char, b as char), 6.5));
+            }
+        }
+        let lex = Lexicon::from_word_zipfs(words, Vec::new());
+        let on = QueryOptions {
+            limit: 40,
+            exhaustive_single_edit: true,
+            ..QueryOptions::default()
+        };
+        let hit = lex
+            .query("bateria", &on)
+            .into_iter()
+            .find(|h| h.word == "bacteria")
+            .expect("single omission is always recalled");
+        assert_eq!(hit.kind, LexiconMatchKind::TypoCorrection);
+        assert!((hit.edit_cost - deletion_cost(b'c', Some(b'a'))).abs() < 1e-6);
+        let comp = lex.query("bateri", &on);
+        assert!(comp.iter().any(|h| h.word == "bacteria" && h.kind == LexiconMatchKind::Completion));
+        // 默认关闭（整句模式）时束搜索在这里召回不到 bacteria
+        assert!(!QueryOptions::default().exhaustive_single_edit);
+        let off = QueryOptions { limit: 40, ..QueryOptions::default() };
+        assert!(!lex.query("bateria", &off).iter().any(|h| h.word == "bacteria"));
     }
 }
