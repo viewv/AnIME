@@ -52,6 +52,9 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
+- Status: [IN PROGRESS — WIP 提交，未过门禁，未测 L3]
+- 根因（L1+L2 诊断）：(1) 末尾未闭合 token 不展开闭合近邻（末词漏首字母 sers->users 召不回）；(2) 罕见收录词（ord/ven，log_freq < -6）被 `realword_neighbor_min_raw_log_freq` 提前返回；(3) 空格编辑门控把 gr/ing/ly/alot 等罕见碎片当真词，`gr eat`/`us ing` 不生成备选；(4) 每个备选只含一处空格编辑；(5) 词格 n-best 被末词屈折变体占满（未修）；(6) 缺撇号所有格（teachers->teacher's）在槽内但排不进前列（未修）。
+- WIP v1（SENTENCE_PROFILE：rare_realword -5.5/1.5、open_token_neighbors 0.5、rare_side -4.5、2 编辑组合、max_alternatives 12），L1+L2 top1/top5 前 -> 后：noise_v2 78.67/87.09 -> 84.55/94.18；ood_dev 66.89/86.31 -> 69.51/90.39；ood_academic 59.32/78.93 -> 59.51/80.19；ood_tm2 67.17/80.67 -> 70.00/86.17；core_v2 83.13/96.29 -> 82.98/96.29。`--mode word` 5 集 dump-rows 逐行一致。
+- 未达标：negative:clean top1 下降 0.5–1.7pt（主要是末词近邻把复数改单数 prices->price、methods->method，以及合并 baseline->base line、webpage->web page）。下一步：末词近邻只用于非词 / 罕见词（真词末词不展开），或调大 open_token_neighbor_penalty；再测 L3 v2、延迟 gate、Wilson CI、门禁。
 - Changed Files:
 - Verification Output:
