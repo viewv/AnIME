@@ -128,6 +128,7 @@ where
             limit: p.lexicon.query_limit.unwrap_or(self.config.max_candidates),
             enable_phonetic: self.config.enable_phonetic,
             max_edit_cost: p.lexicon.max_edit_cost,
+            exhaustive_single_edit: p.lexicon.exhaustive_single_edit,
         }
     }
 
@@ -340,8 +341,10 @@ where
 
         let mut primary: Vec<Candidate> = Vec::with_capacity(self.candidates.len());
         let mut partial: Vec<Candidate> = Vec::new();
+        // 只丢弃末位 Raw 兜底（由 ensure_raw_and_limit 重建）；单 token 原样候选（`place_single_token_verbatim`，
+        // comment = verbatim）是主候选，按自身分数参与合并——只有续写的帧不改主候选分数，它保持原位次。
         for mut c in self.candidates.drain(..) {
-            if c.kind == CandidateKind::Raw && c.consumed_chars == total_chars {
+            if c.kind == CandidateKind::Raw && c.consumed_chars == total_chars && !is_verbatim_raw(&c) {
                 continue;
             }
             if c.consumed_chars < total_chars {
@@ -847,6 +850,7 @@ where
             limit: 3,
             enable_phonetic: false,
             max_edit_cost: 0.0,
+            exhaustive_single_edit: false,
         };
         let lf = self
             .lexicon
@@ -1090,7 +1094,8 @@ where
         if tokens.len() == 1 {
             let (tok, _, _) = &tokens[0];
             let is_closed_word = self.preedit.ends_with(' ');
-            let lex_hits = self.query_lexicon_cached(tok, &opts);
+            let lex_hits =
+                penalize_shorter_corrections(self.query_lexicon_cached(tok, &opts), tok, &p.lexicon);
             let expand_runon = should_expand_runon_token(tok, is_closed_word, &lex_hits, &p.runon);
             let runon_words = if expand_runon {
                 self.lexicon.segment_runon(tok)
@@ -1195,6 +1200,7 @@ where
 
             self.candidates
                 .sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
+            self.place_single_token_verbatim(tok, total_chars, &p.verbatim);
         } else {
             let (slots, first_hits) = self.build_sentence_slots(&tokens, &opts);
             let max = p.lattice.nbest.unwrap_or(self.config.max_candidates);
@@ -1370,6 +1376,7 @@ where
                 limit: 3,
                 enable_phonetic: false,
                 max_edit_cost: 0.0,
+                exhaustive_single_edit: false,
             };
             let near: Vec<String> = self
                 .query_lexicon_cached(tok, &opts)
@@ -1390,6 +1397,59 @@ where
         }
         self.verbatim_lead_cache.insert(tok.to_string(), leads);
         leads
+    }
+
+    /// 单 token 预编辑的原样候选（`verbatim.single_token_*`，单词模式开启）。
+    ///
+    /// 大小写意图判定与整句原样句共用 `token_signals_cased_intent`（词典词与已知驼峰词错拼不领先）；
+    /// 领先时以 `Raw` 类型、比原首选高 `lead_margin` 的分数插到首位。`single_token_slot` 只在输入不是
+    /// 词典词时把原样提到指定位次，供纯小写新词（`frontend`、`npm`）一键选回。
+    fn place_single_token_verbatim(&mut self, tok: &str, total_chars: usize, vp: &VerbatimProfile) {
+        if !vp.single_token_lead && vp.single_token_slot.is_none() {
+            return;
+        }
+        if tok != self.preedit.trim_end() || tok.chars().any(|c| !c.is_ascii_alphabetic()) {
+            return;
+        }
+        let opts = self.query_options();
+        if self.exact_log_freq(tok, &opts).is_some() {
+            return;
+        }
+        let slot = if vp.single_token_lead && self.token_signals_cased_intent(tok) {
+            0
+        } else if let Some(slot) = vp.single_token_slot {
+            slot
+        } else {
+            return;
+        };
+        if let Some(pos) = self
+            .candidates
+            .iter()
+            .position(|c| c.text == tok && c.consumed_chars == total_chars)
+        {
+            if pos <= slot {
+                return;
+            }
+            self.candidates.remove(pos);
+        }
+        let slot = slot.min(self.candidates.len());
+        let score = match (slot.checked_sub(1).and_then(|i| self.candidates.get(i)), self.candidates.get(slot)) {
+            (_, Some(next)) if slot == 0 => next.score + vp.lead_margin,
+            (Some(prev), Some(next)) => (prev.score + next.score) / 2.0,
+            (Some(prev), None) => prev.score - vp.lead_margin,
+            _ => 0.0,
+        };
+        self.candidates.insert(
+            slot,
+            Candidate {
+                text: tok.to_string(),
+                kind: CandidateKind::Raw,
+                comment: Some(VERBATIM_COMMENT.into()),
+                score,
+                consumed_chars: total_chars,
+                trailing_space: self.config.smart_spacing,
+            },
+        );
     }
 
     fn ensure_raw_and_limit(&mut self, total_chars: usize) {
@@ -1420,6 +1480,42 @@ where
             trailing_space: false,
         });
     }
+}
+
+/// 见 `LexiconProfile::shorter_correction_penalty`；未开启、输入是词典词或不是合法前缀时原样返回。
+fn penalize_shorter_corrections(
+    mut hits: Vec<LexiconCandidate>,
+    tok: &str,
+    lp: &LexiconProfile,
+) -> Vec<LexiconCandidate> {
+    // 输入本身是词典词时（真词误拼 kit -> it）交给易混词 / 真词近邻机制，不在这里扣分
+    if lp.shorter_correction_penalty == 0.0
+        || hits.iter().any(|h| h.kind == LexiconMatchKind::Exact)
+        || !hits
+            .iter()
+            .any(|h| h.kind == LexiconMatchKind::Completion && h.edit_cost == 0.0)
+    {
+        return hits;
+    }
+    let n = tok.chars().count();
+    for h in &mut hits {
+        if matches!(
+            h.kind,
+            LexiconMatchKind::TypoCorrection | LexiconMatchKind::PhoneticCorrection
+        ) && h.word.chars().count() < n
+        {
+            h.score -= lp.shorter_correction_penalty;
+        }
+    }
+    hits.sort_by(|a, b| b.score.total_cmp(&a.score));
+    hits
+}
+
+const VERBATIM_COMMENT: &str = "verbatim";
+
+/// 原样候选（单 token 原样领先）与末位 Raw 兜底同为 `CandidateKind::Raw`，以 comment 区分。
+fn is_verbatim_raw(c: &Candidate) -> bool {
+    c.kind == CandidateKind::Raw && c.comment.as_deref() == Some(VERBATIM_COMMENT)
 }
 
 fn append_context_before(before: &mut String, committed: &str, trailing_space: bool) {
@@ -2765,7 +2861,7 @@ mod tests {
     }
 
     #[test]
-    fn default_profiles_match_baseline_for_both_modes() {
+    fn default_profiles_select_per_mode_and_sentence_stays_baseline() {
         let mut sess = make_session();
         assert_eq!(*sess.profiles(), ModeProfiles::default());
         assert_eq!(*sess.profile(), SENTENCE_PROFILE);
@@ -2774,8 +2870,8 @@ mod tests {
             ..EngineConfig::default()
         });
         assert_eq!(*sess.profile(), WORD_PROFILE);
-        assert_eq!(WORD_PROFILE, BASELINE_PROFILE);
-        // 整句模式只在召回相关字段上偏离基准（task-19），其余分组逐值相同
+        // 单词模式轨道（task-18）只改 WORD_PROFILE，整句召回轨道（task-19）只改 SENTENCE_PROFILE；
+        // 整句模式只在召回相关字段上偏离基准，其余分组逐值相同
         let s = SENTENCE_PROFILE;
         assert_eq!(
             (s.lexicon, s.l2, s.runon, s.lattice, s.verbatim, s.partial, s.l3),
@@ -2841,5 +2937,88 @@ mod tests {
         sess.set_profiles(ModeProfiles::default());
         let after: Vec<String> = sess.candidates().iter().map(|c| c.text.clone()).collect();
         assert_eq!(before, after);
+    }
+
+    fn word_mode<L: LexiconProvider, N: NgramModel, M: NeuralSentenceModel>(
+        sess: &mut EngineSession<L, N, M>,
+        space_commits: bool,
+    ) {
+        sess.set_config(EngineConfig {
+            space_commits,
+            ..EngineConfig::default()
+        });
+    }
+
+    #[test]
+    fn word_mode_keeps_cased_novel_token_verbatim() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![("chapters", 4.6), ("chapter", 4.9), ("chatting", 4.0), ("lm", 3.0), ("youtube", 4.5)],
+            Vec::new(),
+        );
+        let mut sess = EngineSession::new(lex, NoopNgramModel, NoopNeuralModel);
+        word_mode(&mut sess, true);
+        for tok in ["ChatGPT", "LLM", "LLMs"] {
+            sess.reset();
+            let st = feed_text(&mut sess, tok);
+            assert_eq!(st.candidates[0].text, tok, "{tok}");
+        }
+        // 纯小写词典外 token 与大小写只在句首的 token 照常纠错
+        sess.reset();
+        assert_ne!(feed_text(&mut sess, "chapterz").candidates[0].text, "chapterz");
+        // 整句模式单 token 不受影响（原样只在末位兜底）
+        word_mode(&mut sess, false);
+        sess.reset();
+        assert_ne!(feed_text(&mut sess, "ChatGPT").candidates[0].text, "ChatGPT");
+    }
+
+    #[test]
+    fn word_mode_prefers_completion_over_shorter_correction_of_valid_prefix() {
+        let lex = Lexicon::from_word_zipfs(vec![("easier", 4.6), ("is", 7.4), ("easy", 5.3)], Vec::new());
+        let mut sess = EngineSession::new(lex, NoopNgramModel, NoopNeuralModel);
+        word_mode(&mut sess, true);
+        assert_eq!(feed_text(&mut sess, "easie").candidates[0].text, "easier");
+        let mut profiles = ModeProfiles::default();
+        profiles.word.lexicon.shorter_correction_penalty = 0.0;
+        profiles.word.lexicon.phonetic_offset = 0.0;
+        sess.set_profiles(profiles);
+        let texts: Vec<String> = sess.candidates().iter().map(|c| c.text.clone()).collect();
+        assert!(texts.iter().any(|t| t == "is"), "{texts:?}");
+    }
+
+    #[test]
+    fn verbatim_lead_survives_async_l3_continuation_frame() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![("chapters", 4.6), ("chapter", 4.9), ("chatting", 4.0)],
+            Vec::new(),
+        );
+        let mut sess = EngineSession::new(lex, NoopNgramModel, NoopNeuralModel);
+        word_mode(&mut sess, true);
+        let rev0 = feed_text(&mut sess, "ChatGPT");
+        assert_eq!(rev0.candidates[0].text, "ChatGPT");
+        assert_eq!(rev0.candidates[0].comment.as_deref(), Some("verbatim"));
+        // 单词模式 L3 不对单 token 做纠错重排，只回续写：revision 1 不得丢掉原样领先
+        let cont = NeuralCandidate {
+            text: "is great".into(),
+            score: 1.0,
+            is_continuation: true,
+        };
+        let rev1 = sess
+            .apply_neural_rerank(sess.seq(), &[], std::slice::from_ref(&cont))
+            .expect("fresh seq");
+        assert_eq!(rev1.revision, rev0.revision + 1);
+        assert_eq!(rev1.candidates[0].text, "ChatGPT", "{:?}", rev1.candidates);
+        assert!(rev1.candidates.iter().any(|c| c.text == "is great"));
+        assert_eq!(
+            rev1.candidates.iter().filter(|c| c.text == "ChatGPT").count(),
+            1,
+            "verbatim lead and raw fallback must not duplicate"
+        );
+        // 末位 Raw 兜底仍按原规则丢弃后重建（纯小写错拼无原样领先）
+        sess.reset();
+        let rev0 = feed_text(&mut sess, "chapterz");
+        assert_ne!(rev0.candidates[0].text, "chapterz");
+        let rev1 = sess.apply_neural_rerank(sess.seq(), &[], &[]).expect("fresh seq");
+        assert_eq!(rev1.candidates[0].text, rev0.candidates[0].text);
+        assert_eq!(rev1.candidates.last().map(|c| c.text.as_str()), Some("chapterz"));
     }
 }

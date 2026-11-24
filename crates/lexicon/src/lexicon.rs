@@ -348,9 +348,17 @@ impl Lexicon {
             } else {
                 (opts.max_edit_cost, 64)
             };
-            let (terminal_hits, completion_hits) =
+            let (mut terminal_hits, mut completion_hits) =
                 self.trie
                     .fuzzy_search_with_width(&needle, eff_edit, 5, eff_beam);
+            if opts.exhaustive_single_edit {
+                // 与束搜索结果合并：同一词取较低代价由 insert_candidate 按分数去重完成
+                let (t, c) = self
+                    .trie
+                    .single_edit_search(&needle, eff_edit, 5, needle.len() >= 5);
+                terminal_hits.extend(t);
+                completion_hits.extend(c);
+            }
 
             for hit in terminal_hits {
                 let slot = &self.words[hit.word_id as usize];

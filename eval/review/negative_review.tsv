@@ -436,3 +436,24 @@ if the given data points are linearly separable in the n dimensions	exclude	源�
 we further incorporate the CDMP algorithm with a theoretically guaranteed	keep	引擎误判 -> we further incorporate the CAMP algorithm with a theoretically guaranteed
 is decidable and even in Ackermann	keep	引擎误判 -> is decidable and even in Agreement
 The lengthy code poses challenges for the performance and efficiency of MLLMs	keep	引擎误判 -> The lengthy code pose challenges for the performance and efficiency of Miles
+# task-18 word_ctx_v1 单词反例复核（只裁决被单词模式 L1+L2 改动的行；源句含错拼 / 非自然片段者 exclude）
+Who have reached the state of enlightnement	exclude	源句错拼（enlightenment）
+but what does empasse mean	exclude	源句错拼（impasse）
+I really don't hawe much to offer to others	exclude	源句错拼（have）
+Make a python script out of this so that Iccan make this command work	exclude	源句粘连错拼（I can）
+when most pople expected the country would fall relatively quickly	exclude	源句错拼（people）
+tively changes throughout this process	exclude	源句截断片段（-tively）
+explain to me the difference between machine learning and artificial inteligence	exclude	源句错拼（intelligence）
+Are there any other potentioal reasons for this	exclude	源句错拼（potential）
+another question is will ffiles be overwritten	exclude	源句错拼（files）
+Thanks for your detailed explaination	exclude	源句错拼（explanation）
+Their trustworthyness as a person	exclude	源句错拼（trustworthiness）
+I work at a relativly large company	exclude	源句错拼（relatively）
+Please give me some examples from the artists you metioned	exclude	源句错拼（mentioned）
+Here is you table in csv format	exclude	源句语法错误（your）
+Did Radioheads change the band members during that time	exclude	源句专名误用（Radiohead）
+if they are this much safer	keep	源句正确，this -> thus 属误纠
+Animation has gained significant interest in the recent film and TV industry	keep	源句正确，has -> his 属误纠
+six are derived from physical activities	keep	源句正确，are -> or 属误纠
+as opposed to heterogenous population	keep	heterogenous 为常见变体拼写（生物学用法）
+I would like you to roleplay being an adventurous archeologist and explorer	keep	archeologist 为美式拼写
