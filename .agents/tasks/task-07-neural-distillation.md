@@ -49,7 +49,7 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - **生成模式（停顿时，后续阶段）**：从同一前缀贪心 / 小束生成整句，作为额外候选，突破 L1+L2 召回上限（多错误、空格错误）。
 
 ### 训练数据（`scripts/data_pipeline/build_l3_sft.py`，可复现，固定 seed）
-- **干净文本源**（均已登记 MANIFEST，许可在白名单内）：oasst1 训练树（已排除 ood_dev 留出树，prompter 为主、assistant 为辅）、MultiWOZ 2.2 train / dev、LibriSpeech（小比例，只防遗忘）。Taskmaster 全部不用（ood_tm2 评测领域）；CC-BY-SA 来源（Wikipedia 错拼表等）不进入模型训练。
+- **干净文本源**（均已登记 MANIFEST，许可在白名单内）：arXiv CS 摘要训练侧（task-14，元数据 CC0，按论文留出的评测论文不进入，约 25%）、oasst1 训练树（已排除 ood_dev 留出树，prompter 为主、assistant 为辅）、MultiWOZ 2.2 train / dev、LibriSpeech（小比例，只防遗忘）。Taskmaster 全部不用（ood_tm2 评测领域）；CC-BY-SA 来源（Wikipedia 错拼表等）不进入模型训练。
 - **上文**：对话 / 会话中的前一轮或前一句（截断 ≤ 48 token），约 30% 样本留空上文。
 - **噪声**：复用 `build_eval_v2` / `build_eval_v3` 的 8 类单错误算子 + `noise:multi` 多错误 + crate-ci typos（MIT）真实错拼对；按开发者 / 口语场景设定比例。
 - **照抄样本 >= 35%**：`typed == 目标`，其中含词典外新词 / 专名 / 技术词的干净句单独加权（教模型不误改新词）。
@@ -79,6 +79,7 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 
 ## 验收目标（L1+L2+新 L3 vs L1+L2+通用 360M，`ngram` = 去泄漏 L2）
 - `ood_dev_v1` TOTAL >= 72%（66.4%）、`negative:novel` >= 60%（24.7%）、`negative:clean` 不低于 L1+L2。
+- `ood_academic_v1`（task-14，学术写作）TOTAL >= 66%（58.6%）、`negative:novel` >= 60%（34.0%）。
 - `ood_tm2_v1` TOTAL >= 74%（69.8%）；`noise_v2` 与 `core_v2` 不退化；各集合 `negative:clean` 不低于 L1+L2。
 - L3 延迟不劣于当前通用 360M（GPU 优化另行处理）；GGUF `Q4_K_M` <= 300 MB。
 - 报告 Wilson 95% 置信区间；所有数字基于去泄漏 L2 与冻结评测集。
@@ -94,6 +95,56 @@ acceptance_cmd: "make check && make test && make verify-infra && ./scripts/verif
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [PENDING]
-- Changed Files:
-- Verification Output:
+- Status: [DONE — 用户批准合并] v2 模型 `anime-l3-360m-v2.Q4_K_M.gguf` 已评测、登记 MANIFEST 并部署；已知未达标：core_v2 `context_realword`（真词误用偏照抄，v3 数据配比待定）与 L3 推理 p50 124 ms > 通用 87 ms（GPU 优化另行处理）。
+- Changed Files（截至 P2 准备）：`crates/lm-neural/src/{config,lib,prompt,llama_backend}.rs`（`PromptStyle`、纠错模板打分、键入原文传入推理线程）、`crates/eval/src/{cli,main}.rs`（`--l3-prompt`）、`scripts/data_pipeline/build_l3_sft.py`、`scripts/data_pipeline/colab/train_l3_correction.{py,ipynb}`、`scripts/data_pipeline/test_pipeline.py`（34 tests）。
+- Verification Output：
+  - **P0 零训练基线**（去泄漏 L2，L1+L2+L3，top1）：
+
+    | 模型 / 模板 | ood_dev TOTAL | clean | novel | multi | realword | ood_tm2 TOTAL | L3 p50 |
+    |---|---|---|---|---|---|---|---|
+    | 360M 通用模板 | 66.4 | 88.7 | 24.7 | 36.0 | 75.0 | 70.0 | 85 ms |
+    | 360M 纠错模板 | 65.2 | 90.3 | 25.3 | 34.0 | 55.0 | 69.7 | 128 ms |
+    | 1.7B 通用模板 | 66.8 | 90.0 | 24.0 | 36.0 | 71.7 | 70.8 | 145–339 ms |
+    | 1.7B 纠错模板 | 66.0 | 91.3 | 25.3 | 35.0 | 55.0 | 69.3 | 455 ms |
+
+    结论：未经训练的模型看不懂模板，看到键入原文后倾向"照抄"——干净句保留 +1.3–2pp，但真词纠错大幅下降（75 -> 55）、整体略降；模板本身不带来收益，必须微调。纠错模板打分整句候选（而非差异后缀），前缀更长，360M p50 85 -> 128 ms，P3 需优化（候选按 token 共享前缀已复用，可再做差异化打分或批量解码）。
+  - **P1 数据集**：`train.jsonl` 407,485 条 / `val.jsonl` 19,925 条（约 1,400 万 token，字符 p50 131 / p99 301）；来源 MultiWOZ 38%、oasst assistant 50%、oasst prompter 12%（prompter 仅 2.2 万子句，×6 变体）；照抄 31.3% + 新词照抄 8.9%、邻键 17.0%、多错误 14.1%、真实错拼 5.5%、漏首字母 / 漏空格 / 空格错位 / 多空格 / 真词各约 4–5%；去泄漏丢弃 79,193 子句；LibriSpeech 默认不用（全小写会教坏专名大小写）。
+  - **P1 数据集 v2（2026-11-23，加入学术文本）**：用户批准 arXiv 元数据后，`build_l3_sft.py` 新增 `arxiv` 来源（task-14 `data/compiled/arxiv_cs/train.jsonl`，子句上限 15 万，上文为同一摘要前一子句；指向 `heldout.jsonl` 时拒绝运行），`--extra-eval-tsv` 把尚未合入本分支的 `ood_academic_v1.tsv` 与 task-14 复核表加入去泄漏参照。重建结果：`train.jsonl` 552,108 条 / `val.jsonl` 20,000 条（128 MB）；来源 oasst assistant 37.4%、MultiWOZ 28.1%、**arXiv 25.3%**、oasst prompter 9.2%；照抄 30.2% + 新词照抄 12.5%（arXiv 术语多，新词照抄占其 23%）、多错误 13.6%；去泄漏丢弃 80,968 子句。上传包已刷新（train.jsonl sha256 前缀 3863fb5d）。
+  - **P2 第一轮 run1（T4，2026-11-23）**：2,157 步 / 3.5 h / 约 4.5 计算点，loss 0.53 -> 0.08、eval_loss 0.074。首次导出的 GGUF 与基座逐字节相同——根因是本脚本 `export_base_tokenizer` 遍历拷贝了整个 HF 缓存快照目录，把基座 `model.safetensors` 覆盖到导出目录（**不是** transformers 5.x 的问题；此前误判已更正）。已修复为文件名白名单 + 存档 / 最终保存 / 转换前三处 `verify_weights_trained`；从 Drive 上未受影响的 `checkpoint-2157` 用 `--export-only --export-from` 重新导出（norm 权重 max|diff| ≈ 1e-2），`anime-l3-360m-v1.Q4_K_M.gguf` sha256 0573818a…、Q8_0 70b985ca…。另锁定 transformers==4.57.6（脚本按 4.x 验证）。
+  - **融合修复**：纠错模型对正确答案给出约 0 的对数概率、对乱改候选 -20 ~ -40，均值中心化使"正确改写"与"照抄"同时截断到 +4.5 打平；`Correction` 风格改用以最优分为锚点的 `normalize_rerank_scores_top`（noise_v2 前 400 行 75.0 -> 83.2）。纠错模型只在整句上训练，单 token 输入（词补全 / 单词纠错）跳过 L3（core_v2 prefix 60.0 -> 82.9）。
+  - **run1 评测**（引擎含 task-15 原样候选，去泄漏 L2，top1 % (95% CI)）：
+
+    | 集合 | L1+L2 | + 通用 360M | **+ anime-l3 v1 Q4** |
+    |---|---|---|---|
+    | ood_dev_v1 TOTAL | 66.9 | 71.8 | **84.2 (82–86)** |
+    | ood_dev negative:clean / novel | 88.7 / 50.0 | 90.7 / 62.7 | **100.0 / 100.0** |
+    | ood_dev multi / space_shift / leading_drop | 32.0 / 58.3 / 53.3 | 32.0 / 66.7 / 61.7 | 44.0 / 88.3 / 75.0 |
+    | ood_academic_v1 TOTAL | 59.3 | 63.0 | **76.2 (74–79)** |
+    | ood_academic clean / novel | 88.0 / 70.7 | 91.7 / 67.3 | 99.7 / 100.0 |
+    | ood_tm2_v1 TOTAL | 67.2 | 68.2 | **74.3 (71–78)** |
+    | noise_v2 TOTAL | 78.7 | 79.5 | **83.3 (81–85)** |
+    | core_v2 TOTAL（跳过单 token 后） | 83.1 | 83.6 | **72.4** |
+    | realword_edit（dev / acad / noise_v2） | 61.7 / 43.3 / 73.3 | 73.3 / 60.0 / 84.0 | 58.3 / 51.7 / 62.7 |
+
+    Q8_0 与 Q4_K_M 指标在 CI 内一致（ood_dev 84.0 / academic 76.2）；L3 推理 p50 约 100 ms（通用 82 ms），按键延迟 p99 <= 4.7 ms。
+  - **v1 已知缺陷（需 v2 数据修复后重训）**：(1) 训练数据中**带错样本的键入原文一律被小写**，只有照抄样本保留大写 → 模型学到"原文含大写即照抄"，用户句首按 Shift 时不纠错（core_v2 `Do tbey have an entfance fee` 原样保留），core_v2 sentence 90.0 -> 62.5；(2) 真词纠错只有单编辑距离样本，缺 their/there/they're、your/you're、its/it's、to/too、then/than、form/from 等同音 / 易混词，core_v2 context_realword 95.0 -> 46.0、各集 realword_edit 下降。
+  - **P2 第二轮 run2 = v2（T4，2026-11-23/24）**：数据 v2（带错样本 50% 保留原文大小写、新增同音 / 易混真词互换 `confusable` 13k 条，共 554,345 / 20,074 条），2,166 步 / 2.5 h / 约 3 计算点，eval_loss 0.072；存档、最终保存、转换前三处权重校验全部通过。冒烟验证：`Do tbey have an entfance fee` 正确改写得分 -0.04（v1 照抄 -0.03 / 改写 -8.0）。Colab 合计约 11 计算点（余 189.2）。
+  - **P3 全量评测**（引擎 = main 含 task-15 原样候选 + task-16 易混真词分差；去泄漏 L2 3fcbf1b9；top1 % (95% CI)）：
+
+    | 集合 / 指标 | L1+L2 | + 通用 360M | + v1 | **+ v2 Q4** |
+    |---|---|---|---|---|
+    | ood_dev TOTAL | 66.9 | 71.8 | 84.1 | **83.8 (81–86)** |
+    | ood_dev clean / novel | 88.7 / 50.0 | 90.7 / 62.7 | 100 / 100 | **100 / 100** |
+    | ood_dev multi / space_shift / leading_drop | 32.0 / 58.3 / 53.3 | 32.0 / 66.7 / 61.7 | 44.0 / 88.3 / 75.0 | 43.0 / 88.3 / 76.7 |
+    | ood_academic TOTAL | 59.3 | 63.0 | 76.2 | **75.8 (73–78)** |
+    | ood_academic clean / novel | 88.0 / 70.7 | 91.7 / 67.3 | 99.7 / 100 | 99.7 / 99.3 |
+    | ood_tm2 TOTAL | 67.2 | 68.2 | 74.3 | **74.3 (71–78)** |
+    | noise_v2 TOTAL | 78.7 | 79.5 | 83.2 | **84.2 (82–86)** |
+    | core_v2 TOTAL | 83.1 | 83.6 | 72.4 | **81.5 (79–83)** |
+    | core_v2 sentence / context_realword | 89.0 / 93.5 | 90.0 / 95.0 | 62.5 / 46.0 | **94.0 / 77.5** |
+    | realword_edit（dev / acad / noise_v2） | 61.7 / 43.3 / 73.3 | 73.3 / 60.0 / 84.0 | 56.7 / 51.7 / 62.0 | 53.3 / 53.3 / 67.3 |
+
+    Q8_0 与 Q4_K_M 在 CI 内一致（ood_dev 83.8 / academic 76.0）。按键延迟 p50 0.4–0.6 ms、p99 <= 4.4 ms；单次 max 偶发 22.5 ms（同一批次 L1+L2 15.2 ms、通用 17.0 ms，均为 L3 并发推理时的抖动，非本改动引入，记录待查）。L3 推理 p50 124 ms（通用 87 ms）。
+  - **验收对照**：ood_dev TOTAL >= 72 ✅（83.8）、novel >= 60 ✅（100）、clean 不低于 L1+L2 ✅；ood_academic >= 66 ✅（75.8）、novel >= 60 ✅；ood_tm2 >= 74 ✅（74.3）；noise_v2 不退化 ✅（+4.7）；Q4_K_M <= 300 MB ✅（270.6 MB）。**未达标**：core_v2 TOTAL 81.5 < 通用 83.6（`context_realword` 77.5 vs 95.0：带上文的单词级真词纠错仍偏向照抄；`realword_edit` 各集低于通用模型）；L3 推理 p50 124 ms > 通用 87 ms（整句候选打分，GPU 优化按用户意见另行处理）。
+  - 部署：本机 `~/.local/bin/animed`（task-07 + main，含 task-15~19 与词格前缀束缓存）加载 v2（systemd drop-in `animed.service.d/l3-correction.conf` 指定 `ANIME_NEURAL_MODEL=%h/.local/share/anime/models/anime-l3-360m-v2.Q4_K_M.gguf`；删除该文件即回到通用 SmolLM2-360M）。
+  - Rust 与 Python 模板黄金测试逐字节一致；`make check`（0 warning）/ `make test`（69 passed）/ `./scripts/verify-boundaries.sh` BOUNDARY OK。

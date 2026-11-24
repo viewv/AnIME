@@ -17,7 +17,7 @@ use anime_lexicon::{
     ConfusableCandidate, LayeredLexicon, Lexicon, LexiconCandidate, LexiconProvider, QueryOptions,
     StaticWordList,
 };
-use anime_lm_neural::{NeuralModelConfig, NeuralRuntimeInfo, NeuralSentenceModel, NoopNeuralModel, load_neural_model};
+use anime_lm_neural::{NeuralModelConfig, NeuralRuntimeInfo, NeuralSentenceModel, NoopNeuralModel, PromptStyle, load_neural_model};
 use anime_lm_ngram::{NgramLanguageModel, NgramModel, NoopNgramModel, UserStore};
 use cli::{OutputFormat, parse_args, usage_text};
 use gate::{evaluate_gates, parse_gate_spec};
@@ -192,6 +192,11 @@ fn main() {
         if let Some(ref model_path) = args.model_path {
             let mut ncfg = NeuralModelConfig::with_model_path(model_path);
             ncfg.n_gpu_layers = args.gpu_layers;
+            match args.l3_prompt.as_deref() {
+                Some("correction") => ncfg.prompt_style = PromptStyle::Correction,
+                Some("generic") => ncfg.prompt_style = PromptStyle::Generic,
+                _ => {}
+            }
             if let Some(w) = args.rerank_weight {
                 ncfg.rerank_weight = w;
             }
