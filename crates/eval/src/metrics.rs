@@ -22,6 +22,18 @@ pub struct SampleFailure {
     pub cs_rank: Option<usize>,
 }
 
+/// 单行最终结果，供 `--dump-rows` 逐行对比（中立性验证、调参前后 diff）。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RowOutcome {
+    pub category: Category,
+    pub context: String,
+    pub input: String,
+    pub expected: String,
+    pub ci_rank: Option<usize>,
+    /// 最终候选文本（单词模式下已拼接此前上屏的文本），最多保留前 5 条。
+    pub top5: Vec<String>,
+}
+
 #[derive(Debug, Default, Clone)]
 pub struct CategoryStats {
     pub total: usize,
@@ -278,6 +290,29 @@ pub struct EvalReport {
     pub by_tag: BTreeMap<String, CategoryStats>,
     /// 是否在报告中输出交互指标分节（`--interactive`）。
     pub show_interaction: bool,
+    /// 按 TSV 顺序的逐行结果。
+    pub rows: Vec<RowOutcome>,
+}
+
+/// 把逐行结果写成 TSV：`category  context  input  expected  ci_rank  top1  top5(" | " 分隔)`。
+pub fn render_row_dump(report: &EvalReport) -> String {
+    let clean = |s: &str| s.replace(['\t', '\n'], " ");
+    let mut out = String::from("# category\tcontext\tinput\texpected\tci_rank\ttop1\ttop5\n");
+    for r in &report.rows {
+        let rank = r.ci_rank.map_or_else(|| "-".to_string(), |x| x.to_string());
+        let top1 = r.top5.first().map(String::as_str).unwrap_or("");
+        out.push_str(&format!(
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+            r.category,
+            clean(&r.context),
+            clean(&r.input),
+            clean(&r.expected),
+            rank,
+            clean(top1),
+            r.top5.iter().map(|t| clean(t)).collect::<Vec<_>>().join(" | "),
+        ));
+    }
+    out
 }
 
 /// Wilson 95% 置信区间（百分比），小样本下比正态近似可靠。
@@ -356,9 +391,15 @@ where
     let mut failures = Vec::new();
     let mut l3_latencies_us: Vec<u128> = Vec::new();
 
+    let mut row_outcomes: Vec<RowOutcome> = Vec::with_capacity(rows.len());
+    // 单词模式（`space_commits = true`）：空格 / 标点会把首选上屏，最终文本 = 已上屏文本 + 剩余预编辑的候选。
+    // 整句模式维持原口径（只看最终预编辑的候选），保证与旧报告逐行可比。
+    let word_mode = session.config().space_commits;
+
     for row in rows {
         session.reset();
         session.set_context(row.context.clone(), "");
+        let mut committed = String::new();
 
         let mut timing = SampleTiming {
             key_us: Vec::with_capacity(row.input.len()),
@@ -377,15 +418,28 @@ where
             let out = session.handle_key(key);
             let key_us = start.elapsed().as_micros();
             match out {
-                EngineOutput::State(st) => last_seq = Some(st.seq),
-                EngineOutput::Commit(_) => last_seq = None,
+                EngineOutput::State(st) => {
+                    // 预编辑为空时空格透传给宿主，宿主插入一个空格
+                    if word_mode && st.passthrough && ch == ' ' {
+                        committed.push(' ');
+                    }
+                    last_seq = Some(st.seq);
+                }
+                EngineOutput::Commit(c) => {
+                    if word_mode {
+                        committed.push_str(&c.text);
+                    }
+                    // 单词模式上屏后剩余预编辑仍可能继续组合（部分选词），L3 以当前 seq 合并
+                    last_seq = (word_mode && !session.preedit().is_empty()).then(|| session.seq());
+                }
             }
             timing.key_us.push(key_us);
             if session.preedit().chars().count() <= MAX_KEY_PREEDIT_CHARS {
                 timing.key_max_us = timing.key_max_us.max(key_us);
             }
             // 排名检查放在计时之外，不计入单键延迟
-            let texts: Vec<&str> = session.candidates().iter().map(|c| c.text.as_str()).collect();
+            let texts = final_texts(session, &committed);
+            let texts: Vec<&str> = texts.iter().map(String::as_str).collect();
             let (rank, _) = rank_against_references(&texts, &row.references);
             inter.observe(key_idx + 1, rank, &mut was_top1);
         }
@@ -393,7 +447,8 @@ where
 
         if let (Some((neural, _)), Some(seq)) = (neural_for_eval, last_seq) {
             let total_chars = session.preedit().chars().count();
-            if total_chars > 0 {
+            // 是否请求 L3 由当前模式的 ModeProfile 决定，与 animed 的调度口径一致
+            if total_chars > 0 && session.wants_l3_rerank() {
                 let cand_texts: Vec<String> = session
                     .candidates()
                     .iter()
@@ -407,8 +462,14 @@ where
                     let has_context = !row.context.trim().is_empty();
                     let has_multi_word = cand_texts.iter().any(|c| c.trim().contains(' '));
                     let l3_start = Instant::now();
+                    // 单词模式下已上屏的词已推进引擎上文；整句模式上文即样本上文
+                    let l3_context = if word_mode {
+                        session.context().before.clone()
+                    } else {
+                        row.context.clone()
+                    };
                     let reranked =
-                        neural.rerank_sentences(&row.context, session.preedit(), &cand_texts);
+                        neural.rerank_sentences(&l3_context, session.preedit(), &cand_texts);
                     let l3_us = l3_start.elapsed().as_micros();
                     if has_context || has_multi_word || !reranked.is_empty() {
                         l3_latencies_us.push(l3_us);
@@ -421,8 +482,8 @@ where
         }
 
         let expected_exact = row.expected.trim();
-        let cands = session.candidates();
-        let texts: Vec<&str> = cands.iter().map(|c| c.text.as_str()).collect();
+        let owned_texts = final_texts(session, &committed);
+        let texts: Vec<&str> = owned_texts.iter().map(String::as_str).collect();
         let (ci_rank, cs_rank) = rank_against_references(&texts, &row.references);
         // 最终排名以 L3 重排后的候选为准
         inter.final_rank = ci_rank;
@@ -448,11 +509,19 @@ where
                 context: row.context.clone(),
                 input: row.input.clone(),
                 expected: expected_exact.to_string(),
-                top1_actual: cands.first().map(|c| c.text.clone()),
+                top1_actual: owned_texts.first().cloned(),
                 ci_rank,
                 cs_rank,
             });
         }
+        row_outcomes.push(RowOutcome {
+            category: row.category,
+            context: row.context.clone(),
+            input: row.input.clone(),
+            expected: expected_exact.to_string(),
+            ci_rank,
+            top5: owned_texts.iter().take(5).cloned().collect(),
+        });
     }
 
     for stats in by_cat.values_mut().chain(by_tag.values_mut()) {
@@ -489,5 +558,26 @@ where
         l3_stats,
         by_tag,
         show_interaction: false,
+        rows: row_outcomes,
     }
+}
+
+/// 最终候选文本：前缀为本样本内已上屏文本（整句模式恒为空）；预编辑已空时唯一结果就是已上屏文本。
+fn final_texts<L, N, M>(session: &EngineSession<L, N, M>, committed: &str) -> Vec<String>
+where
+    L: LexiconProvider,
+    N: NgramModel,
+    M: NeuralSentenceModel,
+{
+    if committed.is_empty() {
+        return session.candidates().iter().map(|c| c.text.clone()).collect();
+    }
+    if session.preedit().is_empty() {
+        return vec![committed.to_string()];
+    }
+    session
+        .candidates()
+        .iter()
+        .map(|c| format!("{committed}{}", c.text))
+        .collect()
 }

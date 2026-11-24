@@ -2,6 +2,7 @@
 //! 数字/部分选词、智能空格/标点回删、`seq`/`revision` 抗过期控制与 L3 异步结果合并。
 
 mod confusables;
+mod profile;
 
 use std::collections::HashMap;
 
@@ -13,19 +14,15 @@ use anime_protocol::{
 };
 
 use crate::confusables::{expand_closed_token_neighbors, expand_slot_confusables};
+pub use crate::profile::{
+    BASELINE_PROFILE, ConfusableProfile, ContextLmProfile, L3Profile, LatticeProfile,
+    LexiconProfile, ModeProfile, ModeProfiles, PartialProfile, RunonProfile, SENTENCE_PROFILE,
+    SpaceEditProfile, VerbatimProfile, WORD_PROFILE,
+};
 
 const MAX_CONTEXT_BEFORE_CHARS: usize = 256;
 const MAX_TOKEN_LEX_CACHE: usize = 256;
-/// 每处空格编辑（合并 / 错位 / 拆分）的信道代价（解码分单位，约等于 LM_LAMBDA × 2 个 log10）：
-/// 默认切分始终优先，只有备选切分在 LM 与词法上显著更好时才胜出。
-const SPACE_EDIT_PENALTY: f32 = 0.75;
-/// 每次按键最多额外解码的备选切分数，守住同步路径延迟预算。
-const MAX_SPACE_EDIT_ALTERNATIVES: usize = 8;
-/// 两段切分的词频门槛（log10 概率）：常规部件 Zipf >= 4，<= 2 字母部件 Zipf >= 6（a、i、to、it、me 级别）。
-const RUNON_PART_MIN_LOG_FREQ: f32 = -5.0;
-const RUNON_SHORT_PART_MIN_LOG_FREQ: f32 = -3.0;
-/// 收录但 Zipf < 3 的粘连形（thankyou、alot）也允许尝试拆分。
-const RUNON_RARE_EXACT_LOG_FREQ: f32 = -6.0;
+// 打分 / 召回参数按模式存放在 `profile::ModeProfile`（单词模式 / 整句模式各一份），见该模块文档。
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EngineOutput {
@@ -38,6 +35,8 @@ pub struct EngineSession<L, N, M> {
     ngram: N,
     neural: M,
     config: EngineConfig,
+    /// 单词 / 整句两份打分参数；每次重算按 `config.space_commits` 取当前模式那份。
+    profiles: ModeProfiles,
     context: ContextText,
     privacy: bool,
     preedit: String,
@@ -69,6 +68,7 @@ where
             ngram,
             neural,
             config: EngineConfig::default(),
+            profiles: ModeProfiles::default(),
             context: ContextText::default(),
             privacy: false,
             preedit: String::new(),
@@ -89,12 +89,52 @@ where
         &self.config
     }
 
+    /// 换配置后立即按新的 `space_commits` 选用对应模式的 profile 并重算候选。
     pub fn set_config(&mut self, config: EngineConfig) {
         self.config = config;
         self.revision = 0;
-        self.token_lex_cache.clear();
-        self.verbatim_lead_cache.clear();
+        self.clear_scoring_caches();
         self.recompute_candidates();
+    }
+
+    /// 当前模式（由 `config.space_commits` 决定）生效的打分参数。
+    pub fn profile(&self) -> &ModeProfile {
+        self.profiles.for_space_commits(self.config.space_commits)
+    }
+
+    pub fn profiles(&self) -> &ModeProfiles {
+        &self.profiles
+    }
+
+    /// 覆盖两种模式的打分参数（调参 / 评测用），立即重算候选。
+    pub fn set_profiles(&mut self, profiles: ModeProfiles) {
+        self.profiles = profiles;
+        self.revision = 0;
+        self.clear_scoring_caches();
+        self.recompute_candidates();
+    }
+
+    /// 槽位、近邻与大小写意图缓存都依赖查询上限 / profile 参数，配置或 profile 变化时必须整体失效。
+    fn clear_scoring_caches(&mut self) {
+        self.token_lex_cache.clear();
+        self.neighbor_cache.clear();
+        self.slot_cache.clear();
+        self.verbatim_lead_cache.clear();
+    }
+
+    fn query_options(&self) -> QueryOptions {
+        let p = self.profile();
+        QueryOptions {
+            limit: p.lexicon.query_limit.unwrap_or(self.config.max_candidates),
+            enable_phonetic: self.config.enable_phonetic,
+            max_edit_cost: p.lexicon.max_edit_cost,
+        }
+    }
+
+    /// 精确词基准分中的固定加成（L1 `EXACT_BONUS` + profile 精确词偏移），供易混词锚点还原原词词频。
+    fn exact_anchor_bonus(&self) -> f32 {
+        let p = self.profile();
+        p.confusables.lexicon_exact_bonus + p.lexicon.exact_offset
     }
 
     pub fn set_context(&mut self, before: impl Into<String>, after: impl Into<String>) {
@@ -393,11 +433,18 @@ where
         Some(self.snapshot_state(false, true))
     }
 
-    fn is_l3_pending(&self) -> bool {
+    /// 当前预编辑是否应请求异步 L3 重排（与后端是否加载无关）；离线评测据此与 animed 调度口径保持一致。
+    pub fn wants_l3_rerank(&self) -> bool {
+        let l3 = self.profile().l3;
         self.config.enable_neural
             && self.config.max_candidates > 0
             && !self.preedit.is_empty()
-            && self.neural.backend_name() != "noop"
+            && l3.enabled
+            && (l3.min_tokens <= 1 || self.preedit.split_whitespace().count() >= l3.min_tokens)
+    }
+
+    fn is_l3_pending(&self) -> bool {
+        self.wants_l3_rerank() && self.neural.backend_name() != "noop"
     }
 
     fn handle_char(&mut self, ch: char) -> EngineOutput {
@@ -557,14 +604,34 @@ where
     }
 
     fn query_lexicon_cached(&mut self, token: &str, opts: &QueryOptions) -> Vec<LexiconCandidate> {
-        if let Some(cached) = self.token_lex_cache.get(token) {
-            return cached.clone();
+        let hits = if let Some(cached) = self.token_lex_cache.get(token) {
+            cached.clone()
+        } else {
+            let hits = self.lexicon.query(token, opts);
+            if self.token_lex_cache.len() >= MAX_TOKEN_LEX_CACHE {
+                self.token_lex_cache.clear();
+            }
+            self.token_lex_cache.insert(token.to_string(), hits.clone());
+            hits
+        };
+        self.apply_kind_offsets(hits)
+    }
+
+    /// 按匹配类型施加 profile 偏移并按分数重排；全零偏移时原样返回（保持 L1 原始次序）。
+    fn apply_kind_offsets(&self, mut hits: Vec<LexiconCandidate>) -> Vec<LexiconCandidate> {
+        let lp = self.profile().lexicon;
+        if !lp.has_offsets() {
+            return hits;
         }
-        let hits = self.lexicon.query(token, opts);
-        if self.token_lex_cache.len() >= MAX_TOKEN_LEX_CACHE {
-            self.token_lex_cache.clear();
+        for h in &mut hits {
+            h.score += match h.kind {
+                LexiconMatchKind::Exact => lp.exact_offset,
+                LexiconMatchKind::Completion => lp.completion_offset,
+                LexiconMatchKind::TypoCorrection => lp.typo_offset,
+                LexiconMatchKind::PhoneticCorrection => lp.phonetic_offset,
+            };
         }
-        self.token_lex_cache.insert(token.to_string(), hits.clone());
+        hits.sort_by(|a, b| b.score.total_cmp(&a.score));
         hits
     }
 
@@ -614,10 +681,12 @@ where
     ) -> (Vec<LatticeSlot>, Vec<LexiconCandidate>) {
         let (start_char, end_char) = (0usize, tok.chars().count());
         let tok = &tok.to_string();
+        let p = *self.profile();
+        let anchor_bonus = self.exact_anchor_bonus();
         let mut slots: Vec<LatticeSlot> = Vec::with_capacity(2);
         let mut first_hits: Vec<LexiconCandidate> = Vec::new();
         let hits = self.query_lexicon_cached(tok, opts);
-        if should_expand_runon_token(tok, is_closed_word, &hits) {
+        if should_expand_runon_token(tok, is_closed_word, &hits, &p.runon) {
             if let Some(seg_words) = self.lexicon.segment_runon(tok) {
                 first_hits.push(LexiconCandidate {
                     word: seg_words.join(" "),
@@ -648,12 +717,23 @@ where
                             },
                         );
                     }
-                    expand_slot_confusables(&self.lexicon, &sub_word, &mut sub_cands, true, false);
+                    expand_slot_confusables(
+                        &self.lexicon,
+                        &sub_word,
+                        &mut sub_cands,
+                        true,
+                        false,
+                        &p.confusables,
+                        anchor_bonus,
+                    );
                     sub_cands.sort_by(|a, b| {
                         b.lex_score
                             .total_cmp(&a.lex_score)
                             .then_with(|| a.word.cmp(&b.word))
                     });
+                    if let Some(cap) = p.lattice.max_slot_candidates {
+                        sub_cands.truncate(cap.max(1));
+                    }
                     slots.push(LatticeSlot {
                         raw_token: sub_word,
                         start_char,
@@ -664,7 +744,7 @@ where
                 return (slots, first_hits);
             }
         }
-        first_hits = hits.iter().take(2).cloned().collect();
+        first_hits = hits.iter().take(p.partial.first_word_hits).cloned().collect();
         let has_exact_hit = hits.iter().any(|h| h.kind == LexiconMatchKind::Exact);
         let tok_char_len = tok.chars().count();
         let best_phonetic: Option<SlotCandidate> = hits
@@ -683,7 +763,7 @@ where
                     if has_exact_hit {
                         return false;
                     }
-                    if h.word.chars().count() > tok_char_len + 2 {
+                    if h.word.chars().count() > tok_char_len + p.lattice.closed_completion_max_extra_chars {
                         return false;
                     }
                 }
@@ -700,10 +780,25 @@ where
                 lex_score: -50.0,
             });
         }
-        expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, true, false);
+        expand_slot_confusables(
+            &self.lexicon,
+            tok,
+            &mut slot_cands,
+            true,
+            false,
+            &p.confusables,
+            anchor_bonus,
+        );
         if is_closed_word {
             let neighbors = self.closed_neighbors_cached(tok);
-            expand_closed_token_neighbors(&neighbors, tok, has_exact_hit, &mut slot_cands);
+            expand_closed_token_neighbors(
+                &neighbors,
+                tok,
+                has_exact_hit,
+                &mut slot_cands,
+                &p.confusables,
+                anchor_bonus,
+            );
         }
         // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
         slot_cands.sort_by(|a, b| {
@@ -711,16 +806,21 @@ where
                 .total_cmp(&a.lex_score)
                 .then_with(|| a.word.cmp(&b.word))
         });
-        // 为读音纠错（PhoneticCorrection，如 sikology->psychology）保底保留 1 个前 10 槽位
-        if slot_cands.len() >= 10 {
+        // 为读音纠错（PhoneticCorrection，如 sikology->psychology）保底保留 1 个前 N 槽位（默认 10，
+        // 与 L2 的 MAX_CANDS_PER_SLOT 对齐，否则保底位会被词格截掉）
+        let window = p.lattice.phonetic_reserve_window;
+        if window > 0 && slot_cands.len() >= window {
             if let Some(phon) = best_phonetic {
-                let in_top10 = slot_cands[..10]
+                let in_window = slot_cands[..window]
                     .iter()
                     .any(|c| c.word.eq_ignore_ascii_case(&phon.word));
-                if !in_top10 {
-                    slot_cands[9] = phon;
+                if !in_window {
+                    slot_cands[window - 1] = phon;
                 }
             }
+        }
+        if let Some(cap) = p.lattice.max_slot_candidates {
+            slot_cands.truncate(cap.max(1));
         }
         slots.push(LatticeSlot {
             raw_token: tok.clone(),
@@ -766,10 +866,12 @@ where
         if !tok.is_ascii() || n < 3 {
             return Vec::new();
         }
+        let runon = self.profile().runon;
+        let keep = self.profile().space_edits.max_two_way_splits;
         let mut cands: Vec<(f32, String, String)> = Vec::new();
         for k in 1..n {
             let (l, r) = tok.split_at(k);
-            let min_lf = |w: &str| if w.len() <= 2 { RUNON_SHORT_PART_MIN_LOG_FREQ } else { RUNON_PART_MIN_LOG_FREQ };
+            let min_lf = |w: &str| if w.len() <= 2 { runon.short_part_min_log_freq } else { runon.part_min_log_freq };
             let (Some(fl), Some(fr)) = (self.exact_log_freq(l, opts), self.exact_log_freq(r, opts)) else {
                 continue;
             };
@@ -778,7 +880,7 @@ where
             }
         }
         cands.sort_by(|a, b| b.0.total_cmp(&a.0));
-        cands.into_iter().take(2).map(|(_, l, r)| (l, r)).collect()
+        cands.into_iter().take(keep).map(|(_, l, r)| (l, r)).collect()
     }
 
     /// 空格出错的备选切分（每个备选只含一处空格编辑）：
@@ -791,6 +893,7 @@ where
         tokens: &[(String, usize, usize)],
         opts: &QueryOptions,
     ) -> Vec<Vec<(String, usize, usize)>> {
+        let p = *self.profile();
         let exact: Vec<bool> = tokens
             .iter()
             .map(|(t, _, _)| self.is_exact_word(t, opts))
@@ -834,7 +937,7 @@ where
         for (i, (t, st, en)) in tokens.iter().enumerate() {
             // 非词，或虽收录但极罕见（如 thankyou）的 token 才尝试拆分
             let rare_exact = exact[i]
-                && self.exact_log_freq(t, opts).is_some_and(|lf| lf < RUNON_RARE_EXACT_LOG_FREQ);
+                && self.exact_log_freq(t, opts).is_some_and(|lf| lf < p.runon.rare_exact_log_freq);
             if exact[i] && !rare_exact {
                 continue;
             }
@@ -846,7 +949,7 @@ where
                 continue;
             }
             let hits = self.query_lexicon_cached(t, opts);
-            if should_expand_runon_token(t, true, &hits) {
+            if should_expand_runon_token(t, true, &hits, &p.runon) {
                 continue; // 已在默认切分中强制拆开
             }
             if let Some(words) = self.lexicon.segment_runon(t) {
@@ -854,7 +957,7 @@ where
                 push_alt(&mut alts, i, 1, repl);
             }
         }
-        alts.truncate(MAX_SPACE_EDIT_ALTERNATIVES);
+        alts.truncate(p.space_edits.max_alternatives);
         alts
     }
 
@@ -862,7 +965,8 @@ where
         if let Some(cached) = self.neighbor_cache.get(token) {
             return cached.clone();
         }
-        let hits = self.lexicon.closed_token_neighbors(token, 12);
+        let limit = self.profile().confusables.closed_neighbor_query_limit;
+        let hits = self.lexicon.closed_token_neighbors(token, limit);
         if self.neighbor_cache.len() >= MAX_TOKEN_LEX_CACHE {
             self.neighbor_cache.clear();
         }
@@ -943,11 +1047,8 @@ where
             return;
         }
 
-        let opts = QueryOptions {
-            limit: self.config.max_candidates,
-            enable_phonetic: self.config.enable_phonetic,
-            ..QueryOptions::default()
-        };
+        let p = *self.profile();
+        let opts = self.query_options();
         let sentence_start = context_starts_sentence(&self.context.before);
         let has_prev_word_ctx = !sentence_start && last_context_word(&self.context.before).is_some();
 
@@ -955,7 +1056,7 @@ where
             let (tok, _, _) = &tokens[0];
             let is_closed_word = self.preedit.ends_with(' ');
             let lex_hits = self.query_lexicon_cached(tok, &opts);
-            let expand_runon = should_expand_runon_token(tok, is_closed_word, &lex_hits);
+            let expand_runon = should_expand_runon_token(tok, is_closed_word, &lex_hits, &p.runon);
             let runon_words = if expand_runon {
                 self.lexicon.segment_runon(tok)
             } else {
@@ -972,7 +1073,15 @@ where
                 });
             }
 
-            expand_slot_confusables(&self.lexicon, tok, &mut slot_cands, has_prev_word_ctx, true);
+            expand_slot_confusables(
+                &self.lexicon,
+                tok,
+                &mut slot_cands,
+                has_prev_word_ctx,
+                true,
+                &p.confusables,
+                self.exact_anchor_bonus(),
+            );
             slot_cands.sort_by(|a, b| {
                 b.lex_score
                     .total_cmp(&a.lex_score)
@@ -986,7 +1095,8 @@ where
                     .find(|(k, _)| k == &low)
                     .map(|(_, kind)| *kind)
                     .unwrap_or(CandidateKind::TypoCorrection);
-                let lm_bonus = self.ngram.score_in_context(&self.context.before, &sc.word);
+                let lm_bonus = p.l2.context_weight
+                    * self.ngram.score_in_context(&self.context.before, &sc.word);
                 let text = if sentence_start {
                     capitalize_first_ascii(&sc.word)
                 } else {
@@ -1028,14 +1138,14 @@ where
                         .fold(f32::NEG_INFINITY, f32::max);
                     let score = if expand_runon {
                         if best_single.is_finite() {
-                            (best_single + 1.5).max(0.5)
+                            (best_single + p.runon.forced_lead).max(p.runon.forced_floor)
                         } else {
-                            0.5
+                            p.runon.forced_floor
                         }
                     } else if best_single.is_finite() {
-                        best_single - 1.5
+                        best_single - p.runon.optional_trail
                     } else {
-                        -2.0
+                        p.runon.optional_fallback
                     };
                     self.candidates.push(Candidate {
                         text,
@@ -1052,13 +1162,19 @@ where
                 .sort_by(|a, b| b.score.total_cmp(&a.score).then_with(|| a.text.cmp(&b.text)));
         } else {
             let (slots, first_hits) = self.build_sentence_slots(&tokens, &opts);
-            let max = self.config.max_candidates;
-            let mut sentences = self.ngram.decode_lattice(&self.context.before, &slots, max);
+            let max = p.lattice.nbest.unwrap_or(self.config.max_candidates);
+            let lex_scale = p.lattice.lex_scale;
+            let mut sentences = self.ngram.decode_lattice(
+                &self.context.before,
+                &scale_slot_lex(slots, lex_scale),
+                max,
+            );
             // 空格可能打错：对可疑词边界生成备选切分，按联合打分 - 空格信道代价与默认切分竞争
             for alt in self.space_edit_alternatives(&tokens, &opts) {
                 let (alt_slots, _) = self.build_sentence_slots(&alt, &opts);
+                let alt_slots = scale_slot_lex(alt_slots, lex_scale);
                 for mut s in self.ngram.decode_lattice(&self.context.before, &alt_slots, max) {
-                    s.score -= SPACE_EDIT_PENALTY;
+                    s.score -= p.space_edits.penalty;
                     sentences.push(s);
                 }
             }
@@ -1086,7 +1202,9 @@ where
                     trailing_space: self.config.smart_spacing,
                 });
             }
-            self.insert_verbatim_sentence(&tokens, sentence_start, total_chars);
+            if p.verbatim.enabled {
+                self.insert_verbatim_sentence(&tokens, sentence_start, total_chars);
+            }
 
             // 同时保留首个词条的部分选词候选，便于用户只确认句首词
             let (_, _, first_end) = &tokens[0];
@@ -1107,7 +1225,7 @@ where
                     text,
                     kind: hit.kind.into(),
                     comment: Some("partial".into()),
-                    score: hit.score - 1.0,
+                    score: hit.score - p.partial.penalty,
                     consumed_chars: *first_end,
                     trailing_space: false,
                 });
@@ -1122,7 +1240,7 @@ where
     /// Why：L1 会把词典外新词（`ChatGPT`、`UBI`）就近纠成词典词，L2 词格因此永远解码不出原句；
     /// 末位 Raw 兜底又会被 L3 调度按 `CandidateKind::Raw` 过滤掉。若原样句不在 L3 的前
     /// `max_rerank_candidates` 条整句候选里，纠错 L3 就只能在错误改写之间挑选，无法选择"照抄"。
-    /// 因此它以 `Sentence` 类型、介于相邻候选之间的分数插在第 `VERBATIM_SLOT` 位：不抢 top-1，
+    /// 因此它以 `Sentence` 类型、介于相邻候选之间的分数插在第 `verbatim.slot` 位：不抢 top-1，
     /// L3 的加性重排分数足以在模型确信原句时把它提到首位；仅当 `verbatim_should_lead` 成立时领先。
     fn insert_verbatim_sentence(
         &mut self,
@@ -1140,8 +1258,9 @@ where
         } else {
             joined
         };
+        let vp = self.profile().verbatim;
         let promote = self.verbatim_should_lead(tokens);
-        let slot = if promote { 0 } else { VERBATIM_SLOT };
+        let slot = if promote { 0 } else { vp.slot };
 
         // 此时候选全部是整句候选（部分选词稍后追加），按分数降序。
         let existing = self
@@ -1159,11 +1278,11 @@ where
         let score = if n == 0 {
             0.0
         } else if pos == 0 {
-            self.candidates[0].score + VERBATIM_LEAD_MARGIN
+            self.candidates[0].score + vp.lead_margin
         } else if pos < n {
             0.5 * (self.candidates[pos - 1].score + self.candidates[pos].score)
         } else {
-            self.candidates[n - 1].score - VERBATIM_LEAD_MARGIN
+            self.candidates[n - 1].score - vp.lead_margin
         };
         self.candidates.insert(
             pos,
@@ -1200,11 +1319,8 @@ where
         if let Some(&cached) = self.verbatim_lead_cache.get(tok) {
             return cached;
         }
-        let opts = QueryOptions {
-            limit: self.config.max_candidates,
-            enable_phonetic: self.config.enable_phonetic,
-            ..QueryOptions::default()
-        };
+        let opts = self.query_options();
+        let near_edit_cost = self.profile().verbatim.near_edit_cost;
         let leads = if self.exact_log_freq(word, &opts).is_some() {
             false
         } else if word
@@ -1223,7 +1339,7 @@ where
             let near: Vec<String> = self
                 .query_lexicon_cached(tok, &opts)
                 .iter()
-                .filter(|h| h.edit_cost <= VERBATIM_NEAR_EDIT_COST)
+                .filter(|h| h.edit_cost <= near_edit_cost)
                 .map(|h| h.word.to_ascii_lowercase())
                 .collect();
             !near.iter().any(|low| {
@@ -1287,13 +1403,17 @@ fn append_context_before(before: &mut String, committed: &str, trailing_space: b
     }
 }
 
-/// 原样句在整句候选中的默认位置（0 基）：紧跟 top-1 之后。不抢 top-1，但给 L3 的先验最强：
-/// 评测中第 1 / 2 / 4 位对 L1+L2 Top-1 完全相同，而通用 SmolLM2 重排下第 1 位的新词句 Top-1 最高、噪声标签逐行不变。
-const VERBATIM_SLOT: usize = 1;
-/// 原样句领先或垫底时与相邻候选的分差：只决定次序，远小于 L3 重排的加性分数（±4.5 量级）。
-const VERBATIM_LEAD_MARGIN: f32 = 0.01;
-/// 判定"驼峰词错拼"的近邻编辑代价上限，与 `should_expand_runon_token` 的单步纠错门槛一致。
-const VERBATIM_NEAR_EDIT_COST: f32 = 1.25;
+/// 送入词格前按 profile 缩放槽位词法分；默认 1.0 时原样返回，不做任何浮点运算。
+fn scale_slot_lex(mut slots: Vec<LatticeSlot>, scale: f32) -> Vec<LatticeSlot> {
+    if scale != 1.0 {
+        for slot in &mut slots {
+            for c in &mut slot.candidates {
+                c.lex_score *= scale;
+            }
+        }
+    }
+    slots
+}
 
 fn context_starts_sentence(before: &str) -> bool {
     if before.is_empty() {
@@ -1387,7 +1507,12 @@ fn format_sentence_proper_nouns(sentence: &str) -> String {
 /// - 否则若存在极低编辑代价的单键邻键纠错（`edit_cost <= 0.65`，如 `agrain->again`），
 ///   或未闭合词尾存在高频前缀补全（如 `internat->international`、`considera->consideration`），
 ///   优先保留单词纠错/补全，不在整句词格中强行拆碎。
-fn should_expand_runon_token(tok: &str, is_closed_word: bool, hits: &[LexiconCandidate]) -> bool {
+fn should_expand_runon_token(
+    tok: &str,
+    is_closed_word: bool,
+    hits: &[LexiconCandidate],
+    runon: &RunonProfile,
+) -> bool {
     if hits.iter().any(|h| h.kind == LexiconMatchKind::Exact) {
         return false;
     }
@@ -1411,17 +1536,17 @@ fn should_expand_runon_token(tok: &str, is_closed_word: bool, hits: &[LexiconCan
     // - 若词长 < 7（非 witha 类），只要词典能召回任何单字纠错/补全，均不拆分以守住短词延迟与准确率。
     if hits
         .iter()
-        .any(|h| h.kind == LexiconMatchKind::TypoCorrection && h.edit_cost <= 1.25)
+        .any(|h| h.kind == LexiconMatchKind::TypoCorrection && h.edit_cost <= runon.block_typo_edit_cost)
     {
         return false;
     }
-    if tok.len() < 7 && !hits.is_empty() {
+    if tok.len() < runon.min_forced_len && !hits.is_empty() {
         return false;
     }
     if !is_closed_word
         && hits
             .iter()
-            .any(|h| h.kind == LexiconMatchKind::Completion && h.log_freq >= -5.5)
+            .any(|h| h.kind == LexiconMatchKind::Completion && h.log_freq >= runon.block_completion_log_freq)
     {
         return false;
     }
@@ -2536,5 +2661,82 @@ mod tests {
         sess.reset_with_seq(40);
         sess.set_context("fill out the ", "");
         assert_eq!(feed_text(&mut sess, "from").candidates[0].text, "form");
+    }
+
+    fn fast_vast_session() -> EngineSession<Lexicon, NgramLanguageModel, NoopNeuralModel> {
+        let lex = Lexicon::from_word_zipfs(
+            vec![("fast", 5.1), ("vast", 4.5), ("type", 5.0), ("to", 7.4)],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![("fast", 120), ("vast", 25), ("type", 110), ("to", 1500)],
+            vec![("to", "type", 40), ("type", "fast", 2), ("type", "vast", 2)],
+            vec![("to", "type", "vast", 2)],
+        );
+        EngineSession::new(lex, lm, NoopNeuralModel)
+    }
+
+    #[test]
+    fn default_profiles_match_baseline_for_both_modes() {
+        let mut sess = make_session();
+        assert_eq!(*sess.profiles(), ModeProfiles::default());
+        assert_eq!(*sess.profile(), SENTENCE_PROFILE);
+        sess.set_config(EngineConfig {
+            space_commits: true,
+            ..EngineConfig::default()
+        });
+        assert_eq!(*sess.profile(), WORD_PROFILE);
+        assert_eq!(WORD_PROFILE, BASELINE_PROFILE);
+        assert_eq!(SENTENCE_PROFILE, BASELINE_PROFILE);
+    }
+
+    #[test]
+    fn space_commits_switches_profile_immediately() {
+        // 只放开单词模式的邻键下限：整句模式保持 3.0，fast 留在首位；切到单词模式后同一预编辑立即重算，vast 翻盘。
+        let mut sess = fast_vast_session();
+        let mut profiles = ModeProfiles::default();
+        profiles.word.confusables.adjacent_key_single_token_min_penalty = 0.0;
+        sess.set_profiles(profiles);
+        sess.set_context("to type ", "");
+        let st = feed_text(&mut sess, "fast");
+        assert_eq!(st.candidates[0].text, "fast", "{:?}", st.candidates);
+
+        sess.set_config(EngineConfig {
+            space_commits: true,
+            ..EngineConfig::default()
+        });
+        assert_eq!(sess.preedit(), "fast");
+        assert_eq!(sess.candidates()[0].text, "vast", "{:?}", sess.candidates());
+
+        sess.set_config(EngineConfig::default());
+        assert_eq!(sess.candidates()[0].text, "fast", "{:?}", sess.candidates());
+    }
+
+    #[test]
+    fn profile_offsets_and_l3_gate_take_effect() {
+        let mut sess = make_session();
+        sess.set_config(EngineConfig {
+            space_commits: true,
+            ..EngineConfig::default()
+        });
+        feed_text(&mut sess, "app");
+        let before: Vec<String> = sess.candidates().iter().map(|c| c.text.clone()).collect();
+        assert!(sess.wants_l3_rerank());
+
+        let mut profiles = ModeProfiles::default();
+        profiles.word.lexicon.completion_offset = -100.0;
+        profiles.word.l3.min_tokens = 2;
+        sess.set_profiles(profiles);
+        assert!(!sess.wants_l3_rerank(), "single token below word-mode min_tokens");
+        let completion = sess
+            .candidates()
+            .iter()
+            .find(|c| c.kind == CandidateKind::Completion)
+            .expect("completions still listed");
+        assert!(completion.score < -90.0, "{:?}", sess.candidates());
+
+        sess.set_profiles(ModeProfiles::default());
+        let after: Vec<String> = sess.candidates().iter().map(|c| c.text.clone()).collect();
+        assert_eq!(before, after);
     }
 }

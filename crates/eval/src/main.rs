@@ -21,7 +21,7 @@ use anime_lm_neural::{NeuralModelConfig, NeuralRuntimeInfo, NeuralSentenceModel,
 use anime_lm_ngram::{NgramLanguageModel, NgramModel, NoopNgramModel, UserStore};
 use cli::{OutputFormat, parse_args, usage_text};
 use gate::{evaluate_gates, parse_gate_spec};
-use metrics::{run_eval_with_neural};
+use metrics::{render_row_dump, run_eval_with_neural};
 use report::{render_json, render_markdown, render_text};
 use tsv::parse_tsv;
 
@@ -125,6 +125,13 @@ fn main() {
         return;
     }
 
+    if args.profile_overrides.iter().any(|o| o == "list") {
+        for (key, value) in anime_engine::BASELINE_PROFILE.fields() {
+            println!("{key} = {value}");
+        }
+        return;
+    }
+
     let mut gate_rules = Vec::new();
     for spec in &args.gates {
         match parse_gate_spec(spec, args.strict_gate) {
@@ -202,6 +209,21 @@ fn main() {
     // Eval 流程由 `run_eval_with_neural` 在同线程显式测算 L3 rerank 耗时并写入报告，
     // 因此 session 内置 `NoopNeuralModel` 不受 L3 调度影响，避免重复推理。
     let mut session = EngineSession::new(lex, ngram, NoopNeuralModel);
+    // `--mode` 只切换 space_commits：引擎据此选择对应模式的 ModeProfile，回放器据此决定空格语义
+    let mut engine_cfg = session.config().clone();
+    engine_cfg.space_commits = args.mode.space_commits();
+    session.set_config(engine_cfg);
+    if !args.profile_overrides.is_empty() {
+        let mut profiles = *session.profiles();
+        for spec in &args.profile_overrides {
+            if let Err(err) = profiles.apply_override(spec) {
+                eprintln!("invalid --profile override: {err}");
+                process::exit(1);
+            }
+        }
+        session.set_profiles(profiles);
+        eprintln!("profile overrides applied: {}", args.profile_overrides.join(", "));
+    }
     let neural_ref = loaded_neural
         .as_ref()
         .map(|(m, info)| (m.as_ref(), info));
@@ -221,6 +243,13 @@ fn main() {
         report.by_tag.clear();
     }
     report.show_interaction = args.interactive;
+
+    if let Some(ref dump_path) = args.dump_rows {
+        if let Err(err) = write_output_file(dump_path, &render_row_dump(&report)) {
+            eprintln!("{err}");
+            process::exit(1);
+        }
+    }
 
     if let Some(ref json_path) = args.json_out {
         let json_body = render_json(&report, gate_summary.as_ref(), args.show_failures);
@@ -261,7 +290,7 @@ mod tests {
     use anime_lm_neural::NoopNeuralModel;
     use anime_lm_ngram::NoopNgramModel;
 
-    use crate::cli::{OutputFormat, parse_args};
+    use crate::cli::{EvalMode, OutputFormat, parse_args};
     use crate::gate::{evaluate_gates, parse_gate_spec};
     use crate::metrics::{
         CategoryStats, EvalReport, SampleTiming, run_eval, run_eval_with_session,
@@ -281,6 +310,29 @@ mod tests {
                 score: -0.1,
             }]
         }
+    }
+
+    #[test]
+    fn word_mode_replay_commits_on_space_and_ranks_full_text() {
+        let rows = parse_tsv(
+            "sentence\t\twan to ea\twant to eat\tprefix commits\nsentence\t\twant to \twant to\ttrailing space\n",
+        )
+        .expect("inline tsv");
+        let mut session = EngineSession::new(
+            anime_lexicon::StaticWordList::smoke_default(),
+            NoopNgramModel,
+            NoopNeuralModel,
+        );
+        let mut cfg = session.config().clone();
+        cfg.space_commits = EvalMode::Word.space_commits();
+        session.set_config(cfg);
+        let report = run_eval_with_session("inline", &rows, &mut session);
+        assert_eq!(report.rows.len(), 2);
+        assert_eq!(report.rows[0].top5.first().map(String::as_str), Some("want to eat"));
+        assert_eq!(report.rows[0].ci_rank, Some(0));
+        assert_eq!(report.rows[1].ci_rank, Some(0), "{:?}", report.rows[1]);
+        let dump = crate::metrics::render_row_dump(&report);
+        assert_eq!(dump.lines().count(), 3);
     }
 
     #[test]
@@ -552,6 +604,7 @@ context_realword\tgo \tform here\tfrom here\tcontext
             l3_stats: None,
             by_tag: BTreeMap::new(),
             show_interaction: false,
+            rows: Vec::new(),
         };
 
         let p1_rules = parse_gate_spec("phase1", false).expect("phase1");
@@ -625,6 +678,12 @@ context_realword\tgo \tform here\tfrom here\tcontext
             "2.0",
             "--max-samples",
             "50",
+            "--mode",
+            "word",
+            "--dump-rows",
+            "/tmp/rows.tsv",
+            "--profile",
+            "word.space_edits.penalty=0.9",
         ])
         .expect("parse valid cli");
 
@@ -650,6 +709,12 @@ context_realword\tgo \tform here\tfrom here\tcontext
         assert_eq!(args.gpu_layers, 0);
         assert_eq!(args.rerank_weight, Some(2.0));
         assert_eq!(args.max_samples, Some(50));
+        assert_eq!(args.mode, EvalMode::Word);
+        assert!(args.mode.space_commits());
+        assert_eq!(args.dump_rows.as_deref(), Some("/tmp/rows.tsv"));
+        assert_eq!(args.profile_overrides, vec!["word.space_edits.penalty=0.9"]);
+        assert_eq!(parse_args(["x.tsv"]).expect("defaults").mode, EvalMode::Sentence);
+        assert!(parse_args(["--mode", "phrase"]).is_err());
 
         assert!(parse_args(["--format", "xml"]).is_err());
         assert!(parse_args(["--gpu-layers", "abc"]).is_err());
