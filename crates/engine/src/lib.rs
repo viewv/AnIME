@@ -791,7 +791,7 @@ where
         );
         if is_closed_word || p.confusables.open_token_neighbors {
             let neighbors = self.closed_neighbors_cached(tok);
-            let extra = if is_closed_word { 0.0 } else { p.confusables.open_token_neighbor_penalty };
+            let open = (!is_closed_word).then_some(p.confusables.open_token_neighbor_penalty);
             expand_closed_token_neighbors(
                 &neighbors,
                 tok,
@@ -799,7 +799,7 @@ where
                 &mut slot_cands,
                 &p.confusables,
                 anchor_bonus,
-                extra,
+                open,
             );
         }
         // 扩展易混词后按 lex_score 重排，防止高优 confusable 落到 MAX_CANDS_PER_SLOT 之外被截断
@@ -889,7 +889,7 @@ where
     /// - 多打空格：相邻两 token 合并后是词（`pr ice -> price`）；
     /// - 空格错位：边界左移 / 右移一个字符后两侧都是词（`wantt o -> want to`、`theatrey ou -> theatre you`）；
     /// - 漏打空格：非词 token 可被连打分词切开（`theone -> the one`）。
-    /// 只在至少一侧不是"可信词"时生成：可信词 = 收录且词频 >= `space_edits.rare_side_log_freq`。
+    /// 合并 / 错位只在至少一侧不是"可信词"时生成：可信词 = 收录且词频 >= `space_edits.rare_side_log_freq`。
     /// 两侧都是常见词的干净整句不产生任何备选，从结构上保证零误伤。
     /// `max_edits_per_alternative >= 2` 时再把两处互不重叠的编辑组合成一个备选（`th eatari ja guar`）。
     fn space_edit_alternatives(
@@ -938,23 +938,16 @@ where
             }
         }
         for (i, (t, st, en)) in tokens.iter().enumerate() {
-            // 非词、可信度不足的罕见收录词，或极罕见的粘连形（如 thankyou）才尝试拆分
+            // 只拆非词或极罕见的粘连形（thankyou）：收录词即使罕见（baseline、webpage）也多是用户有意的合成词
             let rare_exact = exact_lf[i].is_some_and(|lf| lf < p.runon.rare_exact_log_freq);
-            if solid[i] && !rare_exact {
+            if exact[i] && !rare_exact {
                 continue;
             }
             for (l, r) in self.two_way_splits(t, opts) {
-                // 收录 token 只在两段都比它常见时拆分（alot -> a lot），避免把罕见专业词拆成两个碎片
-                if let Some(tlf) = exact_lf[i].filter(|_| !rare_exact) {
-                    let more_common = |w: &str, me: &mut Self| me.exact_log_freq(w, opts).is_some_and(|lf| lf > tlf);
-                    if !(more_common(&l, self) && more_common(&r, self)) {
-                        continue;
-                    }
-                }
                 let mid = st + l.chars().count();
                 edits.push((i, 1, vec![(l, *st, mid), (r, mid, *en)]));
             }
-            if (exact[i] && !rare_exact) || t.chars().count() < 4 {
+            if t.chars().count() < 4 {
                 continue;
             }
             let hits = self.query_lexicon_cached(t, opts);
@@ -2348,15 +2341,68 @@ mod tests {
         let st = feed_text(&mut sess, "he said");
         assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "he said");
 
-        // 罕见但合法的原词（Zipf < 3）不展开真词近邻，即便 L2 偏好常见近邻 he
+        // 整句模式把罕见收录词（Zipf < 3）当作疑似错拼：展开近邻 he 由 L2 选中，原样输入仍留在候选里
+        sess.reset();
+        let st = feed_text(&mut sess, "hen said");
+        assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "he said");
+        assert!(st.candidates.iter().any(|c| c.text.to_ascii_lowercase() == "hen said"));
+        // 基准 profile（单词模式同值）下罕见原词不展开真词近邻，即便 L2 偏好常见近邻 he
+        sess.set_profiles(ModeProfiles { word: BASELINE_PROFILE, sentence: BASELINE_PROFILE });
         sess.reset();
         let st = feed_text(&mut sess, "hen said");
         assert_eq!(st.candidates[0].text.to_ascii_lowercase(), "hen said");
+        sess.set_profiles(ModeProfiles::default());
 
         // 正在输入的末尾 token 不走闭合近邻（单词模式前缀行为不变）
         sess.reset();
         let st = feed_text(&mut sess, "o");
         assert!(st.candidates.iter().all(|c| c.text.to_ascii_lowercase() != "to"));
+    }
+
+    #[test]
+    fn sentence_profile_recalls_rare_fragments_open_last_word_and_two_space_edits() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![
+                ("this", 7.0),
+                ("is", 7.2),
+                ("a", 7.4),
+                ("great", 6.0),
+                ("eat", 5.2),
+                ("gr", 4.0),
+                ("idea", 5.6),
+                ("train", 5.4),
+                ("users", 5.3),
+                ("and", 7.3),
+                ("the", 7.7),
+                ("new", 6.4),
+                ("model", 5.5),
+                ("works", 5.4),
+            ],
+            Vec::new(),
+        );
+        let lm = NgramLanguageModel::from_counts(
+            vec![("this", 900), ("is", 1300), ("a", 2000), ("great", 300), ("eat", 80), ("idea", 200),
+                 ("train", 100), ("users", 120), ("and", 1500), ("the", 3000), ("new", 300), ("model", 150),
+                 ("works", 120)],
+            vec![("this", "is", 400), ("is", "a", 500), ("a", "great", 200), ("great", "idea", 150),
+                 ("train", "users", 60), ("and", "train", 40), ("the", "new", 200), ("new", "model", 90),
+                 ("model", "works", 60)],
+            vec![("this", "is", "a", 300), ("is", "a", "great", 120), ("a", "great", "idea", 100),
+                 ("and", "train", "users", 30), ("the", "new", "model", 60), ("new", "model", "works", 40)],
+        );
+        let mut sess = EngineSession::new(lex, lm, NoopNeuralModel);
+        let top = |sess: &mut EngineSession<_, _, _>, s: &str| {
+            sess.reset();
+            feed_text(sess, s).candidates[0].text.to_ascii_lowercase()
+        };
+        // gr / eat 都收录，但 gr 罕见：仍生成合并备选
+        assert_eq!(top(&mut sess, "this is a gr eat idea"), "this is a great idea");
+        // 末尾未闭合的非词 token 也展开近邻（漏首字母 sers -> users）
+        assert_eq!(top(&mut sess, "and train sers"), "and train users");
+        // 一个备选叠加两处空格编辑
+        assert_eq!(top(&mut sess, "the ne wmodel wor ks"), "the new model works");
+        // 干净整句不变
+        assert_eq!(top(&mut sess, "this is a great idea"), "this is a great idea");
     }
 
     #[test]
@@ -2721,7 +2767,22 @@ mod tests {
         });
         assert_eq!(*sess.profile(), WORD_PROFILE);
         assert_eq!(WORD_PROFILE, BASELINE_PROFILE);
-        assert_eq!(SENTENCE_PROFILE, BASELINE_PROFILE);
+        // 整句模式只在召回相关字段上偏离基准（task-19），其余分组逐值相同
+        let s = SENTENCE_PROFILE;
+        assert_eq!(
+            (s.lexicon, s.l2, s.runon, s.lattice, s.verbatim, s.partial, s.l3),
+            (BASELINE_PROFILE.lexicon, BASELINE_PROFILE.l2, BASELINE_PROFILE.runon, BASELINE_PROFILE.lattice,
+             BASELINE_PROFILE.verbatim, BASELINE_PROFILE.partial, BASELINE_PROFILE.l3)
+        );
+        let neutral = ConfusableProfile {
+            rare_realword_log_freq: BASELINE_PROFILE.confusables.rare_realword_log_freq,
+            rare_realword_base_penalty: BASELINE_PROFILE.confusables.rare_realword_base_penalty,
+            open_token_neighbors: BASELINE_PROFILE.confusables.open_token_neighbors,
+            open_token_neighbor_penalty: BASELINE_PROFILE.confusables.open_token_neighbor_penalty,
+            ..s.confusables
+        };
+        assert_eq!(neutral, BASELINE_PROFILE.confusables);
+        assert_eq!(s.space_edits.penalty, BASELINE_PROFILE.space_edits.penalty);
     }
 
     #[test]

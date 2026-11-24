@@ -105,7 +105,7 @@ pub(crate) fn expand_closed_token_neighbors(
     cands: &mut Vec<SlotCandidate>,
     p: &ConfusableProfile,
     exact_anchor_bonus: f32,
-    extra_penalty: f32,
+    open_token: Option<f32>,
 ) {
     let slot_max = cands
         .iter()
@@ -118,6 +118,12 @@ pub(crate) fn expand_closed_token_neighbors(
     if raw_is_word && !rare_realword && raw_log_freq < p.realword_neighbor_min_raw_log_freq {
         return;
     }
+    // 末尾未闭合 token 只为非词与罕见收录词展开：常见真词末词（prices、methods）的近邻多是屈折变体，
+    // L2 难以区分单复数，展开只会把用户正确敲出的词改掉
+    if open_token.is_some() && raw_is_word && !rare_realword {
+        return;
+    }
+    let extra_penalty = open_token.unwrap_or(0.0);
     for nb in neighbors.iter().take(p.max_closed_neighbors) {
         if nb.word.eq_ignore_ascii_case(raw_token) {
             continue;

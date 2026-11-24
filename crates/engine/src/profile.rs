@@ -284,7 +284,7 @@ pub const WORD_PROFILE: ModeProfile = BASELINE_PROFILE;
 /// - 空格编辑门控把罕见收录碎片（`gr eat`、`us ing`）视为非词，并允许一个备选叠加两处空格编辑。
 pub const SENTENCE_PROFILE: ModeProfile = ModeProfile {
     confusables: ConfusableProfile {
-        rare_realword_log_freq: -5.5,
+        rare_realword_log_freq: -6.0,
         rare_realword_base_penalty: 1.5,
         open_token_neighbors: true,
         open_token_neighbor_penalty: 0.5,
