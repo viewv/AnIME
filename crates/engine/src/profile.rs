@@ -41,6 +41,9 @@ pub struct LexiconProfile {
     pub typo_offset: f32,
     /// 读音纠错偏移。
     pub phonetic_offset: f32,
+    /// L1 模糊召回额外穷举全部单次编辑（`QueryOptions::exhaustive_single_edit`）：词首附近的漏字 /
+    /// 错键不再因束宽剪枝而召回不到（`bateria -> bacteria`）。
+    pub exhaustive_single_edit: bool,
 }
 
 impl LexiconProfile {
@@ -192,6 +195,7 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
         completion_offset: 0.0,
         typo_offset: 0.0,
         phonetic_offset: 0.0,
+        exhaustive_single_edit: false,
     },
     l2: ContextLmProfile { context_weight: 1.0 },
     confusables: ConfusableProfile {
@@ -253,7 +257,16 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
 };
 
 /// 单词模式（`space_commits = true`）。单词模式调参轨道只改这里。
-pub const WORD_PROFILE: ModeProfile = BASELINE_PROFILE;
+///
+/// 单词模式每次只排一个 token，且空格直接上屏首选，所以召回缺口与排序错误都会直接变成错误上屏
+/// （task-18，`eval/benchmarks/word_ctx_v1.tsv`）。
+pub const WORD_PROFILE: ModeProfile = ModeProfile {
+    lexicon: LexiconProfile {
+        exhaustive_single_edit: true,
+        ..BASELINE_PROFILE.lexicon
+    },
+    ..BASELINE_PROFILE
+};
 
 /// 整句模式（`space_commits = false`）。整句召回轨道只改这里。
 pub const SENTENCE_PROFILE: ModeProfile = BASELINE_PROFILE;
@@ -382,6 +395,7 @@ profile_fields!(
     lexicon.completion_offset,
     lexicon.typo_offset,
     lexicon.phonetic_offset,
+    lexicon.exhaustive_single_edit,
     l2.context_weight,
     confusables.query_limit,
     confusables.lexicon_exact_bonus,
@@ -432,9 +446,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn both_modes_start_from_baseline() {
+    fn sentence_mode_stays_baseline() {
         let p = ModeProfiles::default();
-        assert_eq!(p.word, BASELINE_PROFILE);
+        assert_eq!(p.word, WORD_PROFILE);
         assert_eq!(p.sentence, BASELINE_PROFILE);
         assert_eq!(*p.for_space_commits(true), WORD_PROFILE);
         assert_eq!(*p.for_space_commits(false), SENTENCE_PROFILE);

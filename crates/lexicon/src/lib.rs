@@ -61,6 +61,8 @@ pub struct QueryOptions {
     pub limit: usize,
     pub enable_phonetic: bool,
     pub max_edit_cost: f32,
+    /// 模糊召回额外穷举全部单次编辑（见 `CompactTrie::single_edit_nodes`），不再受束宽限制。
+    pub exhaustive_single_edit: bool,
 }
 
 impl Default for QueryOptions {
@@ -69,6 +71,7 @@ impl Default for QueryOptions {
             limit: 9,
             enable_phonetic: true,
             max_edit_cost: 2.5,
+            exhaustive_single_edit: false,
         }
     }
 }

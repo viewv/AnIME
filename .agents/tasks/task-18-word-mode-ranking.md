@@ -57,6 +57,18 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
 - None
 
 ## Handoff / Evidence (由执行 Agent 填写后退出)
-- Status: [IN PROGRESS]
-- Changed Files:
-- Verification Output:
+- Status: [IN PROGRESS — 用量上限中断，WIP 已提交；尚未跑完整门禁]
+- 已完成：
+  - `scripts/data_pipeline/build_word_ctx_eval.py` + `eval/benchmarks/word_ctx_v1.tsv`（2300 行：prefix 300、typo_simple 500（omit_early / omit / adjacent / insert / transpose 各 100）、typo_prefix 300、typo_phonetic 300、context_realword 300、negative:clean 400、negative:novel 200；oasst 留出 60% / arXiv 留出 40%）。标签只用已有命名空间（`source:*`、`negative:*`），无需改契约。
+  - L1：`CompactTrie::single_edit_nodes` / `single_edit_search` 穷举单次编辑，`QueryOptions::exhaustive_single_edit` 门控；`LexiconProfile.exhaustive_single_edit`，仅 `WORD_PROFILE = true`（整句模式不变）。`bateria -> bacteria` 无上文时 Top-1（有 `the` 上文时 L2 偏向 material，排第 5）。
+  - `cargo test -p anime-lexicon -p anime-engine` 通过。
+- 基线（--mode word，L1+L2，de-leaked ngram）word_ctx_v1 top1：TOTAL 71.4、exact 79.3（negative:clean 99.2、negative:novel 39.5）、prefix 80.3、typo_simple 88.4（omit early 78.2）、typo_prefix 62.3（omit early 46.2）、typo_phonetic 88.0、context_realword 11.0。core_v2 word TOTAL 80.7。
+- 穷举单编辑后：word_ctx typo_simple 89.0、typo_prefix 63.3、TOTAL 71.7；core_v2 不变 80.7；key p99 约 0.5→0.7 ms。
+- 待办（按收益）：
+  1. **反例复核**：negative:novel 中约 15 行是源句错拼（enlightnement、pople、inteligence、explaination、metioned、relativly、hawe 等），须写入 `eval/review/negative_review.tsv` 并重新生成；negative:clean 3 行失误待裁决。
+  2. **新词保护**：单词模式单 token 路径对 `token_signals_cased_intent` 成立的 token 让原样领先（ChatGPT、LLM、JSON、NumPy 约占 novel 失误一半）；小写新词可把原样放到第 2 位（需权衡 typo top3）。
+  3. **排序**：短的高频读音 / 纠错候选压过合法前缀补全（easie->is、affe->of、towa->to）。网格（--profile）：phonetic_offset=-0.5 → core_v2 82.0 / word_ctx 72.0；completion_offset=0.5 → typo_prefix +2.7 / +6.0；context_weight 1.3 → context_realword 19.0 但 prefix -2.6。query_limit 16/24 无益。
+  4. 短词漏字仍召回不到（paer、usae、loing、appes）：L1 截断（opts.limit）前词频主导，需按编辑类型调整代价或扩大召回后再截断。
+  5. 收尾：`--mode sentence` 在 ood_dev_v1 / noise_v2 逐行 diff、延迟门禁、Wilson CI（脚本见会话笔记）、`make check && make test && make eval && make verify-infra && verify-boundaries`、ROADMAP。
+- Changed Files: `crates/lexicon/src/{trie.rs,lib.rs,lexicon.rs}`、`crates/engine/src/{profile.rs,lib.rs}`、`scripts/data_pipeline/build_word_ctx_eval.py`、`eval/benchmarks/word_ctx_v1.tsv`、本任务单。
+- Verification Output: 仅 lexicon / engine 单测通过；完整门禁未跑。

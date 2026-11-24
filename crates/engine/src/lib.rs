@@ -128,6 +128,7 @@ where
             limit: p.lexicon.query_limit.unwrap_or(self.config.max_candidates),
             enable_phonetic: self.config.enable_phonetic,
             max_edit_cost: p.lexicon.max_edit_cost,
+            exhaustive_single_edit: p.lexicon.exhaustive_single_edit,
         }
     }
 
@@ -845,6 +846,7 @@ where
             limit: 3,
             enable_phonetic: false,
             max_edit_cost: 0.0,
+            exhaustive_single_edit: false,
         };
         let lf = self
             .lexicon
@@ -1335,6 +1337,7 @@ where
                 limit: 3,
                 enable_phonetic: false,
                 max_edit_cost: 0.0,
+                exhaustive_single_edit: false,
             };
             let near: Vec<String> = self
                 .query_lexicon_cached(tok, &opts)
@@ -2677,7 +2680,7 @@ mod tests {
     }
 
     #[test]
-    fn default_profiles_match_baseline_for_both_modes() {
+    fn default_profiles_select_per_mode_and_sentence_stays_baseline() {
         let mut sess = make_session();
         assert_eq!(*sess.profiles(), ModeProfiles::default());
         assert_eq!(*sess.profile(), SENTENCE_PROFILE);
@@ -2686,7 +2689,7 @@ mod tests {
             ..EngineConfig::default()
         });
         assert_eq!(*sess.profile(), WORD_PROFILE);
-        assert_eq!(WORD_PROFILE, BASELINE_PROFILE);
+        // 单词模式轨道（task-18）只改 WORD_PROFILE；整句模式保持基准
         assert_eq!(SENTENCE_PROFILE, BASELINE_PROFILE);
     }
 

@@ -514,6 +514,116 @@ impl CompactTrie {
 
         (terminal_hits, completion_hits)
     }
+
+    /// 穷举单次编辑（漏打 / 多打 / QWERTY 替换 / 相邻换位）的确定性 Trie 遍历，返回 `(终点节点, 代价)`。
+    ///
+    /// Why：束搜索按"子树最高词频 - λ·代价"剪枝，打分里不含尚未消费的输入，所以词首附近的漏字
+    /// （`bateria` 中 `ba_teria` 漏 c、`paer` 漏 p）在第 2–3 层就被一批零代价 / 低代价的高频前缀挤出束宽，
+    /// 后面的字母即使全部吻合也救不回来；同样的漏字在词尾（`bacteia`）却能命中。单次编辑的候选空间只有
+    /// O(26·n)，沿精确前缀路径逐位分叉、只走真实存在的子边，开销是常数级的微秒量级，因此直接穷举，
+    /// 让"只差一次编辑"的词不再取决于束宽。终点节点既可以是完整词（纠错），也可以是前缀（错拼后补全）。
+    pub fn single_edit_nodes(&self, query_lower: &str, allow_leading_omission: bool) -> Vec<(u32, f32)> {
+        let q = query_lower.as_bytes();
+        let n = q.len();
+        let mut out: Vec<(u32, f32)> = Vec::new();
+        if n == 0 {
+            return out;
+        }
+        let walk = |mut node: u32, rest: &[u8]| -> Option<u32> {
+            for &b in rest {
+                node = self.child(node, b)?;
+            }
+            Some(node)
+        };
+        let mut node = 0u32;
+        for p in 0..=n {
+            let prev_target = (p > 0).then(|| q[p - 1]);
+            // 漏打：目标词在第 p 位多一个字母 ch（漏打首字母只对长词放开，与束搜索一致）
+            if p < n && (p > 0 || allow_leading_omission) {
+                for &(ch, child) in self.node_edges(node) {
+                    if ch == b'\'' {
+                        continue;
+                    }
+                    if let Some(end) = walk(child, &q[p..]) {
+                        out.push((end, deletion_cost(ch, prev_target)));
+                    }
+                }
+            }
+            if p == n {
+                break;
+            }
+            // 多打：跳过输入第 p 个字符
+            if n >= 2 {
+                if let Some(end) = walk(node, &q[p + 1..]) {
+                    out.push((end, insertion_cost(q[p], prev_target, q.get(p + 1).copied())));
+                }
+            }
+            // QWERTY 加权替换
+            for &(ch, child) in self.node_edges(node) {
+                if ch == q[p] || ch == b'\'' {
+                    continue;
+                }
+                if let Some(end) = walk(child, &q[p + 1..]) {
+                    out.push((end, substitution_cost(q[p], ch)));
+                }
+            }
+            // 相邻换位
+            if p + 1 < n && q[p] != q[p + 1] {
+                if let Some(end) = walk(node, &[q[p + 1], q[p]]).and_then(|m| walk(m, &q[p + 2..])) {
+                    out.push((end, TRANSPOSITION_COST));
+                }
+            }
+            match self.child(node, q[p]) {
+                Some(next) => node = next,
+                None => break,
+            }
+        }
+        out.sort_unstable_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.total_cmp(&b.1)));
+        out.dedup_by(|b, a| a.0 == b.0);
+        out
+    }
+
+    /// `single_edit_nodes` 的终点按"完整词命中 + 前缀补全"拆分为两组命中，与 `fuzzy_search` 返回形状相同。
+    /// 补全只对 A* 上界最高的前 `MAX_COMPLETION_BEAM_NODES` 个前缀节点展开，且代价不超过模糊补全上限。
+    pub fn single_edit_search(
+        &self,
+        query_lower: &str,
+        max_edit_cost: f32,
+        completion_per_node: usize,
+        allow_leading_omission: bool,
+    ) -> (Vec<TrieFuzzyHit>, Vec<TrieFuzzyHit>) {
+        let mut ends = self.single_edit_nodes(query_lower, allow_leading_omission);
+        ends.retain(|&(_, c)| c <= max_edit_cost);
+        let mut terminal = Vec::new();
+        for &(node_id, cost) in &ends {
+            if let Some(word_id) = self.node_word_id(node_id) {
+                terminal.push(TrieFuzzyHit {
+                    word_id,
+                    edit_cost: cost,
+                    extra_chars: 0,
+                });
+            }
+        }
+        let mut completion = Vec::new();
+        if completion_per_node > 0 && query_lower.len() >= 4 {
+            ends.retain(|&(_, c)| c <= MAX_FUZZY_COMPLETION_COST);
+            ends.sort_unstable_by(|&(ia, ca), &(ib, cb)| {
+                let sa = self.nodes[ia as usize].max_subtree_log_freq - BEAM_EDIT_LAMBDA * ca;
+                let sb = self.nodes[ib as usize].max_subtree_log_freq - BEAM_EDIT_LAMBDA * cb;
+                sb.total_cmp(&sa)
+            });
+            for &(node_id, cost) in ends.iter().take(MAX_COMPLETION_BEAM_NODES) {
+                for (word_id, extra_chars) in self.complete_prefix(node_id, completion_per_node) {
+                    completion.push(TrieFuzzyHit {
+                        word_id,
+                        edit_cost: cost,
+                        extra_chars,
+                    });
+                }
+            }
+        }
+        (terminal, completion)
+    }
 }
 
 fn dedup_beam_layer(layer: &mut Vec<(u32, BeamEntry)>) {
