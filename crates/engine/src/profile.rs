@@ -116,6 +116,10 @@ pub struct SpaceEditProfile {
     pub rare_side_log_freq: f32,
     /// 单个备选切分最多叠加几处互不重叠的空格编辑（每处各扣一次 `penalty`）。
     pub max_edits_per_alternative: usize,
+    /// 每次按键备选切分的总 token 数预算（每个备选都要整句重新解码一次，耗时约与 token 数成正比）：
+    /// 长句（十几个 token、多处可疑边界）超出预算后不再追加备选，单处编辑排在组合编辑之前优先保留，
+    /// 守住单键 max <= 16 ms 的同步路径延迟预算。
+    pub max_alternative_tokens: usize,
 }
 
 /// 无空格连打（`iwanttogo`、`thankyou`）的切分门槛与连打候选分。
@@ -237,6 +241,7 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
         max_two_way_splits: 2,
         rare_side_log_freq: f32::NEG_INFINITY,
         max_edits_per_alternative: 1,
+        max_alternative_tokens: usize::MAX,
     },
     runon: RunonProfile {
         part_min_log_freq: -5.0,
@@ -294,6 +299,7 @@ pub const SENTENCE_PROFILE: ModeProfile = ModeProfile {
         rare_side_log_freq: -4.5,
         max_edits_per_alternative: 2,
         max_alternatives: 12,
+        max_alternative_tokens: 56,
         ..BASELINE_PROFILE.space_edits
     },
     ..BASELINE_PROFILE
@@ -449,6 +455,7 @@ profile_fields!(
     space_edits.max_two_way_splits,
     space_edits.rare_side_log_freq,
     space_edits.max_edits_per_alternative,
+    space_edits.max_alternative_tokens,
     runon.part_min_log_freq,
     runon.short_part_min_log_freq,
     runon.rare_exact_log_freq,

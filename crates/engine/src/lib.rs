@@ -985,6 +985,14 @@ where
             }
         }
         alts.truncate(p.space_edits.max_alternatives);
+        let mut budget = p.space_edits.max_alternative_tokens;
+        alts.retain(|(alt, _)| {
+            let fits = alt.len() <= budget;
+            if fits {
+                budget -= alt.len();
+            }
+            fits
+        });
         alts
     }
 
