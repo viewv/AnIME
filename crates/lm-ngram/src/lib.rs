@@ -543,4 +543,57 @@ mod tests {
         // 2. 高频前缀 "the" 后未见二元 "from" 封顶压低，确保已见 ("the", "form") 在上下文得分显著胜出
         assert!(lm.score_in_context("the ", "form") > lm.score_in_context("the ", "from") + 1.4);
     }
+
+    #[test]
+    fn beam_prefix_cache_matches_fresh_decode_and_invalidates_on_learning() {
+        let build = || {
+            NgramLanguageModel::from_counts(
+                vec![("i", 900), ("want", 400), ("to", 1500), ("too", 300), ("go", 300), ("home", 200),
+                     ("now", 150), ("know", 120)],
+                vec![("i", "want", 300), ("want", "to", 280), ("to", "go", 200), ("go", "home", 120),
+                     ("go", "now", 30)],
+                vec![("i", "want", "to", 200), ("want", "to", "go", 150), ("to", "go", "home", 90)],
+            )
+        };
+        let slot = |raw: &str, cands: &[(&str, f32)]| LatticeSlot {
+            raw_token: raw.into(),
+            start_char: 0,
+            end_char: 0,
+            candidates: cands.iter().map(|(w, s)| SlotCandidate { word: (*w).into(), lex_score: *s }).collect(),
+        };
+        let prefix = vec![
+            slot("i", &[("i", 5.0)]),
+            slot("want", &[("want", 4.0), ("wane", 1.0)]),
+            slot("to", &[("to", 4.5), ("too", 3.8)]),
+            slot("go", &[("go", 4.0)]),
+        ];
+        let mut a = prefix.clone();
+        a.push(slot("home", &[("home", 3.0), ("hone", 0.5)]));
+        let mut b = prefix.clone();
+        b.push(slot("now", &[("now", 3.0), ("know", 2.6)]));
+        let mut c = prefix.clone();
+        c[2] = slot("too", &[("too", 4.5), ("to", 3.8)]);
+        c.push(slot("home", &[("home", 3.0)]));
+
+        // 同一模型连续解码共享前缀的词格（命中缓存）与每次新建模型从头解码逐位一致
+        let cached = build();
+        for lat in [&a, &b, &a, &c, &prefix, &b] {
+            for ctx in ["", "so "] {
+                assert_eq!(cached.decode_lattice(ctx, lat, 5), build().decode_lattice(ctx, lat, 5));
+            }
+        }
+
+        // 学习后旧束失效：缓存模型与同样学习过的新模型结果一致
+        let before = cached.decode_lattice("", &b, 5);
+        let fresh = build();
+        for lm in [&cached, &fresh] {
+            for _ in 0..30 {
+                lm.learn_commit("", "i want too go now", false);
+            }
+        }
+        for lat in [&a, &b, &c] {
+            assert_eq!(cached.decode_lattice("", lat, 5), fresh.decode_lattice("", lat, 5));
+        }
+        assert_ne!(cached.decode_lattice("", &b, 5), before, "learning must change the decode");
+    }
 }

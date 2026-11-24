@@ -11,6 +11,7 @@ use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{RwLock, mpsc};
 use std::thread::{self, JoinHandle};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -108,6 +109,8 @@ impl Drop for WriterHandle {
 pub struct UserStore {
     memory: RwLock<UserMemory>,
     writer: Option<WriterHandle>,
+    /// 每次学习写入内存后递增：词格前缀束缓存以它为键的一部分，学习后旧束自动失效。
+    generation: AtomicU64,
 }
 
 impl std::fmt::Debug for UserStore {
@@ -136,6 +139,7 @@ impl UserStore {
         Self {
             memory: RwLock::new(UserMemory::default()),
             writer: None,
+            generation: AtomicU64::new(0),
         }
     }
 
@@ -154,6 +158,7 @@ impl UserStore {
         Ok(Self {
             memory: RwLock::new(memory),
             writer: Some(writer),
+            generation: AtomicU64::new(0),
         })
     }
 
@@ -257,6 +262,11 @@ impl UserStore {
         out
     }
 
+    /// 个人学习内存的版本号（每次 `record_commit` 写入后递增）。
+    pub fn generation(&self) -> u64 {
+        self.generation.load(Ordering::Acquire)
+    }
+
     /// 记录一次真实上屏学习：当 `privacy == true` 时绝不修改内存或磁盘 `user.db`。
     pub fn record_commit(&self, context_before: &str, committed_text: &str, privacy: bool) {
         if privacy {
@@ -310,6 +320,8 @@ impl UserStore {
 
                 prev_lower = Some(lower);
             }
+            // 持写锁递增：先读到新版本号的解码一定读到写入后的内存
+            self.generation.fetch_add(1, Ordering::AcqRel);
         }
 
         if let Some(writer) = &self.writer {
