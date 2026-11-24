@@ -341,8 +341,10 @@ where
 
         let mut primary: Vec<Candidate> = Vec::with_capacity(self.candidates.len());
         let mut partial: Vec<Candidate> = Vec::new();
+        // 只丢弃末位 Raw 兜底（由 ensure_raw_and_limit 重建）；单 token 原样候选（`place_single_token_verbatim`，
+        // comment = verbatim）是主候选，按自身分数参与合并——只有续写的帧不改主候选分数，它保持原位次。
         for mut c in self.candidates.drain(..) {
-            if c.kind == CandidateKind::Raw && c.consumed_chars == total_chars {
+            if c.kind == CandidateKind::Raw && c.consumed_chars == total_chars && !is_verbatim_raw(&c) {
                 continue;
             }
             if c.consumed_chars < total_chars {
@@ -1407,7 +1409,7 @@ where
             Candidate {
                 text: tok.to_string(),
                 kind: CandidateKind::Raw,
-                comment: Some("verbatim".into()),
+                comment: Some(VERBATIM_COMMENT.into()),
                 score,
                 consumed_chars: total_chars,
                 trailing_space: self.config.smart_spacing,
@@ -1472,6 +1474,13 @@ fn penalize_shorter_corrections(
     }
     hits.sort_by(|a, b| b.score.total_cmp(&a.score));
     hits
+}
+
+const VERBATIM_COMMENT: &str = "verbatim";
+
+/// 原样候选（单 token 原样领先）与末位 Raw 兜底同为 `CandidateKind::Raw`，以 comment 区分。
+fn is_verbatim_raw(c: &Candidate) -> bool {
+    c.kind == CandidateKind::Raw && c.comment.as_deref() == Some(VERBATIM_COMMENT)
 }
 
 fn append_context_before(before: &mut String, committed: &str, trailing_space: bool) {
@@ -2871,5 +2880,42 @@ mod tests {
         sess.set_profiles(profiles);
         let texts: Vec<String> = sess.candidates().iter().map(|c| c.text.clone()).collect();
         assert!(texts.iter().any(|t| t == "is"), "{texts:?}");
+    }
+
+    #[test]
+    fn verbatim_lead_survives_async_l3_continuation_frame() {
+        let lex = Lexicon::from_word_zipfs(
+            vec![("chapters", 4.6), ("chapter", 4.9), ("chatting", 4.0)],
+            Vec::new(),
+        );
+        let mut sess = EngineSession::new(lex, NoopNgramModel, NoopNeuralModel);
+        word_mode(&mut sess, true);
+        let rev0 = feed_text(&mut sess, "ChatGPT");
+        assert_eq!(rev0.candidates[0].text, "ChatGPT");
+        assert_eq!(rev0.candidates[0].comment.as_deref(), Some("verbatim"));
+        // 单词模式 L3 不对单 token 做纠错重排，只回续写：revision 1 不得丢掉原样领先
+        let cont = NeuralCandidate {
+            text: "is great".into(),
+            score: 1.0,
+            is_continuation: true,
+        };
+        let rev1 = sess
+            .apply_neural_rerank(sess.seq(), &[], std::slice::from_ref(&cont))
+            .expect("fresh seq");
+        assert_eq!(rev1.revision, rev0.revision + 1);
+        assert_eq!(rev1.candidates[0].text, "ChatGPT", "{:?}", rev1.candidates);
+        assert!(rev1.candidates.iter().any(|c| c.text == "is great"));
+        assert_eq!(
+            rev1.candidates.iter().filter(|c| c.text == "ChatGPT").count(),
+            1,
+            "verbatim lead and raw fallback must not duplicate"
+        );
+        // 末位 Raw 兜底仍按原规则丢弃后重建（纯小写错拼无原样领先）
+        sess.reset();
+        let rev0 = feed_text(&mut sess, "chapterz");
+        assert_ne!(rev0.candidates[0].text, "chapterz");
+        let rev1 = sess.apply_neural_rerank(sess.seq(), &[], &[]).expect("fresh seq");
+        assert_eq!(rev1.candidates[0].text, rev0.candidates[0].text);
+        assert_eq!(rev1.candidates.last().map(|c| c.text.as_str()), Some("chapterz"));
     }
 }
