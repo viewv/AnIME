@@ -41,6 +41,12 @@ pub struct LexiconProfile {
     pub typo_offset: f32,
     /// 读音纠错偏移。
     pub phonetic_offset: f32,
+    /// L1 模糊召回额外穷举全部单次编辑（`QueryOptions::exhaustive_single_edit`）：词首附近的漏字 /
+    /// 错键不再因束宽剪枝而召回不到（`bateria -> bacteria`）。
+    pub exhaustive_single_edit: bool,
+    /// 单 token 路径：输入本身是词典词的严格前缀（存在零代价补全）时，比输入更短的拼写 / 读音纠错额外扣分。
+    /// 逐键输入时合法前缀几乎总是"还没打完"，而不是把短词打长了（`easie` 应补全为 easier，而非读音纠成 is）。
+    pub shorter_correction_penalty: f32,
 }
 
 impl LexiconProfile {
@@ -151,6 +157,11 @@ pub struct VerbatimProfile {
     pub lead_margin: f32,
     /// 判定"已知驼峰词错拼"的近邻编辑代价上限。
     pub near_edit_cost: f32,
+    /// 单 token 预编辑：带显式大小写意图的词典外 token（`ChatGPT`、`LLM`、`NumPy`，判定同整句原样句）
+    /// 原样领先。单词模式空格直接上屏首选，L1 的就近改写（`Chapters`、`LM`、`Bumpy`）会被直接写进文本。
+    pub single_token_lead: bool,
+    /// 单 token 预编辑且输入不是词典词时，原样输入至少排在第几位（0 基）；`None` 关闭（原样只在末位兜底）。
+    pub single_token_slot: Option<usize>,
 }
 
 /// 多词预编辑中首词的部分选词候选。
@@ -192,6 +203,8 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
         completion_offset: 0.0,
         typo_offset: 0.0,
         phonetic_offset: 0.0,
+        exhaustive_single_edit: false,
+        shorter_correction_penalty: 0.0,
     },
     l2: ContextLmProfile { context_weight: 1.0 },
     confusables: ConfusableProfile {
@@ -241,6 +254,8 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
         slot: 1,
         lead_margin: 0.01,
         near_edit_cost: 1.25,
+        single_token_lead: false,
+        single_token_slot: None,
     },
     partial: PartialProfile {
         first_word_hits: 2,
@@ -253,7 +268,24 @@ pub const BASELINE_PROFILE: ModeProfile = ModeProfile {
 };
 
 /// 单词模式（`space_commits = true`）。单词模式调参轨道只改这里。
-pub const WORD_PROFILE: ModeProfile = BASELINE_PROFILE;
+///
+/// 单词模式每次只排一个 token，且空格直接上屏首选，所以召回缺口与排序错误都会直接变成错误上屏
+/// （task-18，`eval/benchmarks/word_ctx_v1.tsv`）。
+pub const WORD_PROFILE: ModeProfile = ModeProfile {
+    lexicon: LexiconProfile {
+        exhaustive_single_edit: true,
+        // 单词模式最终靠 L2 单 token PMI 排序，读音纠错常把高频短词（is / of / to）抬上首位；
+        // 合法前缀输入再额外压制更短的纠错（task-18 网格：core_v2 单词级 +2.0）。
+        phonetic_offset: -0.5,
+        shorter_correction_penalty: 2.0,
+        ..BASELINE_PROFILE.lexicon
+    },
+    verbatim: VerbatimProfile {
+        single_token_lead: true,
+        ..BASELINE_PROFILE.verbatim
+    },
+    ..BASELINE_PROFILE
+};
 
 /// 整句模式（`space_commits = false`）。整句召回轨道只改这里。
 pub const SENTENCE_PROFILE: ModeProfile = BASELINE_PROFILE;
@@ -382,6 +414,8 @@ profile_fields!(
     lexicon.completion_offset,
     lexicon.typo_offset,
     lexicon.phonetic_offset,
+    lexicon.exhaustive_single_edit,
+    lexicon.shorter_correction_penalty,
     l2.context_weight,
     confusables.query_limit,
     confusables.lexicon_exact_bonus,
@@ -421,6 +455,8 @@ profile_fields!(
     verbatim.slot,
     verbatim.lead_margin,
     verbatim.near_edit_cost,
+    verbatim.single_token_lead,
+    verbatim.single_token_slot,
     partial.first_word_hits,
     partial.penalty,
     l3.enabled,
@@ -432,9 +468,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn both_modes_start_from_baseline() {
+    fn sentence_mode_stays_baseline() {
         let p = ModeProfiles::default();
-        assert_eq!(p.word, BASELINE_PROFILE);
+        assert_eq!(p.word, WORD_PROFILE);
         assert_eq!(p.sentence, BASELINE_PROFILE);
         assert_eq!(*p.for_space_commits(true), WORD_PROFILE);
         assert_eq!(*p.for_space_commits(false), SENTENCE_PROFILE);

@@ -83,6 +83,10 @@ python3 scripts/data_pipeline/build_eval_v3.py
 #    复核流程：导出候选 -> 用当前引擎评测 -> 只裁决被改动的句子 -> 写入裁决表 -> 重新生成，直到无未复核分歧
 python3 scripts/data_pipeline/build_eval_v3.py --emit-negative-candidates data/compiled/local/neg_candidates.tsv
 
+# 9b. 单词模式逐词上屏评测 word_ctx_v1（oasst 留出树 + arXiv 留出摘要，本身不进入 L2 训练，无需重建 L2）；
+#     反例复核同第 9 步，导出的候选 notes 列为源子句
+python3 scripts/data_pipeline/build_word_ctx_eval.py --emit-negative-candidates data/compiled/local/word_neg_candidates.tsv
+
 # 10. 本机回放自己的打字记录（context<TAB>typed<TAB>committed；只在本机，绝不入库/入训练，只输出聚合指标）
 python3 scripts/data_pipeline/replay_local_log.py ~/my_typing_log.tsv
 ```
