@@ -240,6 +240,7 @@ impl StaticNgramTable {
 pub struct NgramLanguageModel {
     static_table: Option<StaticNgramTable>,
     user_store: UserStore,
+    beam_cache: crate::viterbi::BeamPrefixCache,
 }
 
 impl Default for NgramLanguageModel {
@@ -253,6 +254,7 @@ impl NgramLanguageModel {
         Self {
             static_table: None,
             user_store: UserStore::in_memory(),
+            beam_cache: Default::default(),
         }
     }
 
@@ -260,6 +262,7 @@ impl NgramLanguageModel {
         Self {
             static_table: None,
             user_store,
+            beam_cache: Default::default(),
         }
     }
 
@@ -267,6 +270,7 @@ impl NgramLanguageModel {
         Self {
             static_table: Some(StaticNgramTable::from_data(data)),
             user_store,
+            beam_cache: Default::default(),
         }
     }
 
@@ -427,6 +431,10 @@ impl NgramLanguageModel {
 
     pub fn flush_user_db(&self) {
         self.user_store.flush();
+    }
+
+    pub(crate) fn beam_cache(&self) -> &crate::viterbi::BeamPrefixCache {
+        &self.beam_cache
     }
 
     pub(crate) fn static_table(&self) -> Option<&StaticNgramTable> {
