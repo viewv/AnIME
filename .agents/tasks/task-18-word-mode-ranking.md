@@ -110,3 +110,12 @@ acceptance_cmd: "make check && make test && make eval && make verify-infra && ./
   2. 短词漏字（`paer -> paper`、`usae`、`loing`）：L1 截断前由词频主导，需按编辑类型调代价或召回后再截断，会同时影响整句模式，宜单独任务。
   3. context_realword 11%：单词模式保守保留真词，与用户"不改正确词"的偏好一致，未调。
   4. `exhaustive_single_edit` 对整句模式召回可能同样有益，由整句召回轨道自行评估（只需改 `SENTENCE_PROFILE`）。
+- **补丁（合并 main fe85569 之后，L3 续写帧丢原样领先）**：
+  - 现象：live 守护进程 `enable_neural=true` + 单词模式敲 `ChatGPT`，rev 0 = [ChatGPT(Raw), …]，异步 L3 帧 rev 1 = [Chat, Chapters, Chapter, …]，原样领先消失。根因：`apply_neural_rerank` 丢弃所有 `consumed_chars == total_chars` 的 `CandidateKind::Raw`（原意是丢末位兜底再由 `ensure_raw_and_limit` 重建），而 `place_single_token_verbatim` 的领先候选也是 `Raw`。单词模式下纠错 L3 对单 token 返回空重排，但 animed 每帧都调用 `apply_neural_rerank`（含仅续写帧）。
+  - 修复（`crates/engine/src/lib.rs`）：原样候选以 `comment = "verbatim"`（`VERBATIM_COMMENT` / `is_verbatim_raw`）标记，`apply_neural_rerank` 只丢弃未标记的 Raw 兜底；原样候选与其他主候选一样按分数参与合并（不按位置特判）——只有续写的帧不改主候选分数，它保持首位；若 L3 真的给出重排分数，也按分数正常竞争。
+  - 单测 `verbatim_lead_survives_async_l3_continuation_frame`：单词模式 `ChatGPT` rev 0 首位为 verbatim Raw，喂入仅续写帧后 rev 1 仍首位、续写 `is great` 出现、`ChatGPT` 不重复；纯小写错拼 `chapterz` 的末位 Raw 兜底仍按原规则重建。**去掉修复后该测试失败**（已验证），加上后通过。
+  - 端到端（`animed --stdio --features vulkan --model anime-l3-360m-v2.Q4_K_M.gguf`，独立 `--data-dir`，二进制由 task-07 分支 67b0ed3 本地合并本补丁构建，未合并到任何分支）：上文 `I think `、`space_commits=true`、`enable_neural=true` 敲 `ChatGPT`——补丁前 rev 1 = [Chat, Chapters, Chapter, Chart]（复现），补丁后 rev 1 = [ChatGPT(Raw), Chat, Chapters, Chapter]。
+  - 评测（`--mode word`）：L1+L2 下 word_ctx_v1 / core_v2 逐行 dump 与 task-18 最终版**逐字节相同**（TOTAL 74.9 / 82.7）。`--model anime-l3-360m-v2.Q4_K_M.gguf`（Vulkan，task-07 本地合并构建）：补丁前后逐字节相同，且与 L1+L2 结果逐字节相同（word_ctx_v1 TOTAL 74.9 / top3 87.7 / negative:novel 69.0；core_v2 TOTAL 82.7 / top3 90.6）；L3 调用 2139 / 199 次、p50 0 µs——纠错 L3 对单 token 直接返回空重排。单键延迟 p99 <= 0.62 ms；一次 max 14.8 ms（core_v2 补丁前二进制，sentence 类），均 <= 16 ms。
+  - **评测口径缺口（未修，在本任务路径外）**：`anime-eval --model` 只在重排结果非空时调用 `apply_neural_rerank`，且从不传入续写，因此无法复现 animed 的"仅续写帧"——本缺陷在离线评测中不可见。建议在 task-07 分支的 `crates/eval/src/metrics.rs` 中改为与 animed 相同：每次都调用 `apply_neural_rerank(seq, &reranked, &continuations)`（续写取 `predict_continuations`）。
+  - 门禁：`make check` 通过；`make test` 15 组 82 passed、0 failed；`make eval` TOTAL 28.6%；`make verify-infra` `INFRA OK`；`verify-boundaries --base main --tracked-only` `BOUNDARY OK`。task-07 本地合并状态下 `cargo test -p anime-engine -p anime-lm-neural -p animed` 40 passed、0 failed。
+
